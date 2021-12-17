@@ -307,10 +307,10 @@ public class PlayerData extends Config {
                 String playerName = uniqueId.toString();
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
                 if(offlinePlayer != null) playerName = offlinePlayer.getName();
-                Logger LOGGER = Logger.getLogger("PlayerDataMigrator/V1 -> V2/" + playerName);
+                Logger LOGGER = Logger.getLogger("PlayerDataMigrator/V1 -> V2/" + uniqueId);
 
                 if (config.isSet("homes")) {
-                    LOGGER.info("Started migration for homes");
+                    LOGGER.info("Started migration for " + playerName + "'s homes");
                     ConfigurationSection section = config.getConfigurationSection("homes");
                     if (section != null) {
                         /* LOAD OLD HOMES */
@@ -330,7 +330,7 @@ public class PlayerData extends Config {
                         oldHomeMap.forEach((name, home) -> ConfigurationSerializer.setLocationData(config, "homes.uncategorized." + name, home.location()));
                     }
                 } else {
-                    LOGGER.info("Migration for homes skipped because no homes was found.");
+                    LOGGER.info("Migration for " + playerName + "'s homes skipped because no homes was found.");
                 }
 
                 /* CHANGE CONFIG VERSION */
