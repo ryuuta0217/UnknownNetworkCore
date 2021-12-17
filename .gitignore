@@ -1,0 +1,9 @@
+build/
+libs/
+.idea/
+.gradle/
+testServer/logs/
+testServer/**/*.log
+testServer/**/*.mdmp
+testServer/**/*.dat_old
+.DS_Store

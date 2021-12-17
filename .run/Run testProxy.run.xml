@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run testProxy" type="JarApplication">
+    <option name="JAR_PATH" value="$PROJECT_DIR$/libs/waterfall.jar" />
+    <option name="WORKING_DIRECTORY" value="$ProjectFileDir$/testProxy" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Build" run_configuration_type="GradleRunConfiguration" />
+    </method>
+  </configuration>
+</component>
