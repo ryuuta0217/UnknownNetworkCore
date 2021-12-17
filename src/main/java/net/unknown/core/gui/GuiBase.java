@@ -100,10 +100,9 @@ public class GuiBase implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if(!this.inventory.equals(event.getClickedInventory())) {
-            if(event.getClick().isShiftClick()) event.setCancelled(true);
-            return;
-        }
+        if(!this.inventory.equals(event.getInventory())) return;
+        if(event.getClick().isShiftClick()) event.setCancelled(true);
+        if(!this.inventory.equals(event.getClickedInventory())) return;
         event.setCancelled(true);
         onClick(event);
     }
