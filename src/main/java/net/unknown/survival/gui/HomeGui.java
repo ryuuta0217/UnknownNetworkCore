@@ -33,6 +33,7 @@ package net.unknown.survival.gui;
 
 import com.ryuuta0217.util.ListUtil;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.ChatColor;
@@ -48,10 +49,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class HomeGui extends GuiBase {
@@ -72,19 +70,17 @@ public class HomeGui extends GuiBase {
         this.target = player;
         this.data = PlayerData.of(this.target);
 
+        this.inventory.setItem(45, DefinedItemStackBuilders.leftArrow().displayName(Component.text("戻る", TextColor.color(5635925))).build());
+
         this.loadData();
 
         this.setCategories(this.currentPage);
-
-        this.inventory.setItem(45, DefinedItemStackBuilders.leftArrow().displayName(Component.text("戻る", TextColor.color(5635925))).build());
-
-        if(this.splitCategories.size() > 1) {
-            this.inventory.setItem(53, DefinedItemStackBuilders.rightArrow().displayName(Component.text("次のページ", TextColor.color(5635925))).build());
-        }
     }
 
     @Override
     public void onClick(InventoryClickEvent event) {
+        //System.out.println("guiState=" + this.guiState.name() + ", slot=" + event.getSlot() + ", click=" + event.getClick().name() + ", currentItem=" + event.getCurrentItem().getType().name() + ", cursor=" + event.getCursor().getType().name() + ", ");
+
         if(event.getClick() == ClickType.LEFT) {
             if(this.guiState == State.CATEGORIES && this.slot2CategoryMap.containsKey(event.getSlot())) {
                 this.selectedCategory = this.slot2CategoryMap.get(event.getSlot());
@@ -101,8 +97,8 @@ public class HomeGui extends GuiBase {
                 return;
             }
         } else if (event.getClick() == ClickType.RIGHT) {
-            if(this.guiState == State.CATEGORIES && this.slot2CategoryMap.containsKey(event.getSlot()) && event.getCurrentItem() != null) {
-                PlayerData.of(event.getWhoClicked().getUniqueId()).setCategoryMaterial(this.slot2CategoryMap.get(event.getSlot()), event.getCurrentItem().getType());
+            if(this.guiState == State.CATEGORIES && this.slot2CategoryMap.containsKey(event.getSlot()) && event.getCursor().getType() != Material.AIR) {
+                PlayerData.of(event.getWhoClicked().getUniqueId()).setCategoryMaterial(this.slot2CategoryMap.get(event.getSlot()), event.getCursor().getType());
                 this.loadData();
                 this.clearCategories();
                 this.setCategories(this.currentPage);
@@ -117,10 +113,11 @@ public class HomeGui extends GuiBase {
         }
 
         switch (event.getSlot()) {
-            case 45:
-                if(this.selectedCategory == null) {
+            case 45: // PREVIOUS MENU BUTTON
+                if(this.guiState == State.CATEGORIES) {
                     event.getWhoClicked().openInventory(MainGui.getGui().getInventory());
-                } else {
+                } else if (this.guiState == State.HOMES) {
+                    this.guiState = State.CATEGORIES;
                     this.selectedCategory = null;
                     this.currentPage = 1;
                     this.clearHomes();
@@ -128,39 +125,24 @@ public class HomeGui extends GuiBase {
                     this.setCategories(this.currentPage);
                 }
                 break;
-            case 52:
+            case 52: // PAGE BACK BUTTON
                 if(this.currentPage > 1) {
                     if(this.guiState == State.CATEGORIES && this.splitCategories.size() > 1) {
-                        this.currentPage--;
-                        if(this.currentPage <= this.splitCategories.size()) {
-                            this.inventory.setItem(53, DefinedItemStackBuilders.rightArrow().displayName(Component.text("次のページ", TextColor.color(5635925))).build());
-                        }
-                        if(this.currentPage == 1) this.inventory.setItem(52, null);
                         this.clearCategories();
-                        this.setCategories(this.currentPage);
+                        this.setCategories(this.currentPage - 1);
                     } else if(this.guiState == State.HOMES && this.splitHomes.get(this.selectedCategory).size() > 1) {
-                        this.currentPage--;
-                        if (this.currentPage <= this.splitHomes.get(this.selectedCategory).size())
-                            this.inventory.setItem(53, DefinedItemStackBuilders.rightArrow().displayName(Component.text("次のページ", TextColor.color(5635925))).build());
-                        if (this.currentPage == 1) this.inventory.setItem(52, null);
                         this.clearHomes();
-                        this.setHomes(this.currentPage);
+                        this.setHomes(this.currentPage - 1);
                     }
                 }
                 break;
-            case 53:
+            case 53: // PAGE NEXT BUTTON
                 if(this.guiState == State.CATEGORIES && this.splitCategories.size() > 1 && this.currentPage <= this.splitCategories.size()) {
-                    this.currentPage++;
-                    this.inventory.setItem(52, DefinedItemStackBuilders.leftArrow().displayName(Component.text("前のページ", TextColor.color(16777045))).build());
-                    if(this.currentPage == this.splitCategories.size()) this.inventory.setItem(53, null);
                     this.clearCategories();
-                    this.setCategories(this.currentPage);
+                    this.setCategories(this.currentPage + 1);
                 } else if(this.guiState == State.HOMES && this.splitHomes.get(this.selectedCategory).size() > 1 && this.currentPage <= this.splitHomes.get(this.selectedCategory).size()) {
-                    this.currentPage++;
-                    this.inventory.setItem(52, DefinedItemStackBuilders.leftArrow().displayName(Component.text("前のページ", TextColor.color(16777045))).build());
-                    if (this.currentPage == this.splitHomes.get(this.selectedCategory).size()) this.inventory.setItem(53, null);
                     this.clearHomes();
-                    this.setHomes(this.currentPage);
+                    this.setHomes(this.currentPage + 1);
                 }
                 break;
             default:
@@ -170,11 +152,11 @@ public class HomeGui extends GuiBase {
 
     private void loadData() {
         this.splitCategories = null;
-        this.splitHomes = new HashMap<>();
+        this.splitHomes = new LinkedHashMap<>();
 
-        this.splitCategories = ListUtil.splitListAsSet(data.getCategories(), 45);
+        this.splitCategories = ListUtil.splitListAsLinkedSet(data.getCategories(), 45);
         this.splitCategories.forEach(categories -> categories.forEach(category -> {
-            this.splitHomes.put(category, ListUtil.splitListAsSet(data.getHomes(category).values(), 45));
+            this.splitHomes.put(category, ListUtil.splitListAsLinkedSet(data.getHomes(category).values(), 45));
         }));
     }
 
@@ -189,11 +171,16 @@ public class HomeGui extends GuiBase {
     }
 
     private void setCategories(int page) {
+        this.currentPage = page;
+
         this.splitCategories.get(page - 1).forEach(category -> {
             this.slot2CategoryMap.put(this.inventory.firstEmpty(), category);
             this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(data.getCategoryMaterial(category))
-                            .displayName(Component.text(category, TextColor.color(5635925)))
-                            .lore(Component.text("登録ホーム数: " + data.getHomes(category).size()))
+                            .displayName(Component.text(category, Style.style(TextColor.color(5635925), TextDecoration.ITALIC.as(false))))
+                            .lore(Component.text("登録ホーム数: " + data.getHomes(category).size(), Style.style(TextColor.color(5635935), TextDecoration.ITALIC.as(false))),
+                                    Component.text(""),
+                                    Component.text("持ち物からアイテムを掴んで右クリックで", Style.style(TextColor.color(5636095), TextDecoration.ITALIC.as(false))),
+                                    Component.text("          表示アイテムを変更できます", Style.style(TextColor.color(5636095), TextDecoration.ITALIC.as(false))))
                     .build());
         });
 
@@ -202,21 +189,51 @@ public class HomeGui extends GuiBase {
                     .displayName(Component.text("新規カテゴリ作成", TextColor.color(5635925)))
                     .build());
         }
+
+        // NEXT BUTTON
+        if(this.splitCategories.size() > 1 && this.splitCategories.size() > this.currentPage) {
+            this.inventory.setItem(53, DefinedItemStackBuilders.rightArrow().displayName(Component.text("次のページ", TextColor.color(5635925))).build());
+        } else if (this.splitCategories.size() == this.currentPage) {
+            this.inventory.setItem(53, null);
+        }
+
+        // BACK BUTTON
+        if(this.splitCategories.size() > 1 && this.currentPage > 1) {
+            this.inventory.setItem(52, DefinedItemStackBuilders.leftArrow().displayName(Component.text("前のページ", TextColor.color(5635925))).build());
+        } else if (this.splitCategories.size() <= 1) {
+            this.inventory.setItem(52, null);
+        }
     }
 
     private void setHomes(int page) {
+        this.currentPage = page;
+
         this.splitHomes.get(this.selectedCategory).get(page - 1).forEach(home -> {
             this.slot2HomeMap.put(this.inventory.firstEmpty(), home);
             this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(dimension2Material(home.location()))
-                    .displayName(Component.text(home.name(), dimension2TextColor(home.location())))
-                    .lore(Component.text("ワールド: " + MessageUtil.getWorldNameDisplay(home.getWorld()), TextColor.color(5635925)).decoration(TextDecoration.ITALIC, false),
-                            Component.text("座標: " + getCoordinateAsString(home.location()), TextColor.color(5635925)).decoration(TextDecoration.ITALIC, false),
-                            Component.text("向き: " + getRotationAsString(home.location()), TextColor.color(5635925)).decoration(TextDecoration.ITALIC, false),
+                    .displayName(Component.text(home.name(), Style.style(dimension2TextColor(home.location()), TextDecoration.ITALIC.as(false))))
+                    .lore(Component.text("ワールド: " + MessageUtil.getWorldNameDisplay(home.getWorld()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
+                            Component.text("座標: " + getCoordinateAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
+                            Component.text("向き: " + getRotationAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
                             Component.text(""),
-                            Component.text("クリックでテレポート", TextColor.color(5635925)),
-                            Component.text("Shiftキーを押しながら右クリックで削除", TextColor.color(255, 0, 0)))
+                            Component.text("クリックでテレポート", Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
+                            Component.text("Shiftキーを押しながら右クリックで削除", Style.style(TextColor.color(255, 0, 0), TextDecoration.ITALIC.as(false))))
                     .build());
         });
+
+        // NEXT BUTTON
+        if(this.splitHomes.get(this.selectedCategory).size() > 1 && this.splitHomes.get(this.selectedCategory).size() > this.currentPage) {
+            this.inventory.setItem(53, DefinedItemStackBuilders.rightArrow().displayName(Component.text("次のページ", TextColor.color(5635925))).build());
+        } else if (this.splitHomes.get(this.selectedCategory).size() == this.currentPage) {
+            this.inventory.setItem(53, null);
+        }
+
+        // BACK BUTTON
+        if(this.splitHomes.get(this.selectedCategory).size() > 1 && this.currentPage > 1) {
+            this.inventory.setItem(52, DefinedItemStackBuilders.leftArrow().displayName(Component.text("前のページ", TextColor.color(5635925))).build());
+        } else if (this.currentPage <= 1) {
+            this.inventory.setItem(52, null);
+        }
     }
 
     private static Material dimension2Material(Location loc) {
@@ -251,7 +268,7 @@ public class HomeGui extends GuiBase {
         String yaw = String.valueOf(loc.getYaw());
         String pitch = String.valueOf(loc.getPitch());
 
-        return yaw.substring(0, Math.min(yaw.indexOf(".") + 2, yaw.length())) + ", " + pitch.substring(0, Math.min(pitch.indexOf("." + 2), pitch.length()));
+        return yaw.substring(0, Math.min(yaw.indexOf(".") + 2, yaw.length())) + ", " + pitch.substring(0, Math.min(pitch.indexOf(".") + 2, pitch.length()));
     }
 
     private enum State {

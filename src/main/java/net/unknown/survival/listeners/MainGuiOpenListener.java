@@ -31,15 +31,29 @@
 
 package net.unknown.survival.listeners;
 
+import io.netty.buffer.Unpooled;
 import net.unknown.survival.UnknownNetworkSurvival;
 import net.unknown.survival.gui.MainGui;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.jetbrains.annotations.NotNull;
 
-public class MainGuiOpenListener implements Listener {
+public class MainGuiOpenListener implements Listener, PluginMessageListener {
     @EventHandler
     public void onSwapHand(PlayerSwapHandItemsEvent event) {
-        if(event.getPlayer().isSneaking()) event.getPlayer().openInventory(MainGui.getGui().getInventory());
+        if(event.getPlayer().isSneaking()) {
+            event.setCancelled(true);
+            event.getPlayer().openInventory(MainGui.getGui().getInventory());
+        }
+    }
+
+    @Override
+    public void onPluginMessageReceived(@NotNull String channel, @NotNull Player player, @NotNull byte[] message) {
+        if(channel.equals("unc_survival:open_gui")) {
+            player.openInventory(MainGui.getGui().getInventory());
+        }
     }
 }
