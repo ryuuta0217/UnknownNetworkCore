@@ -18,7 +18,7 @@ jobs:
       - name: chmod +x gradlew
         run: chmod +x gradlew
       - name: Build
-        run: ./gradlew clean cleanCache cleanPaperclipCache reobfJar
+        run: ./gradlew init reobfJar
       - name: Save artifacts
         uses: actions/upload-artifact@v2
         with:
