@@ -163,6 +163,7 @@ public class HomeGui extends GuiBase {
     private void clearCategories() {
         this.slot2CategoryMap.clear();
         IntStream.rangeClosed(0, 44).forEach(this.inventory::clear);
+        this.inventory.clear(49);
     }
 
     private void clearHomes() {
@@ -193,7 +194,7 @@ public class HomeGui extends GuiBase {
         // NEXT BUTTON
         if(this.splitCategories.size() > 1 && this.splitCategories.size() > this.currentPage) {
             this.inventory.setItem(53, DefinedItemStackBuilders.rightArrow().displayName(Component.text("次のページ", TextColor.color(5635925))).build());
-        } else if (this.splitCategories.size() == this.currentPage) {
+        } else if (this.splitCategories.size() >= this.currentPage) {
             this.inventory.setItem(53, null);
         }
 

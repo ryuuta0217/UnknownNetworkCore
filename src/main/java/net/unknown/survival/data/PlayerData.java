@@ -304,12 +304,13 @@ public class PlayerData extends Config {
     public static class MigrateToV2FromV1 {
         public static void migrate(UUID uniqueId, File file, FileConfiguration config) {
             if (config.isSet("config-version") && config.getInt("config-version") <= 1) {
+                String playerName = uniqueId.toString();
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
+                if(offlinePlayer != null) playerName = offlinePlayer.getName();
+                Logger LOGGER = Logger.getLogger("PlayerDataMigrator/V1 -> V2/" + playerName);
+
                 if (config.isSet("homes")) {
-                    String playerName = uniqueId.toString();
-                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
-                    if(offlinePlayer != null) playerName = offlinePlayer.getName();
-                    Logger LOGGER = Logger.getLogger("PlayerDataMigrator/V1 -> V2/" + playerName);
-                    LOGGER.info("Started migration for player " + playerName + "'s homes");
+                    LOGGER.info("Started migration for homes");
                     ConfigurationSection section = config.getConfigurationSection("homes");
                     if (section != null) {
                         /* LOAD OLD HOMES */
@@ -327,16 +328,18 @@ public class PlayerData extends Config {
 
                         /* PUT NEW HOMES */
                         oldHomeMap.forEach((name, home) -> ConfigurationSerializer.setLocationData(config, "homes.uncategorized." + name, home.location()));
-
-                        /* CHANGE CONFIG VERSION */
-                        config.set("config-version", 2);
-
-                        try {
-                            config.save(file);
-                        } catch (IOException e) {
-                            LOGGER.warning("Failed to save migrated configuration data.");
-                        }
                     }
+                } else {
+                    LOGGER.info("Migration for homes skipped because no homes was found.");
+                }
+
+                /* CHANGE CONFIG VERSION */
+                config.set("config-version", 2);
+
+                try {
+                    config.save(file);
+                } catch (IOException e) {
+                    LOGGER.warning("Failed to save migrated configuration data.");
                 }
             }
         }
