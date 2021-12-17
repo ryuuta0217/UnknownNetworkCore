@@ -122,11 +122,15 @@ public class PlayerData extends Config {
     public void onLoad() {
         UUID tempUniqueId = extractUniqueIdFromFileName(this.getFileName());
 
-        if(!this.getConfig().isSet("config-version") || this.getConfig().getInt("config-version") < VERSION) {
-            if(!this.getConfig().isSet("config-version")) {
-                this.getLogger().warning("Unknown configuration version, version set to 1.");
-                this.getConfig().set("config-version", 1);
-            }
+        if(!this.getConfig().isSet("config-version") && this.getConfig().getKeys(false).size() > 0) {
+            this.getLogger().warning("Unknown configuration version, version set to 1.");
+            this.getConfig().set("config-version", 1);
+        } else if (!this.getConfig().isSet("config-version")) {
+            this.getLogger().warning("Empty configuration, version set to latest(" + VERSION + ").");
+            this.getConfig().set("config-version", VERSION);
+        }
+
+        if(this.getConfig().getInt("config-version") < VERSION) {
             this.getLogger().warning("Old version config detected, migrating...");
 
             int version = this.getConfig().getInt("config-version");
