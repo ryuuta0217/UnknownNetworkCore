@@ -37,5 +37,7 @@ public class Commands {
     public static void init() {
         CrashCommand.register(UnknownNetworkCore.getBrigadier());
         EvalCommand.register(UnknownNetworkCore.getBrigadier());
+        PacketCommand.register(UnknownNetworkCore.getBrigadier());
+        SkinCommand.register(UnknownNetworkCore.getBrigadier());
     }
 }

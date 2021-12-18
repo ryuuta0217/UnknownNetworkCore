@@ -39,9 +39,11 @@ import net.unknown.core.commands.Commands;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.json.simple.parser.JSONParser;
 
 public class UnknownNetworkCore extends JavaPlugin {
     private static UnknownNetworkCore INSTANCE;
+    private static final JSONParser JSON_PARSER = new JSONParser();
     private static final Environment ENV = Environment.valueOf(System.getProperty("un.env", "SURVIVAL"));
 
     public UnknownNetworkCore() {
@@ -70,5 +72,9 @@ public class UnknownNetworkCore extends JavaPlugin {
 
     public static UnknownNetworkCore getInstance() {
         return INSTANCE;
+    }
+
+    public static JSONParser getJsonParser() {
+        return JSON_PARSER;
     }
 }
