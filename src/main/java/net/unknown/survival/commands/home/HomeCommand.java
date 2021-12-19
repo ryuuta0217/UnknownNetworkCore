@@ -37,7 +37,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.survival.commands.BrigadierCommandSuggestions;
+import net.unknown.survival.commands.Suggestions;
 import net.unknown.survival.data.Home;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
@@ -53,7 +53,7 @@ public class HomeCommand {
 
         builder.executes(HomesCommand::sendHomeList)
                 .then(Commands.argument("ホーム名", StringArgumentType.greedyString())
-                        .suggests(BrigadierCommandSuggestions.HOME_SUGGEST)
+                        .suggests(Suggestions.HOME_SUGGEST)
                         .executes(HomeCommand::teleport));
 
         dispatcher.register(builder);

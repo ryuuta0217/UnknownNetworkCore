@@ -40,9 +40,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.unknown.core.commands.Suggestions;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.survival.commands.BrigadierCommandSuggestions;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
@@ -61,7 +61,7 @@ public class AddHomeCommand {
 
         // /addhome <player> <homeName> <loc:x,y,z> <rot:yaw,pitch> [world]
         builder.then(Commands.argument("target", StringArgumentType.word())
-                .suggests(BrigadierCommandSuggestions.ALL_PLAYER_SUGGEST)
+                .suggests(Suggestions.ALL_PLAYER_SUGGEST)
                 .then(Commands.argument("name", StringArgumentType.string())
                         .executes(AddHomeCommand::execute) // /addhome <player> <homeName>
                         .then(Commands.argument("overwrite", BoolArgumentType.bool())
@@ -76,7 +76,7 @@ public class AddHomeCommand {
                                         .then(Commands.argument("overwrite", BoolArgumentType.bool())
                                                 .executes(AddHomeCommand::execute)) // /addhome <player> <homeName> <x> <y> <z> <yaw> <pitch> <overwrite>
                                         .then(Commands.argument("world", StringArgumentType.string())
-                                                .suggests(BrigadierCommandSuggestions.WORLD_SUGGEST)
+                                                .suggests(Suggestions.WORLD_SUGGEST)
                                                 .executes(AddHomeCommand::execute) // /addhome <player> <homeName> <x> <y> <z> <yaw> <pitch> <world>
                                                 .then(Commands.argument("overwrite", BoolArgumentType.bool())
                                                         .executes(AddHomeCommand::execute))))))); // /addhome <player> <homeName> <x> <y> <z> <yaw> <pitch> <world> <overwrite>

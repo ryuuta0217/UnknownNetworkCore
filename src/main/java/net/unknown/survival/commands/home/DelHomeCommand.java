@@ -36,7 +36,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.survival.commands.BrigadierCommandSuggestions;
+import net.unknown.survival.commands.Suggestions;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
@@ -48,7 +48,7 @@ public class DelHomeCommand {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("delhome");
         builder.requires(Permissions.COMMAND_DELHOME::checkAndIsPlayer);
         builder.then(Commands.argument("ホーム名", StringArgumentType.greedyString())
-                .suggests(BrigadierCommandSuggestions.HOME_SUGGEST)
+                .suggests(Suggestions.HOME_SUGGEST)
                 .executes(ctx -> {
                     if (ctx.getSource().getBukkitEntity() instanceof CraftPlayer) {
                         String homeName = StringArgumentType.getString(ctx, "ホーム名");

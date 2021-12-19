@@ -50,6 +50,7 @@ import org.json.simple.parser.ParseException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -57,15 +58,16 @@ public class SkinCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("skin");
         builder.then(Commands.argument("skinPlayerName", StringArgumentType.word())
+                        .suggests(Suggestions.ALL_PLAYER_SUGGEST)
                 .executes(ctx -> {
-                    if(!(ctx.getSource().getEntity() instanceof ServerPlayer)) {
+                    if (!(ctx.getSource().getEntity() instanceof ServerPlayer)) {
                         MessageUtil.sendErrorMessage(ctx.getSource(), "プレイヤーが実行する必要があります。");
                         return 1;
                     }
 
                     String skinPlayerName = StringArgumentType.getString(ctx, "skinPlayerName");
                     UUID skinPlayerUniqueId = Bukkit.getPlayerUniqueId(skinPlayerName);
-                    if(skinPlayerUniqueId == null) {
+                    if (skinPlayerUniqueId == null) {
                         MessageUtil.sendErrorMessage(ctx.getSource(), "プレイヤー " + skinPlayerName + " は見つかりませんでした");
                         return -1;
                     }
@@ -73,10 +75,10 @@ public class SkinCommand {
                     ServerPlayer player = ctx.getSource().getPlayerOrException();
                     HTTPUtil hu = new HTTPUtil("GET", "https://sessionserver.mojang.com/session/minecraft/profile/" + skinPlayerUniqueId + "?unsigned=false");
                     AtomicReference<String> stoleSkinBase64 = new AtomicReference<>("");
-                    AtomicReference<String> stoleSkinSignature = new AtomicReference<>("");
+                    AtomicReference<String> stoleSkinSignature = new AtomicReference<>(null);
                     try {
                         JSONObject json = (JSONObject) UnknownNetworkCore.getJsonParser().parse(hu.request());
-                        if(json.containsKey("properties")) {
+                        if (json.containsKey("properties")) {
                             JSONArray properties = (JSONArray) json.get("properties");
                             stoleSkinBase64.set(((JSONObject) properties.get(0)).get("value").toString());
                             stoleSkinSignature.set(((JSONObject) properties.get(0)).get("signature").toString());
@@ -88,10 +90,10 @@ public class SkinCommand {
 
                     new HashMap<>(player.getGameProfile().getProperties().asMap()).forEach((key, values) -> {
                         new ArrayList<>(values).forEach(value -> {
-                           if(key.equals("textures")) {
-                               player.getGameProfile().getProperties().remove(key, value);
-                               player.getGameProfile().getProperties().put(key, new Property(value.getName(), stoleSkinBase64.get(), stoleSkinSignature.get()));
-                           }
+                            if (key.equals("textures")) {
+                                player.getGameProfile().getProperties().remove(key, value);
+                                player.getGameProfile().getProperties().put(key, new Property(value.getName(), stoleSkinBase64.get(), stoleSkinSignature.get()));
+                            }
                         });
                     });
 
@@ -105,14 +107,24 @@ public class SkinCommand {
                             player.gameMode.getGameModeForPlayer(),
                             player.gameMode.getPreviousGameModeForPlayer(), player.getLevel().isDebug(), player.getLevel().isFlat(),
                             true);
+                    ClientboundPlayerPositionPacket teleport = new ClientboundPlayerPositionPacket(
+                            player.position().x(),
+                            player.position().y(),
+                            player.position().z(),
+                            player.getRotationVector().y,
+                            player.getRotationVector().x,
+                            new HashSet<>(),
+                            -1,
+                            false);
 
                     player.connection.send(toRemove);
                     player.connection.send(toAdd);
                     player.connection.send(respawn);
+                    player.connection.send(teleport);
 
                     /* Update other view */
                     Bukkit.getOnlinePlayers().forEach(p -> {
-                        if(p.getUniqueId().equals(player.getUUID())) return;
+                        if (p.getUniqueId().equals(player.getUUID())) return;
                         p.hidePlayer(UnknownNetworkCore.getInstance(), player.getBukkitEntity());
                         p.showPlayer(UnknownNetworkCore.getInstance(), player.getBukkitEntity());
                     });

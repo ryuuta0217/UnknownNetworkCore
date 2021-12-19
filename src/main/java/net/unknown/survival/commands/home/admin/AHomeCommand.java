@@ -38,7 +38,7 @@ import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.survival.commands.BrigadierCommandSuggestions;
+import net.unknown.survival.commands.Suggestions;
 import net.unknown.survival.data.Home;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
@@ -55,10 +55,10 @@ public class AHomeCommand {
         builder.requires(Permissions.COMMAND_AHOME::checkAndIsPlayer);
 
         builder.then(Commands.argument("対象", StringArgumentType.word())
-                .suggests(BrigadierCommandSuggestions.ALL_PLAYER_SUGGEST)
+                .suggests(net.unknown.core.commands.Suggestions.ALL_PLAYER_SUGGEST)
                 .executes(AHomesCommand::sendHomeList)
                 .then(Commands.argument("ホーム名", StringArgumentType.greedyString())
-                        .suggests(BrigadierCommandSuggestions.OFFLINE_HOME_SUGGEST)
+                        .suggests(Suggestions.OFFLINE_HOME_SUGGEST)
                         .executes(AHomeCommand::teleport)));
 
         dispatcher.register(builder);

@@ -38,17 +38,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import net.minecraft.commands.SharedSuggestionProvider;
 
-import java.util.Arrays;
 import java.util.UUID;
 
-public class BrigadierCommandSuggestions {
-    public static final SuggestionProvider<CommandSourceStack> ALL_PLAYER_SUGGEST = (ctx, builder) -> {
-        return SharedSuggestionProvider.suggest(Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName), builder);
-    };
+public class Suggestions {
     public static final SuggestionProvider<CommandSourceStack> HOME_SUGGEST = (ctx, builder) -> {
         ServerPlayer p = BrigadierUtil.getArgumentOrDefault(ctx, ServerPlayer.class, "対象", ctx.getSource().getPlayerOrException());
         return SharedSuggestionProvider.suggest(PlayerData.of(p.getBukkitEntity()).getHomeNames("uncategorized").toArray(new String[0]), builder);
@@ -64,8 +58,5 @@ public class BrigadierCommandSuggestions {
         }
 
         return SharedSuggestionProvider.suggest(new String[0], builder);
-    };
-    public static final SuggestionProvider<CommandSourceStack> WORLD_SUGGEST = (ctx, builder) -> {
-        return SharedSuggestionProvider.suggest(Bukkit.getWorlds().stream().map(World::getName), builder);
     };
 }

@@ -43,9 +43,9 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.commands.CommandSourceStack;
+import net.unknown.core.commands.Suggestions;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.survival.commands.BrigadierCommandSuggestions;
 import net.unknown.survival.commands.home.HomesCommand;
 import net.unknown.survival.data.Home;
 import net.unknown.survival.data.PlayerData;
@@ -64,7 +64,7 @@ public class AHomesCommand {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("ahomes");
         builder.requires(Permissions.COMMAND_AHOMES::check);
         builder.then(Commands.argument("対象", StringArgumentType.word())
-                .suggests(BrigadierCommandSuggestions.ALL_PLAYER_SUGGEST)
+                .suggests(Suggestions.ALL_PLAYER_SUGGEST)
                 .executes(AHomesCommand::sendHomeList)
                 .then(Commands.argument("ページ", IntegerArgumentType.integer(1))
                         .executes(AHomesCommand::sendHomeList)));
