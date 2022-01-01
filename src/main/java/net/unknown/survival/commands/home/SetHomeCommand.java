@@ -69,7 +69,8 @@ public class SetHomeCommand {
         int homeCount = data.getHomeCount();
         int maxHomeCount = data.getMaxHomeCount();
 
-        if (!overwrite && maxHomeCount != -1) {
+        boolean isHomeExists = data.isHomeExists("uncategorized", newHomeName);
+        if ((!overwrite || !isHomeExists) && maxHomeCount != -1) {
             /*if (maxHomeCount == REGULAR_MAXIMUM_HOME_COUNT && Permissions.REGULAR.check(ctx) && homeCount >= maxHomeCount) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "常連プレイヤーが設定できるホームは" + REGULAR_MAXIMUM_HOME_COUNT + "個までです。\n" +
                         "/delhome <ホーム名> するか、ショップで追加券を購入してください。");
@@ -90,7 +91,7 @@ public class SetHomeCommand {
             return 0;
         }
 
-        if ((!data.isHomeExists("uncategorized", newHomeName)) || (data.isHomeExists("uncategorized", newHomeName) && overwrite)) {
+        if (!isHomeExists || overwrite) {
             data.addHome("uncategorized", newHomeName, player.getLocation(), true);
             MessageUtil.sendMessage(ctx.getSource(), "カテゴリ uncategorized にホーム " + newHomeName + " を設定しました");
         } else {
