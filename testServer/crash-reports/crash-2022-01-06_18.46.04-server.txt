@@ -1,0 +1,112 @@
+---- Minecraft Crash Report ----
+// Uh... Did I do that?
+
+Time: 2022/01/06 18:46
+Description: Exception ticking world
+
+java.lang.NullPointerException: Cannot invoke "net.minecraft.world.level.material.FluidState.getAmount()" because the return value of "net.minecraft.world.level.block.state.BlockState.getFluidState()" is null
+	at net.minecraft.world.level.block.SpreadingSnowyDirtBlock.canBeGrass(SpreadingSnowyDirtBlock.java:27)
+	at net.minecraft.world.level.block.SpreadingSnowyDirtBlock.randomTick(SpreadingSnowyDirtBlock.java:45)
+	at net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase.randomTick(BlockBehaviour.java:962)
+	at net.minecraft.server.level.ServerLevel.tickChunk(ServerLevel.java:834)
+	at net.minecraft.server.level.ServerChunkCache.tickChunks(ServerChunkCache.java:1045)
+	at net.minecraft.server.level.ServerChunkCache.tick(ServerChunkCache.java:923)
+	at net.minecraft.server.level.ServerLevel.tick(ServerLevel.java:625)
+	at net.minecraft.server.MinecraftServer.tickChildren(MinecraftServer.java:1607)
+	at net.minecraft.server.dedicated.DedicatedServer.tickChildren(DedicatedServer.java:480)
+	at net.minecraft.server.MinecraftServer.tickServer(MinecraftServer.java:1470)
+	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1264)
+	at net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:317)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+
+A detailed walkthrough of the error, its code path and all known details is as follows:
+---------------------------------------------------------------------------------------
+
+-- Head --
+Thread: Server thread
+Stacktrace:
+	at net.minecraft.world.level.block.SpreadingSnowyDirtBlock.canBeGrass(SpreadingSnowyDirtBlock.java:27)
+	at net.minecraft.world.level.block.SpreadingSnowyDirtBlock.randomTick(SpreadingSnowyDirtBlock.java:45)
+	at net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase.randomTick(BlockBehaviour.java:962)
+	at net.minecraft.server.level.ServerLevel.tickChunk(ServerLevel.java:834)
+	at net.minecraft.server.level.ServerChunkCache.tickChunks(ServerChunkCache.java:1045)
+	at net.minecraft.server.level.ServerChunkCache.tick(ServerChunkCache.java:923)
+	at net.minecraft.server.level.ServerLevel.tick(ServerLevel.java:625)
+
+-- Affected level --
+Details:
+	All players: 1 total; [ServerPlayer['ryuuta0217'/40, uuid='465d418d-3b73-40a2-bfd9-c97f07b191c2', l='ServerLevel[world]', x=34.84, y=9.00, z=-26.97, cpos=[2, -2], tl=1566431, v=true](ryuuta0217 at 34.840845875085364,9.0010929942933,-26.965100348577252)]
+	Chunk stats: 1290
+	Level dimension: minecraft:overworld
+	Level spawn location: World: (0,4,224), Section: (at 0,4,0 in 0,0,14; chunk contains blocks 0,-64,224 to 15,319,239), Region: (0,0; contains chunks 0,0 to 31,31, blocks 0,-64,0 to 511,319,511)
+	Level time: 5707050 game time, 1000 day time
+	Level name: world
+	Level game mode: Game mode: adventure (ID 2). Hardcore: false. Cheats: false
+	Level weather: Rain time: 0 (now: false), thunder time: 0 (now: false)
+	Known server brands: Paper
+	Level was modded: true
+	Level storage version: 0x04ABD - Anvil
+Stacktrace:
+	at net.minecraft.server.MinecraftServer.tickChildren(MinecraftServer.java:1607)
+	at net.minecraft.server.dedicated.DedicatedServer.tickChildren(DedicatedServer.java:480)
+	at net.minecraft.server.MinecraftServer.tickServer(MinecraftServer.java:1470)
+	at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1264)
+	at net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:317)
+	at java.base/java.lang.Thread.run(Thread.java:833)
+
+-- System Details --
+Details:
+	Minecraft Version: 1.18.1
+	Minecraft Version ID: 1.18.1
+	Operating System: Windows 10 (amd64) version 10.0
+	Java Version: 17.0.1, Oracle Corporation
+	Java VM Version: Java HotSpot(TM) 64-Bit Server VM (mixed mode, sharing), Oracle Corporation
+	Memory: 123258880 bytes (117 MiB) / 549453824 bytes (524 MiB) up to 2143289344 bytes (2044 MiB)
+	CPUs: 4
+	Processor Vendor: GenuineIntel
+	Processor Name: Intel(R) Core(TM)2 Quad CPU    Q9650  @ 3.00GHz
+	Identifier: Intel64 Family 6 Model 23 Stepping 10
+	Microarchitecture: Penryn (Client) / Penryn (Server)
+	Frequency (GHz): 3.00
+	Number of physical packages: 1
+	Number of physical CPUs: 4
+	Number of logical CPUs: 4
+	Graphics card #0 name: NVIDIA GeForce GTX 1050 Ti
+	Graphics card #0 vendor: NVIDIA (0x10de)
+	Graphics card #0 VRAM (MB): 4095.00
+	Graphics card #0 deviceId: 0x1c82
+	Graphics card #0 versionInfo: DriverVersion=30.0.14.9709
+	Memory slot #0 capacity (MB): 2048.00
+	Memory slot #0 clockSpeed (GHz): 0.80
+	Memory slot #0 type: DDR2
+	Memory slot #1 capacity (MB): 2048.00
+	Memory slot #1 clockSpeed (GHz): 0.67
+	Memory slot #1 type: DDR2
+	Memory slot #2 capacity (MB): 2048.00
+	Memory slot #2 clockSpeed (GHz): 0.80
+	Memory slot #2 type: DDR2
+	Memory slot #3 capacity (MB): 2048.00
+	Memory slot #3 clockSpeed (GHz): 0.67
+	Memory slot #3 type: DDR2
+	Memory slot #4 capacity (MB): 4.00
+	Memory slot #4 clockSpeed (GHz): 0.00
+	Memory slot #4 type: FLASH
+	Virtual memory max (MB): 33129.49
+	Virtual memory used (MB): 14704.49
+	Swap memory total (MB): 24954.13
+	Swap memory used (MB): 2595.43
+	JVM Flags: 0 total; 
+	CraftBukkit Information: 
+   Running: Paper version git-Paper-134 (MC: 1.18.1) (Implementing API version 1.18.1-R0.1-SNAPSHOT) true
+   Plugins: { HolographicDisplays v3.0.0-SNAPSHOT me.filoghost.holographicdisplays.plugin.HolographicDisplays [filoghost], UnknownNetworkCore v1.0-Alpha UnknownNetworkCore [],}
+   Warnings: DEFAULT
+   Reload Count: 0
+   Threads: { RUNNABLE Attach Listener: [], WAITING Log4j2-AsyncAppenderEventDispatcher-1-Async: [java.base@17.0.1/jdk.internal.misc.Unsafe.park(Native Method), java.base@17.0.1/java.util.concurrent.locks.LockSupport.park(LockSupport.java:341), java.base@17.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionNode.block(AbstractQueuedSynchronizer.java:506), java.base@17.0.1/java.util.concurrent.ForkJoinPool.unmanagedBlock(ForkJoinPool.java:3463), java.base@17.0.1/java.util.concurrent.ForkJoinPool.managedBlock(ForkJoinPool.java:3434), java.base@17.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:1623), java.base@17.0.1/java.util.concurrent.ArrayBlockingQueue.take(ArrayBlockingQueue.java:420), app//org.apache.logging.log4j.core.appender.AsyncAppenderEventDispatcher.dispatchAll(AsyncAppenderEventDispatcher.java:71), app//org.apache.logging.log4j.core.appender.AsyncAppenderEventDispatcher.run(AsyncAppenderEventDispatcher.java:63)], RUNNABLE DestroyJavaVM: [], RUNNABLE Reference Handler: [java.base@17.0.1/java.lang.ref.Reference.waitForReferencePendingList(Native Method), java.base@17.0.1/java.lang.ref.Reference.processPendingReferences(Reference.java:253), java.base@17.0.1/java.lang.ref.Reference$ReferenceHandler.run(Reference.java:215)], RUNNABLE Netty Server IO #0: [java.base@17.0.1/sun.nio.ch.WEPoll.wait(Native Method), java.base@17.0.1/sun.nio.ch.WEPollSelectorImpl.doSelect(WEPollSelectorImpl.java:111), java.base@17.0.1/sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:129), java.base@17.0.1/sun.nio.ch.SelectorImpl.select(SelectorImpl.java:146), app//io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:68), app//io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:810), app//io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:457), app//io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:986), app//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74), java.base@17.0.1/java.lang.Thread.run(Thread.java:833)], TIMED_WAITING Timer hack thread: [java.base@17.0.1/java.lang.Thread.sleep(Native Method), app//net.minecraft.Util$6.run(Util.java:668)], WAITING Paper Async Chunk Task Thread #0: [java.base@17.0.1/jdk.internal.misc.Unsafe.park(Native Method), java.base@17.0.1/java.util.concurrent.locks.LockSupport.park(LockSupport.java:211), app//com.destroystokyo.paper.io.QueueExecutorThread.run(QueueExecutorThread.java:84)], TIMED_WAITING pool-4-thread-1: [java.base@17.0.1/jdk.internal.misc.Unsafe.park(Native Method), java.base@17.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:252), java.base@17.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.awaitNanos(AbstractQueuedSynchronizer.java:1672), java.base@17.0.1/java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:1182), java.base@17.0.1/java.util.concurrent.ScheduledThreadPoolExecutor$DelayedWorkQueue.take(ScheduledThreadPoolExecutor.java:899), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1062), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1122), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635), java.base@17.0.1/java.lang.Thread.run(Thread.java:833)], TIMED_WAITING IO-Worker-3: [java.base@17.0.1/jdk.internal.misc.Unsafe.park(Native Method), java.base@17.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:252), java.base@17.0.1/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:401), java.base@17.0.1/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:903), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1061), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1122), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635), java.base@17.0.1/java.lang.Thread.run(Thread.java:833)], RUNNABLE Signal Dispatcher: [], RUNNABLE Server thread: [java.base@17.0.1/java.lang.Thread.dumpThreads(Native Method), java.base@17.0.1/java.lang.Thread.getAllStackTraces(Thread.java:1662), app//org.bukkit.craftbukkit.v1_18_R1.CraftCrashReport.get(CraftCrashReport.java:33), app//org.bukkit.craftbukkit.v1_18_R1.CraftCrashReport.get(CraftCrashReport.java:17), app//net.minecraft.SystemReport.setDetail(SystemReport.java:65), app//net.minecraft.CrashReport.<init>(CrashReport.java:36), app//net.minecraft.CrashReport.forThrowable(CrashReport.java:242), app//net.minecraft.server.MinecraftServer.tickChildren(MinecraftServer.java:1618), app//net.minecraft.server.dedicated.DedicatedServer.tickChildren(DedicatedServer.java:480), app//net.minecraft.server.MinecraftServer.tickServer(MinecraftServer.java:1470), app//net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1264), app//net.minecraft.server.MinecraftServer.lambda$spin$0(MinecraftServer.java:317), app//net.minecraft.server.MinecraftServer$$Lambda$3920/0x0000000801422da0.run(Unknown Source), java.base@17.0.1/java.lang.Thread.run(Thread.java:833)], RUNNABLE Server console handler: [java.base@17.0.1/java.io.FileInputStream.readBytes(Native Method), java.base@17.0.1/java.io.FileInputStream.read(FileInputStream.java:276), java.base@17.0.1/java.io.BufferedInputStream.read1(BufferedInputStream.java:282), java.base@17.0.1/java.io.BufferedInputStream.read(BufferedInputStream.java:343), java.base@17.0.1/sun.nio.cs.StreamDecoder.readBytes(StreamDecoder.java:270), java.base@17.0.1/sun.nio.cs.StreamDecoder.implRead(StreamDecoder.java:313), java.base@17.0.1/sun.nio.cs.StreamDecoder.read(StreamDecoder.java:188), java.base@17.0.1/java.io.InputStreamReader.read(InputStreamReader.java:177), java.base@17.0.1/java.io.BufferedReader.fill(BufferedReader.java:162), java.base@17.0.1/java.io.BufferedReader.readLine(BufferedReader.java:329), java.base@17.0.1/java.io.BufferedReader.readLine(BufferedReader.java:396), app//net.minecrell.terminalconsole.SimpleTerminalConsole.readCommands(SimpleTerminalConsole.java:180), app//net.minecrell.terminalconsole.SimpleTerminalConsole.start(SimpleTerminalConsole.java:143), app//net.minecraft.server.dedicated.DedicatedServer$1.run(DedicatedServer.java:111)], WAITING Craft Async Scheduler Management Thread: [java.base@17.0.1/jdk.internal.misc.Unsafe.park(Native Method), java.base@17.0.1/java.util.concurrent.locks.LockSupport.park(LockSupport.java:341), java.base@17.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionNode.block(AbstractQueuedSynchronizer.java:506), java.base@17.0.1/java.util.concurrent.ForkJoinPool.unmanagedBlock(ForkJoinPool.java:3463), java.base@17.0.1/java.util.concurrent.ForkJoinPool.managedBlock(ForkJoinPool.java:3434), java.base@17.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:1623), java.base@17.0.1/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:435), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1062), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1122), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635), java.base@17.0.1/java.lang.Thread.run(Thread.java:833)], RUNNABLE Netty Server IO #1: [java.base@17.0.1/sun.nio.ch.WEPoll.wait(Native Method), java.base@17.0.1/sun.nio.ch.WEPollSelectorImpl.doSelect(WEPollSelectorImpl.java:111), java.base@17.0.1/sun.nio.ch.SelectorImpl.lockAndDoSelect(SelectorImpl.java:129), java.base@17.0.1/sun.nio.ch.SelectorImpl.select(SelectorImpl.java:141), app//io.netty.channel.nio.SelectedSelectionKeySetSelector.select(SelectedSelectionKeySetSelector.java:62), app//io.netty.channel.nio.NioEventLoop.select(NioEventLoop.java:814), app//io.netty.channel.nio.NioEventLoop.run(NioEventLoop.java:457), app//io.netty.util.concurrent.SingleThreadEventExecutor$4.run(SingleThreadEventExecutor.java:986), app//io.netty.util.internal.ThreadExecutorMap$2.run(ThreadExecutorMap.java:74), java.base@17.0.1/java.lang.Thread.run(Thread.java:833)], WAITING Paper Async Chunk Urgent Task Thread: [java.base@17.0.1/jdk.internal.misc.Unsafe.park(Native Method), java.base@17.0.1/java.util.concurrent.locks.LockSupport.park(LockSupport.java:211), app//com.destroystokyo.paper.io.QueueExecutorThread.run(QueueExecutorThread.java:84)], WAITING Paper RegionFile IO Thread: [java.base@17.0.1/jdk.internal.misc.Unsafe.park(Native Method), java.base@17.0.1/java.util.concurrent.locks.LockSupport.park(LockSupport.java:211), app//com.destroystokyo.paper.io.QueueExecutorThread.run(QueueExecutorThread.java:84)], WAITING Worker-Main-1: [java.base@17.0.1/jdk.internal.misc.Unsafe.park(Native Method), java.base@17.0.1/java.util.concurrent.locks.LockSupport.park(LockSupport.java:341), java.base@17.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionNode.block(AbstractQueuedSynchronizer.java:506), java.base@17.0.1/java.util.concurrent.ForkJoinPool.unmanagedBlock(ForkJoinPool.java:3463), java.base@17.0.1/java.util.concurrent.ForkJoinPool.managedBlock(ForkJoinPool.java:3434), java.base@17.0.1/java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:1623), java.base@17.0.1/java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:435), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1062), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1122), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635), java.base@17.0.1/java.lang.Thread.run(Thread.java:833)], TIMED_WAITING IO-Worker-4: [java.base@17.0.1/jdk.internal.misc.Unsafe.park(Native Method), java.base@17.0.1/java.util.concurrent.locks.LockSupport.parkNanos(LockSupport.java:252), java.base@17.0.1/java.util.concurrent.SynchronousQueue$TransferStack.transfer(SynchronousQueue.java:401), java.base@17.0.1/java.util.concurrent.SynchronousQueue.poll(SynchronousQueue.java:903), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1061), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1122), java.base@17.0.1/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:635), java.base@17.0.1/java.lang.Thread.run(Thread.java:833)], TIMED_WAITING Common-Cleaner: [java.base@17.0.1/java.lang.Object.wait(Native Method), java.base@17.0.1/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155), java.base@17.0.1/jdk.internal.ref.CleanerImpl.run(CleanerImpl.java:140), java.base@17.0.1/java.lang.Thread.run(Thread.java:833), java.base@17.0.1/jdk.internal.misc.InnocuousThread.run(InnocuousThread.java:162)], TIMED_WAITING Paper Watchdog Thread: [java.base@17.0.1/java.lang.Thread.sleep(Native Method), app//org.spigotmc.WatchdogThread.run(WatchdogThread.java:243)], RUNNABLE Notification Thread: [], WAITING Finalizer: [java.base@17.0.1/java.lang.Object.wait(Native Method), java.base@17.0.1/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:155), java.base@17.0.1/java.lang.ref.ReferenceQueue.remove(ReferenceQueue.java:176), java.base@17.0.1/java.lang.ref.Finalizer$FinalizerThread.run(Finalizer.java:172)],}
+   
+   Force Loaded Chunks: { world: {}, world_nether: {}, world_the_end: {},}
+	Server Running: true
+	Player Count: 1 / 20; [ServerPlayer['ryuuta0217'/40, uuid='465d418d-3b73-40a2-bfd9-c97f07b191c2', l='ServerLevel[world]', x=34.84, y=9.00, z=-26.97, cpos=[2, -2], tl=1566431, v=true](ryuuta0217 at 34.840845875085364,9.0010929942933,-26.965100348577252)]
+	Data Packs: vanilla, file/bukkit
+	Is Modded: Definitely; Server brand changed to 'Paper'
+	Type: Dedicated Server (map_server.txt)

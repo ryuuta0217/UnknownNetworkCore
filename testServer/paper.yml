@@ -1,10 +1,10 @@
 # This is the main configuration file for Paper.
 # As you can see, there's tons to configure. Some options may impact gameplay, so use
 # with caution, and make sure you know what each option does before configuring.
-# 
+#
 # If you need help with the configuration or have any questions related to Paper,
 # join us in our Discord or IRC channel.
-# 
+#
 # Discord: https://discord.gg/papermc
 # IRC: #paper @ irc.esper.net ( https://webchat.esper.net/?channels=paper ) 
 # Website: https://papermc.io/ 
@@ -13,6 +13,7 @@
 verbose: false
 config-version: 24
 settings:
+  fix-target-selector-tag-completion: true
   send-full-pos-for-hard-colliding-entities: true
   player-auto-save-rate: -1
   max-player-auto-save-per-tick: -1
@@ -32,6 +33,7 @@ settings:
   suggest-player-names-when-null-tab-completions: true
   log-player-ip-addresses: true
   unsupported-settings:
+    perform-username-validation: true
     allow-permanent-block-break-exploits: false
     allow-piston-duplication: false
     allow-headless-pistons: false
@@ -115,6 +117,7 @@ timings:
   server-name: Unknown Server
 world-settings:
   default:
+    monster-spawn-max-light-level: -1
     anticheat:
       obfuscation:
         items:
