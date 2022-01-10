@@ -8,4 +8,6 @@ pluginManagement {
 }
 
 rootProject.name = 'UnknownNetworkCore'
+include 'bootstrap'
+include 'plugin'
 

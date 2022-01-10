@@ -6,4 +6,7 @@ testServer/logs/
 testServer/**/*.log
 testServer/**/*.mdmp
 testServer/**/*.dat_old
+testServer/cache/
+testServer/libraries/
+testServer/versions/
 .DS_Store

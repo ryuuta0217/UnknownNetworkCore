@@ -1,0 +1,53 @@
+name: UnknownNetworkCore
+version: 1.0-Alpha
+api-version: 1.18
+main: net.unknown.UnknownNetworkCore
+permissions:
+  unknown.core.default:
+    default: true
+    children: {}
+  unknown.core.admin:
+    default: op
+    children:
+      minecraft.command.nick: true
+      minecraft.command.skin: true
+      minecraft.command.packet: true
+      minecraft.command.setpose: true
+      minecraft.command.eval: true
+      minecraft.command.crash: true
+      unknown.core.command.nick: true
+      unknown.core.command.skin: true
+      unknown.core.command.packet: true
+      unknown.core.command.setpose: true
+      unknown.core.command.eval: true
+      unknown.core.command.crash: true
+  unknown.survival.default:
+    default: true
+    children:
+      minecraft.command.spawn: true
+      minecraft.command.home: true
+      minecraft.command.homes: true
+      minecraft.command.sethome: true
+      minecraft.command.delhome: true
+      minecraft.command.tppet: true
+      unknown.survival.command.spawn: true
+      unknown.survival.command.home: true
+      unknown.survival.command.homes: true
+      unknown.survival.command.sethome: true
+      unknown.survival.command.delhome: true
+      unknown.survival.command.tppet: true
+  unknown.survival.admin:
+    default: op
+    children:
+      minecraft.command.addhome: true
+      minecraft.command.adelhome: true
+      minecraft.command.ahome: true
+      minecraft.command.ahomes: true
+      minecraft.command.findhome: true
+      minecraft.command.sethomecount: true
+      unknown.survival.command.addhome: true
+      unknown.survival.command.adelhome: true
+      unknown.survival.command.ahome: true
+      unknown.survival.command.ahomes: true
+      unknown.survival.command.findhome: true
+      unknown.survival.command.sethomecount: true

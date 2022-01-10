@@ -1,0 +1,14 @@
+plugins {
+    id 'java'
+}
+
+group 'net.unknown'
+version '1.0-Alpha'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+}

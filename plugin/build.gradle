@@ -1,0 +1,58 @@
+plugins {
+    id 'java'
+    id 'io.papermc.paperweight.userdev' version '+' // Enable Development of using Mojang Mapping.
+    id 'xyz.jpenilla.run-paper' version '+' // Run Mojang Mapped or Spigot Mapped Server
+    id 'com.github.johnrengelman.shadow' version '7.1.0' // fatJar
+    id 'org.cadixdev.licenser' version '0.6.1' // Add License Header to source code headers.
+}
+
+group 'net.unknown'
+version '1.0-Alpha'
+
+compileJava.dependsOn = ["licenseFormat"]
+compileJava.options.encoding = "UTF-8"
+javadoc.options.encoding = "UTF-8"
+processResources.filteringCharset = "UTF-8"
+
+java.sourceCompatibility = JavaVersion.VERSION_17
+java.targetCompatibility = JavaVersion.VERSION_17
+compileJava.options.release.set(17)
+
+tasks.build.dependsOn(reobfJar)
+
+license {
+    header = project.file("../HEADER.txt")
+    include '**/*.java'
+    properties {
+        organization = 'Unknown Network'
+        year = 2021
+    }
+    newLine = true
+}
+
+repositories {
+    mavenCentral()
+    maven { url = "https://repo.codemc.io/repository/maven-public/" }
+    maven { url = "https://repo.spongepowered.org/maven/" }
+    maven { url = "https://files.minecraftforge.net/maven/" }
+    maven { url = "https://maven.quiltmc.org/repository/release/" }
+}
+
+dependencies {
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.1-R0.1-SNAPSHOT")
+    compileOnly fileTree(dir: "../libs", include: "*.jar")
+    compileOnly group: 'me.filoghost.holographicdisplays', name: 'holographicdisplays-plugin', version: '+'
+    implementation group: 'org.mozilla', name: 'rhino', version: '+'
+}
+
+shadowJar {
+    archiveFileName = "${archiveBaseName.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
+}
+
+runMojangMappedServer {
+    runDirectory.set(project.file("../testServer"))
+}
+
+runServer {
+    runDirectory.set(project.file("../testServer"))
+}

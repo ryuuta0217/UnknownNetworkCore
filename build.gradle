@@ -1,57 +1,9 @@
 plugins {
-    id 'java'
-    id 'io.papermc.paperweight.userdev' version '+' // Enable Development of using Mojang Mapping.
-    id 'xyz.jpenilla.run-paper' version '+' // Run Mojang Mapped or Spigot Mapped Server
     id "de.undercouch.download" version "4.1.2" // File Downloader
-    id 'org.cadixdev.licenser' version '0.6.1' // Add License Header to source code headers.
-    id 'com.github.johnrengelman.shadow' version '7.1.0' // fatJar
 }
 
 group 'net.unknown'
 version '1.0-Alpha'
-
-compileJava.dependsOn = ["licenseFormat"]
-compileJava.options.encoding = "UTF-8"
-javadoc.options.encoding = "UTF-8"
-processResources.filteringCharset = "UTF-8"
-
-java.sourceCompatibility = JavaVersion.VERSION_17
-java.targetCompatibility = JavaVersion.VERSION_17
-compileJava.options.release.set(17)
-
-tasks.build.dependsOn(reobfJar)
-
-repositories {
-    mavenCentral()
-}
-
-dependencies {
-    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.1-R0.1-SNAPSHOT")
-    compileOnly fileTree(dir: "libs", include: "*.jar")
-    implementation group: 'org.mozilla', name: 'rhino', version: '+'
-}
-
-shadowJar {
-    archiveFileName = "${archiveBaseName.get()}-${archiveVersion.get()}.${archiveExtension.get()}"
-}
-
-license {
-    header = project.file("HEADER.txt")
-    include '**/*.java'
-    properties {
-        organization = 'Unknown Network'
-        year = 2021
-    }
-    newLine = true
-}
-
-runMojangMappedServer {
-    runDirectory.set(project.file("testServer"))
-}
-
-runServer {
-    runDirectory.set(project.file("testServer"))
-}
 
 task downloadWaterfall(type: Download) {
     src "https://papermc.io/api/v2/projects/waterfall/versions/1.18/builds/471/downloads/waterfall-1.18-471.jar"

@@ -1,0 +1,283 @@
+/*
+ * Copyright (c) 2021 Unknown Network Developers and contributors.
+ *
+ * All rights reserved.
+ *
+ * NOTICE: This license is subject to change without prior notice.
+ *
+ * Redistribution and use in source and binary forms, *without modification*,
+ *     are permitted provided that the following conditions are met:
+ *
+ * I. Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
+ *
+ * II. Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * III. Neither the name of Unknown Network nor the names of its contributors may be used to
+ *     endorse or promote products derived from this software without specific prior written permission.
+ *
+ * IV. This source code and binaries is provided by the copyright holders and contributors "AS-IS" and
+ *     any express or implied warranties, including, but not limited to, the implied warranties of
+ *     merchantability and fitness for a particular purpose are disclaimed.
+ *     In not event shall the copyright owner or contributors be liable for
+ *     any direct, indirect, incidental, special, exemplary, or consequential damages
+ *     (including but not limited to procurement of substitute goods or services;
+ *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     whether in contract, strict liability, or tort (including negligence or otherwise)
+ *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
+ */
+
+package net.unknown.survival.gui;
+
+import com.ryuuta0217.util.ListUtil;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.md_5.bungee.api.ChatColor;
+import net.unknown.survival.data.Home;
+import net.unknown.survival.data.PlayerData;
+import net.unknown.core.builder.ItemStackBuilder;
+import net.unknown.core.define.DefinedItemStackBuilders;
+import net.unknown.core.gui.GuiBase;
+import net.unknown.core.util.MessageUtil;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+
+import java.util.*;
+import java.util.stream.IntStream;
+
+public class HomeGui extends GuiBase {
+    private State guiState;
+    private String selectedCategory = null;
+    private final Player target;
+    private final PlayerData data;
+    private List<Set<String>> splitCategories;
+    private Map<String, List<Set<Home>>> splitHomes = new HashMap<>();
+    private int currentPage = 1;
+    private final Map<Integer, String> slot2CategoryMap = new HashMap<>();
+    private final Map<Integer, Home> slot2HomeMap = new HashMap<>();
+
+    public HomeGui(Player player) {
+        super(player, 54, Component.text("ホーム"), true);
+        this.guiState = State.CATEGORIES;
+
+        this.target = player;
+        this.data = PlayerData.of(this.target);
+
+        this.inventory.setItem(45, DefinedItemStackBuilders.leftArrow().displayName(Component.text("戻る", TextColor.color(5635925))).build());
+
+        this.loadData();
+
+        this.setCategories(this.currentPage);
+    }
+
+    @Override
+    public void onClick(InventoryClickEvent event) {
+        //System.out.println("guiState=" + this.guiState.name() + ", slot=" + event.getSlot() + ", click=" + event.getClick().name() + ", currentItem=" + event.getCurrentItem().getType().name() + ", cursor=" + event.getCursor().getType().name() + ", ");
+
+        if(event.getClick() == ClickType.LEFT) {
+            if(this.guiState == State.CATEGORIES && this.slot2CategoryMap.containsKey(event.getSlot())) {
+                this.selectedCategory = this.slot2CategoryMap.get(event.getSlot());
+                this.clearCategories();
+                this.guiState = State.HOMES;
+                this.currentPage = 1;
+                this.setHomes(this.currentPage);
+                return;
+            } else if(this.guiState == State.HOMES && this.slot2HomeMap.containsKey(event.getSlot())) {
+                Home home = this.slot2HomeMap.get(event.getSlot());
+                home.teleportPlayer((Player) event.getWhoClicked());
+                event.getWhoClicked().closeInventory();
+                MessageUtil.sendMessage((Player) event.getWhoClicked(), "ホーム " + home.name() + " にテレポートしました (GUI)");
+                return;
+            }
+        } else if (event.getClick() == ClickType.RIGHT) {
+            if(this.guiState == State.CATEGORIES && this.slot2CategoryMap.containsKey(event.getSlot()) && event.getCursor().getType() != Material.AIR) {
+                PlayerData.of(event.getWhoClicked().getUniqueId()).setCategoryMaterial(this.slot2CategoryMap.get(event.getSlot()), event.getCursor().getType());
+                this.loadData();
+                this.clearCategories();
+                this.setCategories(this.currentPage);
+            }
+        } else if (event.getClick() == ClickType.SHIFT_RIGHT) {
+            if(this.guiState == State.HOMES && this.slot2HomeMap.containsKey(event.getSlot())) {
+                PlayerData.of(event.getWhoClicked().getUniqueId()).removeHome(this.selectedCategory, this.slot2HomeMap.get(event.getSlot()).name());
+                this.loadData();
+                this.clearHomes();
+                this.setHomes(this.currentPage);
+            }
+        }
+
+        switch (event.getSlot()) {
+            case 45: // PREVIOUS MENU BUTTON
+                if(this.guiState == State.CATEGORIES) {
+                    event.getWhoClicked().openInventory(MainGui.getGui().getInventory());
+                } else if (this.guiState == State.HOMES) {
+                    this.guiState = State.CATEGORIES;
+                    this.selectedCategory = null;
+                    this.currentPage = 1;
+                    this.clearHomes();
+                    this.loadData();
+                    this.setCategories(this.currentPage);
+                }
+                break;
+            case 52: // PAGE BACK BUTTON
+                if(this.currentPage > 1) {
+                    if(this.guiState == State.CATEGORIES && this.splitCategories.size() > 1) {
+                        this.clearCategories();
+                        this.setCategories(this.currentPage - 1);
+                    } else if(this.guiState == State.HOMES && this.splitHomes.get(this.selectedCategory).size() > 1) {
+                        this.clearHomes();
+                        this.setHomes(this.currentPage - 1);
+                    }
+                }
+                break;
+            case 53: // PAGE NEXT BUTTON
+                if(this.guiState == State.CATEGORIES && this.splitCategories.size() > 1 && this.currentPage <= this.splitCategories.size()) {
+                    this.clearCategories();
+                    this.setCategories(this.currentPage + 1);
+                } else if(this.guiState == State.HOMES && this.splitHomes.get(this.selectedCategory).size() > 1 && this.currentPage <= this.splitHomes.get(this.selectedCategory).size()) {
+                    this.clearHomes();
+                    this.setHomes(this.currentPage + 1);
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void loadData() {
+        this.splitCategories = null;
+        this.splitHomes = new LinkedHashMap<>();
+
+        this.splitCategories = ListUtil.splitListAsLinkedSet(data.getCategories(), 45);
+        this.splitCategories.forEach(categories -> categories.forEach(category -> {
+            this.splitHomes.put(category, ListUtil.splitListAsLinkedSet(data.getHomes(category).values(), 45));
+        }));
+    }
+
+    private void clearCategories() {
+        this.slot2CategoryMap.clear();
+        IntStream.rangeClosed(0, 44).forEach(this.inventory::clear);
+        this.inventory.clear(49);
+    }
+
+    private void clearHomes() {
+        this.slot2HomeMap.clear();
+        IntStream.rangeClosed(0, 44).forEach(this.inventory::clear);
+    }
+
+    private void setCategories(int page) {
+        this.currentPage = page;
+
+        this.splitCategories.get(page - 1).forEach(category -> {
+            this.slot2CategoryMap.put(this.inventory.firstEmpty(), category);
+            this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(data.getCategoryMaterial(category))
+                            .displayName(Component.text(category, Style.style(TextColor.color(5635925), TextDecoration.ITALIC.as(false))))
+                            .lore(Component.text("登録ホーム数: " + data.getHomes(category).size(), Style.style(TextColor.color(5635935), TextDecoration.ITALIC.as(false))),
+                                    Component.text(""),
+                                    Component.text("持ち物からアイテムを掴んで右クリックで", Style.style(TextColor.color(5636095), TextDecoration.ITALIC.as(false))),
+                                    Component.text("          表示アイテムを変更できます", Style.style(TextColor.color(5636095), TextDecoration.ITALIC.as(false))))
+                    .build());
+        });
+
+        if(this.splitCategories.size() == this.currentPage) {
+            this.inventory.setItem(49, DefinedItemStackBuilders.plus()
+                    .displayName(Component.text("新規カテゴリ作成", TextColor.color(5635925)))
+                    .build());
+        }
+
+        // NEXT BUTTON
+        if(this.splitCategories.size() > 1 && this.splitCategories.size() > this.currentPage) {
+            this.inventory.setItem(53, DefinedItemStackBuilders.rightArrow().displayName(Component.text("次のページ", TextColor.color(5635925))).build());
+        } else if (this.splitCategories.size() >= this.currentPage) {
+            this.inventory.setItem(53, null);
+        }
+
+        // BACK BUTTON
+        if(this.splitCategories.size() > 1 && this.currentPage > 1) {
+            this.inventory.setItem(52, DefinedItemStackBuilders.leftArrow().displayName(Component.text("前のページ", TextColor.color(5635925))).build());
+        } else if (this.splitCategories.size() <= 1) {
+            this.inventory.setItem(52, null);
+        }
+    }
+
+    private void setHomes(int page) {
+        this.currentPage = page;
+
+        this.splitHomes.get(this.selectedCategory).get(page - 1).forEach(home -> {
+            this.slot2HomeMap.put(this.inventory.firstEmpty(), home);
+            this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(dimension2Material(home.location()))
+                    .displayName(Component.text(home.name(), Style.style(dimension2TextColor(home.location()), TextDecoration.ITALIC.as(false))))
+                    .lore(Component.text("ワールド: " + MessageUtil.getWorldNameDisplay(home.getWorld()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
+                            Component.text("座標: " + getCoordinateAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
+                            Component.text("向き: " + getRotationAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
+                            Component.text(""),
+                            Component.text("クリックでテレポート", Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
+                            Component.text("Shiftキーを押しながら右クリックで削除", Style.style(TextColor.color(255, 0, 0), TextDecoration.ITALIC.as(false))))
+                    .build());
+        });
+
+        // NEXT BUTTON
+        if(this.splitHomes.get(this.selectedCategory).size() > 1 && this.splitHomes.get(this.selectedCategory).size() > this.currentPage) {
+            this.inventory.setItem(53, DefinedItemStackBuilders.rightArrow().displayName(Component.text("次のページ", TextColor.color(5635925))).build());
+        } else if (this.splitHomes.get(this.selectedCategory).size() == this.currentPage) {
+            this.inventory.setItem(53, null);
+        }
+
+        // BACK BUTTON
+        if(this.splitHomes.get(this.selectedCategory).size() > 1 && this.currentPage > 1) {
+            this.inventory.setItem(52, DefinedItemStackBuilders.leftArrow().displayName(Component.text("前のページ", TextColor.color(5635925))).build());
+        } else if (this.currentPage <= 1) {
+            this.inventory.setItem(52, null);
+        }
+    }
+
+    private static Material dimension2Material(Location loc) {
+        return switch (loc.getWorld().getEnvironment()) {
+            case NORMAL -> Material.GRASS_BLOCK;
+            case NETHER -> Material.NETHERRACK;
+            case THE_END -> Material.END_STONE;
+            default -> Material.WHITE_WOOL;
+        };
+    }
+
+    private static TextColor dimension2TextColor(Location loc) {
+        return switch (loc.getWorld().getEnvironment()) {
+            case NORMAL -> TextColor.color(5635925);
+            case NETHER -> TextColor.color(16733525);
+            case THE_END -> TextColor.color(16733695);
+            default -> TextColor.color(16777215);
+        };
+    }
+
+    private static String getCoordinateAsString(Location loc) {
+        String x = String.valueOf(loc.getX());
+        String y = String.valueOf(loc.getY());
+        String z = String.valueOf(loc.getZ());
+
+        return x.substring(0, Math.min(x.indexOf(".") + 2, x.length())) + ", " +
+                y.substring(0, Math.min(y.indexOf(".") + 2, y.length())) + ", " +
+                z.substring(0, Math.min(z.indexOf(".") + 2, z.length()));
+    }
+
+    private static String getRotationAsString(Location loc) {
+        String yaw = String.valueOf(loc.getYaw());
+        String pitch = String.valueOf(loc.getPitch());
+
+        return yaw.substring(0, Math.min(yaw.indexOf(".") + 2, yaw.length())) + ", " + pitch.substring(0, Math.min(pitch.indexOf(".") + 2, pitch.length()));
+    }
+
+    private enum State {
+        CATEGORIES,
+        ADD_CATEGORY,
+        TO_REMOVE_CATEGORY,
+        HOMES,
+        ADD_HOME,
+        TO_REMOVE_HOME
+    }
+}
