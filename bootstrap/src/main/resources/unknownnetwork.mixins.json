@@ -1,8 +1,0 @@
-{
-  "required": true,
-  "minVersion": "0.8.5",
-  "package": "unknown.launchwrapper.mixins",
-  "target": "@env(DEFAULT)",
-  "compatibilityLevel": "JAVA_8",
-  "server": []
-}
