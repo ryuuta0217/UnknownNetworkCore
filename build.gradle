@@ -58,7 +58,40 @@ runServer {
     runDirectory.set(project.file("testServer"))
 }
 
-task downloadWaterfall(type: Download) {
-    src "https://papermc.io/api/v2/projects/waterfall/versions/1.18/builds/471/downloads/waterfall-1.18-471.jar"
-    dest 'libs/waterfall.jar'
+task downloadWaterfall(type: Task) {
+    var wf = new File("libs/standalone/waterfall.jar")
+
+    if (!wf.exists()) {
+        download {
+            src "https://papermc.io/api/v2/projects/waterfall/versions/1.18/builds/471/downloads/waterfall-1.18-471.jar"
+            dest 'libs/standalone/waterfall.jar'
+        }
+
+        println "Downloaded waterfall.jar"
+    }
+
+    if (wf.exists()) {
+        if(!file("libs/waterfall").exists()) {
+            copy {
+                from zipTree(file("libs/standalone/waterfall.jar"))
+                into file("libs/waterfall/")
+            }
+
+            println "Extracted waterfall"
+        }
+
+        if(file("libs/waterfall/com/mojang/brigadier").exists()) {
+            delete {
+                delete file("libs/waterfall/com/mojang/brigadier")
+            }
+
+            println "Removed brigadier from extracted waterfall"
+        }
+    }
+}
+
+task reCompressWaterfall(type: Zip, dependsOn: downloadWaterfall) {
+    from "libs/waterfall/"
+    destinationDirectory = file("libs")
+    archiveFileName = "waterfall.jar"
 }
