@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -39,29 +39,14 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.chat.SelectorComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
-import net.minecraft.network.protocol.game.ClientboundCooldownPacket;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.bossevents.CustomBossEvent;
-import net.minecraft.server.commands.BossBarCommands;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.BossEvent;
 import net.unknown.core.enums.Permissions;
-import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.Particle;
 
-import java.util.*;
+import java.util.Collection;
 
-public class CrashCommand implements Listener {
-    private static final Map<UUID, BukkitTask> TASKS = new HashMap<>();
-
+public class CrashCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("crash");
         builder.requires(Permissions.COMMAND_CRASH::check);
@@ -69,36 +54,7 @@ public class CrashCommand implements Listener {
                 .executes(ctx -> {
                     Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "対象");
                     targets.forEach(target -> {
-                        if(TASKS.containsKey(target.getUUID())) {
-                            TASKS.get(target.getUUID()).cancel();
-                            TASKS.remove(target.getUUID());
-                        }
-                        UUID targetUniqueId = target.getUUID();
-                        BukkitTask task = RunnableManager.runAsyncRepeating(() -> {
-                            /*Player p = Bukkit.getPlayer(targetUniqueId);
-                            if(p == null) {
-                                TASKS.get(targetUniqueId).cancel();
-                                TASKS.remove(targetUniqueId);
-                                return;
-                            }
-                            Location particleLoc = p.getLocation();*/
-
-                            BossEvent bossEvent = new CustomBossEvent(new ResourceLocation("null"), new SelectorComponent("@p", Optional.of(new TextComponent(""))));
-                            bossEvent.setProgress(-5.0f);
-                            bossEvent.setDarkenScreen(true);
-                            bossEvent.setOverlay(BossEvent.BossBarOverlay.NOTCHED_20);
-                            ClientboundBossEventPacket bossEventPacket = ClientboundBossEventPacket.createAddPacket(bossEvent);
-                            ClientboundCooldownPacket coolDown = new ClientboundCooldownPacket(null ,100) {
-                                @Override
-                                public void write(FriendlyByteBuf buf) {
-                                    buf.writeVarInt(Integer.MAX_VALUE);
-                                    buf.writeVarInt(super.getDuration());
-                                }
-                            };
-                            target.connection.send(bossEventPacket);
-                            //p.spawnParticle(Particle.TOTEM, particleLoc.getX(), particleLoc.getY(), particleLoc.getZ(), 10000, 1, 1, 1, 10000, null);
-                        }, 0, 10);
-                        TASKS.put(target.getUUID(), task);
+                        target.getBukkitEntity().spawnParticle(Particle.EXPLOSION_HUGE, target.getBukkitEntity().getLocation(), Integer.MAX_VALUE);
                         MessageUtil.broadcast(
                                 Component.empty()
                                         .append(Component.text("[!]", TextColor.color(16733525), TextDecoration.BOLD, TextDecoration.UNDERLINED))
@@ -113,13 +69,5 @@ public class CrashCommand implements Listener {
                     return targets.size();
                 }));
         dispatcher.register(builder);
-    }
-
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        if(TASKS.containsKey(event.getPlayer().getUniqueId())) {
-            TASKS.get(event.getPlayer().getUniqueId()).cancel();
-            TASKS.remove(event.getPlayer().getUniqueId());
-        }
     }
 }

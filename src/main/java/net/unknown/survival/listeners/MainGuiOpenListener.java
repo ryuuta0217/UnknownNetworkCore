@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,14 +24,13 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
 package net.unknown.survival.listeners;
 
-import io.netty.buffer.Unpooled;
 import net.unknown.survival.gui.MainGui;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -43,7 +42,7 @@ import org.jetbrains.annotations.NotNull;
 public class MainGuiOpenListener implements Listener, PluginMessageListener {
     @EventHandler
     public void onSwapHand(PlayerSwapHandItemsEvent event) {
-        if(event.getPlayer().isSneaking()) {
+        if (event.getPlayer().isSneaking()) {
             event.setCancelled(true);
             event.getPlayer().openInventory(MainGui.getGui().getInventory());
         }
@@ -51,7 +50,7 @@ public class MainGuiOpenListener implements Listener, PluginMessageListener {
 
     @Override
     public void onPluginMessageReceived(@NotNull String channel, @NotNull Player player, @NotNull byte[] message) {
-        if(channel.equals("unc_survival:open_gui")) {
+        if (channel.equals("unc_survival:open_gui")) {
             player.openInventory(MainGui.getGui().getInventory());
         }
     }

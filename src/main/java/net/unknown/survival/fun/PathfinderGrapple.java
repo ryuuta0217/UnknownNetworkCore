@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -47,13 +47,12 @@ import org.bukkit.util.Vector;
 public class PathfinderGrapple implements Listener {
     @EventHandler
     public void onEntityBowShoot(EntityShootBowEvent event) {
-        if (!(event.getEntity() instanceof Player)) return;
-        if (!(event.getProjectile() instanceof Arrow)) return;
+        if (!(event.getEntity() instanceof Player player)) return;
+        if (!(event.getProjectile() instanceof Arrow arrow)) return;
 
         if (event.getBow() == null || !event.getBow().getItemMeta().getDisplayName().equals("§6§lパスくんのグラップル")) return;
 
-        Player player = (Player) event.getEntity();
-        Arrow arrow = (Arrow) event.getProjectile();
+        if (!player.hasPermission("unknown.survival.feature.pathfinder_grapple")) return;
         arrow.setVelocity(arrow.getVelocity().multiply(2.0D));
 
         new BukkitRunnable() {

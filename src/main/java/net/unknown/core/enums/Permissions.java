@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -33,13 +33,11 @@ package net.unknown.core.enums;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.entity.player.Player;
 import net.unknown.core.commands.*;
 import net.unknown.core.commands.vanilla.GamemodeCommand;
 import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.commands.vanilla.TimeCommand;
-import net.unknown.core.commands.*;
-import org.bukkit.craftbukkit.v1_18_R1.command.VanillaCommandWrapper;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 
 public enum Permissions {
     COMMAND_CRASH("unknown.command.crash", 4, CrashCommand.class),
@@ -52,8 +50,10 @@ public enum Permissions {
     COMMAND_GAMEMODE("minecraft.command.gamemode", 2, GamemodeCommand.class),
     COMMAND_TIME("minecraft.command.time", 2, TimeCommand.class),
     COMMAND_REPLY("unknown.command.reply", 0, MsgCommand.class),
+    COMMAND_TELEPORTWORLD("unknown.command.teleportworld", 2, TeleportWorldCommand.class),
 
-    FEATURE_USE_COLOR_CODE("unknown.feature.use_color_code", 2, null);
+    FEATURE_USE_COLOR_CODE("unknown.feature.use_color_code", 2, null),
+    FEATURE_SEE_VANISHED_PLAYERS("unknown.feature.see_vanished_players", 2, null);
 
     private final int opLevel;
     private final String permissionNode;
@@ -80,7 +80,7 @@ public enum Permissions {
     }
 
     public boolean checkAndIsPlayer(CommandSourceStack clw) {
-        if (!(clw.getBukkitEntity() instanceof CraftPlayer)) return false;
+        if (!(clw.source instanceof Player)) return false;
         return check(clw);
     }
 }

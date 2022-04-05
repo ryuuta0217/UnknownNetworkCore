@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -32,10 +32,6 @@
 package net.unknown.proxy.fml;
 
 import io.netty.buffer.ByteBuf;
-import net.md_5.bungee.UserConnection;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.connection.InitialHandler;
-import net.md_5.bungee.netty.ChannelWrapper;
 import net.md_5.bungee.protocol.DefinedPacket;
 
 import java.util.List;

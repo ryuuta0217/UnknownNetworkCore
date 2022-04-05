@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,14 +24,13 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
 package net.unknown.survival.antivillagerlag;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenCustomHashMap;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.survival.antivillagerlag.tasks.MainLoopTask;
 import org.bukkit.scheduler.BukkitTask;

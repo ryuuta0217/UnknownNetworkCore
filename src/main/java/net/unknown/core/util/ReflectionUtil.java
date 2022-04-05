@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,34 +24,36 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
 package net.unknown.core.util;
 
-import io.netty.channel.Channel;
-import sun.misc.Unsafe;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ReflectionUtil {
     public static void makeNonFinal(Field targetField) {
         try {
-            Field theUnsafeF = Unsafe.class.getDeclaredField("theUnsafe");
+            /*Field theUnsafeF = Unsafe.class.getDeclaredField("theUnsafe");
             theUnsafeF.trySetAccessible();
             Unsafe unsafe = (Unsafe) theUnsafeF.get(null);
+            long offSet = unsafe.objectFieldOffset(targetField);
+            unsafe.getBoolean()*/
 
             Method internalMethod = Class.class.getDeclaredMethod("getDeclaredFields0", boolean.class);
+            //Method internalMethod = Stream.of(java.lang.Class.class.getDeclaredMethods()).filter(m -> m.getName().equalsIgnoreCase("getDeclaredFields0")).toList().get(0);
+            if (!internalMethod.trySetAccessible()) {
+                throw new RuntimeException("Failed to #trySetAccessible");
+            }
             Field[] fields = (Field[]) internalMethod.invoke(targetField, false);
-            List<Field> filteredFields = Stream.of(fields).filter(f -> f.getName().equals("modifiers")).collect(Collectors.toList());
+            List<Field> filteredFields = Stream.of(fields).filter(f -> f.getName().equals("modifiers")).toList();
             if (filteredFields.size() != 1) {
                 throw new RuntimeException("Cannot Find Field: modifiers");
             }
@@ -62,7 +64,7 @@ public class ReflectionUtil {
             if (Modifier.isFinal(modifiers)) {
                 modifiersField.set(targetField, modifiers & ~Modifier.FINAL);
             }
-        } catch(IllegalAccessException | InvocationTargetException | NoSuchMethodException | NoSuchFieldException e) {
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
             throw new RuntimeException(e);
         }
     }

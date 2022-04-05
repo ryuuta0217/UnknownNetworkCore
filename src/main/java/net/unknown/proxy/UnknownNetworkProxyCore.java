@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,21 +24,42 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
 package net.unknown.proxy;
 
+import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.config.YamlConfiguration;
 import net.unknown.proxy.fml.ForgeListener;
 
 public class UnknownNetworkProxyCore extends Plugin {
+    private static ServerInfo LOBBY;
+    private static ServerInfo SURVIVAL;
+
     private static UnknownNetworkProxyCore INSTANCE;
 
     public UnknownNetworkProxyCore() {
         INSTANCE = this;
+    }
+
+    public static UnknownNetworkProxyCore getInstance() {
+        return UnknownNetworkProxyCore.INSTANCE;
+    }
+
+    public static YamlConfiguration getConfigProvider() {
+        return (YamlConfiguration) YamlConfiguration.getProvider(YamlConfiguration.class);
+    }
+
+    public static ServerInfo getLobbyServer() {
+        return LOBBY;
+    }
+
+    public static ServerInfo getSurvivalServer() {
+        return SURVIVAL;
     }
 
     @Override
@@ -49,14 +70,14 @@ public class UnknownNetworkProxyCore extends Plugin {
     @Override
     public void onEnable() {
         getProxy().getPluginManager().registerListener(this, new ForgeListener());
+        getProxy().getPluginManager().registerListener(this, new PingListener());
+        getProxy().getPluginManager().registerListener(this, new ServerDisconnectListener());
+        LOBBY = getProxy().getServerInfo("lobby");
+        SURVIVAL = getProxy().getServerInfo("survival");
     }
 
     @Override
     public void onDisable() {
 
-    }
-
-    public static UnknownNetworkProxyCore getInstance() {
-        return UnknownNetworkProxyCore.INSTANCE;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -34,7 +34,6 @@ package net.unknown.core.util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -48,12 +47,12 @@ import java.util.UUID;
 public class PlayerDataUtil {
     public static Location getLastLocation(OfflinePlayer offlinePlayer) {
         CompoundTag tag = getData(offlinePlayer);
-        if(tag == null) throw new IllegalArgumentException("プレイヤーが見つかりません");
+        if (tag == null) throw new IllegalArgumentException("プレイヤーが見つかりません");
 
-        if(tag.contains("WorldUUIDMost") && tag.contains("WorldUUIDLeast") && tag.contains("Pos") && tag.contains("Rotation")) {
+        if (tag.contains("WorldUUIDMost") && tag.contains("WorldUUIDLeast") && tag.contains("Pos") && tag.contains("Rotation")) {
             UUID worldUniqueId = new UUID(tag.getLong("WorldUUIDMost"), tag.getLong("WorldUUIDLeast"));
             World world = Bukkit.getWorld(worldUniqueId);
-            if(world == null) throw new IllegalStateException("ワールドが見つかりません");
+            if (world == null) throw new IllegalStateException("ワールドが見つかりません");
 
             ListTag position = tag.getList("Pos", CompoundTag.TAG_DOUBLE);
             double x = position.getDouble(0);
@@ -71,9 +70,9 @@ public class PlayerDataUtil {
 
     public static List<ItemStack> getInventoryItems(OfflinePlayer offlinePlayer) {
         CompoundTag tag = getData(offlinePlayer);
-        if(tag == null) throw new IllegalArgumentException("プレイヤーが見つかりません");
+        if (tag == null) throw new IllegalArgumentException("プレイヤーが見つかりません");
 
-        if(tag.contains("Inventory")) {
+        if (tag.contains("Inventory")) {
             ListTag items = tag.getList("Inventory", CompoundTag.TAG_COMPOUND);
 
         }

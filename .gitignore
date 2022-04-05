@@ -9,4 +9,6 @@ testServer/**/*.dat_old
 testServer/cache/
 testServer/libraries/
 testServer/versions/
+testServer/plugins/*/
+!testServer/plugins/UnknownNetworkCore/
 .DS_Store

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -37,13 +37,13 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
-import net.minecraft.commands.Commands;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,20 +68,14 @@ public class TeleportPetCommand {
                             ((Tameable) e).getOwnerUniqueId().equals(ctx.getSource().getBukkitEntity().getUniqueId()))
                     .toList());
         });
-        if(tamedEntities.size() == 0) return -1; // 手懐けているエンティティがひとつもみつからなかったらここまで
+        if (tamedEntities.size() == 0) return -1; // 手懐けているエンティティがひとつもみつからなかったらここまで
 
         // 数字が指定されていたらその数字を使用、指定されていなかったら0を使用
         int num = BrigadierUtil.getArgumentOrDefault(ctx, Integer.class, "番号", 0);
-        if(num > tamedEntities.size()-1) num = tamedEntities.size()-1; // 手懐けているエンティティの数を数字が上回っていたら最大値にする
+        if (num > tamedEntities.size() - 1) num = tamedEntities.size() - 1; // 手懐けているエンティティの数を数字が上回っていたら最大値にする
         Entity e = tamedEntities.get(num); // TP対象のエンティティを取得する
-        ctx.getSource().getPlayerOrException().getBukkitEntity().teleport(e); // 対象にテレポートするおはよう
-        // ohayou
-        // 今日何日？tyやっときた
-        // さっき言ったメッセージのやつよろしくたのむhome doko仕事してくるるくてazasu
-        // 下の方 unknown.survival.commands.home.HomeCommand この順でたどって
-        //ﾌﾝ23bkns
-        //これだけだと味気ないな
-        MessageUtil.sendMessage(ctx.getSource(),"番号"+ num + "のペットにテレポートしました");
+        ctx.getSource().getPlayerOrException().getBukkitEntity().teleport(e); // 対象にテレポートする
+        MessageUtil.sendMessage(ctx.getSource(), "番号" + num + "のペットにテレポートしました");
         return 0;
     }
 }

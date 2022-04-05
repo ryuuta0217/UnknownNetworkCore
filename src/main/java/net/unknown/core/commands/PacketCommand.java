@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -45,7 +45,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.util.MessageUtil;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 public class PacketCommand {
     private static final Map<String, Map<String, Float>> DEFINED_GAME_EVENT_PACKET_PARAMS = new HashMap<>() {{
@@ -62,12 +65,12 @@ public class PacketCommand {
         }});
 
         put("DEMO_EVENT", new HashMap<>() {{
-           put("DEMO_PARAM_INTRO", 0f);
-           put("DEMO_PARAM_HINT_1", 101f);
-           put("DEMO_PARAM_HINT_2", 102f);
-           put("DEMO_PARAM_HINT_3", 103f);
-           put("DEMO_PARAM_HINT_4", 104f);
-       }});
+            put("DEMO_PARAM_INTRO", 0f);
+            put("DEMO_PARAM_HINT_1", 101f);
+            put("DEMO_PARAM_HINT_2", 102f);
+            put("DEMO_PARAM_HINT_3", 103f);
+            put("DEMO_PARAM_HINT_4", 104f);
+        }});
 
         put("IMMEDIATE_RESPAWN", new HashMap<>() {{
             put("SHOW_DEATH_SCREEN", 0f);
@@ -79,15 +82,15 @@ public class PacketCommand {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("packet");
         builder.requires(Permissions.COMMAND_PACKET::check);
 
-        for(Packets packet : Packets.values()) {
-            if(packet == Packets.GAME_EVENT) {
+        for (Packets packet : Packets.values()) {
+            if (packet == Packets.GAME_EVENT) {
                 for (GameEventType gameEventType : GameEventType.values()) {
-                    if(!gameEventType.name().equals("RAIN_LEVEL_CHANGE") && !gameEventType.name().equals("THUNDER_LEVEL_CHANGE")) {
+                    if (!gameEventType.name().equals("RAIN_LEVEL_CHANGE") && !gameEventType.name().equals("THUNDER_LEVEL_CHANGE")) {
                         builder = builder.then(Commands.argument("targets", EntityArgument.players())
-                                        .then(Commands.literal(packet.getLiteral())
-                                                .then(Commands.literal(gameEventType.name())
-                                                        .then(Commands.argument("customParamValue", FloatArgumentType.floatArg())
-                                                                .executes(ctx -> sendGameEventPacket(ctx, gameEventType.ordinal(), FloatArgumentType.getFloat(ctx, "customParamValue")))))));
+                                .then(Commands.literal(packet.getLiteral())
+                                        .then(Commands.literal(gameEventType.name())
+                                                .then(Commands.argument("customParamValue", FloatArgumentType.floatArg())
+                                                        .executes(ctx -> sendGameEventPacket(ctx, gameEventType.ordinal(), FloatArgumentType.getFloat(ctx, "customParamValue")))))));
                     }
 
                     switch (gameEventType) {
@@ -100,29 +103,29 @@ public class PacketCommand {
                                 float internalParamValue = definedParamsEntry.getValue();
 
                                 builder = builder.then(Commands.argument("targets", EntityArgument.players())
-                                                .then(Commands.literal(packet.getLiteral())
-                                                        .then(Commands.literal(gameEventType.name())
-                                                                .then(Commands.literal(friendlyParamName)
-                                                                        .executes(ctx -> sendGameEventPacket(ctx, gameEventType.ordinal(), internalParamValue))))));
+                                        .then(Commands.literal(packet.getLiteral())
+                                                .then(Commands.literal(gameEventType.name())
+                                                        .then(Commands.literal(friendlyParamName)
+                                                                .executes(ctx -> sendGameEventPacket(ctx, gameEventType.ordinal(), internalParamValue))))));
                             }
                             break;
                         case RAIN_LEVEL_CHANGE:
                         case THUNDER_LEVEL_CHANGE:
                             builder = builder.then(Commands.argument("targets", EntityArgument.players())
-                                            .then(Commands.literal(packet.getLiteral())
-                                                    .then(Commands.literal(gameEventType.name())
-                                                            .then(Commands.argument("level", FloatArgumentType.floatArg(0.0f, 1.0f))
-                                                                    .executes(ctx -> sendGameEventPacket(ctx, gameEventType.ordinal(), FloatArgumentType.getFloat(ctx, "level")))))));
+                                    .then(Commands.literal(packet.getLiteral())
+                                            .then(Commands.literal(gameEventType.name())
+                                                    .then(Commands.argument("level", FloatArgumentType.floatArg(0.0f, 1.0f))
+                                                            .executes(ctx -> sendGameEventPacket(ctx, gameEventType.ordinal(), FloatArgumentType.getFloat(ctx, "level")))))));
                             break;
 
                     }
                 }
 
                 builder = builder.then(Commands.argument("targets", EntityArgument.players())
-                                .then(Commands.literal(packet.getLiteral())
-                                        .then(Commands.argument("customTypeNumber", IntegerArgumentType.integer())
-                                                .then(Commands.argument("customParamValue", FloatArgumentType.floatArg())
-                                                        .executes(ctx -> sendGameEventPacket(ctx, IntegerArgumentType.getInteger(ctx, "customTypeNumber"), FloatArgumentType.getFloat(ctx, "customParamValue")))))));
+                        .then(Commands.literal(packet.getLiteral())
+                                .then(Commands.argument("customTypeNumber", IntegerArgumentType.integer())
+                                        .then(Commands.argument("customParamValue", FloatArgumentType.floatArg())
+                                                .executes(ctx -> sendGameEventPacket(ctx, IntegerArgumentType.getInteger(ctx, "customTypeNumber"), FloatArgumentType.getFloat(ctx, "customParamValue")))))));
             }
         }
 

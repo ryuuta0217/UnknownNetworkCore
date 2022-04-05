@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -39,15 +39,12 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.TimeArgument;
-import net.minecraft.core.Registry;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
-import net.unknown.core.util.BrigadierUtil;
+import net.unknown.core.commands.Suggestions;
 import net.unknown.core.enums.Permissions;
+import net.unknown.core.util.BrigadierUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
@@ -59,21 +56,23 @@ public class TimeCommand {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("time");
         builder.requires(Permissions.COMMAND_TIME::check);
 
-        for(TickName tickName : TickName.values()) {
+        for (TickName tickName : TickName.values()) {
             builder.then(Commands.literal("set")
                     // /time set <tickName> [world]
                     // world を省略した場合、 execute in ... で指定された ServerLevel またはデフォルトの ServerLevel に対して実行される
                     .then(Commands.literal(tickName.getName())
                             .executes(ctx -> setTime(ctx, ctx.getSource().getLevel(), tickName.getTicks()))
                             .then(Commands.argument("world", StringArgumentType.string())
-                                    //.suggests()
+                                    .suggests(Suggestions.WORLD_SUGGEST)
                                     .executes(ctx -> setTimeAsWorldName(ctx, StringArgumentType.getString(ctx, "world"), tickName.getTicks()))))
                     .then(Commands.argument("time", TimeArgument.time())
                             .executes(ctx -> setTime(ctx, ctx.getSource().getLevel(), IntegerArgumentType.getInteger(ctx, "time")))
                             .then(Commands.argument("world", StringArgumentType.string())
-                                    //.suggests()
+                                    .suggests(Suggestions.WORLD_SUGGEST)
                                     .executes(ctx -> addTimeAsWorldName(ctx, StringArgumentType.getString(ctx, "world"), IntegerArgumentType.getInteger(ctx, "time"))))));
         }
+
+        dispatcher.register(builder);
     }
 
     private static int setTime(CommandContext<CommandSourceStack> ctx, ServerLevel targetLevel, int newDayTimeTicks) {
@@ -85,7 +84,7 @@ public class TimeCommand {
 
     private static int setTimeAsWorldName(CommandContext<CommandSourceStack> ctx, String worldName, int newDayTimeTicks) {
         World bukkitWorld = Bukkit.getWorld(worldName);
-        if(bukkitWorld != null) {
+        if (bukkitWorld != null) {
             return setTime(ctx, ((CraftWorld) bukkitWorld).getHandle(), newDayTimeTicks);
         } else {
             ctx.getSource().sendFailure(new TextComponent("ワールド " + worldName + " は見つかりませんでした"));
@@ -99,7 +98,7 @@ public class TimeCommand {
 
     private static int addTimeAsWorldName(CommandContext<CommandSourceStack> ctx, String worldName, int additionalDayTimeTicks) {
         World bukkitWorld = Bukkit.getWorld(worldName);
-        if(bukkitWorld != null) {
+        if (bukkitWorld != null) {
             return addTime(ctx, ((CraftWorld) bukkitWorld).getHandle(), additionalDayTimeTicks);
         } else {
             ctx.getSource().sendFailure(new TextComponent("ワールド " + worldName + " は見つかりませんでした"));

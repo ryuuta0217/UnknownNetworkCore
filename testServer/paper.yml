@@ -8,11 +8,13 @@
 # Discord: https://discord.gg/papermc
 # IRC: #paper @ irc.esper.net ( https://webchat.esper.net/?channels=paper ) 
 # Website: https://papermc.io/ 
-# Docs: https://paper.readthedocs.org/ 
+# Docs: https://docs.papermc.io/ 
 
 verbose: false
-config-version: 24
+config-version: 25
 settings:
+  use-dimension-type-for-custom-spawners: false
+  time-command-affects-all-worlds: false
   fix-target-selector-tag-completion: true
   send-full-pos-for-hard-colliding-entities: true
   player-auto-save-rate: -1
@@ -75,7 +77,7 @@ settings:
     global-max-chunk-send-rate: -1.0
     enable-frustum-priority: false
     global-max-chunk-load-rate: -1.0
-    player-max-concurrent-loads: 4.0
+    player-max-concurrent-loads: 20.0
     global-max-concurrent-loads: 500.0
   console:
     enable-brigadier-highlighting: true
@@ -91,6 +93,7 @@ settings:
         max-packet-rate: 5.0
         action: DROP
   loggers:
+    use-rgb-for-named-text-colors: true
     deobfuscate-stacktraces: true
   book-size:
     page-max: 2560
@@ -117,6 +120,15 @@ timings:
   server-name: Unknown Server
 world-settings:
   default:
+    wateranimal-spawn-height:
+      maximum: default
+      minimum: default
+    slime-spawn-height:
+      swamp-biome:
+        maximum: 70.0
+        minimum: 50.0
+      slime-chunk:
+        maximum: 40.0
     monster-spawn-max-light-level: -1
     anticheat:
       obfuscation:

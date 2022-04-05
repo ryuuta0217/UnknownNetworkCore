@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -55,9 +55,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PlayerData extends Config {
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
     private static final Map<UUID, PlayerData> PLAYER_DATA_MAP = new HashMap<>();
     private static final int DEFAULT_MAX_HOME_COUNT = 5;
+    private final UUID uniqueId;
+    private Map<String, Map<String, Home>> homes;
+    private String defaultGroup;
+    private Map<String, Material> group2Material;
+    private int homeBaseCount;
+    private int homeAdditionalCount;
+    private UUID replyTarget;
+    private boolean isAfk = false;
+
+    public PlayerData(UUID uniqueId) {
+        super("players/" + uniqueId + ".yml", false, "UNC/PlayerData/" + Bukkit.getOfflinePlayer(uniqueId).getName());
+        this.uniqueId = uniqueId;
+    }
 
     public static PlayerData of(Player player) {
         return of(player.getUniqueId());
@@ -72,7 +85,7 @@ public class PlayerData extends Config {
     }
 
     public static PlayerData of(UUID uniqueId) {
-        if(!PLAYER_DATA_MAP.containsKey(uniqueId)) {
+        if (!PLAYER_DATA_MAP.containsKey(uniqueId)) {
             PlayerData pd = new PlayerData(uniqueId);
             PLAYER_DATA_MAP.put(uniqueId, pd);
         }
@@ -85,13 +98,14 @@ public class PlayerData extends Config {
 
     public static void loadExists() {
         File f = new File(UnknownNetworkCore.getInstance().getDataFolder(), "players");
-        if(!f.exists()) return;
+        if (!f.exists()) return;
         File[] files = f.listFiles(p -> {
-            if(p.getName().endsWith(".yml")) {
+            if (p.getName().endsWith(".yml")) {
                 try {
                     UUID.fromString(p.getName().replace(".yml", ""));
                     return true;
-                } catch (IllegalArgumentException ignored) {}
+                } catch (IllegalArgumentException ignored) {
+                }
             }
             return false;
         });
@@ -102,28 +116,17 @@ public class PlayerData extends Config {
         }
     }
 
-    private final UUID uniqueId;
-    private Map<String, Map<String, Home>> homes;
-    private Map<String, Material> category2Material;
-    private Map<String, Set<String>> removedHomes;
-    private int homeBaseCount;
-    private int homeAdditionalCount;
-    private UUID replyTarget;
-
-    private boolean isAfk = false;
-
-    private final boolean savingLock = false;
-
-    public PlayerData(UUID uniqueId) {
-        super("players/" + uniqueId + ".yml", false, "UNC/PlayerData");
-        this.uniqueId = uniqueId;
+    private static UUID extractUniqueIdFromFileName(String fileName) {
+        Matcher m = Pattern.compile("players/(.*)\\.yml").matcher(fileName);
+        if (m.matches() && m.groupCount() == 1) return UUID.fromString(m.group(1));
+        return null;
     }
 
     @Override
     public void onLoad() {
         UUID tempUniqueId = extractUniqueIdFromFileName(this.getFileName());
 
-        if(!this.getConfig().isSet("config-version") && this.getConfig().getKeys(false).size() > 0) {
+        if (!this.getConfig().isSet("config-version") && this.getConfig().getKeys(false).size() > 0) {
             this.getLogger().warning("Unknown configuration version, version set to 1.");
             this.getConfig().set("config-version", 1);
         } else if (!this.getConfig().isSet("config-version")) {
@@ -131,73 +134,80 @@ public class PlayerData extends Config {
             this.getConfig().set("config-version", VERSION);
         }
 
-        if(this.getConfig().getInt("config-version") < VERSION) {
+        if (this.getConfig().getInt("config-version") < VERSION) {
             this.getLogger().warning("Old version config detected, migrating...");
 
             int version = this.getConfig().getInt("config-version");
 
-            switch(version) {
+            switch (version) {
                 case 1:
                     MigrateToV2FromV1.migrate(tempUniqueId, this.getFile(), this.getConfig());
+                case 2:
+                    MigrateToV3FromV2.migrate(tempUniqueId, this.getFile(), this.getConfig());
+            }
+
+            if (this.getConfig().getInt("config-version") == VERSION) {
+                this.getLogger().info("Successfully migrated to V" + VERSION);
             }
         }
 
-        if(this.homes == null) this.homes = new LinkedHashMap<>();
+        if (this.homes == null) this.homes = new LinkedHashMap<>();
         else if (!this.homes.isEmpty()) this.homes.clear();
-        ConfigurationSection homeCategories = this.getConfig().getConfigurationSection("homes");
-        if (homeCategories != null) {
+        ConfigurationSection homeGroups = this.getConfig().getConfigurationSection("homes");
+        if (homeGroups != null) {
             long start = System.nanoTime();
-            homeCategories.getKeys(false).forEach(categoryName -> {
-                ConfigurationSection categorizedHomes = homeCategories.getConfigurationSection(categoryName);
-                if (categorizedHomes != null) {
+            homeGroups.getKeys(false).forEach(groupName -> {
+                ConfigurationSection groupedHomes = homeGroups.getConfigurationSection(groupName);
+                if (groupedHomes != null) {
                     Map<String, Home> homes = new LinkedHashMap<>();
-                    categorizedHomes.getKeys(false).forEach(homeName -> {
-                        Location loc = ConfigurationSerializer.getLocationData(categorizedHomes, homeName);
-                        if (loc == null) {
-                            if (this.removedHomes == null) this.removedHomes = new HashMap<>();
-                            Set<String> removedHomes = this.removedHomes.getOrDefault(categoryName, new HashSet<>());
-                            removedHomes.add(homeName);
-                            this.removedHomes.put(categoryName, removedHomes);
-                        } else {
-                            homes.put(homeName, new Home(homeName, loc));
-                        }
+                    groupedHomes.getKeys(false).forEach(homeName -> {
+                        Location loc = ConfigurationSerializer.getLocationData(groupedHomes, homeName);
+                        if (loc != null) homes.put(homeName, new Home(homeName, loc));
                     });
-                    this.homes.put(categoryName, homes);
+                    this.homes.put(groupName, homes);
                 }
             });
             long end = System.nanoTime();
             long durationNS = end - start;
-            if(tempUniqueId != null) this.getLogger().info(Bukkit.getOfflinePlayer(tempUniqueId).getName() + "'s home load completed with " + durationNS + "ns (" + TimeUnit.NANOSECONDS.toMillis(durationNS) + "ms)");
+            this.getLogger().info("Home load completed with " + durationNS + "ns (" + TimeUnit.NANOSECONDS.toMillis(durationNS) + "ms)");
+        } else if (!this.getConfig().isSet("homes")) {
+            this.addGroup("default");
+            this.getLogger().info("Home isn't set, created default group.");
         }
 
-        if(this.category2Material == null) this.category2Material = new HashMap<>();
-        else if(!this.category2Material.isEmpty()) this.category2Material.clear();
-        ConfigurationSection homeCategoryItems = this.getConfig().getConfigurationSection("homeCategoryItems");
-        if (homeCategoryItems != null) {
-            homeCategoryItems.getKeys(false).forEach(categoryName -> this.category2Material.put(categoryName, Material.valueOf(homeCategoryItems.getString(categoryName))));
+        if (this.group2Material == null) this.group2Material = new HashMap<>();
+        else if (!this.group2Material.isEmpty()) this.group2Material.clear();
+        ConfigurationSection homeGroupItems = this.getConfig().getConfigurationSection("homeGroupItems");
+        if (homeGroupItems != null) {
+            homeGroupItems.getKeys(false).forEach(groupName -> this.group2Material.put(groupName, Material.valueOf(homeGroupItems.getString(groupName))));
         }
 
         this.homeBaseCount = this.getConfig().isSet("home-base-count") ? this.getConfig().getInt("home-base-count") : DEFAULT_MAX_HOME_COUNT;
         this.homeAdditionalCount = this.getConfig().isSet("home-additional-count") ? this.getConfig().getInt("home-additional-count") : 0;
 
-        if(this.getConfig().isSet("reply-target")) this.replyTarget = UUID.fromString(this.getConfig().getString("reply-target"));
+        if (this.getConfig().isSet("reply-target"))
+            this.replyTarget = UUID.fromString(this.getConfig().getString("reply-target"));
     }
 
     @Override
-    public void save() {
+    public synchronized void save() {
         this.getConfig().set("homes", null);
-        this.homes.forEach((categoryName, categorizedHomes) -> {
-            categorizedHomes.forEach((homeName, home) -> {
-                ConfigurationSerializer.setLocationData(this.getConfig(), "homes." + categoryName + "." + homeName, home.location());
-            });
+        this.homes.forEach((groupName, categorizedHomes) -> {
+            if (categorizedHomes.size() > 0) {
+                categorizedHomes.forEach((homeName, home) -> {
+                    ConfigurationSerializer.setLocationData(this.getConfig(), "homes." + groupName + "." + homeName, home.location());
+                });
+            } else {
+                this.getConfig().createSection("homes." + groupName);
+            }
         });
 
-        this.getConfig().set("homeCategoryItems", null);
-        this.category2Material.forEach((categoryName, material) -> this.getConfig().set("homeCategoryItems." + categoryName, material.name()));
+        this.getConfig().set("homeGroupItems", null);
+        this.group2Material.forEach((groupName, material) -> this.getConfig().set("homeGroupItems." + groupName, material.name()));
 
         this.getConfig().set("home-base-count", homeBaseCount);
         this.getConfig().set("home-additional-count", homeAdditionalCount);
-        if(this.replyTarget != null) this.getConfig().set("reply-target", this.replyTarget.toString());
+        if (this.replyTarget != null) this.getConfig().set("reply-target", this.replyTarget.toString());
         super.save();
     }
 
@@ -210,43 +220,63 @@ public class PlayerData extends Config {
         return Bukkit.getPlayer(this.uniqueId);
     }
 
-    public Map<String, Map<String, Home>> getCategorizedHomes() {
+    public Map<String, Map<String, Home>> getGroupedHomes() {
         return this.homes;
     }
 
-    public Set<String> getCategories() {
+    public Set<String> getGroups() {
         return this.homes.keySet();
     }
 
-    public Material getCategoryMaterial(String category) {
-        return this.category2Material.getOrDefault(category, Material.WHITE_WOOL);
+    public String getDefaultGroup() {
+        if (this.defaultGroup == null) this.defaultGroup = new ArrayList<>(this.getGroups()).get(0);
+        return this.defaultGroup;
     }
 
-    public void setCategoryMaterial(String category, Material newMaterial) {
-        this.category2Material.put(category, newMaterial);
+    public boolean isGroupExists(String groupName) {
+        return this.homes.containsKey(groupName);
+    }
+
+    public void addGroup(String newGroupName) {
+        if (this.isGroupExists(newGroupName)) return;
+        this.homes.put(newGroupName, new LinkedHashMap<>());
+        RunnableManager.runAsync(this::save);
+    }
+
+    public Material getGroupMaterial(String groupName) {
+        return this.group2Material.getOrDefault(groupName, Material.WHITE_WOOL);
+    }
+
+    public void setGroupMaterial(String groupName, Material newMaterial) {
+        this.group2Material.put(groupName, newMaterial);
         RunnableManager.runAsync(this::save);
     }
 
     @Nullable
-    public Map<String, Home> getHomes(String category) {
-        return this.homes.getOrDefault(category, null);
-    }
-
-    public Map<String, Set<String>> getRemovedHomes() {
-        return this.removedHomes;
-    }
-
-    public Set<String> getHomeNames(String category) {
-        return this.homes.getOrDefault(category, new HashMap<>()).keySet();
-    }
-
-    public boolean isHomeExists(String category, String name) {
-        return this.getHomeNames(category).contains(name);
+    public Map<String, Home> getHomes(String groupName) {
+        return this.homes.getOrDefault(groupName, null);
     }
 
     @Nullable
-    public Home getHome(String category, String name) {
-        return this.homes.getOrDefault(category, new HashMap<>()).getOrDefault(name, null);
+    public Map<String, Home> getDefaultHomes() {
+        return this.homes.getOrDefault(getDefaultGroup(), null);
+    }
+
+    public Set<String> getHomeNames(String groupName) {
+        return this.homes.getOrDefault(groupName, new HashMap<>()).keySet();
+    }
+
+    public Set<String> getDefaultHomeNames() {
+        return this.homes.getOrDefault(getDefaultGroup(), new HashMap<>()).keySet();
+    }
+
+    public boolean isHomeExists(String groupName, String name) {
+        return this.getHomeNames(groupName).contains(name);
+    }
+
+    @Nullable
+    public Home getHome(String groupName, String name) {
+        return this.homes.getOrDefault(groupName, new HashMap<>()).getOrDefault(name, null);
     }
 
     public int getHomeCount() {
@@ -275,32 +305,32 @@ public class PlayerData extends Config {
         return this.getHomeBaseCount() + this.getHomeAdditionalCount();
     }
 
-    public Home addHome(String category, String name, Location loc, boolean overwrite) {
-        if(name.contains(".")) return null;
-        if(!overwrite && this.homes.getOrDefault(category, new HashMap<>()).containsKey(name)) return null;
-        Map<String, Home> categorizedHomes = this.homes.getOrDefault(category, new HashMap<>());
+    public Home addHome(String groupName, String name, Location loc, boolean overwrite) {
+        if (name.contains(".")) return null;
+        if (!overwrite && this.homes.getOrDefault(groupName, new HashMap<>()).containsKey(name)) return null;
+        Map<String, Home> categorizedHomes = this.homes.getOrDefault(groupName, new HashMap<>());
         categorizedHomes.put(name, new Home(name, loc));
-        this.homes.put(category, categorizedHomes);
+        this.homes.put(groupName, categorizedHomes);
         RunnableManager.runAsync(this::save);
-        return this.homes.get(category).get(name);
+        return this.homes.get(groupName).get(name);
     }
 
-    public boolean removeHome(String category, String name) {
-        if(this.homes.containsKey(category)) {
-            if(this.homes.get(category).containsKey(name)) {
-                this.homes.get(category).remove(name);
+    public boolean removeHome(String groupName, String name) {
+        if (this.homes.containsKey(groupName)) {
+            if (this.homes.get(groupName).containsKey(name)) {
+                this.homes.get(groupName).remove(name);
                 return true;
             }
         }
         return false;
     }
 
-    public void setAfk(boolean afk) {
-        this.isAfk = afk;
-    }
-
     public boolean isAfk() {
         return this.isAfk;
+    }
+
+    public void setAfk(boolean afk) {
+        this.isAfk = afk;
     }
 
     public UUID getPrivateMessageReplyTarget() {
@@ -312,18 +342,12 @@ public class PlayerData extends Config {
         RunnableManager.runAsync(this::save);
     }
 
-    private static UUID extractUniqueIdFromFileName(String fileName) {
-        Matcher m = Pattern.compile("players/(.*)\\.yml").matcher(fileName);
-        if(m.matches() && m.groupCount() == 1) return UUID.fromString(m.group(1));
-        return null;
-    }
-
     public static class MigrateToV2FromV1 {
         public static void migrate(UUID uniqueId, File file, FileConfiguration config) {
             if (config.isSet("config-version") && config.getInt("config-version") <= 1) {
                 String playerName = uniqueId.toString();
                 OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
-                if(offlinePlayer != null) playerName = offlinePlayer.getName();
+                if (offlinePlayer != null) playerName = offlinePlayer.getName();
                 Logger LOGGER = Logger.getLogger("PlayerDataMigrator/V1 -> V2/" + uniqueId);
 
                 if (config.isSet("homes")) {
@@ -331,7 +355,7 @@ public class PlayerData extends Config {
                     ConfigurationSection section = config.getConfigurationSection("homes");
                     if (section != null) {
                         /* LOAD OLD HOMES */
-                        Map<String, Home> oldHomeMap = new LinkedHashMap<>();
+                        Map<String, Home> oldHomeMap = new LinkedHashMap<>(); // 登録順が崩れないようにLinkedを使う
                         section.getKeys(false).forEach(homeName -> {
                             LOGGER.info("Migrating: homes." + homeName + " -> homes.uncategorized." + homeName);
                             Location loc = ConfigurationSerializer.getLocationData(section, homeName);
@@ -355,6 +379,64 @@ public class PlayerData extends Config {
 
                 try {
                     config.save(file);
+                } catch (IOException e) {
+                    LOGGER.warning("Failed to save migrated configuration data.");
+                }
+            }
+        }
+    }
+
+    public static class MigrateToV3FromV2 {
+        public static void migrate(UUID uniqueId, File configFile, FileConfiguration config) {
+            if (config.isSet("config-version") && config.getInt("config-version") == 2) {
+                String playerName = uniqueId.toString();
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
+                if (offlinePlayer != null) playerName = offlinePlayer.getName();
+                Logger LOGGER = Logger.getLogger("PlayerDataMigrator/V2 -> V3/" + playerName);
+
+                Map<String, Material> category2Material = new HashMap<>();
+
+                if (config.isSet("homeCategoryItems")) {
+                    ConfigurationSection homeCategoryItemsSection = config.getConfigurationSection("homeCategoryItems");
+                    if (homeCategoryItemsSection == null) throw new IllegalStateException("Something wrong.");
+                    homeCategoryItemsSection.getKeys(false).forEach(categoryName -> {
+                        category2Material.put(categoryName, Material.valueOf(homeCategoryItemsSection.getString(categoryName)));
+                    });
+                }
+
+                Map<String, ConfigurationSection> uncategorizedHomes = new LinkedHashMap<>(); // 登録順が崩れないようにLinkedを使う
+
+                if (config.isSet("homes.uncategorized")) {
+                    ConfigurationSection uncategorizedHomeSection = config.getConfigurationSection("homes.uncategorized");
+                    if (uncategorizedHomeSection == null) throw new IllegalStateException("Something wrong.");
+
+                    uncategorizedHomeSection.getKeys(false).forEach(homeName -> {
+                        if (uncategorizedHomeSection.isSet(homeName)) {
+                            uncategorizedHomes.put(homeName, uncategorizedHomeSection.getConfigurationSection(homeName));
+                        }
+                    });
+                }
+
+                config.set("homeCategoryItems", null);
+
+                category2Material.forEach((categoryName, material) -> {
+                    if (categoryName.equalsIgnoreCase("uncategorized")) categoryName = "default";
+                    config.set("homeGroupItems." + categoryName, material.name());
+                });
+
+                if (uncategorizedHomes.size() > 0) {
+                    LOGGER.info("Renaming Home Category \"uncategorized\" to Home Group \"default\"");
+                    config.set("homes.uncategorized", null);
+
+                    uncategorizedHomes.forEach((homeName, section) -> {
+                        config.set("homes.default." + homeName, section);
+                    });
+                }
+
+                config.set("config-version", 3);
+
+                try {
+                    config.save(configFile);
                 } catch (IOException e) {
                     LOGGER.warning("Failed to save migrated configuration data.");
                 }

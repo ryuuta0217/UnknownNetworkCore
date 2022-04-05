@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -33,26 +33,54 @@ package net.unknown.core.util;
 
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.level.BaseCommandBlock;
+import net.minecraft.world.level.GameRules;
+import net.unknown.core.define.DefinedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Style;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class MessageUtil {
-    private static final String PREFIX = "§r";
+    private static final String PREFIX = "§7[§6§lU.N.§r§7] §r";
+    private static final Component PREFIX_ADVENTURE_COMPONENT = Component.empty()
+            .append(Component.text("[", DefinedTextColor.GRAY))
+            .append(Component.text("U.N.", net.kyori.adventure.text.format.Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD.as(true))))
+            .append(Component.text("]", DefinedTextColor.GRAY))
+            .append(Component.text(" "));
+    private static final MutableComponent PREFIX_MINECRAFT_COMPONENT = new TextComponent("")
+            .append(new TextComponent("[").withStyle(ChatFormatting.GRAY))
+            .append(new TextComponent("U.N.").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
+            .append(new TextComponent("]").withStyle(ChatFormatting.GRAY))
+            .append(new TextComponent(" "));
     private static final String PREFIX_ERROR = "§c";
     private static final String PREFIX_ADMIN = "§r";
     private static final String PREFIX_ADMIN_ERROR = "§c";
+    private static final Map<String, String> WORLD_NAME_DISPLAY = new HashMap<>() {{
+        put("world", "メイン");
+        put("world_nether", "メインネザー");
+        put("world_the_end", "メインエンド");
+        put("main2", "メイン2");
+        put("main2_nether", "メイン2ネザー");
+        put("main2_the_end", "メイン2エンド");
+        put("resource", "資源");
+        put("resource_nether", "資源ネザー");
+        put("resource_the_end", "資源エンド");
+    }};
 
     public static void sendMessage(Player player, String msg) {
         sendMessage(((CraftPlayer) player).getHandle().createCommandSourceStack(), msg, true);
@@ -63,10 +91,10 @@ public class MessageUtil {
     }
 
     public static void sendMessage(CommandSourceStack commandSourceStack, String msg, boolean showOthers) {
-        commandSourceStack.sendSuccess(new TextComponent(PREFIX + msg.replace("\n", "\n" + PREFIX)), false);
+        commandSourceStack.sendSuccess(PREFIX_MINECRAFT_COMPONENT.copy().append(new TextComponent(msg.replace("\n", "\n" + PREFIX))), false);
         if (showOthers) {
             String msgFormat = String.format("§7§o[%s: %s]", commandSourceStack.getTextName(), ChatColor.stripColor(msg));
-            broadcast(msgFormat, "minecraft.admin.command_feedback", commandSourceStack);
+            broadcastCommandFeedback(msgFormat, commandSourceStack);
         }
     }
 
@@ -82,7 +110,7 @@ public class MessageUtil {
         commandSourceStack.sendSuccess(new TextComponent(PREFIX_ERROR + msg.replace("\n", "\n" + PREFIX_ERROR)).setStyle(Style.EMPTY.withColor(ChatFormatting.RED)), false);
         if (showOthers) {
             String msgFormat = String.format("§7§o[%s: §c%s§7]", commandSourceStack.getTextName(), ChatColor.stripColor(msg));
-            broadcast(msgFormat, "minecraft.admin.command_feedback", commandSourceStack);
+            broadcastCommandFeedback(msgFormat, commandSourceStack);
         }
     }
 
@@ -98,7 +126,7 @@ public class MessageUtil {
         commandSourceStack.sendSuccess(new TextComponent(PREFIX_ADMIN + msg.replace("\n", "\n" + PREFIX_ADMIN)), false);
         if (showOthers) {
             String msgFormat = String.format("§7§o[%s: %s]", commandSourceStack.getTextName(), ChatColor.stripColor(msg));
-            broadcast(msgFormat, "minecraft.admin.command_feedback", commandSourceStack);
+            broadcastCommandFeedback(msgFormat, commandSourceStack);
         }
     }
 
@@ -114,7 +142,7 @@ public class MessageUtil {
         commandSourceStack.sendSuccess(new TextComponent(PREFIX_ADMIN_ERROR + msg.replace("\n", "\n" + PREFIX_ADMIN_ERROR)).withStyle(Style.EMPTY.withColor(ChatFormatting.RED)), false);
         if (showOthers) {
             String msgFormat = String.format("§7§o[%s: §c%s§7]", commandSourceStack.getTextName(), ChatColor.stripColor(msg));
-            broadcast(msgFormat, "minecraft.admin.command_feedback", commandSourceStack);
+            broadcastCommandFeedback(msgFormat, commandSourceStack);
         }
     }
 
@@ -124,15 +152,33 @@ public class MessageUtil {
 
     public static void broadcast(Component message, UUID broadcaster, boolean prefix) {
         Bukkit.getOnlinePlayers().forEach(p -> {
-            p.sendMessage(broadcaster == null ? Identity.nil() : Identity.identity(broadcaster), Component.text(PREFIX).append(message));
+            p.sendMessage(broadcaster == null ? Identity.nil() : Identity.identity(broadcaster), prefix ? Component.text(PREFIX).append(message) : message);
         });
     }
 
-    public static void broadcast(String message, String permission, CommandSourceStack sentBy) {
+    private static void broadcastCommandFeedback(String message, CommandSourceStack sentBy) {
         Set<CommandSender> recipients = new HashSet<>();
 
-        for (Permissible permissible : Bukkit.getPluginManager().getPermissionSubscriptions(permission)) {
-            if (permissible instanceof CommandSender && permissible.hasPermission(permission)) {
+        if (sentBy.source instanceof BaseCommandBlock commandBlock) {
+            boolean commandBlockOutput = commandBlock.getLevel().getGameRules().getBoolean(GameRules.RULE_COMMANDBLOCKOUTPUT);
+            if (!commandBlockOutput) return;
+        }
+
+        for (Permissible permissible : Bukkit.getPluginManager().getPermissionSubscriptions("minecraft.admin.command_feedback")) {
+            if (permissible instanceof CommandSender sender && (permissible.hasPermission("minecraft.admin.command_feedback") || permissible.isOp())) {
+                if (sender instanceof Player player) {
+                    /*
+                     * when Executor World is sendCommandFeedback: true
+                     * but receiver World is sendCommandFeedback: false
+                     * -> Feedback not received.
+                     *
+                     * when executor world is sendCommandFeedback: false
+                     * but receiver world is sendCommandFeedback: true
+                     * -> Feedback receive.
+                     */
+                    if (!player.getWorld().getGameRuleValue(GameRule.SEND_COMMAND_FEEDBACK)) return;
+                }
+
                 if (!sentBy.getBukkitSender().getName().equals(((CommandSender) permissible).getName())) {
                     recipients.add((CommandSender) permissible);
                 }
@@ -145,16 +191,15 @@ public class MessageUtil {
     }
 
     public static String getWorldNameDisplay(World world) {
-        return world.getName()
-                .replace("main2", "メイン2")
-                .replace("world_the_end", "メインエンド")
-                .replace("world_nether", "メインネザー")
-                .replace("world", "メイン")
-                .replace("shop", "ショップ")
-                .replace("market", "マーケット")
-                .replace("resource", "資源")
-                .replace("hellowork", "ハローワーク")
-                .replace("tutorial", "チュートリアル") + "ワールド";
+        return (WORLD_NAME_DISPLAY.containsKey(world.getName()) ? WORLD_NAME_DISPLAY.get(world.getName()) : world.getName()) + "ワールド";
+    }
+
+    public static String getWorldName(World world) {
+        return getWorldName(world.getName());
+    }
+
+    public static String getWorldName(String worldName) {
+        return WORLD_NAME_DISPLAY.getOrDefault(worldName, worldName);
     }
 
     public static String getMessagePrefix() {
@@ -181,4 +226,12 @@ public class MessageUtil {
         if(suffix) baseComponent = baseComponent.append(Component.text(LuckPerms.getSuffix(player.getUniqueId())));
         return baseComponent;
     }*/
+
+    public static Component convertNMS2Adventure(net.minecraft.network.chat.Component nms) {
+        return GsonComponentSerializer.gson().deserialize(net.minecraft.network.chat.Component.Serializer.toJson(nms));
+    }
+
+    public static net.minecraft.network.chat.Component convertAdventure2NMS(Component adventure) {
+        return net.minecraft.network.chat.Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(adventure));
+    }
 }

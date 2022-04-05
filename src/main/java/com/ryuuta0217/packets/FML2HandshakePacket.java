@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -44,6 +44,7 @@ public class FML2HandshakePacket {
     private final List<String> mods;
     private final Map<String, String> channels;
     private final Map<String, String> registries;
+
     public FML2HandshakePacket(List<String> mods, Map<String, String> channels, Map<String, String> registries) {
         this.mods = mods;
         this.channels = channels;
@@ -66,22 +67,22 @@ public class FML2HandshakePacket {
         //                   [ Version] [String]
         //                   ...
         //
-        int modCount = MinecraftPacketReader.readVarInt(buf);
+        int modCount = MinecraftPacketReader.readVarInt(buf); // [Mod Count]
         List<String> mods = new ArrayList<>();
         IntStream.range(0, modCount).forEach(i -> {
-            mods.add(MinecraftPacketReader.readString(buf));
+            mods.add(MinecraftPacketReader.readString(buf)); // [Mod Name]
         });
 
-        int channelCount = MinecraftPacketReader.readVarInt(buf);
+        int channelCount = MinecraftPacketReader.readVarInt(buf); // [Channel Count]
         Map<String, String> channels = new HashMap<>();
         IntStream.range(0, channelCount).forEach(i -> {
-            channels.put(MinecraftPacketReader.readString(buf), MinecraftPacketReader.readString(buf));
+            channels.put(MinecraftPacketReader.readString(buf), MinecraftPacketReader.readString(buf)); // [Channel Name]
         });
 
-        int registryCount = MinecraftPacketReader.readVarInt(buf);
+        int registryCount = MinecraftPacketReader.readVarInt(buf); // [Registry Count]
         Map<String, String> registries = new HashMap<>();
         IntStream.range(0, registryCount).forEach(i -> {
-            registries.put(MinecraftPacketReader.readString(buf), MinecraftPacketReader.readString(buf));
+            registries.put(MinecraftPacketReader.readString(buf), MinecraftPacketReader.readString(buf)); // <[Registry], [Version]>
         });
 
         return new FML2HandshakePacket(mods, channels, registries);

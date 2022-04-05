@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -55,14 +55,15 @@ import java.util.Map;
 
 public class RegistryUtil {
     public static <T> boolean forceUnregister(Registry<T> registry, T object) {
-        if(registry instanceof MappedRegistry<T>) {
+        if (registry instanceof MappedRegistry<T>) {
             try {
                 ObjectList<T> byId = (ObjectList<T>) getObject(MappedRegistry.class.getDeclaredField("byId"), registry);
                 Reference2IntOpenHashMap<T> toId = (Reference2IntOpenHashMap<T>) getObject(MappedRegistry.class.getDeclaredField("toId"), registry);
                 BiMap<ResourceLocation, T> storage = (BiMap<ResourceLocation, T>) getObject(MappedRegistry.class.getDeclaredField("storage"), registry);
                 BiMap<ResourceKey<T>, T> keyStorage = (BiMap<ResourceKey<T>, T>) getObject(MappedRegistry.class.getDeclaredField("keyStorage"), registry);
                 Map<T, Lifecycle> lifecycles = (Map<T, Lifecycle>) getObject(MappedRegistry.class.getDeclaredField("lifecycles"), registry);
-                if(byId == null || toId == null || storage == null || keyStorage == null || lifecycles == null) return false;
+                if (byId == null || toId == null || storage == null || keyStorage == null || lifecycles == null)
+                    return false;
 
                 int id = registry.getId(object);
                 ResourceKey<T> rk = registry.getResourceKey(object).orElseThrow();
@@ -73,20 +74,22 @@ public class RegistryUtil {
                 storage.remove(rl);
                 keyStorage.remove(rk);
                 lifecycles.remove(object);
-            } catch (NoSuchFieldException ignored) {}
+            } catch (NoSuchFieldException ignored) {
+            }
         }
         return false;
     }
 
     public static <T> boolean forceReplace(Registry<T> registry, T objectSrc, T objectTo) {
-        if(registry instanceof MappedRegistry<T>) {
+        if (registry instanceof MappedRegistry<T>) {
             try {
                 ObjectList<T> byId = (ObjectList<T>) getObject(MappedRegistry.class.getDeclaredField("byId"), registry);
                 Reference2IntOpenHashMap<T> toId = (Reference2IntOpenHashMap<T>) getObject(MappedRegistry.class.getDeclaredField("toId"), registry);
                 BiMap<ResourceLocation, T> storage = (BiMap<ResourceLocation, T>) getObject(MappedRegistry.class.getDeclaredField("storage"), registry);
                 BiMap<ResourceKey<T>, T> keyStorage = (BiMap<ResourceKey<T>, T>) getObject(MappedRegistry.class.getDeclaredField("keyStorage"), registry);
                 Map<T, Lifecycle> lifecycles = (Map<T, Lifecycle>) getObject(MappedRegistry.class.getDeclaredField("lifecycles"), registry);
-                if(byId == null || toId == null || storage == null || keyStorage == null || lifecycles == null) return false;
+                if (byId == null || toId == null || storage == null || keyStorage == null || lifecycles == null)
+                    return false;
 
                 int id = registry.getId(objectSrc);
                 ResourceKey<T> rk = registry.getResourceKey(objectSrc).orElseThrow();
@@ -100,16 +103,18 @@ public class RegistryUtil {
                 Lifecycle lc = lifecycles.get(objectSrc);
                 lifecycles.remove(objectSrc);
                 lifecycles.put(objectTo, lc);
-            } catch (NoSuchFieldException ignored) {}
+            } catch (NoSuchFieldException ignored) {
+            }
         }
         return false;
     }
 
     private static Object getObject(Field field, Object instance) {
-        if(field.trySetAccessible()) {
+        if (field.trySetAccessible()) {
             try {
                 return field.get(instance);
-            } catch (IllegalAccessException ignored) {}
+            } catch (IllegalAccessException ignored) {
+            }
         }
         return null;
     }
@@ -118,20 +123,22 @@ public class RegistryUtil {
         public static boolean unregisterBlockDataMap(Class<? extends Block> nms) {
             try {
                 Map<Class<? extends Block>, Function<BlockState, CraftBlockData>> MAP = (Map<Class<? extends Block>, Function<BlockState, CraftBlockData>>) getObject(CraftBlockData.class.getDeclaredField("MAP"), null);
-                if(MAP == null) return false;
+                if (MAP == null) return false;
                 MAP.remove(nms);
                 return true;
-            } catch (NoSuchFieldException ignored) {}
+            } catch (NoSuchFieldException ignored) {
+            }
             return false;
         }
 
         public static boolean registerBlockDataMap(Class<? extends Block> nms, Function<BlockState, CraftBlockData> bukkit) {
             try {
                 Map<Class<? extends Block>, Function<BlockState, CraftBlockData>> MAP = (Map<Class<? extends Block>, Function<BlockState, CraftBlockData>>) getObject(CraftBlockData.class.getDeclaredField("MAP"), null);
-                if(MAP == null) return false;
+                if (MAP == null) return false;
                 MAP.put(nms, bukkit);
                 return true;
-            } catch (NoSuchFieldException ignored) {}
+            } catch (NoSuchFieldException ignored) {
+            }
             return false;
         }
 
@@ -140,7 +147,7 @@ public class RegistryUtil {
                 Map<Block, Material> BLOCK_MATERIAL = (Map<Block, Material>) getObject(CraftMagicNumbers.class.getDeclaredField("BLOCK_MATERIAL"), null);
                 Map<Item, Material> ITEM_MATERIAL = (Map<Item, Material>) getObject(CraftMagicNumbers.class.getDeclaredField("ITEM_MATERIAL"), null);
                 Map<net.minecraft.world.level.material.Fluid, Fluid> FLUID_MATERIAL = (Map<net.minecraft.world.level.material.Fluid, Fluid>) getObject(CraftMagicNumbers.class.getDeclaredField("FLUID_MATERIAL"), null);
-                if(BLOCK_MATERIAL == null || ITEM_MATERIAL == null || FLUID_MATERIAL == null) return false;
+                if (BLOCK_MATERIAL == null || ITEM_MATERIAL == null || FLUID_MATERIAL == null) return false;
 
                 BLOCK_MATERIAL.clear();
                 for (Block block : net.minecraft.core.Registry.BLOCK) {
@@ -160,7 +167,7 @@ public class RegistryUtil {
                 Map<Material, Item> MATERIAL_ITEM = (Map<Material, Item>) getObject(CraftMagicNumbers.class.getDeclaredField("MATERIAL_ITEM"), null);
                 Map<Material, Block> MATERIAL_BLOCK = (Map<Material, Block>) getObject(CraftMagicNumbers.class.getDeclaredField("MATERIAL_BLOCK"), null);
                 Map<Material, net.minecraft.world.level.material.Fluid> MATERIAL_FLUID = (Map<Material, net.minecraft.world.level.material.Fluid>) getObject(CraftMagicNumbers.class.getDeclaredField("MATERIAL_FLUID"), null);
-                if(MATERIAL_ITEM == null || MATERIAL_BLOCK == null || MATERIAL_FLUID == null) return false;
+                if (MATERIAL_ITEM == null || MATERIAL_BLOCK == null || MATERIAL_FLUID == null) return false;
 
                 MATERIAL_ITEM.clear();
                 MATERIAL_BLOCK.clear();
@@ -182,7 +189,8 @@ public class RegistryUtil {
                     });
                 }
                 return true;
-            } catch (NoSuchFieldException ignored) {}
+            } catch (NoSuchFieldException ignored) {
+            }
             return false;
         }
     }

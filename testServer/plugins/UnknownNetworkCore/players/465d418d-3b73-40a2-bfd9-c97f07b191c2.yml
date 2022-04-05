@@ -1,8 +1,9 @@
 home-base-count: 1000
 home-additional-count: 0
-config-version: 2
+config-version: 3
+reply-target: 1a2ccd14-5204-4fa4-9987-6c8df82f5136
 homes:
-  uncategorized:
+  default:
     a:
       world: world
       x: 28.50972498010315
@@ -325,5 +326,5 @@ homes:
       z: 11.584633575649615
       yaw: 91.83923
       pitch: 2.8164847
-homeCategoryItems:
-  uncategorized: ENDER_EYE
+homeGroupItems:
+  default: ENDER_EYE

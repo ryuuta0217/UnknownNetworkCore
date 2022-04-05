@@ -1,0 +1,6 @@
+config-version: 3
+home-base-count: 5
+home-additional-count: 0
+reply-target: 465d418d-3b73-40a2-bfd9-c97f07b191c2
+homes:
+  default: {}

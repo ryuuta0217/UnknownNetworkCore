@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -34,28 +34,20 @@ package net.unknown.core.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.commands.Commands;
+import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.block.entity.Hopper;
-import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.mozilla.javascript.*;
-import net.minecraft.ChatFormatting;
-import net.minecraft.commands.Commands;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.network.chat.Style;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class EvalCommand {
     public static final Map<String, Object> GLOBAL_STORAGE = new HashMap<>();
@@ -79,28 +71,53 @@ public class EvalCommand {
 
                     Scriptable scope = RHINO_CONTEXT.initStandardObjects(GLOBAL_SCOPE);
 
-                    if(ctx.getSource().getEntityOrException() instanceof ServerPlayer) ScriptableObject.putProperty(scope, "nmsPlayer", ctx.getSource().getPlayerOrException());
-                    ScriptableObject.putProperty(scope, "nmsEntity", ctx.getSource().getEntity());
+                    // <Variables>
+                    // nmsPlayer, nmsEntity
+                    // player, entity
+                    // location
+                    // Util
 
-                    if(ctx.getSource().getBukkitEntity() instanceof Player) ScriptableObject.putProperty(scope, "player", ctx.getSource().getPlayerOrException().getBukkitEntity());
-                    ScriptableObject.putProperty(scope, "entity", ctx.getSource().getBukkitEntity());
+                    if (ctx.getSource().getEntity() != null) {
+                        if (ctx.getSource().getEntity() instanceof ServerPlayer player)
+                            ScriptableObject.putProperty(scope, "nmsPlayer", player);
+                        ScriptableObject.putProperty(scope, "nmsEntity", ctx.getSource().getEntity());
+
+                        if (ctx.getSource().getBukkitEntity() instanceof Player player)
+                            ScriptableObject.putProperty(scope, "player", player);
+                        ScriptableObject.putProperty(scope, "entity", ctx.getSource().getBukkitEntity());
+                    }
 
                     ScriptableObject.putProperty(scope, "location", ctx.getSource().getBukkitLocation());
 
                     ScriptableObject.putProperty(scope, "Util", new Util());
 
                     try {
-                        Script script = RHINO_CONTEXT.compileString(scriptIn, "eval_" + ctx.getSource().getEntityOrException().getUUID(), 1, null);
+                        Script script = RHINO_CONTEXT.compileString(scriptIn, "eval", 1, null);
                         Object result = script.exec(RHINO_CONTEXT, scope);
-                        if(result instanceof Undefined) MessageUtil.sendAdminMessage(ctx.getSource(), "コードの実行が正常に完了しました", true);
-                        else MessageUtil.sendAdminMessage(ctx.getSource(), "コードの実行が正常に完了しました: " + (result instanceof NativeJavaObject ? ((NativeJavaObject) result).unwrap() : result.toString()), true);
-                        return result instanceof NativeJavaObject ? ((NativeJavaObject) result).unwrap().hashCode() : result.hashCode();
-                    } catch(Exception e) {
-                        StringWriter s = new StringWriter();
-                        e.printStackTrace(new PrintWriter(s));
+                        if (result instanceof Undefined || result == null)
+                            MessageUtil.sendAdminMessage(ctx.getSource(), "コードの実行が正常に完了しました", true);
+                        else
+                            MessageUtil.sendAdminMessage(ctx.getSource(), "コードの実行が正常に完了しました: " + (result instanceof NativeJavaObject ? ((NativeJavaObject) result).unwrap() : (result == null ? "null" : result.toString())), true);
+                        return result instanceof NativeJavaObject java ? (java.unwrap() instanceof Integer i ? i : java.unwrap().hashCode()) : (result == null ? 0 : result.hashCode());
+                    } catch (Exception e) {
+                        List<StackTraceElement> sts = new ArrayList<>(List.of(e.getStackTrace()));
+                        Collections.reverse(sts); // trace reverse
+                        List<Component> componentTraces = new ArrayList<>();
+                        for (StackTraceElement element : sts) {
+                            componentTraces.add(new TextComponent(element.toString()));
+                        }
+                        Collections.reverse(componentTraces);
+
+                        MutableComponent c = new TextComponent("");
+                        componentTraces.forEach(trace -> {
+                            c.append(trace).append("\n");
+                        });
+
+                        //StringWriter s = new StringWriter();
+                        //e.printStackTrace(new PrintWriter(s));
 
                         Style modifier = Style.EMPTY.withColor(ChatFormatting.RED)
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new TextComponent(s.toString())));
+                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, c));
                         ctx.getSource().sendFailure(new TextComponent("コードの評価中にエラーが発生しました: " + e.getLocalizedMessage()).withStyle(modifier));
                         return e.hashCode();
                     }

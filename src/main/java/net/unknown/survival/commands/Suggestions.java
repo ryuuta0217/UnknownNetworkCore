@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -34,29 +34,35 @@ package net.unknown.survival.commands;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
-import net.minecraft.commands.SharedSuggestionProvider;
 
+import java.util.Collections;
 import java.util.UUID;
 
 public class Suggestions {
     public static final SuggestionProvider<CommandSourceStack> HOME_SUGGEST = (ctx, builder) -> {
         ServerPlayer p = BrigadierUtil.getArgumentOrDefault(ctx, ServerPlayer.class, "対象", ctx.getSource().getPlayerOrException());
-        return SharedSuggestionProvider.suggest(PlayerData.of(p.getBukkitEntity()).getHomeNames("uncategorized").toArray(new String[0]), builder);
+        PlayerData data = PlayerData.of(p.getBukkitEntity());
+        return SharedSuggestionProvider.suggest(data.getHomeNames(data.getDefaultGroup()).toArray(new String[0]), builder);
     };
     public static final SuggestionProvider<CommandSourceStack> OFFLINE_HOME_SUGGEST = (ctx, builder) -> {
         try {
             String playerId = StringArgumentType.getString(ctx, "対象");
             UUID uniqueId = Bukkit.getPlayerUniqueId(playerId);
             if (uniqueId != null) {
-                return SharedSuggestionProvider.suggest(PlayerData.of(uniqueId).getHomeNames("uncategorized").toArray(new String[0]), builder);
+                PlayerData data = PlayerData.of(uniqueId);
+                return SharedSuggestionProvider.suggest(data.getHomeNames(data.getDefaultGroup()).toArray(new String[0]), builder);
             }
         } catch (IllegalArgumentException ignored) {
         }
 
         return SharedSuggestionProvider.suggest(new String[0], builder);
+    };
+    public static final SuggestionProvider<CommandSourceStack> JOINED_CHANNELS_SUGGEST = (ctx, builder) -> {
+        return SharedSuggestionProvider.suggest(Collections.emptySet(), builder);
     };
 }

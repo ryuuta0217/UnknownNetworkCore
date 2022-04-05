@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,44 +24,38 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
 package net.unknown.core.commands;
 
-import com.destroystokyo.paper.profile.CraftPlayerProfile;
-import com.destroystokyo.paper.profile.ProfileProperty;
-import com.mojang.authlib.properties.Property;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
-import com.ryuuta0217.util.HTTPUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.protocol.game.*;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.biome.BiomeManager;
-import net.unknown.core.enums.Permissions;
-import net.unknown.core.util.MessageUtil;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.enums.Permissions;
+import net.unknown.core.managers.SkinManager;
+import net.unknown.core.util.MessageUtil;
 import org.bukkit.Bukkit;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 
 import java.util.HashSet;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class SkinCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("skin");
         builder.requires(Permissions.COMMAND_SKIN::checkAndIsPlayer);
         builder.then(Commands.argument("skinPlayerName", StringArgumentType.word())
-                        .suggests(Suggestions.ALL_PLAYER_SUGGEST)
+                .suggests(Suggestions.ALL_PLAYER_SUGGEST)
                 .executes(ctx -> {
                     if (!(ctx.getSource().getEntity() instanceof ServerPlayer)) {
                         MessageUtil.sendErrorMessage(ctx.getSource(), "プレイヤーが実行する必要があります。");
@@ -76,24 +70,13 @@ public class SkinCommand {
                     }
 
                     ServerPlayer player = ctx.getSource().getPlayerOrException();
-                    HTTPUtil hu = new HTTPUtil("GET", "https://sessionserver.mojang.com/session/minecraft/profile/" + skinPlayerUniqueId + "?unsigned=false");
-                    AtomicReference<String> stoleSkinBase64 = new AtomicReference<>("");
-                    AtomicReference<String> stoleSkinSignature = new AtomicReference<>(null);
-                    try {
-                        JSONObject json = (JSONObject) UnknownNetworkCore.getJsonParser().parse(hu.request());
-                        if (json.containsKey("properties")) {
-                            JSONArray properties = (JSONArray) json.get("properties");
-                            stoleSkinBase64.set(((JSONObject) properties.get(0)).get("value").toString());
-                            stoleSkinSignature.set(((JSONObject) properties.get(0)).get("signature").toString());
-                        }
-                    } catch (ParseException e) {
-                        MessageUtil.sendErrorMessage(ctx.getSource(), "エラーが発生しました: " + e.getLocalizedMessage());
-                        return e.hashCode();
+                    SkinManager.Skin skinData = SkinManager.getSkin(skinPlayerUniqueId);
+                    if (skinData == null) {
+                        MessageUtil.sendErrorMessage(ctx.getSource(), "データの取得中にエラーが発生しました");
+                        return -2;
                     }
 
-                    CraftPlayerProfile profile = (CraftPlayerProfile) player.getBukkitEntity().getPlayerProfile();
-                    profile.setProperty(new ProfileProperty("textures", stoleSkinBase64.get(), stoleSkinSignature.get()));
-                    player.getBukkitEntity().setPlayerProfile(profile);
+                    SkinManager.setSkin(player.getBukkitEntity(), skinData);
 
                     /*sendSelfUpdatePackets(player);
                     sendOtherUpdatePackets(player);*/

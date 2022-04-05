@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -46,6 +46,10 @@ public abstract class Config {
     private FileConfiguration CONFIG;
 
     public Config(String fileName, boolean ifNotExistsExtractFromJar, String loggerName) {
+        this(fileName, ifNotExistsExtractFromJar, loggerName, '.');
+    }
+
+    public Config(String fileName, boolean ifNotExistsExtractFromJar, String loggerName, char pathSeparator) {
         this.FILE_NAME = fileName;
         this.FILE = new File(UnknownNetworkCore.getInstance().getDataFolder(), FILE_NAME);
         this.LOGGER = Logger.getLogger(loggerName);
@@ -67,6 +71,8 @@ public abstract class Config {
             }
         }
 
+        // TODO Use FileConfigurationOptions#pathSeparator(char) to allows contains dot<.> values
+        // TODO this.CONFIG.options().pathSeparator(pathSeparator);
         this.CONFIG = YamlConfiguration.loadConfiguration(FILE);
         onLoad();
     }

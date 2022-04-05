@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -42,6 +42,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.data.Home;
@@ -49,7 +50,6 @@ import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
-import net.minecraft.commands.Commands;
 
 import java.util.List;
 import java.util.Set;
@@ -69,15 +69,15 @@ public class HomesCommand {
         CraftPlayer player = (CraftPlayer) ctx.getSource().getBukkitEntity();
         PlayerData data = PlayerData.of(player);
 
-        StringBuilder sb = new StringBuilder(MessageUtil.getMessagePrefix() + "§d-§6=§d- §aカテゴリ uncategorized のホーム一覧(" + data.getHomes("uncategorized").size() + getMaxCountStr(player.getUniqueId()) + ") §d-§6=§d-");
+        StringBuilder sb = new StringBuilder(MessageUtil.getMessagePrefix() + "§d-§6=§d- §aグループ" + data.getDefaultGroup() + " のホーム一覧(" + data.getHomes(data.getDefaultGroup()).size() + getMaxCountStr(player.getUniqueId()) + ") §d-§6=§d-");
 
         int page = BrigadierUtil.getArgumentOrDefault(ctx, Integer.class, "ページ", 1);
-        int internalPage = page-1;
+        int internalPage = page - 1;
 
-        List<Set<Home>> pagination = ListUtil.splitListAsSet(data.getHomes("uncategorized").values(), 10);
+        List<Set<Home>> pagination = ListUtil.splitListAsSet(data.getHomes(data.getDefaultGroup()).values(), 10);
 
         int maxPage = pagination.size();
-        if(page > maxPage) {
+        if (page > maxPage) {
             MessageUtil.sendErrorMessage(ctx.getSource(), "最大ページ数は " + maxPage + " です");
             return 1;
         }
@@ -93,13 +93,13 @@ public class HomesCommand {
                 .append(Component.text("\n" + MessageUtil.getMessagePrefix() + "                        "));
 
         c = c.append(Component.text("⇦", TextColor.color(ChatColor.RED.getColor().getRGB()))
-                        .clickEvent(page > 1 ? ClickEvent.runCommand("/homes " + (page-1)) : null))
-              .append(Component.text(" [" + page + "/" + maxPage + "] ",
-                      TextColor.color(ChatColor.AQUA.getColor().getRGB())));
+                        .clickEvent(page > 1 ? ClickEvent.runCommand("/homes " + (page - 1)) : null))
+                .append(Component.text(" [" + page + "/" + maxPage + "] ",
+                        TextColor.color(ChatColor.AQUA.getColor().getRGB())));
 
-        if(page < maxPage) {
+        if (page < maxPage) {
             c = c.append(Component.text("⇨", TextColor.color(ChatColor.GREEN.getColor().getRGB()))
-                    .clickEvent(ClickEvent.runCommand("/homes " + (page+1))));
+                    .clickEvent(ClickEvent.runCommand("/homes " + (page + 1))));
         }
 
         ctx.getSource().getPlayerOrException().getBukkitEntity().sendMessage(c);

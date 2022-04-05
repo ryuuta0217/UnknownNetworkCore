@@ -2,6 +2,7 @@ name: UnknownNetworkCore
 version: 1.0-Alpha
 api-version: 1.18
 main: net.unknown.UnknownNetworkCore
+softdepend: ["WorldGuard", "Multiverse-Core", "HolographicDisplays", "Vault", "Jecon"]
 permissions:
   unknown.core.default:
     default: true
@@ -30,12 +31,14 @@ permissions:
       minecraft.command.sethome: true
       minecraft.command.delhome: true
       minecraft.command.tppet: true
+      minecraft.command.fly: true
       unknown.survival.command.spawn: true
       unknown.survival.command.home: true
       unknown.survival.command.homes: true
       unknown.survival.command.sethome: true
       unknown.survival.command.delhome: true
       unknown.survival.command.tppet: true
+      unknown.survival.command.fly: true
   unknown.survival.admin:
     default: op
     children:

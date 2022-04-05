@@ -1,0 +1,5 @@
+config-version: 3
+homes:
+  default: {}
+home-base-count: 5
+home-additional-count: 0

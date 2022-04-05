@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,34 +24,41 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
 package net.unknown;
 
-import java.lang.System;
-
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.unknown.core.commands.Commands;
 import net.unknown.core.gui.SignGui;
 import org.bukkit.Bukkit;
-import org.bukkit.Statistic;
 import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
 
 public class UnknownNetworkCore extends JavaPlugin {
-    private static UnknownNetworkCore INSTANCE;
     private static final JSONParser JSON_PARSER = new JSONParser();
     private static final Environment ENV = Environment.valueOf(System.getProperty("un.env", "SURVIVAL"));
+    private static UnknownNetworkCore INSTANCE;
 
     public UnknownNetworkCore() {
         INSTANCE = this;
+    }
+
+    public static CommandDispatcher<CommandSourceStack> getBrigadier() {
+        return ((CraftServer) Bukkit.getServer()).getServer().vanillaCommandDispatcher.getDispatcher();
+    }
+
+    public static UnknownNetworkCore getInstance() {
+        return INSTANCE;
+    }
+
+    public static JSONParser getJsonParser() {
+        return JSON_PARSER;
     }
 
     @Override
@@ -81,22 +88,11 @@ public class UnknownNetworkCore extends JavaPlugin {
         getLogger().info("");
         getLogger().info("");
         ENV.onEnable();
+        System.out.println(Boolean.getBoolean("net.kyori.adventure.text.warnWhenLegacyFormattingDetected"));
     }
 
     @Override
     public void onDisable() {
         ENV.onDisable();
-    }
-
-    public static CommandDispatcher<CommandSourceStack> getBrigadier() {
-        return ((CraftServer) Bukkit.getServer()).getServer().vanillaCommandDispatcher.getDispatcher();
-    }
-
-    public static UnknownNetworkCore getInstance() {
-        return INSTANCE;
-    }
-
-    public static JSONParser getJsonParser() {
-        return JSON_PARSER;
     }
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -38,12 +38,10 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
-import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
-import net.minecraft.commands.Commands;
 
 // /minecraft:sethome - send usage
 // /minecraft:sethome <String: 新規ホーム名> [Boolean: 上書き]
@@ -70,7 +68,7 @@ public class SetHomeCommand {
         int homeCount = data.getHomeCount();
         int maxHomeCount = data.getMaxHomeCount();
 
-        boolean isHomeExists = data.isHomeExists("uncategorized", newHomeName);
+        boolean isHomeExists = data.isHomeExists(data.getDefaultGroup(), newHomeName);
         if ((!overwrite || !isHomeExists) && maxHomeCount != -1) {
             /*if (maxHomeCount == REGULAR_MAXIMUM_HOME_COUNT && Permissions.REGULAR.check(ctx) && homeCount >= maxHomeCount) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "常連プレイヤーが設定できるホームは" + REGULAR_MAXIMUM_HOME_COUNT + "個までです。\n" +
@@ -80,7 +78,8 @@ public class SetHomeCommand {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "一般プレイヤーが設定できるホームは" + DEFAULT_MAXIMUM_HOME_COUNT + "個までです。\n" +
                         "/delhome <ホーム名> するか、ショップで追加券を購入してください。");
                 return DEFAULT_MAXIMUM_HOME_COUNT;
-            } else */if (homeCount >= maxHomeCount) {
+            } else */
+            if (homeCount >= maxHomeCount) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "設定可能なホームは" + maxHomeCount + "個までです。\n" +
                         "/delhome <ホーム名> してください。");
                 return maxHomeCount;
@@ -93,10 +92,10 @@ public class SetHomeCommand {
         }
 
         if (!isHomeExists || overwrite) {
-            data.addHome("uncategorized", newHomeName, ctx.getSource().getBukkitLocation(), true);
-            MessageUtil.sendMessage(ctx.getSource(), "カテゴリ uncategorized にホーム " + newHomeName + " を設定しました");
+            data.addHome(data.getDefaultGroup(), newHomeName, ctx.getSource().getBukkitLocation(), true);
+            MessageUtil.sendMessage(ctx.getSource(), "グループ " + data.getDefaultGroup() + " にホーム " + newHomeName + " を設定しました");
         } else {
-            MessageUtil.sendErrorMessage(ctx.getSource(), "ホーム " + newHomeName + " はカテゴリ uncategorized に既に設定されています。\n" +
+            MessageUtil.sendErrorMessage(ctx.getSource(), "ホーム " + newHomeName + " はグループ " + data.getDefaultGroup() + " に既に設定されています。\n" +
                     "/delhome " + newHomeName + "で削除するか、/" + ctx.getInput().replaceAll(" false$", "") + " true で上書きするか、別の名前を検討してください。");
         }
         return 1;

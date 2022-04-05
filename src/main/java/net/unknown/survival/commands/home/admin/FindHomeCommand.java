@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -37,17 +37,17 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.BrigadierUtil;
+import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.data.Home;
 import net.unknown.survival.data.PlayerData;
-import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.arguments.EntityArgument;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -70,12 +70,14 @@ public class FindHomeCommand {
         double distance = DoubleArgumentType.getDouble(ctx, "distance");
         Location loc = ctx.getSource().getBukkitLocation();
 
-        Map<UUID, Map<String, Home>> allHomes = new HashMap<>();
+        Map<UUID, Map<String, List<Home>>> allHomes = new HashMap<>();
         PlayerData.getAll().forEach((uniqueId, data) -> {
-            data.getCategories().forEach(category -> {
-                Map<String, Home> m = allHomes.getOrDefault(uniqueId, new HashMap<>());
-                m.putAll(data.getHomes(category));
-                allHomes.put(uniqueId, m);
+            data.getGroups().forEach(groupName -> {
+                Map<String, List<Home>> groupedHomes = allHomes.getOrDefault(uniqueId, new HashMap<>());
+                List<Home> homes = groupedHomes.getOrDefault(groupName, new ArrayList<>());
+                homes.addAll(data.getHomes(groupName).values());
+                groupedHomes.put(groupName, homes);
+                allHomes.put(uniqueId, groupedHomes);
             });
         });
 
@@ -89,18 +91,22 @@ public class FindHomeCommand {
         }
 
         RunnableManager.runAsync(() -> {
-            Map<UUID, List<Home>> resultsRaw = new HashMap<>();
+            Map<UUID, Map<String, List<Home>>> resultsRaw = new HashMap<>();
 
             if (searchAll.get()) {
-                allHomes.forEach((uniqueId, homes) -> {
-                    homes.forEach((name, home) -> {
-                        searchHome(uniqueId, loc, distance, home, resultsRaw);
+                allHomes.forEach((uniqueId, groupedHomes) -> {
+                    groupedHomes.forEach((groupName, homes) -> {
+                        homes.forEach(home -> {
+                            searchHome(uniqueId, loc, distance, groupName, home, resultsRaw);
+                        });
                     });
                 });
             } else {
                 targets.get().forEach(player -> {
-                    PlayerData.of(player).getHomes("uncategorized").forEach((name, home) -> {
-                        searchHome(player.getUUID(), loc, distance, home, resultsRaw);
+                    PlayerData.of(player).getGroupedHomes().forEach((groupName, homes) -> {
+                        homes.forEach((name, home) -> {
+                            searchHome(player.getUUID(), loc, distance, groupName, home, resultsRaw);
+                        });
                     });
                 });
             }
@@ -109,22 +115,28 @@ public class FindHomeCommand {
 
             StringBuilder sb = new StringBuilder("§r§d-§6=§d- §a見つかったホーム一覧§e(" + resultsRaw.size() + ") §d-§6=§d-§r");
 
-            resultsRaw.forEach((uniqueId, homes) -> homes.forEach(home -> sb.append("\n§7§o(").append((long) home.location().distance(loc)).append(" blks away)§r §6").append(Bukkit.getOfflinePlayer(uniqueId).getName()).append(": §b").append(home.name()).append(" §6-§r §a").append(home.location().getBlockX()).append("§6, §a").append(home.location().getBlockY()).append("§6, §a").append(home.location().getBlockZ()).append("§6")));
+            resultsRaw.forEach((uniqueId, groupedHomes) -> {
+                groupedHomes.forEach((groupName, homes) -> {
+                    homes.forEach(home -> {
+                        sb.append("\n§7§o(").append((long) home.location().distance(loc)).append(" blks away)§r §6").append(Bukkit.getOfflinePlayer(uniqueId).getName()).append(": §b").append(groupName).append(":").append(home.name()).append(" §6-§r §a").append(home.location().getBlockX()).append("§6, §a").append(home.location().getBlockY()).append("§6, §a").append(home.location().getBlockZ()).append("§6");
+                    });
+                });
+            });
 
             MessageUtil.sendAdminMessage(ctx.getSource(), sb.toString(), false);
         });
         return 0;
     }
 
-    private static void searchHome(UUID uniqueId, Location centerLoc, double distance, Home home, Map<UUID, List<Home>> output) {
+    private static void searchHome(UUID uniqueId, Location centerLoc, double distance, String groupName, Home home, Map<UUID, Map<String, List<Home>>> output) {
         if (home.location().getWorld().getUID().equals(centerLoc.getWorld().getUID())) {
             double d = home.location().distance(centerLoc);
             if (d != -1 && d <= distance) {
-                List<Home> hs;
-                if (output.containsKey(uniqueId)) hs = output.get(uniqueId);
-                else hs = new ArrayList<>();
-                hs.add(home);
-                output.put(uniqueId, hs);
+                Map<String, List<Home>> groupedHomes = output.getOrDefault(uniqueId, new HashMap<>());
+                List<Home> homes = groupedHomes.getOrDefault(groupName, new ArrayList<>());
+                homes.add(home);
+                groupedHomes.put(groupName, homes);
+                output.put(uniqueId, groupedHomes);
             }
         }
     }

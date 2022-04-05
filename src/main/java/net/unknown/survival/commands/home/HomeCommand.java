@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -36,13 +36,13 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.survival.commands.Suggestions;
 import net.unknown.survival.data.Home;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
-import net.unknown.survival.commands.Suggestions;
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
-import net.minecraft.commands.Commands;
 
 // /minecraft:home - send homes list
 // /minecraft:home <String: homeName> - teleport to home
@@ -63,12 +63,12 @@ public class HomeCommand {
         String homeName = StringArgumentType.getString(ctx, "ホーム名");
         CraftPlayer player = (CraftPlayer) ctx.getSource().getBukkitSender();
         PlayerData data = PlayerData.of(player);
-        if (data.isHomeExists("uncategorized", homeName)) {
-            Home home = data.getHome("uncategorized", homeName);
+        if (data.isHomeExists(data.getDefaultGroup(), homeName)) {
+            Home home = data.getHome(data.getDefaultGroup(), homeName);
             home.teleportPlayer(player);
-            MessageUtil.sendMessage(ctx.getSource(), "カテゴリ uncategorized のホーム " + homeName + " にテレポートしました");
+            MessageUtil.sendMessage(ctx.getSource(), "グループ " + data.getDefaultGroup() + " のホーム " + homeName + " にテレポートしました");
         } else {
-            MessageUtil.sendErrorMessage(ctx.getSource(), "ホーム " + homeName + " はカテゴリ uncategorized には存在しません。");
+            MessageUtil.sendErrorMessage(ctx.getSource(), "ホーム " + homeName + " はグループ " + data.getDefaultGroup() + " には存在しません。");
         }
         return 1;
     }

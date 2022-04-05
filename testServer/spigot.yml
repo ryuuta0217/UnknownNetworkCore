@@ -5,9 +5,9 @@
 # http://www.spigotmc.org/wiki/spigot-configuration/
 #
 # If you need help with the configuration or have any questions related to Spigot,
-# join us at the IRC or drop by our forums and leave a post.
+# join us at the Discord or drop by our forums and leave a post.
 #
-# IRC: #spigot @ irc.spi.gt ( http://www.spigotmc.org/pages/irc/ )
+# Discord: https://www.spigotmc.org/go/discord
 # Forums: http://www.spigotmc.org/
 
 config-version: 12
@@ -63,6 +63,8 @@ stats:
   forced-stats: {}
 world-settings:
   default:
+    seed-nether: 30084232
+    seed-stronghold: default
     below-zero-generation-in-existing-chunks: true
     simulation-distance: default
     verbose: false
@@ -108,6 +110,7 @@ world-settings:
       misc: 32
       other: 64
     entity-activation-range:
+      ignore-spectators: false
       animals: 32
       monsters: 32
       raiders: 48
@@ -169,3 +172,5 @@ world-settings:
       swim-multiplier: 0.01
       sprint-multiplier: 0.1
       other-multiplier: 0.0
+  faweregentempworld:
+    verbose: false

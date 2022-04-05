@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,26 +24,25 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
 package net.unknown.core.util;
 
-import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.tree.CommandNode;
-import com.mojang.brigadier.tree.RootCommandNode;
-import com.sun.jna.platform.win32.OaIdl;
 import net.minecraft.commands.CommandSourceStack;
 import net.unknown.UnknownNetworkCore;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public class BrigadierUtil {
     @SuppressWarnings("unchecked")
@@ -68,7 +67,7 @@ public class BrigadierUtil {
     public static <S, T> T getArgumentOrDefault(@Nonnull CommandContext<S> context, @Nonnull Class<T> argType, @Nonnull String argName, @Nullable T def) {
         try {
             return context.getArgument(argName, argType);
-        } catch(IllegalArgumentException ignored) {
+        } catch (IllegalArgumentException ignored) {
             return def;
         }
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -48,23 +48,92 @@ import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.protocol.*;
 import net.md_5.bungee.protocol.packet.LoginPayloadResponse;
+import net.unknown.core.util.ReflectionUtil;
 import net.unknown.proxy.fml.FML2Player;
 import net.unknown.proxy.fml.ModdedPlayer;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
 public class ModdedInitialHandler extends InitialHandler {
-    private static final Logger LOGGER = ProxyServer.getInstance().getLogger();
     public static final Map<Integer, Object> PENDING_FORGE_PLAYER_CONNECTIONS = new HashMap<>();
     public static final Map<String, ModdedPlayer> FORGE_PLAYERS = new HashMap<>();
+    private static final Logger LOGGER = ProxyServer.getInstance().getLogger();
+    private static final KickStringWriter legacyKicker = getLegacyKicker();
+    private static ChannelInitializer<Channel> moddedInitializer;
 
     public ModdedInitialHandler(BungeeCord bungee, ListenerInfo listener) {
         super(bungee, listener);
+    }
+
+    public static void injectModdedInitialHandler() {
+        if (moddedInitializer == null) moddedInitializer = new ChannelInitializer<>() {
+            @Override
+            protected void initChannel(Channel ch) throws Exception {
+                SocketAddress remoteAddress = (ch.remoteAddress() == null) ? ch.parent().localAddress() : ch.remoteAddress();
+
+                if (BungeeCord.getInstance().getConnectionThrottle() != null && BungeeCord.getInstance().getConnectionThrottle().throttle(remoteAddress)) {
+                    ch.close();
+                    return;
+                }
+
+                ListenerInfo listener = ch.attr(PipelineUtils.LISTENER).get();
+
+                if (BungeeCord.getInstance().getPluginManager().callEvent(new ClientConnectEvent(remoteAddress, listener)).isCancelled()) {
+                    ch.close();
+                    return;
+                }
+
+                PipelineUtils.BASE.initChannel(ch);
+                ch.pipeline().addBefore(PipelineUtils.FRAME_DECODER, PipelineUtils.LEGACY_DECODER, new LegacyDecoder());
+                ch.pipeline().addAfter(PipelineUtils.FRAME_DECODER, PipelineUtils.PACKET_DECODER, new MinecraftDecoder(Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion()));
+                ch.pipeline().addAfter(PipelineUtils.FRAME_PREPENDER, PipelineUtils.PACKET_ENCODER, new MinecraftEncoder(Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion()));
+                ch.pipeline().addBefore(PipelineUtils.FRAME_PREPENDER, PipelineUtils.LEGACY_KICKER, legacyKicker);
+                ch.pipeline().get(HandlerBoss.class).setHandler(new ModdedInitialHandler(BungeeCord.getInstance(), listener));
+
+                if (listener.isProxyProtocol()) {
+                    ch.pipeline().addFirst(new HAProxyMessageDecoder());
+                }
+            }
+        };
+
+        if (PipelineUtils.SERVER_CHILD.equals(moddedInitializer)) {
+            LOGGER.info(" -> Already injected.");
+            return;
+        }
+
+        try {
+            Field serverChildField = PipelineUtils.class.getDeclaredField("SERVER_CHILD");
+
+            /* MAKE THE VALUE OF THE FINAL FIELD CHANGEABLE */
+            ReflectionUtil.makeNonFinal(serverChildField);
+
+            /* MODIFY */
+            serverChildField.set(null, moddedInitializer);
+
+            /* CHECK */
+            if (PipelineUtils.SERVER_CHILD.equals(moddedInitializer)) {
+                LOGGER.info(" -> Injection completed.");
+            } else {
+                LOGGER.warning(" -> Injection failed, running without forge detection support.");
+            }
+        } catch (Exception e) {
+            LOGGER.warning(" -> Injection failed: " + e.getLocalizedMessage());
+            e.printStackTrace();
+        }
+    }
+
+    private static KickStringWriter getLegacyKicker() {
+        try {
+            Field legacyKickerF = PipelineUtils.class.getDeclaredField("legacyKicker");
+            legacyKickerF.setAccessible(true);
+            return (KickStringWriter) legacyKickerF.get(null);
+        } catch (Exception ignored) {
+        }
+        return null;
     }
 
     @Override
@@ -95,76 +164,5 @@ public class ModdedInitialHandler extends InitialHandler {
     @Override
     public String toString() {
         return "[" + this.getSocketAddress() + (this.getName() != null ? "|" + this.getName() : "") + "] <-> ModdedInitialHandler";
-    }
-
-    private static final KickStringWriter legacyKicker = getLegacyKicker();
-    private static ChannelInitializer<Channel> moddedInitializer;
-
-    public static void injectModdedInitialHandler() {
-        if(moddedInitializer == null) moddedInitializer = new ChannelInitializer<>() {
-            @Override
-            protected void initChannel(Channel ch) throws Exception {
-                SocketAddress remoteAddress = (ch.remoteAddress() == null) ? ch.parent().localAddress() : ch.remoteAddress();
-
-                if (BungeeCord.getInstance().getConnectionThrottle() != null && BungeeCord.getInstance().getConnectionThrottle().throttle(remoteAddress)) {
-                    ch.close();
-                    return;
-                }
-
-                ListenerInfo listener = ch.attr(PipelineUtils.LISTENER).get();
-
-                if (BungeeCord.getInstance().getPluginManager().callEvent(new ClientConnectEvent(remoteAddress, listener)).isCancelled()) {
-                    ch.close();
-                    return;
-                }
-
-                PipelineUtils.BASE.initChannel(ch);
-                ch.pipeline().addBefore(PipelineUtils.FRAME_DECODER, PipelineUtils.LEGACY_DECODER, new LegacyDecoder());
-                ch.pipeline().addAfter(PipelineUtils.FRAME_DECODER, PipelineUtils.PACKET_DECODER, new MinecraftDecoder(Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion()));
-                ch.pipeline().addAfter(PipelineUtils.FRAME_PREPENDER, PipelineUtils.PACKET_ENCODER, new MinecraftEncoder(Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion()));
-                ch.pipeline().addBefore(PipelineUtils.FRAME_PREPENDER, PipelineUtils.LEGACY_KICKER, legacyKicker);
-                ch.pipeline().get(HandlerBoss.class).setHandler(new ModdedInitialHandler(BungeeCord.getInstance(), listener));
-
-                if (listener.isProxyProtocol()) {
-                    ch.pipeline().addFirst(new HAProxyMessageDecoder());
-                }
-            }
-        };
-
-        if(PipelineUtils.SERVER_CHILD.equals(moddedInitializer)) {
-            LOGGER.info(" -> Already injected.");
-            return;
-        }
-
-        try {
-            Field serverChildField = PipelineUtils.class.getDeclaredField("SERVER_CHILD");
-
-            /* MAKE THE VALUE OF THE FINAL FIELD CHANGEABLE */
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(serverChildField, serverChildField.getModifiers() & ~Modifier.FINAL);
-
-            /* MODIFY */
-            serverChildField.set(null, moddedInitializer);
-
-            /* CHECK */
-            if (PipelineUtils.SERVER_CHILD.equals(moddedInitializer)) {
-                LOGGER.info(" -> Injection completed.");
-            } else {
-                LOGGER.warning(" -> Injection failed, running without forge detection support.");
-            }
-        } catch(Exception e) {
-            LOGGER.warning(" -> Injection failed: " + e.getLocalizedMessage());
-            e.printStackTrace();
-        }
-    }
-
-    private static KickStringWriter getLegacyKicker() {
-        try {
-            Field legacyKickerF = PipelineUtils.class.getDeclaredField("legacyKicker");
-            legacyKickerF.setAccessible(true);
-            return (KickStringWriter) legacyKickerF.get(null);
-        } catch(Exception ignored) {}
-        return null;
     }
 }

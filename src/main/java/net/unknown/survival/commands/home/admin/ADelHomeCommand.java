@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -36,13 +36,13 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.commands.Suggestions;
+import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import net.minecraft.commands.Commands;
 
 import java.util.UUID;
 
@@ -74,9 +74,9 @@ public class ADelHomeCommand {
 
         OfflinePlayer homeOwner = Bukkit.getOfflinePlayer(homeOwnerUniqueId);
 
-        if (homeOwnerData.isHomeExists("uncategorized", homeName)) {
-            homeOwnerData.removeHome("uncategorized", homeName);
-            if (!homeOwnerData.isHomeExists("uncategorized", homeName)) {
+        if (homeOwnerData.isHomeExists(homeOwnerData.getDefaultGroup(), homeName)) {
+            homeOwnerData.removeHome(homeOwnerData.getDefaultGroup(), homeName);
+            if (!homeOwnerData.isHomeExists(homeOwnerData.getDefaultGroup(), homeName)) {
                 MessageUtil.sendAdminMessage(ctx.getSource(), homeOwner.getName() + " のホーム " + homeName + " を§c§l削除§rしました");
             } else {
                 MessageUtil.sendAdminErrorMessage(ctx.getSource(), homeOwner.getName() + " のホーム " + homeName + " を削除できませんでした");

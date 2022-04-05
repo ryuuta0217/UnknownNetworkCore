@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,13 +24,14 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
 package net.unknown.survival.listeners;
 
+import io.papermc.paper.text.PaperComponents;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -53,7 +54,7 @@ import java.util.List;
 public class ColorCodeListener implements Listener {
     @EventHandler
     public void onPrepareAnvil(PrepareAnvilEvent event) {
-        if(!event.getView().getPlayer().hasPermission(Permissions.FEATURE_USE_COLOR_CODE.getPermissionNode())) return;
+        if (!event.getView().getPlayer().hasPermission(Permissions.FEATURE_USE_COLOR_CODE.getPermissionNode())) return;
 
         ItemStack item = event.getResult();
         if (item == null) return;
@@ -61,7 +62,7 @@ public class ColorCodeListener implements Listener {
         ItemMeta oldMeta = item.getItemMeta();
         if (oldMeta == null || oldMeta.displayName() == null) return;
 
-        oldMeta.displayName(LegacyComponentSerializer.legacyAmpersand().deserialize(PlainTextComponentSerializer.plainText().serialize(oldMeta.displayName())));
+        oldMeta.displayName(PaperComponents.legacySectionSerializer().deserialize(PlainTextComponentSerializer.plainText().serialize(oldMeta.displayName())));
         item.setItemMeta(oldMeta);
 
         event.setResult(item);
@@ -69,10 +70,10 @@ public class ColorCodeListener implements Listener {
 
     @EventHandler
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        if(!event.getPlayer().hasPermission(Permissions.FEATURE_USE_COLOR_CODE.getPermissionNode())) return;
+        if (!event.getPlayer().hasPermission(Permissions.FEATURE_USE_COLOR_CODE.getPermissionNode())) return;
 
         String message = event.getMessage();
-        if(message.startsWith("/")) {
+        if (message.startsWith("/")) {
             event.setMessage(ChatColor.translateAlternateColorCodes('&', event.getMessage()));
         }
     }

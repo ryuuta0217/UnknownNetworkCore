@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,16 +24,16 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
 package net.unknown;
 
+import net.unknown.lobby.UnknownNetworkLobby;
 import net.unknown.minigame.UnknownNetworkMiniGame;
 import net.unknown.survival.UnknownNetworkSurvival;
-import net.unknown.lobby.UnknownNetworkLobby;
 
 public enum Environment {
     PROXY,
@@ -43,20 +43,20 @@ public enum Environment {
     UNKNOWN;
 
     public void onLoad() {
-        if(this == SURVIVAL) UnknownNetworkSurvival.onLoad();
-        if(this == LOBBY) UnknownNetworkLobby.onLoad();
-        if(this == MINIGAME) UnknownNetworkMiniGame.onLoad();
+        if (this == SURVIVAL) UnknownNetworkSurvival.onLoad();
+        if (this == LOBBY) UnknownNetworkLobby.onLoad();
+        if (this == MINIGAME) UnknownNetworkMiniGame.onLoad();
     }
 
     public void onEnable() {
-        if(this == SURVIVAL) UnknownNetworkSurvival.onEnable();
-        if(this == LOBBY) UnknownNetworkLobby.onEnable();
-        if(this == MINIGAME) UnknownNetworkMiniGame.onEnable();
+        if (this == SURVIVAL) UnknownNetworkSurvival.onEnable();
+        if (this == LOBBY) UnknownNetworkLobby.onEnable();
+        if (this == MINIGAME) UnknownNetworkMiniGame.onEnable();
     }
 
     public void onDisable() {
-        if(this == SURVIVAL) UnknownNetworkSurvival.onDisable();
-        if(this == LOBBY) UnknownNetworkLobby.onDisable();
-        if(this == MINIGAME) UnknownNetworkMiniGame.onDisable();
+        if (this == SURVIVAL) UnknownNetworkSurvival.onDisable();
+        if (this == LOBBY) UnknownNetworkLobby.onDisable();
+        if (this == MINIGAME) UnknownNetworkMiniGame.onDisable();
     }
 }

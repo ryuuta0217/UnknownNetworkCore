@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -59,7 +59,7 @@ class Pair<L, R> {
                 .filter(pair -> pair.equals(inst))
                 .map(pair -> (Pair<L, R>) pair)
                 .toList();
-        if(searchedInstances.size() > 0) return searchedInstances.get(0);
+        if (searchedInstances.size() > 0) return searchedInstances.get(0);
         INSTANCES.add(inst);
         return inst;
     }
@@ -74,8 +74,8 @@ class Pair<L, R> {
 
     @Override
     public boolean equals(Object obj) {
-        if(obj instanceof Pair<?, ?> pair) {
-            if(pair.getLeft().equals(this.getLeft()) && pair.getRight().equals(this.getRight())) {
+        if (obj instanceof Pair<?, ?> pair) {
+            if (pair.getLeft().equals(this.getLeft()) && pair.getRight().equals(this.getRight())) {
                 return true;
             }
         }

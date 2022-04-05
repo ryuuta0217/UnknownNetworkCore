@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -32,6 +32,8 @@
 package net.unknown.core.builder;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -54,7 +56,7 @@ public class ItemStackBuilder {
     }
 
     public ItemStackBuilder enchantments(Map<Enchantment, Integer> enchantments) {
-        if(this.original.getEnchantments().size() > 0) {
+        if (this.original.getEnchantments().size() > 0) {
             this.original.getEnchantments().forEach((ench, lvl) -> this.original.removeEnchantment(ench));
         }
         this.original.addEnchantments(enchantments);
@@ -84,6 +86,7 @@ public class ItemStackBuilder {
 
     public ItemStackBuilder displayName(Component displayName) {
         ItemMeta meta = this.original.getItemMeta();
+        displayName = displayName.style(Style.style(TextDecoration.ITALIC.as(false)));
         meta.displayName(displayName);
         this.original.setItemMeta(meta);
         return this;

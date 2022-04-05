@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -33,7 +33,7 @@ package net.unknown.survival.enums;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
-import net.unknown.survival.commands.home.admin.*;
+import net.unknown.survival.commands.FlyCommand;
 import net.unknown.survival.commands.SpawnCommand;
 import net.unknown.survival.commands.TeleportPetCommand;
 import net.unknown.survival.commands.admin.LastTpCommand;
@@ -61,7 +61,8 @@ public enum Permissions {
 
     COMMAND_TELEPORT_PET("unknown.survival.command.tppet", 0, TeleportPetCommand.class),
     COMMAND_LASTTP("unknown.survival.command.lasttp", 2, LastTpCommand.class),
-    COMMAND_SPAWN("unknown.survival.command.spawn", 0, SpawnCommand.class);
+    COMMAND_SPAWN("unknown.survival.command.spawn", 0, SpawnCommand.class),
+    COMMAND_FLY("unknown.survival.command.fly", 0, FlyCommand.class);
 
     private final int opLevel;
     private final String permissionNode;
@@ -93,7 +94,7 @@ public enum Permissions {
     }
 
     public boolean checkAndIsLivingEntity(CommandSourceStack source) {
-        if(!(source.getBukkitEntity() instanceof LivingEntity)) return false;
+        if (!(source.getBukkitEntity() instanceof LivingEntity)) return false;
         return check(source);
     }
 }

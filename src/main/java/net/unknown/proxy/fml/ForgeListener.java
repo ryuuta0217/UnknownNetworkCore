@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -37,7 +37,6 @@ import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
-import net.md_5.bungee.api.event.ServerKickEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.protocol.ProtocolConstants;
@@ -53,7 +52,7 @@ public class ForgeListener implements Listener {
 
     @EventHandler
     public void onPreLogin(PreLoginEvent event) {
-        if(!(event.getConnection() instanceof ModdedInitialHandler handler)) return;
+        if (!(event.getConnection() instanceof ModdedInitialHandler handler)) return;
         String logPrefix = "[" + handler.getSocketAddress() + "|" + handler.getName() + "]";
 
         if (handler.getHandshake().getProtocolVersion() >= ProtocolConstants.MINECRAFT_1_13 && handler.getExtraDataInHandshake().contains("FML2")) {
@@ -89,7 +88,7 @@ public class ForgeListener implements Listener {
             ModdedPlayer fp = ModdedInitialHandler.FORGE_PLAYERS.get(event.getPlayer().getName());
             ByteBuf buf = Unpooled.buffer();
             fp.getData(buf, event.getPlayer().getUniqueId());
-            event.getServer().sendData("unknownnet:forge", buf.array());
+            event.getServer().sendData("unknown:forge", buf.array());
         }
     }
 }

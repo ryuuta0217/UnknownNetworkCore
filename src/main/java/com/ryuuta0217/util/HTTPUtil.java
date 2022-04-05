@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -63,24 +63,25 @@ public class HTTPUtil {
         this.targetAddress = targetAddress;
     }
 
-    public HTTPUtil() {}
-
-    public HTTPUtil setMethod(String method) {
-        this.method = method;
-        return this;
+    public HTTPUtil() {
     }
 
     public String getMethod() {
         return method;
     }
 
-    public HTTPUtil setTargetAddress(String targetAddress) {
-        this.targetAddress = targetAddress;
+    public HTTPUtil setMethod(String method) {
+        this.method = method;
         return this;
     }
 
     public String getTargetAddress() {
         return targetAddress;
+    }
+
+    public HTTPUtil setTargetAddress(String targetAddress) {
+        this.targetAddress = targetAddress;
+        return this;
     }
 
     public HTTPUtil setQueryMap(Map<String, String> query) {
@@ -89,7 +90,7 @@ public class HTTPUtil {
     }
 
     public HTTPUtil addQuery(String key, Object value) {
-        if(query == null) this.query = new HashMap<>();
+        if (query == null) this.query = new HashMap<>();
         query.put(key, value.toString());
         return this;
     }
@@ -104,7 +105,7 @@ public class HTTPUtil {
     }
 
     public HTTPUtil addHeader(String key, Object value) {
-        if(headers == null) this.headers = new HashMap<>();
+        if (headers == null) this.headers = new HashMap<>();
         headers.put(key, value.toString());
         return this;
     }
@@ -113,13 +114,13 @@ public class HTTPUtil {
         return headers;
     }
 
+    public String getRequestData() {
+        return requestData;
+    }
+
     public HTTPUtil setRequestData(String data) {
         this.requestData = data;
         return this;
-    }
-
-    public String getRequestData() {
-        return requestData;
     }
 
     public HttpURLConnection getConnection() {
@@ -131,8 +132,8 @@ public class HTTPUtil {
     }
 
     public String request() {
-        if(method == null  || method.isEmpty()) throw new NullPointerException("メソッドが設定されていません。");
-        if(targetAddress == null || targetAddress.isEmpty()) throw new NullPointerException("URLが設定されていません。");
+        if (method == null || method.isEmpty()) throw new NullPointerException("メソッドが設定されていません。");
+        if (targetAddress == null || targetAddress.isEmpty()) throw new NullPointerException("URLが設定されていません。");
 
         String params = "";
 
@@ -165,7 +166,7 @@ public class HTTPUtil {
                 pw.close();
             }
 
-            if((query == null && requestData != null) && method.equalsIgnoreCase("POST")) {
+            if ((query == null && requestData != null) && method.equalsIgnoreCase("POST")) {
                 PrintWriter pw = new PrintWriter(connection.getOutputStream());
                 pw.print(requestData);
                 pw.close();
@@ -199,7 +200,7 @@ public class HTTPUtil {
                     response.close();
                 }
 
-                System.out.println("エラー: " + responseCode + "\n" + sb.toString());
+                System.out.println("エラー: " + responseCode + "\n" + sb);
             }
         } catch (MalformedURLException e) {
             throw new NullPointerException("URLが不正です: " + e.getLocalizedMessage());
@@ -218,9 +219,10 @@ public class HTTPUtil {
                     br.close();
                     response.close();
                 }
-            } catch(Exception ignored) {}
+            } catch (Exception ignored) {
+            }
 
-            System.out.println("エラーが発生しました: " + e.getLocalizedMessage() + "\n" + sb.toString());
+            System.out.println("エラーが発生しました: " + e.getLocalizedMessage() + "\n" + sb);
         } finally {
             if (connection != null) connection.disconnect();
         }

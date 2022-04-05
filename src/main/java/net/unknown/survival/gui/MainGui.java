@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -50,9 +50,17 @@ public class MainGui extends GuiBase {
     public MainGui() {
         super(null, 27, Component.text("メインGUI"),
                 (inv) -> {
-                    inv.setItem(13, new ItemStackBuilder(Material.RESPAWN_ANCHOR)
+                    inv.setItem(12, new ItemStackBuilder(Material.RESPAWN_ANCHOR)
                             .displayName(Component.text("Home", TextColor.color(16755200)))
-                            .lore(Component.text("ホームを追加したり、テレポートしたり、削除したりできます。", TextColor.color(5636095)).decoration(TextDecoration.ITALIC, false))
+                            .lore(Component.text("ホームを追加したり", Style.style(TextColor.color(0xFF00), TextDecoration.ITALIC.as(false))),
+                                    Component.text("テレポートしたり", Style.style(TextColor.color(0xFFFF00), TextDecoration.ITALIC.as(false))),
+                                    Component.text("削除したり", Style.style(TextColor.color(0xFF0000), TextDecoration.ITALIC.as(false))),
+                                    Component.text("できます。", Style.style(TextColor.color(0xFF00), TextDecoration.ITALIC.as(false))))
+                            .build());
+
+                    inv.setItem(13, new ItemStackBuilder(Material.WOODEN_AXE)
+                            .displayName(Component.text("保護", TextColor.color(0xFFFF00)))
+                            .lore(Component.text("建物を保護しよう", Style.style(TextColor.color(0xFF00), TextDecoration.ITALIC.as(false))))
                             .build());
 
                     inv.setItem(18, new ItemStackBuilder(Material.PLAYER_HEAD)
@@ -62,13 +70,18 @@ public class MainGui extends GuiBase {
                 }, false);
     }
 
+    public static MainGui getGui() {
+        return GUI;
+    }
+
     @Override
     public void onClick(InventoryClickEvent event) {
-        switch(event.getSlot()) {
-            case 13 -> event.getWhoClicked().openInventory(new HomeGui((Player) event.getWhoClicked()).getInventory());
+        switch (event.getSlot()) {
+            case 12 -> event.getWhoClicked().openInventory(new HomeGui((Player) event.getWhoClicked()).getInventory());
+            case 13 -> event.getWhoClicked().openInventory(new ProtectionGui((Player) event.getWhoClicked()).getInventory());
             case 18 -> {
-                if(event.getCursor() == null) return;
-                if(event.getClick() != ClickType.LEFT) return;
+                if (event.getCursor() == null || event.getCursor().getType() == Material.AIR) return;
+                if (event.getClick() != ClickType.LEFT) return;
                 ItemStack newHead = event.getView().getCursor();
                 ItemStack oldHead = event.getWhoClicked().getInventory().getHelmet();
                 event.getWhoClicked().getInventory().setHelmet(newHead);
@@ -76,9 +89,5 @@ public class MainGui extends GuiBase {
                 MessageUtil.sendMessage((Player) event.getWhoClicked(), "アイテムを頭に被りました");
             }
         }
-    }
-
-    public static MainGui getGui() {
-        return GUI;
     }
 }

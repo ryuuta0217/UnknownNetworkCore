@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -56,8 +56,8 @@ public class ActivityUtils {
 
     public static void setScheduleNormal(Villager villager) {
         Schedule schedule;
-        if(villager.isAdult()) {
-            if(villager.getProfession() == Villager.Profession.NITWIT) schedule = Schedule.SIMPLE;
+        if (villager.isAdult()) {
+            if (villager.getProfession() == Villager.Profession.NITWIT) schedule = Schedule.SIMPLE;
             else schedule = Schedule.VILLAGER_DEFAULT;
         } else {
             schedule = Schedule.VILLAGER_BABY;
@@ -78,8 +78,8 @@ public class ActivityUtils {
 
     public static boolean wouldBeBadActivity(Villager bukkitVillager) {
         Schedule schedule;
-        if(bukkitVillager.isAdult()) {
-            if(bukkitVillager.getProfession() == Villager.Profession.NITWIT) schedule = Schedule.SIMPLE;
+        if (bukkitVillager.isAdult()) {
+            if (bukkitVillager.getProfession() == Villager.Profession.NITWIT) schedule = Schedule.SIMPLE;
             else schedule = Schedule.VILLAGER_DEFAULT;
         } else {
             schedule = Schedule.VILLAGER_BABY;
@@ -89,15 +89,15 @@ public class ActivityUtils {
     }
 
     private static boolean badActivity(Activity nmsActivity, Villager bukkitVillager) {
-        if(nmsActivity == Activity.REST) {
+        if (nmsActivity == Activity.REST) {
             return bukkitVillager.getMemory(MemoryKey.HOME) == null || isPlaceholderMemory(bukkitVillager, MemoryKey.HOME);
         }
 
-        if(nmsActivity == Activity.WORK) {
+        if (nmsActivity == Activity.WORK) {
             return isPlaceholderMemory(bukkitVillager, MemoryKey.JOB_SITE);
         }
 
-        if(nmsActivity == Activity.MEET) {
+        if (nmsActivity == Activity.MEET) {
             return bukkitVillager.getMemory(MemoryKey.MEETING_POINT) == null || isPlaceholderMemory(bukkitVillager, MemoryKey.MEETING_POINT);
         }
 
@@ -108,11 +108,11 @@ public class ActivityUtils {
         Location loc = bukkitVillager.getLocation();
         loc.setY(-10000);
 
-        if(bukkitVillager.getMemory(MemoryKey.HOME) == null) {
+        if (bukkitVillager.getMemory(MemoryKey.HOME) == null) {
             bukkitVillager.setMemory(MemoryKey.HOME, loc);
         }
 
-        if(bukkitVillager.getMemory(MemoryKey.MEETING_POINT) == null) {
+        if (bukkitVillager.getMemory(MemoryKey.MEETING_POINT) == null) {
             bukkitVillager.setMemory(MemoryKey.MEETING_POINT, loc);
         }
     }
@@ -123,23 +123,23 @@ public class ActivityUtils {
     }
 
     public static void clearPlaceholderMemories(Villager bukkitVillager) {
-        if(bukkitVillager.getMemory(MemoryKey.HOME) != null && isPlaceholderMemory(bukkitVillager, MemoryKey.HOME)) {
+        if (bukkitVillager.getMemory(MemoryKey.HOME) != null && isPlaceholderMemory(bukkitVillager, MemoryKey.HOME)) {
             bukkitVillager.setMemory(MemoryKey.HOME, null);
         }
 
-        if(bukkitVillager.getMemory(MemoryKey.JOB_SITE) != null && isPlaceholderMemory(bukkitVillager, MemoryKey.JOB_SITE)) {
+        if (bukkitVillager.getMemory(MemoryKey.JOB_SITE) != null && isPlaceholderMemory(bukkitVillager, MemoryKey.JOB_SITE)) {
             bukkitVillager.setMemory(MemoryKey.JOB_SITE, null);
         }
 
-        if(bukkitVillager.getMemory(MemoryKey.MEETING_POINT) != null && isPlaceholderMemory(bukkitVillager, MemoryKey.MEETING_POINT)) {
+        if (bukkitVillager.getMemory(MemoryKey.MEETING_POINT) != null && isPlaceholderMemory(bukkitVillager, MemoryKey.MEETING_POINT)) {
             bukkitVillager.setMemory(MemoryKey.MEETING_POINT, null);
         }
     }
 
     public static boolean isScheduleNormal(Villager bukkitVillager) {
         Schedule schedule;
-        if(bukkitVillager.isAdult()) {
-            if(bukkitVillager.getProfession() == Villager.Profession.NITWIT) schedule = Schedule.SIMPLE;
+        if (bukkitVillager.isAdult()) {
+            if (bukkitVillager.getProfession() == Villager.Profession.NITWIT) schedule = Schedule.SIMPLE;
             else schedule = Schedule.VILLAGER_DEFAULT;
         } else {
             schedule = Schedule.VILLAGER_BABY;

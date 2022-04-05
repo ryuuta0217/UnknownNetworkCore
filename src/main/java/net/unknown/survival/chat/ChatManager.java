@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Unknown Network Developers and contributors.
+ * Copyright (c) 2022 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -24,7 +24,7 @@
  *     In not event shall the copyright owner or contributors be liable for
  *     any direct, indirect, incidental, special, exemplary, or consequential damages
  *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interpution) however caused and on any theory of liability,
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
  *     whether in contract, strict liability, or tort (including negligence or otherwise)
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
@@ -32,54 +32,66 @@
 package net.unknown.survival.chat;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.survival.UnknownNetworkSurvival;
+import net.unknown.survival.chat.channels.ChannelType;
+import net.unknown.survival.chat.channels.ChatChannel;
+import net.unknown.survival.chat.channels.GlobalChannel;
+import net.unknown.survival.dependency.LuckPerms;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.regex.Pattern;
 
 public class ChatManager implements Listener {
-    private static final Map<UUID, ChatMode> CHAT_MODES = new HashMap<>();
-    private static final Map<UUID, Double> RANGE = new HashMap<>();
+    private static final Map<UUID, ChatChannel> DEFAULT_CHANNELS = new HashMap<>();
 
-    public static boolean setChatMode(UUID uniqueId, ChatMode chatMode) {
-        if(CHAT_MODES.getOrDefault(uniqueId, ChatMode.GLOBAL) == chatMode) return false;
+    public static boolean setChannel(UUID uniqueId, ChatChannel channel) {
+        if (ChatManager.getCurrentChannel(uniqueId).getType() == channel.getType()) return false;
 
-        if(chatMode == ChatMode.HEADS_UP && !UnknownNetworkSurvival.isHolographicDisplaysEnabled()) {
+        if (channel.getType() == ChannelType.HEADS_UP && !UnknownNetworkSurvival.isHolographicDisplaysEnabled()) {
             return false;
         }
 
-        if(chatMode != ChatMode.GLOBAL) CHAT_MODES.put(uniqueId, chatMode);
-        else CHAT_MODES.remove(uniqueId);
+        if (DEFAULT_CHANNELS.containsKey(uniqueId)) {
+            DEFAULT_CHANNELS.get(uniqueId).onChannelSwitch(channel);
+        }
+
+        if (channel.getType() != ChannelType.GLOBAL) DEFAULT_CHANNELS.put(uniqueId, channel);
+        else DEFAULT_CHANNELS.remove(uniqueId);
         return true;
     }
 
-    public static void setRange(UUID uniqueId, double range) {
-        if(range > 0) RANGE.put(uniqueId, range);
-        else RANGE.remove(uniqueId);
+    public static ChatChannel getCurrentChannel(UUID uniqueId) {
+        return DEFAULT_CHANNELS.getOrDefault(uniqueId, GlobalChannel.getInstance());
     }
 
-    public static double getRange(UUID uniqueId) {
-        return RANGE.getOrDefault(uniqueId, -1D);
-    }
-
-    public static ChatMode getChatMode(UUID uniqueId) {
-        return CHAT_MODES.getOrDefault(uniqueId, ChatMode.GLOBAL);
-    }
-
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onChat(AsyncChatEvent event) {
-        if(event.getPlayer().hasPermission(Permissions.FEATURE_USE_COLOR_CODE.getPermissionNode())) {
+        event.renderer((source, sourceDisplayName, message, viewer) -> {
+            Component base = Component.empty();
+            Component prefix = LuckPerms.getPrefixAsComponent(source.getUniqueId());
+            Component suffix = LuckPerms.getSuffixAsComponent(source.getUniqueId());
+            return base.append(prefix).append(sourceDisplayName).append(suffix).append(Component.text(": ")).append(message);
+        });
+
+        if (event.getPlayer().hasPermission(Permissions.FEATURE_USE_COLOR_CODE.getPermissionNode())) {
             event.message(LegacyComponentSerializer.legacyAmpersand().deserialize(PlainTextComponentSerializer.plainText().serialize(event.message())));
         }
 
-        if(getChatMode(event.getPlayer().getUniqueId()) != ChatMode.GLOBAL) {
-            getChatMode(event.getPlayer().getUniqueId()).processChat(event);
-        }
+        event.message(event.message().replaceText((b) -> {
+            b.match(Pattern.compile("https?://\\S+")).replacement((r, b2) -> Component.text(b2.content(), DefinedTextColor.AQUA).clickEvent(ClickEvent.openUrl(b2.content())));
+        }));
+
+        getCurrentChannel(event.getPlayer().getUniqueId()).processChat(event);
     }
 }
