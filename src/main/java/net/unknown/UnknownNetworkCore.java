@@ -63,6 +63,7 @@ public class UnknownNetworkCore extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        getLogger().info("Plugin was loaded with environment: " + ENV.name());
         Commands.init();
         ENV.onLoad();
     }
