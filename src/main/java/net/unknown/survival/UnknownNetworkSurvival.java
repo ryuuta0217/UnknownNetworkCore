@@ -36,6 +36,7 @@ import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.survival.antivillagerlag.AntiVillagerLag;
 import net.unknown.survival.chat.ChatManager;
+import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enchants.HatakeWatari;
@@ -46,6 +47,7 @@ import net.unknown.survival.fun.DemolitionGun;
 import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.listeners.ColorCodeListener;
 import net.unknown.survival.listeners.MainGuiOpenListener;
+import net.unknown.survival.worldseparator.WorldSeparator;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
@@ -70,6 +72,7 @@ public class UnknownNetworkSurvival {
         JECON_ENABLED = Bukkit.getPluginManager().getPlugin("Jecon") != null && Bukkit.getPluginManager().isPluginEnabled("Jecon");
 
         PlayerData.loadExists();
+        CustomChannels.load();
         AntiVillagerLag.startLoopTask();
 
         Bukkit.getPluginManager().registerEvents(new MainGuiOpenListener(), UnknownNetworkCore.getInstance());
@@ -80,6 +83,7 @@ public class UnknownNetworkSurvival {
         Bukkit.getPluginManager().registerEvents(new DemolitionGun(), UnknownNetworkCore.getInstance());
         Bukkit.getPluginManager().registerEvents(new HatakeWatari(), UnknownNetworkCore.getInstance());
         Bukkit.getPluginManager().registerEvents(new RangedMining(), UnknownNetworkCore.getInstance());
+        Bukkit.getPluginManager().registerEvents(new WorldSeparator(), UnknownNetworkCore.getInstance());
 
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());
 

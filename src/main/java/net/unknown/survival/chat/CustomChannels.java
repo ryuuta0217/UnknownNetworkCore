@@ -31,12 +31,16 @@
 
 package net.unknown.survival.chat;
 
+import com.mojang.brigadier.arguments.StringArgumentType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.minecraft.server.commands.TitleCommand;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.managers.RunnableManager;
 import net.unknown.survival.chat.channels.CustomChannel;
 import org.bukkit.configuration.file.YamlConfiguration;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -55,12 +59,14 @@ public class CustomChannels {
             if (CONFIG_FILE.exists() || CONFIG_FILE.createNewFile()) {
                 CONFIG = YamlConfiguration.loadConfiguration(CONFIG_FILE);
 
-                CONFIG.getConfigurationSection("channels").getKeys(false).forEach(channelName -> {
-                    UUID owner = UUID.fromString(CONFIG.getString(channelName + ".owner"));
-                    Component displayName = GsonComponentSerializer.gson().deserialize(CONFIG.getString(channelName + ".display_name"));
-                    List<UUID> players = CONFIG.getStringList(channelName + ".players").stream().map(rawUniqueId -> UUID.fromString(rawUniqueId)).toList();
-                    CHANNELS.put(channelName, new CustomChannel(channelName, displayName, owner, players));
-                });
+                if(CONFIG.contains("channels")) {
+                    CONFIG.getConfigurationSection("channels").getKeys(false).forEach(channelName -> {
+                        UUID owner = UUID.fromString(CONFIG.getString(channelName + ".owner"));
+                        Component displayName = GsonComponentSerializer.gson().deserialize(CONFIG.getString(channelName + ".display_name"));
+                        List<UUID> players = CONFIG.getStringList(channelName + ".players").stream().map(rawUniqueId -> UUID.fromString(rawUniqueId)).toList();
+                        CHANNELS.put(channelName, new CustomChannel(channelName, displayName, owner, players));
+                    });
+                }
             }
         } catch (IOException e) {
             LOGGER.warning("Failed to load channels - " + e.getLocalizedMessage());
@@ -68,11 +74,35 @@ public class CustomChannels {
         }
     }
 
+    public static Map<String, CustomChannel> getChannels() {
+        return CHANNELS;
+    }
+
     public static Set<String> getChannelNames() {
         return CHANNELS.keySet();
     }
 
-    public static void save() {
+    public static boolean isChannelFound(String channelName) {
+        return getChannelNames().contains(channelName);
+    }
+
+    public static CustomChannel createChannel(String channelName, UUID owner, Component displayName) throws IllegalArgumentException {
+        if(isChannelFound(channelName)) {
+            throw new IllegalArgumentException("Channel already exists!");
+        }
+
+        CustomChannel channel = new CustomChannel(channelName, displayName, owner, new ArrayList<>());
+        CHANNELS.put(channelName, channel);
+        RunnableManager.runAsync(CustomChannels::save);
+        return channel;
+    }
+
+    @Nullable
+    public static CustomChannel getChannel(String channelName) {
+        return CHANNELS.getOrDefault(channelName, null);
+    }
+
+    public synchronized static void save() {
         CONFIG.set("channels", null);
         CHANNELS.forEach((channelName, channel) -> {
             CONFIG.set("channels." + channelName + ".display_name", GsonComponentSerializer.gson().serialize(channel.getDisplayName()));

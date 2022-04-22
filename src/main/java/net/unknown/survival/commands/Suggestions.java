@@ -36,11 +36,16 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import net.unknown.core.util.BrigadierUtil;
+import net.unknown.survival.chat.CustomChannels;
+import net.unknown.survival.chat.channels.ChatChannel;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 public class Suggestions {
@@ -63,6 +68,14 @@ public class Suggestions {
         return SharedSuggestionProvider.suggest(new String[0], builder);
     };
     public static final SuggestionProvider<CommandSourceStack> JOINED_CHANNELS_SUGGEST = (ctx, builder) -> {
-        return SharedSuggestionProvider.suggest(Collections.emptySet(), builder);
+        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+            return SharedSuggestionProvider.suggest(CustomChannels.getChannels()
+                    .values()
+                    .stream()
+                    .filter(channel -> channel.getPlayers().contains(player.getUUID()))
+                    .map(ChatChannel::getChannelName), builder);
+        }
+
+        return SharedSuggestionProvider.suggest(Collections.emptyList(), builder);
     };
 }

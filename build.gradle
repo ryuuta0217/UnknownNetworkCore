@@ -65,6 +65,7 @@ shadowJar {
 runMojangMappedServer {
     runDirectory(project.file("testServer"))
     setSystemProperty("net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false")
+    setSystemProperty("Paper.ignoreWorldDataVersion", "true")
     setSystemProperty("un.env", System.getProperty("un.env", "SURVIVAL"))
     args("-P pluginsMapped")
 }
@@ -72,6 +73,7 @@ runMojangMappedServer {
 runServer {
     runDirectory.set(project.file("testServer"))
     setSystemProperty("net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false") // default is false, but run-paper is set this option force true.
+    setSystemProperty("Paper.ignoreWorldDataVersion", "true")
     setSystemProperty("un.env", System.getProperty("un.env", "SURVIVAL"))
 }
 

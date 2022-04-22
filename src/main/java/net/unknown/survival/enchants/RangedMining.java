@@ -41,6 +41,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
@@ -121,6 +122,11 @@ public class RangedMining implements Listener {
                 FACING.put(event.getPlayer().getUniqueId(), event.getBlockFace());
             }
         }
+    }
+
+    @EventHandler
+    public void onAttackPlayer(EntityDamageByEntityEvent event) {
+
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

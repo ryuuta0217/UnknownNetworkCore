@@ -33,6 +33,12 @@ package net.unknown.survival.chat.channels;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.managers.RunnableManager;
+import net.unknown.survival.chat.CustomChannels;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -61,36 +67,40 @@ public class CustomChannel extends ChatChannel {
         this.players.addAll(players);
     }
 
-    private static Component getRenderedMessage(Player source, Component displayName, Component message) {
+    private Component getChannelPrefix(boolean space) {
+        Component c = Component.empty()
+                .append(Component.text("["))
+                .append(this.displayName) // チャンネル名
+                .append(Component.text("]"));
+
+        return space ? c : c.append(Component.text(" "));
+    }
+
+    private Component getRenderedMessage(Player source, Component message) {
         // うんちする // @author Yu_212
         //source.setDisplayName("うんち"); // @author Yu_212
         //source.banPlayerIP("うんちしたので"); // @author Yu_212
         return Component.empty()
-                .append(Component.text("["))
-                .append(displayName) // チャンネル名
-                .append(Component.text("]"))
+                .append(this.getChannelPrefix(false))
                 .append(Component.text(" "))
                 .append(source.displayName()) // プレイヤー名
                 .append(Component.text(": "))
-                .append(message); // [DISPLAYNAME] NAME: MESSAGE
+                .append(message);
     }
 
     @Override
     public void processChat(AsyncChatEvent event) {
         event.setCancelled(true);
 
-        this.players.stream()
-                .map(Bukkit::getOfflinePlayer)
-                .filter(OfflinePlayer::isOnline)
-                .map(off -> (Player) off)
-                .collect(Collectors.toSet())
-                .forEach(player -> {
-                    player.sendMessage(getRenderedMessage(event.getPlayer(), this.displayName, event.message()));
-                });
+        this.sendMessage(this.getRenderedMessage(event.getPlayer(), event.message()));
     }
 
     public Component getDisplayName() {
         return this.displayName;
+    }
+
+    public String getDisplayNameAsPlainText() {
+        return PlainTextComponentSerializer.plainText().serialize(this.getDisplayName());
     }
 
     public UUID getOwner() {
@@ -99,5 +109,22 @@ public class CustomChannel extends ChatChannel {
 
     public Set<UUID> getPlayers() {
         return this.players;
+    }
+
+    public void addPlayer(UUID uniqueId) {
+        this.players.add(uniqueId);
+        this.sendMessage(Component.empty().color(DefinedTextColor.GRAY).decoration(TextDecoration.ITALIC, true)
+                .append(this.getChannelPrefix(true))
+                .append(Component.text(Bukkit.getOfflinePlayer(uniqueId).getName() + " がチャンネルに参加しました")));
+        RunnableManager.runAsync(CustomChannels::save);
+    }
+
+    private void sendMessage(Component message) {
+        this.players.stream()
+                .map(Bukkit::getOfflinePlayer)
+                .filter(OfflinePlayer::isOnline)
+                .map(off -> (Player) off)
+                .collect(Collectors.toSet())
+                .forEach(player -> player.sendMessage(message));
     }
 }

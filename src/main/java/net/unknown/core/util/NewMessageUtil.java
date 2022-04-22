@@ -29,24 +29,40 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.listeners;
+package net.unknown.core.util;
 
-import org.bukkit.Location;
-import org.bukkit.entity.Entity;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.util.Vector;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.entity.player.Player;
+import net.unknown.core.define.DefinedTextColor;
 
-public class GNT_ZeroThree<T> implements Listener {
-    private static Location calculateTargetBackPosition(Entity entity) {
-        Location position = entity.getLocation();
-        Vector lookingAt = position.toVector();
-        return position;
+public class NewMessageUtil {
+    public static void sendMessage(Player player, Component component) {
+
     }
 
-    @EventHandler
-    public void onPlayerDamageDeal(EntityDamageByEntityEvent event) {
+    public static void sendMessage(CommandSourceStack source, Component component, boolean broadcastToOps) {
+        source.sendSuccess(NewMessageUtil.format(component), broadcastToOps);
+    }
 
+    private static Component format(Component component) {
+        return new TextComponent("")
+                .append(new TextComponent("[").withStyle(ChatFormatting.GRAY))
+                .append(new TextComponent("U.N.").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
+                .append(new TextComponent("]").withStyle(ChatFormatting.GRAY))
+                .append(new TextComponent(" "))
+                .append(component);
+    }
+
+    private static net.kyori.adventure.text.Component format(net.kyori.adventure.text.Component component) {
+        return net.kyori.adventure.text.Component.empty()
+                .append(net.kyori.adventure.text.Component.text("[", DefinedTextColor.GRAY))
+                .append(net.kyori.adventure.text.Component.text("U.N.", net.kyori.adventure.text.format.Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD.as(true))))
+                .append(net.kyori.adventure.text.Component.text("]", DefinedTextColor.GRAY))
+                .append(net.kyori.adventure.text.Component.text(" "))
+                .append(component);
     }
 }
