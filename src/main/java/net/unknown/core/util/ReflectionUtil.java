@@ -31,40 +31,54 @@
 
 package net.unknown.core.util;
 
+import sun.misc.Unsafe;
+
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.List;
-import java.util.stream.Stream;
 
 public class ReflectionUtil {
-    public static void makeNonFinal(Field targetField) {
+    /*private static final VarHandle MOD_HANDLE;
+
+    static {
         try {
-            /*Field theUnsafeF = Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafeF.trySetAccessible();
-            Unsafe unsafe = (Unsafe) theUnsafeF.get(null);
-            long offSet = unsafe.objectFieldOffset(targetField);
-            unsafe.getBoolean()*/
+            MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(Field.class, MethodHandles.lookup());
+            MOD_HANDLE = lookup.findVarHandle(Field.class, "modifiers", int.class);
+        } catch(IllegalAccessException | NoSuchFieldException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-            Method internalMethod = Class.class.getDeclaredMethod("getDeclaredFields0", boolean.class);
-            //Method internalMethod = Stream.of(java.lang.Class.class.getDeclaredMethods()).filter(m -> m.getName().equalsIgnoreCase("getDeclaredFields0")).toList().get(0);
-            if (!internalMethod.trySetAccessible()) {
-                throw new RuntimeException("Failed to #trySetAccessible");
-            }
-            Field[] fields = (Field[]) internalMethod.invoke(targetField, false);
-            List<Field> filteredFields = Stream.of(fields).filter(f -> f.getName().equals("modifiers")).toList();
-            if (filteredFields.size() != 1) {
-                throw new RuntimeException("Cannot Find Field: modifiers");
-            }
-            Field modifiersField = filteredFields.get(0);
-            modifiersField.trySetAccessible();
+    public static void makeNonFinal(Field targetField) {
+        int beforeMods = targetField.getModifiers();
+        if(Modifier.isFinal(beforeMods)) {
+            MOD_HANDLE.set(targetField, beforeMods & ~Modifier.FINAL);
 
-            int modifiers = targetField.getModifiers();
-            if (Modifier.isFinal(modifiers)) {
-                modifiersField.set(targetField, modifiers & ~Modifier.FINAL);
+            if(Modifier.isFinal(targetField.getModifiers())) {
+                throw new RuntimeException("Failed to make non-final.");
             }
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+        }
+    }*/
+
+    public static void setFinalObject(Field targetField, Object newValue) {
+        try {
+            if(!Modifier.isStatic(targetField.getModifiers())) {
+                throw new RuntimeException("Only it works static fields!");
+            }
+
+            Class<Unsafe> classUnsafe = Unsafe.class;
+            Field fieldTheUnsafe = classUnsafe.getDeclaredField("theUnsafe");
+            if(!fieldTheUnsafe.trySetAccessible()) {
+                throw new RuntimeException("Failed to Unsafe.theUnsafe #trySetAccessible");
+            }
+            Unsafe unsafe = (Unsafe) fieldTheUnsafe.get(null);
+
+            Object fieldBase = unsafe.staticFieldBase(targetField);
+            long fieldOffset = unsafe.staticFieldOffset(targetField);
+
+            unsafe.putObject(fieldBase, fieldOffset, newValue);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
     }

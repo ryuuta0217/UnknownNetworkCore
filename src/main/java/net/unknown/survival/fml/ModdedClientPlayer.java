@@ -45,8 +45,8 @@ public class ModdedClientPlayer {
     private final Map<String, String> registries;
     private Map<String, String> withoutForgeChannels;
 
-    public ModdedClientPlayer(ConnectionEnvironment env, List<String> mods, Map<String, String> channels, Map<String, String> registries) {
-        this(env, new HashMap<String, String>() {{
+    public ModdedClientPlayer(ConnectionEnvironment env, Set<String> mods, Map<String, String> channels, Map<String, String> registries) {
+        this(env, new HashMap<>() {{
             mods.forEach(modName -> put(modName, ""));
         }}, channels, registries);
     }

@@ -51,21 +51,20 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemFlag;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.IntStream;
 
 // TODO RegionAreaが他人と被っているときの処理
 // TODO FlagEditor
 // TODO
 public class ProtectionGui extends GuiBase {
+    private static final Map<UUID, ProtectionGui> TEMP_DATA = new HashMap<>();
+
     private final Player player;
     private State guiState;
     private ViewBase view;
 
-    public ProtectionGui(Player owner) {
+    private ProtectionGui(Player owner) {
         super(owner,
                 9 * 6,
                 Component.text("保護", TextColor.color(0xFF00)),
@@ -78,6 +77,10 @@ public class ProtectionGui extends GuiBase {
         this.inventory.setItem(45, DefinedItemStackBuilders.leftArrow()
                 .displayName(Component.text("戻る", TextColor.color(5635925)))
                 .build());
+    }
+
+    public static ProtectionGui of(Player owner) {
+        return TEMP_DATA.getOrDefault(owner.getUniqueId(), new ProtectionGui(owner));
     }
 
     private static Component coordinates2Str(BlockVector3 vec3) {
@@ -95,7 +98,10 @@ public class ProtectionGui extends GuiBase {
 
     @Override
     public void onClose(InventoryCloseEvent event) {
-        if (this.guiState != State.WAITING_CALLBACK) this.unRegisterAsListener();
+        if (this.guiState != State.WAITING_CALLBACK && this.guiState != State.NEW_REGION) this.unRegisterAsListener();
+        if(this.guiState == State.NEW_REGION) {
+            TEMP_DATA.put(this.player.getUniqueId(), this);
+        }
     }
 
     //
@@ -213,6 +219,42 @@ public class ProtectionGui extends GuiBase {
                 super(regionsView.gui);
                 this.regionsView = regionsView;
                 this.newRegionName = newRegionName;
+
+                this.gui.inventory.setItem(13, new ItemStackBuilder(Material.PAPER)
+                        .displayName(Component.text("新規保護領域の作成",
+                                Style.style(DefinedTextColor.GREEN,
+                                        TextDecoration.BOLD.as(true))))
+                        .lore(Component.text("名前: " + this.newRegionName,
+                                Style.style(DefinedTextColor.AQUA,
+                                        TextDecoration.ITALIC.as(false))),
+                                Component.text("範囲: " + (this.min == null && this.max == null ? "未設定" : (this.min != null ? (coordinates2Str(this.min) + (this.max != null ? " -> " + coordinates2Str(this.max) : " -> [未設定]")) : "[未設定]")),
+                                        Style.style(DefinedTextColor.YELLOW,
+                                                TextDecoration.ITALIC.as(false))))
+                        .build());
+
+                this.gui.inventory.setItem(30, new ItemStackBuilder(Material.NAME_TAG)
+                        .displayName(Component.text("保護領域名", DefinedTextColor.GOLD))
+                        .lore(Component.text("現在の設定値: " + this.newRegionName,
+                                Style.style(DefinedTextColor.AQUA,
+                                        TextDecoration.ITALIC.as(false))),
+                                Component.text(""),
+                                Component.text("クリックして名前を変更",
+                                        Style.style(DefinedTextColor.YELLOW,
+                                                TextDecoration.ITALIC.as(false))))
+                        .build());
+                this.gui.inventory.setItem(32, new ItemStackBuilder(Material.OAK_FENCE)
+                        .displayName(Component.text("保護範囲", DefinedTextColor.YELLOW))
+                        .lore(Component.text("地点#1: " + (this.min == null ? "未設定" : coordinates2Str(this.min)),
+                                        Style.style(DefinedTextColor.AQUA,
+                                                TextDecoration.ITALIC.as(false))),
+                                Component.text("地点#2: " + (this.max == null ? "未設定" : coordinates2Str(this.max)),
+                                        Style.style(DefinedTextColor.AQUA,
+                                                TextDecoration.ITALIC.as(false))),
+                                Component.text(""),
+                                Component.text("クリックして範囲設定を開始",
+                                        Style.style(DefinedTextColor.YELLOW,
+                                                TextDecoration.ITALIC.as(false))))
+                        .build());
             }
 
             @Override

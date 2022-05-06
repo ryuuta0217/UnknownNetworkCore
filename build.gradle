@@ -57,6 +57,8 @@ dependencies {
     compileOnly group: 'com.github.MilkBowl', name: 'VaultAPI', version: '+'
     compileOnly group: 'net.luckperms', name: 'api', version: '+'
     implementation group: 'org.mozilla', name: 'rhino', version: '+'
+    implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
+    implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
 }
 
 shadowJar {
@@ -82,7 +84,7 @@ task downloadWaterfall(type: Task) {
 
     if (!wf.exists()) {
         download {
-            src "https://papermc.io/api/v2/projects/waterfall/versions/1.18/builds/471/downloads/waterfall-1.18-471.jar"
+            src "https://papermc.io/api/v2/projects/waterfall/versions/1.18/builds/485/downloads/waterfall-1.18-485.jar"
             dest 'libs/standalone/waterfall.jar'
         }
 
@@ -113,4 +115,10 @@ task reCompressWaterfall(type: Zip, dependsOn: downloadWaterfall) {
     from "libs/waterfall/"
     destinationDirectory = file("libs")
     archiveFileName = "waterfall.jar"
+}
+
+task copyArtifactToProxy(type: Copy) {
+    from project.file("build/libs/UnknownNetworkCore-${version}.jar")
+    rename("UnknownNetworkCore-${version}.jar", "UNC.jar")
+    into project.file("testProxy/plugins")
 }

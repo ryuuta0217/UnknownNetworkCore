@@ -54,3 +54,4 @@ permissions:
       unknown.survival.command.ahomes: true
       unknown.survival.command.findhome: true
       unknown.survival.command.sethomecount: true
+      unknown.survival.notify.mod: true

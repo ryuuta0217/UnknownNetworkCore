@@ -31,8 +31,12 @@
 
 package net.unknown.proxy.fml;
 
+import com.ryuuta0217.packets.FML2HandshakePacket;
+import com.ryuuta0217.packets.S2CModList;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import io.netty.buffer.UnpooledHeapByteBuf;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
@@ -41,8 +45,14 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.protocol.ProtocolConstants;
 import net.md_5.bungee.protocol.packet.LoginPayloadRequest;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.unknown.proxy.ModdedInitialHandler;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -53,27 +63,35 @@ public class ForgeListener implements Listener {
     @EventHandler
     public void onPreLogin(PreLoginEvent event) {
         if (!(event.getConnection() instanceof ModdedInitialHandler handler)) return;
-        String logPrefix = "[" + handler.getSocketAddress() + "|" + handler.getName() + "]";
+        String logPrefix = "[" + handler.getName() + "|" + handler.getSocketAddress() + "]";
 
         if (handler.getHandshake().getProtocolVersion() >= ProtocolConstants.MINECRAFT_1_13 && handler.getExtraDataInHandshake().contains("FML2")) {
-            LOGGER.info(logPrefix + " <-> Connected as using FML2 protocol, Initializing handshake");
+            LOGGER.info(logPrefix + "  -> Connected as using FML2 protocol");
+            LOGGER.info(logPrefix + "  -  Initializing FML2 Handshake (S2CModList)");
             LoginPayloadRequest loginPayloadRequest = new LoginPayloadRequest();
-            loginPayloadRequest.setData(new byte[] {1, 0, 0, 0});
+            S2CModList packet = new S2CModList(new HashSet<>() {{
+                add("minecraft");
+                add("forge");
+            }}, new HashMap<>() {{
+                put("forge:tier_sorting", "1.0");
+            }}, new HashSet<>());
+            loginPayloadRequest.setData(ByteBufUtil.getBytes(packet.encode(Unpooled.buffer())));
             loginPayloadRequest.setChannel("fml:handshake");
-            int id = RANDOM.nextInt(Integer.MAX_VALUE);
+            int id = RANDOM.nextInt(Short.MAX_VALUE);
             if (ModdedInitialHandler.PENDING_FORGE_PLAYER_CONNECTIONS.containsKey(id)) {
-                LOGGER.info(logPrefix + " <-> FML2 handshake Message ID " + id + " is duplicated, re-generating.");
+                LOGGER.info(logPrefix + "  -  FML2 handshake Message ID " + id + " is duplicated, re-generating.");
                 while (ModdedInitialHandler.PENDING_FORGE_PLAYER_CONNECTIONS.containsKey(id)) {
                     id = RANDOM.nextInt(Integer.MAX_VALUE);
-                    LOGGER.info(logPrefix + " <-> FML2 handshake new Message ID is " + id);
+                    LOGGER.info(logPrefix + "  -  FML2 handshake new Message ID is " + id);
                 }
-                LOGGER.info(logPrefix + " <-> FML2 handshake Message ID duplicate is fixed.");
+                LOGGER.info(logPrefix + "  -  FML2 handshake Message ID duplicate is fixed.");
             } else {
-                LOGGER.info(logPrefix + " <-> FML2 handshake Message ID is " + id);
+                LOGGER.info(logPrefix + "  -  FML2 handshake Message ID is " + id);
             }
             ModdedInitialHandler.PENDING_FORGE_PLAYER_CONNECTIONS.put(id, event.getConnection());
             loginPayloadRequest.setId(id);
             event.getConnection().unsafe().sendPacket(loginPayloadRequest);
+            LOGGER.info(logPrefix + " <-  LoginPayloadRequest (FML2 Handshake S2CModList) Sent");
         }
     }
 

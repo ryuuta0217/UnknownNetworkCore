@@ -106,7 +106,7 @@ public class CustomChannels {
         CONFIG.set("channels", null);
         CHANNELS.forEach((channelName, channel) -> {
             CONFIG.set("channels." + channelName + ".display_name", GsonComponentSerializer.gson().serialize(channel.getDisplayName()));
-            CONFIG.set("channels." + channelName + ".owner", channel.getOwner());
+            CONFIG.set("channels." + channelName + ".owner", channel.getOwner().toString());
             CONFIG.set("channels." + channelName + ".players", channel.getPlayers().stream().filter(p -> !p.equals(channel.getOwner())).map(UUID::toString).toList());
         });
         try {

@@ -31,25 +31,27 @@
 
 package net.unknown.proxy.fml;
 
+import com.ryuuta0217.packets.C2SModListReply;
 import io.netty.buffer.ByteBuf;
 import net.md_5.bungee.protocol.DefinedPacket;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public class FML2Player implements ModdedPlayer {
-    private final List<String> mods;
+    private final Set<String> mods;
     private final Map<String, String> channels;
     private final Map<String, String> registries;
 
-    public FML2Player(List<String> mods, Map<String, String> channels, Map<String, String> registries) {
+    public FML2Player(Set<String> mods, Map<String, String> channels, Map<String, String> registries) {
         this.mods = mods;
         this.channels = channels;
         this.registries = registries;
     }
 
-    public List<String> getMods() {
+    public Set<String> getMods() {
         return this.mods;
     }
 
@@ -64,21 +66,7 @@ public class FML2Player implements ModdedPlayer {
     @Override
     public void getData(ByteBuf buf, UUID uniqueId) {
         DefinedPacket.writeUUID(uniqueId, buf);
-
-        DefinedPacket.writeVarInt(this.getMods().size(), buf);
-        this.getMods().forEach(modName -> DefinedPacket.writeString(modName, buf));
-
-        DefinedPacket.writeVarInt(this.getChannels().size(), buf);
-        this.getChannels().forEach((channel, version) -> {
-            DefinedPacket.writeString(channel, buf);
-            DefinedPacket.writeString(version, buf);
-        });
-
-        DefinedPacket.writeVarInt(this.getRegistries().size(), buf);
-        this.getRegistries().forEach((registry, version) -> {
-            DefinedPacket.writeString(registry, buf);
-            DefinedPacket.writeString(version, buf);
-        });
+        new C2SModListReply(this.mods, this.channels, this.registries).encode(buf);
     }
 
     @Override

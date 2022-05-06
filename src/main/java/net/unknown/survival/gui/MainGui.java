@@ -78,7 +78,7 @@ public class MainGui extends GuiBase {
     public void onClick(InventoryClickEvent event) {
         switch (event.getSlot()) {
             case 12 -> event.getWhoClicked().openInventory(new HomeGui((Player) event.getWhoClicked()).getInventory());
-            case 13 -> event.getWhoClicked().openInventory(new ProtectionGui((Player) event.getWhoClicked()).getInventory());
+            case 13 -> event.getWhoClicked().openInventory(ProtectionGui.of((Player) event.getWhoClicked()).getInventory());
             case 18 -> {
                 if (event.getCursor() == null || event.getCursor().getType() == Material.AIR) return;
                 if (event.getClick() != ClickType.LEFT) return;

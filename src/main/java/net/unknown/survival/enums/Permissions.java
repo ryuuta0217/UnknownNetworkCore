@@ -42,6 +42,7 @@ import net.unknown.survival.commands.home.HomeCommand;
 import net.unknown.survival.commands.home.HomesCommand;
 import net.unknown.survival.commands.home.SetHomeCommand;
 import net.unknown.survival.commands.home.admin.*;
+import net.unknown.survival.fml.FMLConnectionListener;
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 
@@ -62,7 +63,9 @@ public enum Permissions {
     COMMAND_TELEPORT_PET("unknown.survival.command.tppet", 0, TeleportPetCommand.class),
     COMMAND_LASTTP("unknown.survival.command.lasttp", 2, LastTpCommand.class),
     COMMAND_SPAWN("unknown.survival.command.spawn", 0, SpawnCommand.class),
-    COMMAND_FLY("unknown.survival.command.fly", 0, FlyCommand.class);
+    COMMAND_FLY("unknown.survival.command.fly", 0, FlyCommand.class),
+
+    NOTIFY_MODDED_PLAYER("unknown.survival.notify.mod", 2, null);
 
     private final int opLevel;
     private final String permissionNode;

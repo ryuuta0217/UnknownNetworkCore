@@ -83,7 +83,7 @@ public class UnknownNetworkSurvival {
         Bukkit.getPluginManager().registerEvents(new DemolitionGun(), UnknownNetworkCore.getInstance());
         Bukkit.getPluginManager().registerEvents(new HatakeWatari(), UnknownNetworkCore.getInstance());
         Bukkit.getPluginManager().registerEvents(new RangedMining(), UnknownNetworkCore.getInstance());
-        Bukkit.getPluginManager().registerEvents(new WorldSeparator(), UnknownNetworkCore.getInstance());
+        //Bukkit.getPluginManager().registerEvents(new WorldSeparator(), UnknownNetworkCore.getInstance());
 
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());
 

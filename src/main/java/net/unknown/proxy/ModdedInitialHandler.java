@@ -31,7 +31,7 @@
 
 package net.unknown.proxy;
 
-import com.ryuuta0217.packets.FML2HandshakePacket;
+import com.ryuuta0217.packets.C2SModListReply;
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -61,7 +61,7 @@ import java.util.logging.Logger;
 public class ModdedInitialHandler extends InitialHandler {
     public static final Map<Integer, Object> PENDING_FORGE_PLAYER_CONNECTIONS = new HashMap<>();
     public static final Map<String, ModdedPlayer> FORGE_PLAYERS = new HashMap<>();
-    private static final Logger LOGGER = ProxyServer.getInstance().getLogger();
+    private static final Logger LOGGER = UnknownNetworkProxyCore.getInstance().getProxy().getLogger();
     private static final KickStringWriter legacyKicker = getLegacyKicker();
     private static ChannelInitializer<Channel> moddedInitializer;
 
@@ -70,49 +70,59 @@ public class ModdedInitialHandler extends InitialHandler {
     }
 
     public static void injectModdedInitialHandler() {
-        if (moddedInitializer == null) moddedInitializer = new ChannelInitializer<>() {
-            @Override
-            protected void initChannel(Channel ch) throws Exception {
-                SocketAddress remoteAddress = (ch.remoteAddress() == null) ? ch.parent().localAddress() : ch.remoteAddress();
+        LOGGER.info(" -> Injection started");
+        if (moddedInitializer == null) {
+            LOGGER.info(" -> Create new ChannelInitializer instance");
+            moddedInitializer = new ChannelInitializer<>() {
+                @Override
+                protected void initChannel(Channel ch) throws Exception {
+                    SocketAddress remoteAddress = (ch.remoteAddress() == null) ? ch.parent().localAddress() : ch.remoteAddress();
 
-                if (BungeeCord.getInstance().getConnectionThrottle() != null && BungeeCord.getInstance().getConnectionThrottle().throttle(remoteAddress)) {
-                    ch.close();
-                    return;
+                    if (BungeeCord.getInstance().getConnectionThrottle() != null && BungeeCord.getInstance().getConnectionThrottle().throttle(remoteAddress)) {
+                        ch.close();
+                        return;
+                    }
+
+                    ListenerInfo listener = ch.attr(PipelineUtils.LISTENER).get();
+
+                    if (BungeeCord.getInstance().getPluginManager().callEvent(new ClientConnectEvent(remoteAddress, listener)).isCancelled()) {
+                        ch.close();
+                        return;
+                    }
+
+                    PipelineUtils.BASE.initChannel(ch);
+                    ch.pipeline().addBefore(PipelineUtils.FRAME_DECODER, PipelineUtils.LEGACY_DECODER, new LegacyDecoder());
+                    ch.pipeline().addAfter(PipelineUtils.FRAME_DECODER, PipelineUtils.PACKET_DECODER, new MinecraftDecoder(Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion()));
+                    ch.pipeline().addAfter(PipelineUtils.FRAME_PREPENDER, PipelineUtils.PACKET_ENCODER, new MinecraftEncoder(Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion()));
+                    ch.pipeline().addBefore(PipelineUtils.FRAME_PREPENDER, PipelineUtils.LEGACY_KICKER, legacyKicker);
+                    ch.pipeline().get(HandlerBoss.class).setHandler(new ModdedInitialHandler(BungeeCord.getInstance(), listener));
+
+                    if (listener.isProxyProtocol()) {
+                        ch.pipeline().addFirst(new HAProxyMessageDecoder());
+                    }
                 }
+            };
+            LOGGER.info(" -> Instance OK");
+        }
 
-                ListenerInfo listener = ch.attr(PipelineUtils.LISTENER).get();
-
-                if (BungeeCord.getInstance().getPluginManager().callEvent(new ClientConnectEvent(remoteAddress, listener)).isCancelled()) {
-                    ch.close();
-                    return;
-                }
-
-                PipelineUtils.BASE.initChannel(ch);
-                ch.pipeline().addBefore(PipelineUtils.FRAME_DECODER, PipelineUtils.LEGACY_DECODER, new LegacyDecoder());
-                ch.pipeline().addAfter(PipelineUtils.FRAME_DECODER, PipelineUtils.PACKET_DECODER, new MinecraftDecoder(Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion()));
-                ch.pipeline().addAfter(PipelineUtils.FRAME_PREPENDER, PipelineUtils.PACKET_ENCODER, new MinecraftEncoder(Protocol.HANDSHAKE, true, ProxyServer.getInstance().getProtocolVersion()));
-                ch.pipeline().addBefore(PipelineUtils.FRAME_PREPENDER, PipelineUtils.LEGACY_KICKER, legacyKicker);
-                ch.pipeline().get(HandlerBoss.class).setHandler(new ModdedInitialHandler(BungeeCord.getInstance(), listener));
-
-                if (listener.isProxyProtocol()) {
-                    ch.pipeline().addFirst(new HAProxyMessageDecoder());
-                }
-            }
-        };
-
+        LOGGER.info(" -> Checking currently SERVER_CHILD value");
         if (PipelineUtils.SERVER_CHILD.equals(moddedInitializer)) {
             LOGGER.info(" -> Already injected.");
             return;
         }
+        LOGGER.info(" -> SERVER_CHILD is default, continue injection");
 
         try {
+            LOGGER.info(" -> Finding SERVER_CHILD field");
             Field serverChildField = PipelineUtils.class.getDeclaredField("SERVER_CHILD");
+            LOGGER.info(" -> Found! " + serverChildField);
 
             /* MAKE THE VALUE OF THE FINAL FIELD CHANGEABLE */
-            ReflectionUtil.makeNonFinal(serverChildField);
+            //ReflectionUtil.makeNonFinal(serverChildField);
 
+            LOGGER.info(" -> Injecting");
             /* MODIFY */
-            serverChildField.set(null, moddedInitializer);
+            ReflectionUtil.setFinalObject(serverChildField, moddedInitializer);
 
             /* CHECK */
             if (PipelineUtils.SERVER_CHILD.equals(moddedInitializer)) {
@@ -122,6 +132,7 @@ public class ModdedInitialHandler extends InitialHandler {
             }
         } catch (Exception e) {
             LOGGER.warning(" -> Injection failed: " + e.getLocalizedMessage());
+            LOGGER.warning(" -> Proxy is now running without forge detection support.");
             e.printStackTrace();
         }
     }
@@ -138,7 +149,7 @@ public class ModdedInitialHandler extends InitialHandler {
 
     @Override
     public void handle(LoginPayloadResponse response) {
-        LOGGER.info("[ " + this.getSocketAddress() + "|" + this.getName() + "] -> LoginPayloadResponse received.");
+        LOGGER.info("[" + this.getName() + "|" + this.getSocketAddress() + "]  -> LoginPayloadResponse received.");
 
         if (!PENDING_FORGE_PLAYER_CONNECTIONS.containsKey(response.getId())) {
             LOGGER.info("[" + this.getSocketAddress() + "|" + this.getName() + "] <-> Message ID " + response.getId() + " is unknown. Disconnecting");
@@ -151,13 +162,13 @@ public class ModdedInitialHandler extends InitialHandler {
 
         ByteBuf buf = Unpooled.wrappedBuffer(response.getData());
 
-        int packetId = MinecraftPacketReader.readVarInt(buf);
-
-        if (packetId == 2) {
-            FML2HandshakePacket handshake = FML2HandshakePacket.parse(buf);
+        try {
+            C2SModListReply handshake = C2SModListReply.decode(buf);
             FORGE_PLAYERS.put(this.getName(), new FML2Player(handshake.getMods(), handshake.getChannels(), handshake.getRegistries()));
-            LOGGER.info("[" + this.getSocketAddress() + "|" + this.getName() + "] <-> Successfully FML2 handshake completed");
-            LOGGER.info("[" + this.getSocketAddress() + "|" + this.getName() + "] <-> Connected as using mods: " + handshake.getMods());
+            LOGGER.info("[" + this.getName() + "|" + this.getSocketAddress() + "] <-> Successfully FML2 handshake completed");
+            LOGGER.info("[" + this.getName() + "|" + this.getSocketAddress() + "] <-> Connected as using mods: " + handshake.getMods());
+        } catch(IllegalArgumentException e) {
+            e.printStackTrace();
         }
     }
 

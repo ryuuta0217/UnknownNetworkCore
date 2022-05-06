@@ -41,7 +41,7 @@ import net.md_5.bungee.event.EventHandler;
 public class ServerDisconnectListener implements Listener {
     @EventHandler
     public void onPlayerDisconnectedFromServer(ServerKickEvent event) {
-        if (event.getKickedFrom().equals(UnknownNetworkProxyCore.getSurvivalServer())) {
+        if (event.getKickedFrom().equals(UnknownNetworkProxyCore.getSurvivalServer()) && event.getCause() != ServerKickEvent.Cause.LOST_CONNECTION) {
             event.setCancelled(true);
             event.setCancelServer(UnknownNetworkProxyCore.getLobbyServer());
             BaseComponent[] message = new BaseComponent[event.getKickReasonComponent().length + 1];

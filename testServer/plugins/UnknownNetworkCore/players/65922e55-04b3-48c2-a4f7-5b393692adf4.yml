@@ -1,0 +1,7 @@
+config-version: 3
+home-base-count: 5
+home-additional-count: 0
+homes:
+  default: {}
+homeGroupItems:
+  default: ROTTEN_FLESH

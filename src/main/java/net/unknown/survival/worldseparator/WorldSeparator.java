@@ -96,7 +96,7 @@ public class WorldSeparator implements Listener {
             INVENTORIES.put(fromGroup, p2item);
 
             /* ADVANCEMENTS */
-            player.getAdvancements().reload();
+            //player.getAdvancements().reload();
 
             /* HEALTH */
             Map<UUID, Float> p2health = HEALTH.getOrDefault(fromGroup, new HashMap<>());

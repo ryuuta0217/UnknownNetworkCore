@@ -1,0 +1,10 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run Proxy" type="JarApplication">
+    <option name="JAR_PATH" value="$PROJECT_DIR$/libs/standalone/waterfall.jar" />
+    <option name="WORKING_DIRECTORY" value="C:\Users\t88t_\IdeaProjects\UnknownNetworkCore\testProxy" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method v="2">
+      <option name="Gradle.BeforeRunTask" enabled="false" tasks="build copyArtifactToProxy" externalProjectPath="$PROJECT_DIR$" vmOptions="" scriptParameters="" />
+    </method>
+  </configuration>
+</component>

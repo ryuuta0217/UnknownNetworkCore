@@ -71,7 +71,7 @@ public class UnknownNetworkProxyCore extends Plugin {
     public void onEnable() {
         getProxy().getPluginManager().registerListener(this, new ForgeListener());
         getProxy().getPluginManager().registerListener(this, new PingListener());
-        getProxy().getPluginManager().registerListener(this, new ServerDisconnectListener());
+        //getProxy().getPluginManager().registerListener(this, new ServerDisconnectListener());
         LOBBY = getProxy().getServerInfo("lobby");
         SURVIVAL = getProxy().getServerInfo("survival");
     }

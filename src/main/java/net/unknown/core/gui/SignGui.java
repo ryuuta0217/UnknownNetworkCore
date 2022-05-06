@@ -47,6 +47,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
@@ -103,21 +104,23 @@ public class SignGui {
         if (SignGui.SIGN_GUI_OPENED.containsKey(this.target.getUniqueId()))
             throw new IllegalStateException("Double Sign Gui?");
 
+        ServerPlayer nmsTarget = ((CraftPlayer) this.target).getHandle();
+
         Location bukkitLoc = this.target.getLocation();
         bukkitLoc.setY(1);
         Vec3 nmsLoc = new Vec3(bukkitLoc.getX(), bukkitLoc.getY(), bukkitLoc.getZ());
         BlockPos blockPos = new BlockPos(nmsLoc);
         BlockState signBlock = CraftMagicNumbers.getBlock(this.signType).defaultBlockState();
 
+        ClientboundBlockUpdatePacket blockUpdatePacket = new ClientboundBlockUpdatePacket(blockPos, signBlock);
+        nmsTarget.connection.send(blockUpdatePacket); // set sign block
+
         SignBlockEntity sign = new SignBlockEntity(blockPos, signBlock);
         System.arraycopy(this.defaultLines, 0, sign.messages, 0, 4);
 
-        ClientboundBlockUpdatePacket blockUpdatePacket = new ClientboundBlockUpdatePacket(blockPos, signBlock);
         ClientboundOpenSignEditorPacket signEditorPacket = new ClientboundOpenSignEditorPacket(blockPos);
-
-        ServerPlayer nmsTarget = ((CraftPlayer) this.target).getHandle();
-        nmsTarget.connection.send(blockUpdatePacket); // set sign block
         nmsTarget.connection.send(sign.getUpdatePacket()); // set lines
+
         nmsTarget.connection.send(signEditorPacket); // show sign editor
 
         this.isOpened = true;

@@ -62,7 +62,7 @@ public class ColorCodeListener implements Listener {
         ItemMeta oldMeta = item.getItemMeta();
         if (oldMeta == null || oldMeta.displayName() == null) return;
 
-        oldMeta.displayName(PaperComponents.legacySectionSerializer().deserialize(PlainTextComponentSerializer.plainText().serialize(oldMeta.displayName())));
+        oldMeta.displayName(LegacyComponentSerializer.legacyAmpersand().deserialize(PlainTextComponentSerializer.plainText().serialize(oldMeta.displayName())));
         item.setItemMeta(oldMeta);
 
         event.setResult(item);

@@ -29,57 +29,76 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
+import com.ryuuta0217.packets.FML2HandshakePacket;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.FriendlyByteBuf;
+import sun.misc.Unsafe;
+
+import java.lang.reflect.Field;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class Debug {
     public static void main(String[] args) {
-        Map<Pair<Integer, Integer>, String> map = new HashMap<>();
-        map.put(Pair.of(1, 2), "unti");
-        map.put(Pair.of(1, 2), "buri");
-        map.put(Pair.of(2, 3), "oppai");
-        System.out.println(map);
-        System.out.println(map.keySet().stream().filter(pair -> pair.equals(Pair.of(1, 2))).collect(Collectors.toSet()));
+        FML2HandshakePacket packet = new FML2HandshakePacket(new ArrayList<>() {{
+            add("minecraft");
+            add("packetdebugger");
+            add("forge");
+        }}, new HashMap<>() {{
+            put("fml:loginwrapper", "FML2");
+            put("forge:tier_sorting", "1.0");
+            put("fml:handshake", "FML2");
+            put("minecraft:unregister", "FML2");
+            put("fml:play", "FML2");
+            put("minecraft:register", "FML2");
+            put("forge:split", "1.1");
+        }}, new HashMap<>() {{
+            put("minecraft:block", null);
+            put("minecraft:fluid", null);
+            put("minecraft:item", null);
+            put("minecraft:mob_effect", null);
+            put("minecraft:sound_event", null);
+            put("minecraft:potion", null);
+            put("minecraft:enchantment", null);
+            put("minecraft:entity_type", null);
+            put("minecraft:block_entity_type", null);
+            put("minecraft:particle_type", null);
+            put("minecraft:menu", null);
+            put("minecraft:motive", null);
+            put("minecraft:recipe_serializer", null);
+            put("minecraft:stat_type", null);
+            put("minecraft:villager_profession", null);
+            put("minecraft:data_serializers", null);
+        }});
+
+        ByteBuf buf = Unpooled.buffer();
+        buf.writeByte(1 & 0xff);
+        buf = packet.encodeS2C(buf);
+
+        /*
+        Mods: [minecraft, packetdebugger, forge]
+
+Channels: {fml:loginwrapper=FML2, forge:tier_sorting=1.0, fml:handshake=FML2, minecraft:unregister=FML2, fml:play=FML2, minecraft:register=FML2, forge:split=1.1}
+
+Registries: [minecraft:villager_profession, minecraft:data_serializers]
+         */
+
+        System.out.println(Arrays.toString(ByteBufUtil.getBytes(buf)));
     }
-}
 
-class Pair<L, R> {
-    private static final Set<Pair<?, ?>> INSTANCES = new HashSet<>();
-    private final L left;
-    private final R right;
-
-    private Pair(L left, R right) {
-        this.left = left;
-        this.right = right;
-    }
-
-    public static <L, R> Pair<L, R> of(L left, R right) {
-        Pair<L, R> inst = new Pair<>(left, right);
-        List<Pair<L, R>> searchedInstances = INSTANCES.stream()
-                .filter(pair -> pair.equals(inst))
-                .map(pair -> (Pair<L, R>) pair)
-                .toList();
-        if (searchedInstances.size() > 0) return searchedInstances.get(0);
-        INSTANCES.add(inst);
-        return inst;
-    }
-
-    public L getLeft() {
-        return left;
-    }
-
-    public R getRight() {
-        return right;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Pair<?, ?> pair) {
-            if (pair.getLeft().equals(this.getLeft()) && pair.getRight().equals(this.getRight())) {
-                return true;
-            }
+    public static Unsafe getUnsafe() {
+        Field f = null;
+        try {
+            f = Unsafe.class.getDeclaredField("theUnsafe");
+        } catch (NoSuchFieldException e) {
+            throw new RuntimeException(e);
         }
-
-        return super.equals(obj);
+        f.trySetAccessible();
+        try {
+            return (Unsafe) f.get(null);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

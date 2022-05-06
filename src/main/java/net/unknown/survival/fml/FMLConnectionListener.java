@@ -31,11 +31,16 @@
 
 package net.unknown.survival.fml;
 
+import com.ryuuta0217.packets.C2SModListReply;
 import com.ryuuta0217.packets.FML2HandshakePacket;
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.kyori.adventure.text.Component;
+import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.enums.ConnectionEnvironment;
+import net.unknown.survival.enums.Permissions;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -43,7 +48,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public class FMLConnectionListener implements org.bukkit.plugin.messaging.PluginMessageListener {
-    private static final Logger LOGGER = Logger.getLogger("SCK/ModDetector");
+    private static final Logger LOGGER = Logger.getLogger("UNC/ModDetector");
 
     @Override
     public void onPluginMessageReceived(@NotNull String s, @NotNull Player player, byte[] bytes) {
@@ -56,10 +61,12 @@ public class FMLConnectionListener implements org.bukkit.plugin.messaging.Plugin
                 return;
             }
 
-            FML2HandshakePacket handshake = FML2HandshakePacket.parse(buf);
+            C2SModListReply reply = C2SModListReply.decode(buf);
 
-            ModdedClientPlayer mcp = new ModdedClientPlayer(ConnectionEnvironment.FML2, handshake.getMods(), handshake.getChannels(), handshake.getRegistries());
+            ModdedClientPlayer mcp = new ModdedClientPlayer(ConnectionEnvironment.FML2, reply.getMods(), reply.getChannels(), reply.getRegistries());
             ModdedPlayerManager.addPlayer(player, mcp);
+
+            Bukkit.broadcast(Component.text("").append(player.displayName()).append(Component.text(" の導入Mod: " + mcp.getModNames())), Permissions.NOTIFY_MODDED_PLAYER.getPermissionNode());
 
             //Bukkit.broadcast(Component.text(player.getName() + " is using mods! Installed: " + mcp.getModNames()));
         }

@@ -31,10 +31,10 @@
 
 package com.ryuuta0217.util;
 
-import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
 
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 /**
@@ -75,7 +75,7 @@ public class MinecraftPacketReader {
         } else {
             byte[] b = new byte[len];
             buf.readBytes(b);
-            String s = new String(b, Charsets.UTF_8);
+            String s = new String(b, StandardCharsets.UTF_8);
             if (s.length() > maxLen) {
                 throw new DecoderException(String.format("Cannot receive string longer than %d (got %d characters)", maxLen, s.length()));
             } else {
@@ -86,5 +86,27 @@ public class MinecraftPacketReader {
 
     public static UUID readUUID(ByteBuf input) {
         return new UUID(input.readLong(), input.readLong());
+    }
+
+    public static void writeVarInt(int value, ByteBuf out) {
+        do {
+            int part = value & 127;
+            value >>>= 7;
+            if (value != 0) {
+                part |= 128;
+            }
+
+            out.writeByte(part);
+        } while(value != 0);
+    }
+
+    public static void writeString(String s, ByteBuf out) {
+        if (s.length() > 32767) {
+            throw new IllegalArgumentException("Cannot send string longer than Short.MAX_VALUE (got " + s.length() + " characters)");
+        } else {
+            byte[] b = s.getBytes(StandardCharsets.UTF_8);
+            writeVarInt(b.length, out);
+            out.writeBytes(b);
+        }
     }
 }
