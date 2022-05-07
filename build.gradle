@@ -57,8 +57,8 @@ dependencies {
     compileOnly group: 'com.github.MilkBowl', name: 'VaultAPI', version: '+'
     compileOnly group: 'net.luckperms', name: 'api', version: '+'
     implementation group: 'org.mozilla', name: 'rhino', version: '+'
-    implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
-    implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
+    //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
+    //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
 }
 
 shadowJar {
