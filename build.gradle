@@ -41,7 +41,6 @@ license {
 
 repositories {
     mavenCentral()
-    maven { url = "https://repo.codemc.io/repository/maven-public/" }
     maven { url = "https://repo.spongepowered.org/maven/" }
     maven { url = "https://files.minecraftforge.net/maven/" }
     maven { url = "https://maven.quiltmc.org/repository/release/" }
@@ -53,7 +52,6 @@ dependencies {
     paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.18.1-R0.1-SNAPSHOT")
     compileOnly fileTree(dir: "libs", include: "*.jar")
     compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '+'
-    compileOnly group: 'me.filoghost.holographicdisplays', name: 'holographicdisplays-plugin', version: '+'
     compileOnly group: 'com.github.MilkBowl', name: 'VaultAPI', version: '+'
     compileOnly group: 'net.luckperms', name: 'api', version: '+'
     implementation group: 'org.mozilla', name: 'rhino', version: '+'

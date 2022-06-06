@@ -1,5 +1,7 @@
 build/
-libs/
+libs/*
+!libs/HolographicDisplays.jar
+!libs/gradle/
 .idea/
 .gradle/
 testServer/logs/
