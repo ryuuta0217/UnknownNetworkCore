@@ -78,4 +78,16 @@ public class Suggestions {
 
         return SharedSuggestionProvider.suggest(Collections.emptyList(), builder);
     };
+
+    public static final SuggestionProvider<CommandSourceStack> OWNED_CHANNELS_SUGGEST = (ctx, builder) -> {
+        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+            return SharedSuggestionProvider.suggest(CustomChannels.getChannels()
+                    .values()
+                    .stream()
+                    .filter(channel -> channel.getOwner().equals(player.getUUID()))
+                    .map(ChatChannel::getChannelName), builder);
+        }
+
+        return SharedSuggestionProvider.suggest(Collections.emptyList(), builder);
+    };
 }

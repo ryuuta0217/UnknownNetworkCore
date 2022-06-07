@@ -32,13 +32,16 @@
 package net.unknown.survival.chat.channels;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.managers.RunnableManager;
+import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
+import net.unknown.survival.events.CustomChatChannelEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
@@ -47,8 +50,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class CustomChannel extends ChatChannel {
-    public static final Set<String> RESERVED_NAMES = new HashSet<>(Arrays.asList("global", "near", "heads_up", "title", "me", "private"));
-
     private final Set<UUID> players = new HashSet<>();
     private final UUID owner;
     private final String channelName;
@@ -73,7 +74,7 @@ public class CustomChannel extends ChatChannel {
                 .append(this.displayName) // チャンネル名
                 .append(Component.text("]"));
 
-        return space ? c : c.append(Component.text(" "));
+        return space ? c.append(Component.text(" ")) : c;
     }
 
     private Component getRenderedMessage(Player source, Component message) {
@@ -92,7 +93,7 @@ public class CustomChannel extends ChatChannel {
     public void processChat(AsyncChatEvent event) {
         event.setCancelled(true);
 
-        this.sendMessage(this.getRenderedMessage(event.getPlayer(), event.message()));
+        this.sendMessage(event.getPlayer(), this.getRenderedMessage(event.getPlayer(), event.message()));
     }
 
     public Component getDisplayName() {
@@ -112,19 +113,35 @@ public class CustomChannel extends ChatChannel {
     }
 
     public void addPlayer(UUID uniqueId) {
+        if(this.players.contains(uniqueId)) throw new IllegalArgumentException("プレイヤー " + uniqueId + " はチャンネル " + this.channelName + " に既に参加しています。");
         this.players.add(uniqueId);
-        this.sendMessage(Component.empty().color(DefinedTextColor.GRAY).decoration(TextDecoration.ITALIC, true)
+        this.sendMessage(null, Component.empty().color(DefinedTextColor.GRAY).decoration(TextDecoration.ITALIC, true)
                 .append(this.getChannelPrefix(true))
                 .append(Component.text(Bukkit.getOfflinePlayer(uniqueId).getName() + " がチャンネルに参加しました")));
         RunnableManager.runAsync(CustomChannels::save);
     }
 
-    private void sendMessage(Component message) {
-        this.players.stream()
+    public void removePlayer(UUID uniqueId) {
+        if(!this.players.contains(uniqueId)) throw new IllegalArgumentException("プレイヤー " + uniqueId + " はチャンネル " + this.channelName + " に参加していません");
+        this.players.remove(uniqueId);
+        if(ChatManager.getCurrentChannel(uniqueId).equals(this)) {
+            ChatManager.setChannel(uniqueId, GlobalChannel.getInstance());
+        }
+        this.sendMessage(null, Component.empty().color(DefinedTextColor.GRAY).decoration(TextDecoration.ITALIC, true)
+                .append(this.getChannelPrefix(true))
+                .append(Component.text(Bukkit.getOfflinePlayer(uniqueId).getName() + " がチャンネルから退出しました")));
+        RunnableManager.runAsync(CustomChannels::save);
+    }
+
+    public void sendMessage(Player player, Component message) {
+        CustomChatChannelEvent event = new CustomChatChannelEvent(!Bukkit.isPrimaryThread(), player, message, this.players.stream()
                 .map(Bukkit::getOfflinePlayer)
                 .filter(OfflinePlayer::isOnline)
                 .map(off -> (Player) off)
-                .collect(Collectors.toSet())
-                .forEach(player -> player.sendMessage(message));
+                .collect(Collectors.toSet()), this);
+        Bukkit.getPluginManager().callEvent(event);
+        if(event.isCancelled()) return;
+        Bukkit.getServer().getConsoleSender().sendMessage(player == null ? Identity.nil() : player.identity(), message);
+        event.getReceivers().forEach(receiver -> receiver.sendMessage((event.getSender() == null ? Identity.nil() : event.getSender().identity()), event.getRenderedMessage()));
     }
 }

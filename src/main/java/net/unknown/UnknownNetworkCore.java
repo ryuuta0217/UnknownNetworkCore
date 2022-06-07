@@ -33,10 +33,13 @@ package net.unknown;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.dedicated.DedicatedServer;
 import net.unknown.core.commands.Commands;
 import net.unknown.core.gui.SignGui;
+import net.unknown.core.tab.TabListPingManager;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
 
@@ -50,7 +53,11 @@ public class UnknownNetworkCore extends JavaPlugin {
     }
 
     public static CommandDispatcher<CommandSourceStack> getBrigadier() {
-        return ((CraftServer) Bukkit.getServer()).getServer().vanillaCommandDispatcher.getDispatcher();
+        return getDedicatedServer().vanillaCommandDispatcher.getDispatcher();
+    }
+
+    public static DedicatedServer getDedicatedServer() {
+        return ((CraftServer) Bukkit.getServer()).getServer();
     }
 
     public static UnknownNetworkCore getInstance() {
@@ -63,37 +70,51 @@ public class UnknownNetworkCore extends JavaPlugin {
 
     @Override
     public void onLoad() {
+        long start = System.nanoTime();
         getLogger().info("Plugin was loaded with environment: " + ENV.name());
         Commands.init();
         ENV.onLoad();
+        long end = System.nanoTime();
+        getLogger().info("Plugin was loaded in " + (end - start) / 1000000 + "ms");
     }
 
     @Override
     public void onEnable() {
+        long start = System.nanoTime();
         Bukkit.getPluginManager().registerEvents(new SignGui.Listener(), this);
+        Bukkit.getPluginManager().registerEvents(new TabListPingManager(), this);
+        TabListPingManager.startTask();
         getLogger().info("");
         getLogger().info("");
         getLogger().info("""
 
 
-                ██╗   ██╗███╗   ██╗██╗  ██╗███╗   ██╗ ██████╗ ██╗    ██╗███╗   ██╗    ███╗   ██╗███████╗████████╗██╗    ██╗ ██████╗ ██████╗ ██╗  ██╗
-                ██║   ██║████╗  ██║██║ ██╔╝████╗  ██║██╔═══██╗██║    ██║████╗  ██║    ████╗  ██║██╔════╝╚══██╔══╝██║    ██║██╔═══██╗██╔══██╗██║ ██╔╝
-                ██║   ██║██╔██╗ ██║█████╔╝ ██╔██╗ ██║██║   ██║██║ █╗ ██║██╔██╗ ██║    ██╔██╗ ██║█████╗     ██║   ██║ █╗ ██║██║   ██║██████╔╝█████╔╝
-                ██║   ██║██║╚██╗██║██╔═██╗ ██║╚██╗██║██║   ██║██║███╗██║██║╚██╗██║    ██║╚██╗██║██╔══╝     ██║   ██║███╗██║██║   ██║██╔══██╗██╔═██╗
-                ╚██████╔╝██║ ╚████║██║  ██╗██║ ╚████║╚██████╔╝╚███╔███╔╝██║ ╚████║    ██║ ╚████║███████╗   ██║   ╚███╔███╔╝╚██████╔╝██║  ██║██║  ██╗
-                 ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝    ╚═╝  ╚═══╝╚══════╝   ╚═╝    ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
+                ██╗   ██╗███╗   ██╗██╗  ██╗███╗   ██╗ ██████╗ ██╗    ██╗███╗   ██╗
+                ██║   ██║████╗  ██║██║ ██╔╝████╗  ██║██╔═══██╗██║    ██║████╗  ██║
+                ██║   ██║██╔██╗ ██║█████╔╝ ██╔██╗ ██║██║   ██║██║ █╗ ██║██╔██╗ ██║
+                ██║   ██║██║╚██╗██║██╔═██╗ ██║╚██╗██║██║   ██║██║███╗██║██║╚██╗██║
+                ╚██████╔╝██║ ╚████║██║  ██╗██║ ╚████║╚██████╔╝╚███╔███╔╝██║ ╚████║
+                 ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
                  
+                ███╗   ██╗███████╗████████╗██╗    ██╗ ██████╗ ██████╗ ██╗  ██╗
+                ████╗  ██║██╔════╝╚══██╔══╝██║    ██║██╔═══██╗██╔══██╗██║ ██╔╝
+                ██╔██╗ ██║█████╗     ██║   ██║ █╗ ██║██║   ██║██████╔╝█████╔╝
+                ██║╚██╗██║██╔══╝     ██║   ██║███╗██║██║   ██║██╔══██╗██╔═██╗
+                ██║ ╚████║███████╗   ██║   ╚███╔███╔╝╚██████╔╝██║  ██║██║  ██╗
+                ╚═╝  ╚═══╝╚══════╝   ╚═╝    ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
 
                 """);
         getLogger().info("");
         getLogger().info("");
         getLogger().info("");
         ENV.onEnable();
-        System.out.println(Boolean.getBoolean("net.kyori.adventure.text.warnWhenLegacyFormattingDetected"));
+        long end = System.nanoTime();
+        getLogger().info("Plugin was enabled in " + (end - start) / 1000000 + "ms");
     }
 
     @Override
     public void onDisable() {
+        HandlerList.unregisterAll(this);
         ENV.onDisable();
     }
 }

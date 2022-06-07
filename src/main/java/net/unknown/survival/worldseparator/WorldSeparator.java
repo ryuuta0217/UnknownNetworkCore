@@ -33,6 +33,7 @@ package net.unknown.survival.worldseparator;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.World;

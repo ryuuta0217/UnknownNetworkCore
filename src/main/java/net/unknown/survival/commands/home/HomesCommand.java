@@ -43,6 +43,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.data.Home;
@@ -94,8 +95,7 @@ public class HomesCommand {
 
         c = c.append(Component.text("⇦", TextColor.color(ChatColor.RED.getColor().getRGB()))
                         .clickEvent(page > 1 ? ClickEvent.runCommand("/homes " + (page - 1)) : null))
-                .append(Component.text(" [" + page + "/" + maxPage + "] ",
-                        TextColor.color(ChatColor.AQUA.getColor().getRGB())));
+                .append(Component.text(" [" + page + "/" + maxPage + "] ", DefinedTextColor.AQUA));
 
         if (page < maxPage) {
             c = c.append(Component.text("⇨", TextColor.color(ChatColor.GREEN.getColor().getRGB()))

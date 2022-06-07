@@ -31,8 +31,10 @@
 
 package net.unknown.survival.chat.channels.ranged;
 
+import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.text.Component;
 import net.unknown.survival.chat.channels.ChannelType;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -46,6 +48,8 @@ public class NearChatChannel extends RangedChatChannel {
 
     @Override
     public void processRangedChat(AsyncChatEvent event, Collection<? extends Player> receivers) {
-        Bukkit.getServer().sendMessage(event.getPlayer(), event.renderer().render(event.getPlayer(), event.getPlayer().displayName(), event.message(), Audience.audience(receivers)));
+        receivers.forEach(receiver -> {
+            receiver.sendMessage(event.getPlayer(), event.renderer().render(event.getPlayer(), Component.empty().append(event.getPlayer().displayName()).append(Component.text("[" + this.getRange() + "]")), event.message(), Audience.audience(receivers)));
+        });
     }
 }

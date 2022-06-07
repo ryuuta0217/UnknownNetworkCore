@@ -47,6 +47,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.unknown.UnknownNetworkCore;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.events.PrivateMessageEvent;
 import net.unknown.core.util.BrigadierUtil;
@@ -193,7 +194,7 @@ public class MsgCommand {
             }
         }
 
-        ServerPlayer receiver = ((CraftServer) Bukkit.getServer()).getServer().getPlayerList().getPlayer(replyTarget);
+        ServerPlayer receiver = UnknownNetworkCore.getDedicatedServer().getPlayerList().getPlayer(replyTarget);
         if (receiver == null) {
             MessageUtil.sendErrorMessage(ctx.getSource(), "プレイヤーが見つかりません");
             return 2;

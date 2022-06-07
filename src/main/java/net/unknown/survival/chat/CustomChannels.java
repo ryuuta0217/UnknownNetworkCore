@@ -47,6 +47,8 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public class CustomChannels {
+    public static final Set<String> RESERVED_NAMES = new HashSet<>(Arrays.asList("global", "near", "heads_up", "title", "me", "private"));
+
     private static final Logger LOGGER = Logger.getLogger("CCLoader");
 
     private static final Map<String, CustomChannel> CHANNELS = new HashMap<>();
@@ -61,9 +63,9 @@ public class CustomChannels {
 
                 if(CONFIG.contains("channels")) {
                     CONFIG.getConfigurationSection("channels").getKeys(false).forEach(channelName -> {
-                        UUID owner = UUID.fromString(CONFIG.getString(channelName + ".owner"));
-                        Component displayName = GsonComponentSerializer.gson().deserialize(CONFIG.getString(channelName + ".display_name"));
-                        List<UUID> players = CONFIG.getStringList(channelName + ".players").stream().map(rawUniqueId -> UUID.fromString(rawUniqueId)).toList();
+                        UUID owner = UUID.fromString(CONFIG.getString("channels." + channelName + ".owner"));
+                        Component displayName = GsonComponentSerializer.gson().deserialize(CONFIG.getString("channels." + channelName + ".display_name"));
+                        List<UUID> players = CONFIG.getStringList("channels." + channelName + ".players").stream().map(rawUniqueId -> UUID.fromString(rawUniqueId)).toList();
                         CHANNELS.put(channelName, new CustomChannel(channelName, displayName, owner, players));
                     });
                 }
@@ -87,7 +89,7 @@ public class CustomChannels {
     }
 
     public static CustomChannel createChannel(String channelName, UUID owner, Component displayName) throws IllegalArgumentException {
-        if(isChannelFound(channelName)) {
+        if(isChannelFound(channelName) || RESERVED_NAMES.contains(channelName)) {
             throw new IllegalArgumentException("Channel already exists!");
         }
 
@@ -95,6 +97,15 @@ public class CustomChannels {
         CHANNELS.put(channelName, channel);
         RunnableManager.runAsync(CustomChannels::save);
         return channel;
+    }
+
+    public static void removeChannel(String channelName) {
+        if(!isChannelFound(channelName)) throw new IllegalArgumentException("Channel not found!");
+        CustomChannel channel = getChannel(channelName);
+        if(channel == null) throw new IllegalArgumentException("Channel not found!");
+        channel.sendMessage(null, Component.text("チャンネルが削除されました"));
+        CHANNELS.remove(channelName);
+        RunnableManager.runAsync(CustomChannels::save);
     }
 
     @Nullable

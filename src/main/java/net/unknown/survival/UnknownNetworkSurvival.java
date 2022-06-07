@@ -32,7 +32,9 @@
 package net.unknown.survival;
 
 import net.milkbowl.vault.economy.Economy;
+import net.minecraft.core.Registry;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
+import net.minecraft.world.level.block.ComposterBlock;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.survival.antivillagerlag.AntiVillagerLag;
 import net.unknown.survival.chat.ChatManager;
@@ -44,9 +46,11 @@ import net.unknown.survival.enchants.RangedMining;
 import net.unknown.survival.fml.FMLConnectionListener;
 import net.unknown.survival.fml.ModdedPlayerManager;
 import net.unknown.survival.fun.DemolitionGun;
+import net.unknown.survival.fun.MonsterBall;
 import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.listeners.ColorCodeListener;
 import net.unknown.survival.listeners.MainGuiOpenListener;
+import net.unknown.survival.listeners.PlayerDeathListener;
 import net.unknown.survival.worldseparator.WorldSeparator;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
@@ -74,6 +78,7 @@ public class UnknownNetworkSurvival {
         PlayerData.loadExists();
         CustomChannels.load();
         AntiVillagerLag.startLoopTask();
+        PlayerDeathListener.load();
 
         Bukkit.getPluginManager().registerEvents(new MainGuiOpenListener(), UnknownNetworkCore.getInstance());
         Bukkit.getPluginManager().registerEvents(new ChatManager(), UnknownNetworkCore.getInstance());
@@ -83,6 +88,8 @@ public class UnknownNetworkSurvival {
         Bukkit.getPluginManager().registerEvents(new DemolitionGun(), UnknownNetworkCore.getInstance());
         Bukkit.getPluginManager().registerEvents(new HatakeWatari(), UnknownNetworkCore.getInstance());
         Bukkit.getPluginManager().registerEvents(new RangedMining(), UnknownNetworkCore.getInstance());
+        Bukkit.getPluginManager().registerEvents(new MonsterBall(), UnknownNetworkCore.getInstance());
+        Bukkit.getPluginManager().registerEvents(new PlayerDeathListener(), UnknownNetworkCore.getInstance());
         //Bukkit.getPluginManager().registerEvents(new WorldSeparator(), UnknownNetworkCore.getInstance());
 
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());

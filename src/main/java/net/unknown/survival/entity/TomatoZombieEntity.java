@@ -60,9 +60,9 @@ import java.util.EnumSet;
 public class TomatoZombieEntity extends Zombie {
     private final MeleeAttackGoal attackGoal = new MeleeAttackGoal(this, 1.0, false);
     private final FireBallAttackGoal fireBallGoal = new FireBallAttackGoal(this);
-    private final boolean monsters = false;
+    private static boolean monsters = false;
 
-    public TomatoZombieEntity(Level world, boolean monsters) {
+    public TomatoZombieEntity(Level world) {
         super(EntityType.ZOMBIE, world);
     }
 
@@ -75,7 +75,8 @@ public class TomatoZombieEntity extends Zombie {
     }
 
     public static void spawn(ServerLevel level, Vec3 position, Vec2 rotation, boolean monsters) {
-        TomatoZombieEntity entity = new TomatoZombieEntity(level, monsters);
+        TomatoZombieEntity.monsters = monsters;
+        TomatoZombieEntity entity = new TomatoZombieEntity(level);
         entity.setPos(position);
         entity.setRot(rotation.y, rotation.x);
         level.addFreshEntity(entity, CreatureSpawnEvent.SpawnReason.DEFAULT);

@@ -36,15 +36,10 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.*;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.spigotmc.SpigotConfig;
-
-import java.util.UUID;
 
 public class NewMessageUtil {
     /* NORMAL MESSAGES */
@@ -100,6 +95,32 @@ public class NewMessageUtil {
         sendMessage(player, component, true);
     }
     /* END - Adventure Components */
+
+    /* START - Plain Texts */
+    public static void sendMessage(CommandSourceStack source, String message, boolean broadcastToOps) {
+        sendMessage(source, new TextComponent(message), broadcastToOps);
+    }
+
+    public static void sendMessage(CommandSourceStack source, String message) {
+        sendMessage(source, message, true);
+    }
+
+    public static void sendMessage(Player player, String message, boolean broadcastToOps) {
+        sendMessage(player.createCommandSourceStack(), message, broadcastToOps);
+    }
+
+    public static void sendMessage(Player player, String message) {
+        sendMessage(player, message, true);
+    }
+
+    public static void sendMessage(org.bukkit.entity.Player player, String message, boolean broadcastToOps) {
+        sendMessage(((CraftPlayer) player).getHandle(), message, broadcastToOps);
+    }
+
+    public static void sendMessage(org.bukkit.entity.Player player, String message) {
+        sendMessage(player, message, true);
+    }
+    /* END - Plain Texts*/
     /* NORMAL MESSAGES END */
 
     /* ERROR MESSAGES */
@@ -156,6 +177,33 @@ public class NewMessageUtil {
     }
     /* END - Adventure Components */
 
+    /* START - Plain Texts */
+    public static void sendErrorMessage(CommandSourceStack source, String message, boolean broadcastToOps) {
+        sendErrorMessage(source, new TextComponent(message), broadcastToOps);
+    }
+
+    public static void sendErrorMessage(CommandSourceStack source, String message) {
+        sendErrorMessage(source, message, false);
+    }
+
+    public static void sendErrorMessage(Player player, String message, boolean broadcastToOps) {
+        sendErrorMessage(player.createCommandSourceStack(), message, broadcastToOps);
+    }
+
+    public static void sendErrorMessage(Player player, String message) {
+        sendErrorMessage(player, message, false);
+    }
+
+    public static void sendErrorMessage(org.bukkit.entity.Player player, String message, boolean broadcastToOps) {
+        sendErrorMessage(((CraftPlayer) player).getHandle(), message, broadcastToOps);
+    }
+
+    public static void sendErrorMessage(org.bukkit.entity.Player player, String message) {
+        sendErrorMessage(player, message, false);
+    }
+    /* END - Plain Texts*/
+    /* ERROR MESSAGES END */
+
     //public static void broadcast(Component component, UUID sender, ChatType type, String permission) {
         //CraftServer bukkit = (CraftServer) Bukkit.getServer();
         //bukkit.getServer().getPlayerList().broadcastMessage();
@@ -174,7 +222,7 @@ public class NewMessageUtil {
                 //  → プレイヤーの行動追跡に若干の難が生まれる？
                 //  ただし、実行者のワールドAがtrueでも受信者のいるワールドBがfalseだとフィードバックを受信できない
                 if(player.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
-                    player.sendMessage(msg, Util.NIL_UUID);
+                    player.sendMessage(msg, source.getEntity() != null ? source.getEntity().getUUID() : Util.NIL_UUID);
                 }
             }
         });

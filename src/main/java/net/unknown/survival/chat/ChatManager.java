@@ -31,17 +31,22 @@
 
 package net.unknown.survival.chat;
 
+import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
+import net.unknown.core.util.YukiKanaConverter;
 import net.unknown.survival.UnknownNetworkSurvival;
 import net.unknown.survival.chat.channels.ChannelType;
 import net.unknown.survival.chat.channels.ChatChannel;
 import net.unknown.survival.chat.channels.GlobalChannel;
+import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.dependency.LuckPerms;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -89,9 +94,32 @@ public class ChatManager implements Listener {
         }
 
         event.message(event.message().replaceText((b) -> {
-            b.match(Pattern.compile("https?://\\S+")).replacement((r, b2) -> Component.text(b2.content(), DefinedTextColor.AQUA).clickEvent(ClickEvent.openUrl(b2.content())));
+            b.match(Pattern.compile("https?://\\S+")).replacement((r, b2) -> Component.text(b2.content(), Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl(b2.content())));
         }));
 
-        getCurrentChannel(event.getPlayer().getUniqueId()).processChat(event);
+        if(PlayerData.of(event.getPlayer()).isUseKanaConvert()) {
+            ChatRenderer baseRenderer = event.renderer();
+            event.renderer((source, displayName, message, viewer) -> {
+                String msgStr = PlainTextComponentSerializer.plainText().serialize(message);
+                if(YukiKanaConverter.isNeedToJapanize(msgStr)) {
+                    String kanaMsgStr = YukiKanaConverter.conv(msgStr);
+                    Component msg = PlainTextComponentSerializer.plainText().deserialize(kanaMsgStr);
+                    return baseRenderer.render(source, displayName, Component.empty()
+                            .append(msg)
+                            .append(Component.text(" (" + msgStr + ")",
+                                    Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC.as(true)))), viewer);
+                }
+                return baseRenderer.render(source, displayName, message, viewer);
+            });
+        }
+
+        if(PlainTextComponentSerializer.plainText().serialize(event.message()).startsWith(PlayerData.of(event.getPlayer()).getForceGlobalChatPrefix())) {
+            event.message(event.message().replaceText((b) -> {
+                b.match(PlayerData.of(event.getPlayer()).getForceGlobalChatPrefix()).once().replacement(Component.empty());
+            }));
+            GlobalChannel.getInstance().processChat(event);
+        } else {
+            getCurrentChannel(event.getPlayer().getUniqueId()).processChat(event);
+        }
     }
 }

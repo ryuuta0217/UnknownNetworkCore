@@ -34,7 +34,9 @@ package net.unknown.survival.chat.channels.ranged;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.level.block.ComposterBlock;
 import net.unknown.survival.chat.channels.ChannelType;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;
@@ -46,6 +48,6 @@ public class MeChatChannel extends RangedChatChannel {
 
     @Override
     public void processRangedChat(AsyncChatEvent event, Collection<? extends Player> receivers) {
-        receivers.forEach(receiver -> receiver.sendMessage(Component.translatable("chat.type.emote").args(event.getPlayer().displayName(), event.message()), MessageType.CHAT));
+        receivers.forEach(receiver -> receiver.sendMessage(event.getPlayer(), Component.translatable("chat.type.emote").args(Component.empty().append(event.getPlayer().displayName()).append(Component.text(this.getRange() > 0 ? "[" + this.getRange() + "]" : "")), event.message()), MessageType.CHAT));
     }
 }

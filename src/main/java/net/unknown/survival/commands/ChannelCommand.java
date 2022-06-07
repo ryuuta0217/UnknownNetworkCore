@@ -32,9 +32,12 @@
 package net.unknown.survival.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -50,13 +53,17 @@ import net.minecraft.world.entity.player.Player;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.chat.channels.*;
 import net.unknown.survival.chat.channels.ranged.MeChatChannel;
 import net.unknown.survival.chat.channels.ranged.NearChatChannel;
 import net.unknown.survival.chat.channels.ranged.TitleChatChannel;
+import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
@@ -66,6 +73,8 @@ import java.util.UUID;
 
 public class ChannelCommand {
     private static final Map<UUID, Map<UUID, Map<BukkitTask, CustomChannel>>> CHANNEL_INVITES = new HashMap<>();
+
+    private static final Map<UUID, CustomChannel> TO_REMOVE_CONFIRM = new HashMap<>();
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("channel");
@@ -98,6 +107,11 @@ public class ChannelCommand {
                         .then(Commands.argument("チャンネル名", StringArgumentType.word())
                                 .then(Commands.argument("表示名", ComponentArgument.textComponent())
                                         .executes(ChannelCommand::createChannel))))
+                .then(Commands.literal("remove")
+                        .executes(ChannelCommand::removeChannel) // remove default channel
+                        .then(Commands.argument("チャンネル名", StringArgumentType.word())
+                                .suggests(Suggestions.OWNED_CHANNELS_SUGGEST)
+                                .executes(ChannelCommand::removeChannel)))
                 .then(Commands.literal("invite") // /channel invite <target: Single> [channelName]
                         .then(Commands.argument("対象", EntityArgument.player())
                                 .executes(ChannelCommand::inviteToChannel) // invite defaulting channel (only for CUSTOM_CHANNEL)
@@ -121,6 +135,21 @@ public class ChannelCommand {
                                 .executes(ChannelCommand::denyInvite)
                                 .then(Commands.argument("チャンネル名", StringArgumentType.word())
                                         .executes(ChannelCommand::denyInvite))));
+
+        builder.then(Commands.literal("options")
+                .then(Commands.literal("global")
+                        .then(Commands.literal("forceGlobalChatPrefix")
+                                .then(Commands.literal("get")
+                                        .executes(ctx -> showGlobalOption(ctx, GlobalOptions.FORCE_GLOBAL_CHAT_PREFIX, false)))
+                                .then(Commands.literal("set")
+                                        .then(Commands.argument("接頭辞", StringArgumentType.greedyString())
+                                                .executes(ctx -> setGlobalOption(ctx, GlobalOptions.FORCE_GLOBAL_CHAT_PREFIX)))))
+                        .then(Commands.literal("kanaConvert")
+                                .then(Commands.literal("get")
+                                        .executes(ctx -> showGlobalOption(ctx, GlobalOptions.KANA_CONVERT, false)))
+                                .then(Commands.literal("set")
+                                        .then(Commands.argument("有効", BoolArgumentType.bool())
+                                                .executes(ctx -> setGlobalOption(ctx, GlobalOptions.KANA_CONVERT)))))));
 
         dispatcher.register(builder);
     }
@@ -179,7 +208,6 @@ public class ChannelCommand {
             case PRIVATE -> {
                 UUID target = null;
                 EntitySelector selector = BrigadierUtil.getArgumentOrDefault(ctx, EntitySelector.class, "対象", null);
-                System.out.println("SELECTOR* " + selector);
                 if (selector != null) {
                     try {
                         target = selector.findSinglePlayer(ctx.getSource()).getUUID();
@@ -214,7 +242,7 @@ public class ChannelCommand {
     }
 
     private static int createChannel(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player){
+        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
             String internalChannelName = StringArgumentType.getString(ctx, "チャンネル名");
             if (CustomChannels.isChannelFound(internalChannelName)) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "チャンネル名 " + internalChannelName + " は既に使用されています");
@@ -232,6 +260,50 @@ public class ChannelCommand {
         return 0;
     }
 
+    private static int removeChannel(CommandContext<CommandSourceStack> ctx) {
+        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+            String channelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
+            if(channelName == null) {
+                ChatChannel channel = ChatManager.getCurrentChannel(player.getUUID());
+                if(channel.getType() == ChannelType.CUSTOM && channel instanceof CustomChannel customChannel) {
+                    channelName = customChannel.getChannelName();
+                } else {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("システムチャンネルを削除することはできません"));
+                    return 1;
+                }
+            }
+
+            if(CustomChannels.isChannelFound(channelName)) {
+                CustomChannel channel = CustomChannels.getChannel(channelName);
+                if(channel.getOwner().equals(player.getUUID())) {
+                    if(TO_REMOVE_CONFIRM.containsKey(player.getUUID()) && TO_REMOVE_CONFIRM.get(player.getUUID()).getChannelName().equals(channelName)) {
+                        TO_REMOVE_CONFIRM.remove(player.getUUID());
+                        CustomChannels.removeChannel(channelName);
+                        NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("チャンネル ")
+                                .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                                .append(new TextComponent(" が削除されました")));
+                        return 0;
+                    } else {
+                        TO_REMOVE_CONFIRM.put(player.getUUID(), channel);
+                        NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("チャンネル ").withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+                                .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                                .append(new TextComponent(" を本当に削除しますか？"))
+                                .append("\n")
+                                .append(new TextComponent("本当に削除する場合は、もう一度コマンドを実行してください。")));
+                        return 0;
+                    }
+                } else {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネルのオーナーのみがチャンネルを削除できます"));
+                    return 2;
+                }
+            } else {
+                NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネル " + channelName + " は存在しません"));
+                return 3;
+            }
+        }
+        return 0;
+    }
+
     private static int inviteToChannel(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         /*
                         .then(Commands.literal("invite") // /channel invite <target: Single> [channelName]
@@ -244,35 +316,31 @@ public class ChannelCommand {
         if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
             ServerPlayer inviteTarget = EntityArgument.getPlayer(ctx, "対象");
             String inviteChannelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
-            if(!CustomChannels.isChannelFound(inviteChannelName)) {
+            if(inviteChannelName != null && !CustomChannels.isChannelFound(inviteChannelName)) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "チャンネル " + inviteChannelName + " は存在しません");
                 return 1;
             }
 
             CustomChannel inviteChannel = CustomChannels.getChannel(inviteChannelName);
+            if(inviteChannel == null) {
+                ChatChannel channel = ChatManager.getCurrentChannel(player.getUUID());
+                if(channel.getType() == ChannelType.CUSTOM && channel instanceof CustomChannel) {
+                    inviteChannel = (CustomChannel) channel;
+                    inviteChannelName = inviteChannel.getChannelName();
+                } else {
+                    MessageUtil.sendErrorMessage(ctx.getSource(), "カスタムチャンネル以外には招待できません！チャンネル名を指定するか、デフォルトチャンネルを切り替えてください。");
+                    return 2;
+                }
+            }
 
             /* Pre-flight Check */
             if(CHANNEL_INVITES.containsKey(inviteTarget.getUUID())) {
                 Map<UUID, Map<BukkitTask, CustomChannel>> invites = CHANNEL_INVITES.get(inviteTarget.getUUID());
                 if(invites.containsKey(player.getUUID())) {
                     Map<BukkitTask, CustomChannel> invitedChannels = invites.get(player.getUUID());
-                    if(inviteChannel != null) { // チャンネル名が指定されている場合
-                        if(invitedChannels.containsValue(inviteChannel)) {
-                            MessageUtil.sendErrorMessage(ctx.getSource(), "既に " + inviteTarget.getScoreboardName() + " をチャンネル " + inviteChannelName + " に招待しています");
-                            return 2;
-                        }
-                    } else { // 指定されていない場合はデフォルト発言先を使用する
-                        ChatChannel channel = ChatManager.getCurrentChannel(player.getUUID());
-                        if(channel.getType() == ChannelType.CUSTOM && channel instanceof CustomChannel) { // カスタムチャンネルのみ対象
-                            if(invitedChannels.containsValue(channel)) {
-                                MessageUtil.sendErrorMessage(ctx.getSource(), "既に " + inviteTarget.getScoreboardName() + " をチャンネル " + inviteChannelName + " に招待しています");
-                                return 2;
-                            }
-                            inviteChannel = (CustomChannel) channel;
-                        } else { // それ以外
-                            MessageUtil.sendErrorMessage(ctx.getSource(), "カスタムチャンネル以外には招待できません！チャンネル名を指定するか、デフォルトチャンネルを切り替えてください。");
-                            return 3;
-                        }
+                    if(invitedChannels.containsValue(inviteChannel)) {
+                        MessageUtil.sendErrorMessage(ctx.getSource(), "既に " + inviteTarget.getScoreboardName() + " をチャンネル " + inviteChannelName + " に招待しています");
+                        return 3;
                     }
                 }
             }
@@ -282,11 +350,22 @@ public class ChannelCommand {
                 return 4;
             }
 
-            Component displayName$minecraft = Component.Serializer.fromJson(GsonComponentSerializer.gson().serialize(inviteChannel.getDisplayName()));
+            Component displayName$minecraft = NewMessageUtil.convertAdventure2Minecraft(inviteChannel.getDisplayName());
 
+            if(inviteChannel.getPlayers().contains(inviteTarget.getUUID())) {
+                NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("")
+                        .append(inviteTarget.getName())
+                        .append(new TextComponent(" は既にチャンネル "))
+                        .append(displayName$minecraft)
+                        .append(new TextComponent("(" + inviteChannel.getChannelName() + ")").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                        .append(new TextComponent(" に参加しています")));
+                return 5;
+            }
+
+            final CustomChannel finalInviteChannel = inviteChannel;
             BukkitTask inviteExpiredTask = RunnableManager.runAsyncDelayed(() -> {
                 Map<BukkitTask, CustomChannel> invites = CHANNEL_INVITES.get(inviteTarget.getUUID()).get(player.getUUID());
-                invites.entrySet().removeIf(e -> e.getValue().getChannelName().equals(inviteChannelName));
+                invites.entrySet().removeIf(e -> e.getValue().equals(finalInviteChannel) || e.getValue().getChannelName().equals(finalInviteChannel.getChannelName()));
 
                 inviteTarget.sendMessage(new TextComponent("").withStyle(ChatFormatting.RED)
                         .append(player.getName())
@@ -319,51 +398,322 @@ public class ChannelCommand {
                             .withUnderlined(true)
                             .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/channel accept " + player.getScoreboardName() + " " + inviteChannelName)))), player.getUUID());
 
-            MessageUtil.sendMessage(ctx.getSource(), inviteTarget.getScoreboardName() + " にチャンネル " + inviteChannelName + " への招待を送信しました");
+            NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("")
+                    .append(inviteTarget.getScoreboardName())
+                    .append(new TextComponent(" にチャンネル "))
+                    .append(NewMessageUtil.convertAdventure2Minecraft(inviteChannel.getDisplayName()))
+                    .append(new TextComponent(" への招待を送信しました")));
         }
         return 0;
     }
 
     private static int acceptInvite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
-            if(!CHANNEL_INVITES.containsKey(player.getUUID())) {
+            if (!CHANNEL_INVITES.containsKey(player.getUUID())) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "チャンネルへの招待は届いていません");
                 return 1;
             }
 
             Player inviteSrc = BrigadierUtil.isArgumentKeyExists(ctx, "対象") ? EntityArgument.getPlayer(ctx, "対象") : null;
+            UUID inviterUniqueId = inviteSrc == null ? null : inviteSrc.getUUID();
             String channelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
+            Map<UUID, Map<BukkitTask, CustomChannel>> inviter2invites = CHANNEL_INVITES.get(player.getUUID());
 
-            if(inviteSrc == null && channelName == null) {
-                Map<UUID, Map<BukkitTask, CustomChannel>> inviter2invites = CHANNEL_INVITES.get(player.getUUID());
-                Optional<UUID> firstUUID = inviter2invites.keySet().stream().findFirst();
-                if(firstUUID.isPresent()) {
-                    Map<BukkitTask, CustomChannel> invites = inviter2invites.get(firstUUID.get());
-                    Optional<BukkitTask> firstTask = invites.keySet().stream().findFirst();
-                    if(firstTask.isPresent()) {
-                        CustomChannel channel = invites.get(firstTask.get());
-                        firstTask.get().cancel();
-                        channel.addPlayer(player.getUUID());
-                        invites.remove(firstTask.get());
-                        MessageUtil.sendMessage(ctx.getSource(), Bukkit.getOfflinePlayer(firstUUID.get()).getName() + " からのチャンネル " + channel.getDisplayNameAsPlainText() + " への招待を承諾しました");
-                        return 0;
-                    }
-                }
-            } else if(inviteSrc != null && channelName == null) {
-
-            } else if(inviteSrc != null && channelName != null) {
-
+            if (inviter2invites.size() == 0) {
+                MessageUtil.sendErrorMessage(ctx.getSource(), "チャンネルへの招待は届いていません");
+                return 1;
             }
 
+            BukkitTask key = null;
+            if (inviteSrc != null) {
+                if (!inviter2invites.containsKey(inviteSrc.getUUID())) {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("")
+                            .append(inviteSrc.getDisplayName())
+                            .append(new TextComponent(" からのチャンネルへの招待は届いていません")));
+                    return 1;
+                }
+
+                if (channelName != null) {
+                    if (!CustomChannels.isChannelFound(channelName)) {
+                        NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネル " + channelName + " は存在しません"));
+                        return 2;
+                    }
+
+                    Optional<Map.Entry<BukkitTask, CustomChannel>> optionalEntry = inviter2invites.get(inviteSrc.getUUID())
+                            .entrySet()
+                            .stream()
+                            .filter(e -> e.getValue().getChannelName().equals(channelName))
+                            .findFirst();
+
+                    if (optionalEntry.isPresent()) {
+                        key = optionalEntry.get().getKey();
+                    } else {
+                        NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("")
+                                .append(inviteSrc.getDisplayName())
+                                .append(new TextComponent(" からチャンネル " + channelName + " への招待は届いていません")));
+                        return 1;
+                    }
+                }
+            }
+
+            Map<BukkitTask, CustomChannel> invites;
+            if (inviteSrc == null) {
+                Optional<UUID> optionalUUID = inviter2invites.entrySet()
+                        .stream()
+                        .filter(e -> e.getValue().size() > 0)
+                        .map(Map.Entry::getKey)
+                        .findFirst();
+
+                if (optionalUUID.isPresent()) {
+                    invites = inviter2invites.get(optionalUUID.get());
+                    inviterUniqueId = optionalUUID.get();
+                } else {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネルへの招待は届いていません"));
+                    return 1;
+                }
+            } else {
+                invites = inviter2invites.getOrDefault(inviteSrc.getUUID(), new HashMap<>());
+            }
+
+            if (key == null) {
+                Optional<BukkitTask> optionalKey = invites.entrySet().stream().map(Map.Entry::getKey).findFirst();
+                if (optionalKey.isPresent()) {
+                    key = optionalKey.get();
+                } else {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネルへの招待が届いているはずでしたが、届いていませんでした。"));
+                    return 1;
+                }
+            }
+
+            CustomChannel channel = invites.get(key);
+            key.cancel();
+            channel.addPlayer(player.getUUID());
+            invites.remove(key);
+            Component name;
+            OfflinePlayer oPlayer = Bukkit.getOfflinePlayer(inviterUniqueId);
+            if (oPlayer.isOnline()) name = ((CraftPlayer) oPlayer).getHandle().getDisplayName();
+            else name = new TextComponent(oPlayer.getName());
+
+            NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("")
+                    .append(name)
+                    .append(new TextComponent(" からのチャンネル "))
+                    .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                    .append(new TextComponent("(" + channel.getChannelName() + ")")
+                            .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                    .append(new TextComponent(" への招待を承諾しました")));
         }
         return 0;
     }
 
-    private static int denyInvite(CommandContext<CommandSourceStack> ctx) {
+    private static int denyInvite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+            if (!CHANNEL_INVITES.containsKey(player.getUUID())) {
+                MessageUtil.sendErrorMessage(ctx.getSource(), "チャンネルへの招待は届いていません");
+                return 1;
+            }
+
+            Player inviteSrc = BrigadierUtil.isArgumentKeyExists(ctx, "対象") ? EntityArgument.getPlayer(ctx, "対象") : null;
+            UUID inviterUniqueId = inviteSrc == null ? null : inviteSrc.getUUID();
+            String channelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
+            Map<UUID, Map<BukkitTask, CustomChannel>> inviter2invites = CHANNEL_INVITES.get(player.getUUID());
+
+            if (inviter2invites.size() == 0) {
+                MessageUtil.sendErrorMessage(ctx.getSource(), "チャンネルへの招待は届いていません");
+                return 1;
+            }
+
+            BukkitTask key = null;
+            if (inviteSrc != null) {
+                if (!inviter2invites.containsKey(inviteSrc.getUUID())) {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("")
+                            .append(inviteSrc.getDisplayName())
+                            .append(new TextComponent(" からのチャンネルへの招待は届いていません")));
+                    return 1;
+                }
+
+                if (channelName != null) {
+                    if (!CustomChannels.isChannelFound(channelName)) {
+                        NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネル " + channelName + " は存在しません"));
+                        return 2;
+                    }
+
+                    Optional<Map.Entry<BukkitTask, CustomChannel>> optionalEntry = inviter2invites.get(inviteSrc.getUUID())
+                            .entrySet()
+                            .stream()
+                            .filter(e -> e.getValue().getChannelName().equals(channelName))
+                            .findFirst();
+
+                    if (optionalEntry.isPresent()) {
+                        key = optionalEntry.get().getKey();
+                    } else {
+                        NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("")
+                                .append(inviteSrc.getDisplayName())
+                                .append(new TextComponent(" からチャンネル " + channelName + " への招待は届いていません")));
+                        return 1;
+                    }
+                }
+            }
+
+            Map<BukkitTask, CustomChannel> invites;
+            if (inviteSrc == null) {
+                Optional<UUID> optionalUUID = inviter2invites.entrySet()
+                        .stream()
+                        .filter(e -> e.getValue().size() > 0)
+                        .map(Map.Entry::getKey)
+                        .findFirst();
+
+                if (optionalUUID.isPresent()) {
+                    invites = inviter2invites.get(optionalUUID.get());
+                    inviterUniqueId = optionalUUID.get();
+                } else {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネルへの招待は届いていません"));
+                    return 1;
+                }
+            } else {
+                invites = inviter2invites.getOrDefault(inviteSrc.getUUID(), new HashMap<>());
+            }
+
+            if (key == null) {
+                Optional<BukkitTask> optionalKey = invites.entrySet().stream().map(Map.Entry::getKey).findFirst();
+                if (optionalKey.isPresent()) {
+                    key = optionalKey.get();
+                } else {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネルへの招待が届いているはずでしたが、届いていませんでした。"));
+                    return 1;
+                }
+            }
+
+            CustomChannel channel = invites.get(key);
+            key.cancel();
+            invites.remove(key);
+            Component name;
+            OfflinePlayer oPlayer = Bukkit.getOfflinePlayer(inviterUniqueId);
+            if (oPlayer.isOnline()) name = ((CraftPlayer) oPlayer).getHandle().getDisplayName();
+            else name = new TextComponent(oPlayer.getName());
+
+            NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("").withStyle(ChatFormatting.RED)
+                    .append(name)
+                    .append(new TextComponent(" からのチャンネル "))
+                    .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                    .append(new TextComponent("(" + channel.getChannelName() + ")")
+                            .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                    .append(new TextComponent(" への招待を拒否しました")));
+
+            if(oPlayer.isOnline()) {
+                NewMessageUtil.sendMessage(((org.bukkit.entity.Player) oPlayer), new TextComponent("").withStyle(ChatFormatting.RED)
+                        .append(player.getDisplayName())
+                        .append(new TextComponent(" はチャンネル "))
+                        .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                        .append(new TextComponent("(" + channel.getChannelName() + ")")
+                                .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                        .append(new TextComponent(" への招待を拒否しました")));
+            }
+        }
         return 0;
     }
 
     private static int leaveChannel(CommandContext<CommandSourceStack> ctx) {
+        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+            String channelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
+            if (channelName == null) {
+                ChatChannel channel = ChatManager.getCurrentChannel(player.getUUID());
+                if(channel.getType() == ChannelType.CUSTOM && channel instanceof CustomChannel) {
+                    channelName = channel.getChannelName();
+                } else {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), "システムチャンネルから退出することはできません");
+                    return 1;
+                }
+            }
+
+            if(!CustomChannels.isChannelFound(channelName)) {
+                NewMessageUtil.sendErrorMessage(ctx.getSource(), "チャンネル " + channelName + " は存在しません");
+                return 2;
+            }
+
+            CustomChannel channel = CustomChannels.getChannel(channelName);
+
+            if(channel.getPlayers().contains(player.getUUID())) {
+                channel.removePlayer(player.getUUID());
+                NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("チャンネル ")
+                        .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                        .append(new TextComponent("(" + channel.getChannelName() + ")").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                        .append(new TextComponent(" から退出しました")));
+            } else {
+                NewMessageUtil.sendErrorMessage(ctx.getSource(), "参加していないチャンネルから退出することはできません");
+                return 3;
+            }
+        }
         return 0;
+    }
+
+    private static int showGlobalOption(CommandContext<CommandSourceStack> ctx, GlobalOptions type, boolean set) throws CommandSyntaxException {
+        Object value = type.getValue(ctx.getSource().getPlayerOrException().getUUID());
+        NewMessageUtil.sendMessage(ctx.getSource(), type.getOptionName() + " " + (set ? "が" : "は") + " " + (value instanceof Boolean b ? (b ? "有効" : "無効") : value.toString()) + " に設定され" + (set ? "ました" : "ています"));
+        return 0;
+    }
+
+    private static int setGlobalOption(CommandContext<CommandSourceStack> ctx, GlobalOptions type) throws CommandSyntaxException {
+        type.setValue(ctx.getSource().getPlayerOrException().getUUID(), type.getArgument(ctx));
+        showGlobalOption(ctx, type, true);
+        return 0;
+    }
+
+    private enum GlobalOptions {
+        FORCE_GLOBAL_CHAT_PREFIX("全体強制送信接頭辞") {
+            @Override
+            public Object getArgument(CommandContext<CommandSourceStack> ctx) {
+                return StringArgumentType.getString(ctx, "接頭辞");
+            }
+
+            @Override
+            public Object getValue(UUID uniqueId) {
+                return PlayerData.of(uniqueId).getForceGlobalChatPrefix();
+            }
+
+            @Override
+            public void setValue(UUID uniqueId, Object newValue) {
+                if(!(newValue instanceof String)) throw new IllegalArgumentException("Required \"String\" but found \"" + newValue.getClass().getName() + "\"");
+                PlayerData.of(uniqueId).setForceGlobalChatPrefix((String) newValue);
+            }
+        },
+        KANA_CONVERT("ローマ字かな変換") {
+            @Override
+            public Object getArgument(CommandContext<CommandSourceStack> ctx) {
+                return BoolArgumentType.getBool(ctx, "有効");
+            }
+
+            @Override
+            public Object getValue(UUID uniqueId) {
+                return PlayerData.of(uniqueId).isUseKanaConvert();
+            }
+
+            @Override
+            public void setValue(UUID uniqueId, Object newValue) {
+                if(!(newValue instanceof Boolean)) throw new IllegalArgumentException("Requires \"Boolean\" but found \"" + newValue.getClass().getName() + "\"");
+                PlayerData.of(uniqueId).setUseKanaConvert((boolean) newValue);
+            }
+        };
+
+        private final String optionName;
+
+        GlobalOptions(String optionName) {
+            this.optionName = optionName;
+        }
+
+        public String getOptionName() {
+            return this.optionName;
+        }
+
+        public Object getArgument(CommandContext<CommandSourceStack> ctx) {
+            return null;
+        }
+
+        public Object getValue(UUID uniqueId) {
+            return null;
+        }
+
+        public void setValue(UUID uniqueId, Object newValue) {
+            // nothing here
+        }
     }
 }

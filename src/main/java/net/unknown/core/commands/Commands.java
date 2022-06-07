@@ -49,5 +49,6 @@ public class Commands {
         TeleportWorldCommand.register(UnknownNetworkCore.getBrigadier());
         DeepFakeCommand.register(UnknownNetworkCore.getBrigadier());
         KillCommand.register(UnknownNetworkCore.getBrigadier());
+        SkullCommand.register(UnknownNetworkCore.getBrigadier());
     }
 }
