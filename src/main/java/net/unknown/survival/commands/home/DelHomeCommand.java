@@ -40,7 +40,7 @@ import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.commands.Suggestions;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 
 // /minecraft:delhome <String: ホーム名> - remove home
 public class DelHomeCommand {

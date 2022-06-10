@@ -39,7 +39,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -108,9 +109,9 @@ public class KillCommand {
         });
 
         if (entities.size() == 1) {
-            ctx.getSource().sendSuccess(new TranslatableComponent("commands.kill.success.single", entities.iterator().next().getDisplayName()), true);
+            ctx.getSource().sendSuccess(MutableComponent.create(new TranslatableContents("commands.kill.success.single", entities.iterator().next().getDisplayName())), true);
         } else {
-            ctx.getSource().sendSuccess(new TranslatableComponent("commands.kill.success.multiple", entities.size()), true);
+            ctx.getSource().sendSuccess(MutableComponent.create(new TranslatableContents("commands.kill.success.multiple", entities.size())), true);
         }
 
         return entities.size();

@@ -31,10 +31,10 @@
 
 package net.unknown.minigame.hideandseek.entity;
 
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.Level;
@@ -42,8 +42,8 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.unknown.UnknownNetworkCore;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 public class CustomFallingBlockEntity extends FallingBlockEntity {
@@ -95,13 +95,13 @@ public class CustomFallingBlockEntity extends FallingBlockEntity {
         if (this.isStayed && stayTick == 20L) {
             BlockPos bp = new BlockPos(this.position());
             if (this.level.getBlockState(bp).getBlock() != Blocks.AIR) {
-                this.srcPlayer.sendMessage(new TextComponent("そこには固定できねえ！"), ChatType.SYSTEM, Util.NIL_UUID);
+                this.srcPlayer.sendSystemMessage(MutableComponent.create(new LiteralContents("そこには固定できねえ！")), ChatType.SYSTEM);
             } else {
                 //this.setPos(Vec3.atCenterOf(bp));
                 this.setInvisible(true);
                 this.level.setBlock(bp, this.getBlockState(), 3);
                 this.srcPlayer.collides = false;
-                this.srcPlayer.sendMessage(new TextComponent("固定されました"), ChatType.SYSTEM, Util.NIL_UUID);
+                this.srcPlayer.sendSystemMessage(MutableComponent.create(new LiteralContents("固定されました")), ChatType.SYSTEM);
             }
             this.stayTick++;
         }

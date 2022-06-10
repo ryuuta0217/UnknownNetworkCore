@@ -41,7 +41,7 @@ import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -87,11 +87,11 @@ public class PrivateChatChannel extends ChatChannel {
 
         Component message = MessageUtil.convertAdventure2NMS(pEvent.message());
 
-        sender.sendMessage(MsgCommand.senderMessage(receiver.getDisplayName(), message), sender.getUUID());
+        sender.sendSystemMessage(MsgCommand.senderMessage(receiver.getDisplayName(), message));
         pEvent.getReceivers()
                 .stream()
                 .map(r -> ((CraftPlayer) r).getHandle())
-                .forEach(r -> r.sendMessage(MsgCommand.receiverMessage(sender.getName(), message), sender.getUUID()));
+                .forEach(r -> r.sendSystemMessage(MsgCommand.receiverMessage(sender.getName(), message)));
         PlayerData.of(receiver.getUUID()).setPrivateMessageReplyTarget(sender.getUUID());
     }
 }

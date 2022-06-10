@@ -39,7 +39,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameRules;
 import net.unknown.core.define.DefinedTextColor;
@@ -48,7 +48,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 
@@ -62,11 +62,11 @@ public class MessageUtil {
             .append(Component.text("U.N.", net.kyori.adventure.text.format.Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD.as(true))))
             .append(Component.text("]", DefinedTextColor.GRAY))
             .append(Component.text(" "));
-    private static final MutableComponent PREFIX_MINECRAFT_COMPONENT = new TextComponent("")
-            .append(new TextComponent("[").withStyle(ChatFormatting.GRAY))
-            .append(new TextComponent("U.N.").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
-            .append(new TextComponent("]").withStyle(ChatFormatting.GRAY))
-            .append(new TextComponent(" "));
+    private static final MutableComponent PREFIX_MINECRAFT_COMPONENT = MutableComponent.create(new LiteralContents(""))
+            .append(MutableComponent.create(new LiteralContents("[")).withStyle(ChatFormatting.GRAY))
+            .append(MutableComponent.create(new LiteralContents("U.N.")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
+            .append(MutableComponent.create(new LiteralContents("]")).withStyle(ChatFormatting.GRAY))
+            .append(MutableComponent.create(new LiteralContents(" ")));
     private static final String PREFIX_ERROR = "§c";
     private static final String PREFIX_ADMIN = "§r";
     private static final String PREFIX_ADMIN_ERROR = "§c";
@@ -91,7 +91,7 @@ public class MessageUtil {
     }
 
     public static void sendMessage(CommandSourceStack commandSourceStack, String msg, boolean showOthers) {
-        commandSourceStack.sendSuccess(PREFIX_MINECRAFT_COMPONENT.copy().append(new TextComponent(msg.replace("\n", "\n" + PREFIX))), false);
+        commandSourceStack.sendSuccess(PREFIX_MINECRAFT_COMPONENT.copy().append(MutableComponent.create(new LiteralContents(msg.replace("\n", "\n" + PREFIX)))), false);
         if (showOthers) {
             String msgFormat = String.format("§7§o[%s: %s]", commandSourceStack.getTextName(), ChatColor.stripColor(msg));
             broadcastCommandFeedback(msgFormat, commandSourceStack);
@@ -107,7 +107,7 @@ public class MessageUtil {
     }
 
     public static void sendErrorMessage(CommandSourceStack commandSourceStack, String msg, boolean showOthers) {
-        commandSourceStack.sendSuccess(new TextComponent(PREFIX_ERROR + msg.replace("\n", "\n" + PREFIX_ERROR)).setStyle(Style.EMPTY.withColor(ChatFormatting.RED)), false);
+        commandSourceStack.sendSuccess(MutableComponent.create(new LiteralContents(PREFIX_ERROR + msg.replace("\n", "\n" + PREFIX_ERROR))).setStyle(Style.EMPTY.withColor(ChatFormatting.RED)), false);
         if (showOthers) {
             String msgFormat = String.format("§7§o[%s: §c%s§7]", commandSourceStack.getTextName(), ChatColor.stripColor(msg));
             broadcastCommandFeedback(msgFormat, commandSourceStack);
@@ -123,7 +123,7 @@ public class MessageUtil {
     }
 
     public static void sendAdminMessage(CommandSourceStack commandSourceStack, String msg, boolean showOthers) {
-        commandSourceStack.sendSuccess(new TextComponent(PREFIX_ADMIN + msg.replace("\n", "\n" + PREFIX_ADMIN)), false);
+        commandSourceStack.sendSuccess(MutableComponent.create(new LiteralContents(PREFIX_ADMIN + msg.replace("\n", "\n" + PREFIX_ADMIN))), false);
         if (showOthers) {
             String msgFormat = String.format("§7§o[%s: %s]", commandSourceStack.getTextName(), ChatColor.stripColor(msg));
             broadcastCommandFeedback(msgFormat, commandSourceStack);
@@ -139,7 +139,7 @@ public class MessageUtil {
     }
 
     public static void sendAdminErrorMessage(CommandSourceStack commandSourceStack, String msg, boolean showOthers) {
-        commandSourceStack.sendSuccess(new TextComponent(PREFIX_ADMIN_ERROR + msg.replace("\n", "\n" + PREFIX_ADMIN_ERROR)).withStyle(Style.EMPTY.withColor(ChatFormatting.RED)), false);
+        commandSourceStack.sendSuccess(MutableComponent.create(new LiteralContents(PREFIX_ADMIN_ERROR + msg.replace("\n", "\n" + PREFIX_ADMIN_ERROR))).withStyle(Style.EMPTY.withColor(ChatFormatting.RED)), false);
         if (showOthers) {
             String msgFormat = String.format("§7§o[%s: §c%s§7]", commandSourceStack.getTextName(), ChatColor.stripColor(msg));
             broadcastCommandFeedback(msgFormat, commandSourceStack);
@@ -228,7 +228,7 @@ public class MessageUtil {
     }*/
 
     public static Component convertNMS2Adventure(net.minecraft.network.chat.Component nms) {
-        return GsonComponentSerializer.gson().deserialize(net.minecraft.network.chat.Component.Serializer.toJson(nms));
+        return GsonComponentSerializer.gson().deserializeFromTree(net.minecraft.network.chat.Component.Serializer.toJsonTree(nms));
     }
 
     public static net.minecraft.network.chat.Component convertAdventure2NMS(Component adventure) {

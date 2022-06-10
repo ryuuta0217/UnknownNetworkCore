@@ -38,7 +38,7 @@ import net.unknown.core.commands.Commands;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.tab.TabListPingManager;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;

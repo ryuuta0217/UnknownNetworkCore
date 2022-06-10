@@ -36,9 +36,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.spigotmc.SpigotConfig;
 
 public class NewMessageUtil {
@@ -98,7 +100,7 @@ public class NewMessageUtil {
 
     /* START - Plain Texts */
     public static void sendMessage(CommandSourceStack source, String message, boolean broadcastToOps) {
-        sendMessage(source, new TextComponent(message), broadcastToOps);
+        sendMessage(source, MutableComponent.create(new LiteralContents(message)), broadcastToOps);
     }
 
     public static void sendMessage(CommandSourceStack source, String message) {
@@ -179,7 +181,7 @@ public class NewMessageUtil {
 
     /* START - Plain Texts */
     public static void sendErrorMessage(CommandSourceStack source, String message, boolean broadcastToOps) {
-        sendErrorMessage(source, new TextComponent(message), broadcastToOps);
+        sendErrorMessage(source, MutableComponent.create(new LiteralContents(message)), broadcastToOps);
     }
 
     public static void sendErrorMessage(CommandSourceStack source, String message) {
@@ -212,7 +214,8 @@ public class NewMessageUtil {
     private static void broadcastCommandFeedback(Component component, CommandSourceStack source, boolean error) {
         // commandBlockOutput: false の時にコマンドブロックからfeedbackが出ることを防ぐが、エラーの時は無視する
         if(!error && !source.source.shouldInformAdmins()) return;
-        MutableComponent msg = new TranslatableComponent("chat.type.admin", source.getDisplayName(), component).withStyle(error ? ChatFormatting.RED : ChatFormatting.GRAY, ChatFormatting.ITALIC);
+        MutableComponent msg = MutableComponent.create(new TranslatableContents("chat.type.admin", source.getDisplayName(), component))
+                .withStyle(error ? ChatFormatting.RED : ChatFormatting.GRAY, ChatFormatting.ITALIC);
 
         source.getServer().getPlayerList().getPlayers().forEach(player -> {
             if(player != source.source && player.getBukkitEntity().hasPermission("minecraft.admin.command_feedback")) {
@@ -222,22 +225,22 @@ public class NewMessageUtil {
                 //  → プレイヤーの行動追跡に若干の難が生まれる？
                 //  ただし、実行者のワールドAがtrueでも受信者のいるワールドBがfalseだとフィードバックを受信できない
                 if(player.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
-                    player.sendMessage(msg, source.getEntity() != null ? source.getEntity().getUUID() : Util.NIL_UUID);
+                    player.sendSystemMessage(msg);
                 }
             }
         });
 
         if(source.source != source.getServer() && source.getServer().getGameRules().getBoolean(GameRules.RULE_LOGADMINCOMMANDS) && !SpigotConfig.silentCommandBlocks) {
-            source.getServer().sendMessage(msg, Util.NIL_UUID);
+            source.getServer().sendSystemMessage(msg);
         }
     }
 
     private static Component format(Component component) {
-        return new TextComponent("")
-                .append(new TextComponent("[").withStyle(ChatFormatting.GRAY))
-                .append(new TextComponent("U.N.").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
-                .append(new TextComponent("]").withStyle(ChatFormatting.GRAY))
-                .append(new TextComponent(" "))
+        return MutableComponent.create(new LiteralContents(""))
+                .append(MutableComponent.create(new LiteralContents("[")).withStyle(ChatFormatting.GRAY))
+                .append(MutableComponent.create(new LiteralContents("U.N.")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
+                .append(MutableComponent.create(new LiteralContents("]")).withStyle(ChatFormatting.GRAY))
+                .append(MutableComponent.create(new LiteralContents(" ")))
                 .append(component);
     }
 

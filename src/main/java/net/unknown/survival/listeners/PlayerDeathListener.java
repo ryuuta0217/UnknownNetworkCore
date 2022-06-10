@@ -38,8 +38,9 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -53,8 +54,8 @@ import org.bukkit.*;
 import org.bukkit.block.Skull;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_18_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -142,7 +143,7 @@ public class PlayerDeathListener implements Listener {
         if(!REMOVAL_TASKS.containsKey(event.getPlayer().getUniqueId())) REMOVAL_TASKS.put(event.getPlayer().getUniqueId(), new HashMap<>());
         REMOVAL_TASKS.get(event.getPlayer().getUniqueId()).put(blockPos, getTask(event.getPlayer().getUniqueId(), blockPos, millisToTicks(TimeUnit.MINUTES.toMillis(30))));
 
-        NewMessageUtil.sendMessage(event.getPlayer(), new TextComponent("")
+        NewMessageUtil.sendMessage(event.getPlayer(), MutableComponent.create(new LiteralContents(""))
                 .append("死亡地点に ")
                 .append(getGraveyardComponent(blockPos))
                 .append(" が生成されました。\n" +
@@ -215,7 +216,7 @@ public class PlayerDeathListener implements Listener {
             REMOVAL_TASKS.get(uniqueId).remove(location);
             location.getBlock().setType(Material.AIR);
             if(Bukkit.getOfflinePlayer(uniqueId).isOnline()) {
-                NewMessageUtil.sendMessage(Bukkit.getPlayer(uniqueId), new TextComponent("")
+                NewMessageUtil.sendMessage(Bukkit.getPlayer(uniqueId), MutableComponent.create(new LiteralContents(""))
                         .append(getGraveyardComponent(location))
                         .append(" は自然に還りました。アイテムは回収できません。"));
             }
@@ -236,14 +237,14 @@ public class PlayerDeathListener implements Listener {
     }
 
     private static Component getGraveyardComponent(Location loc) {
-        return new TextComponent("[墓]")
+        return MutableComponent.create(new LiteralContents("[墓]"))
                 .withStyle(Style.EMPTY
                         .withColor(ChatFormatting.AQUA)
                         .withUnderlined(true)
                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                new TextComponent("")
-                                        .append(new TextComponent("====== 墓の情報 =====\n").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD))
-                                        .append(new TextComponent("ワールド: " + MessageUtil.getWorldName(loc.getWorld()) + "\n").withStyle(ChatFormatting.YELLOW)
+                                MutableComponent.create(new LiteralContents(""))
+                                        .append(MutableComponent.create(new LiteralContents("====== 墓の情報 =====\n")).withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD))
+                                        .append(MutableComponent.create(new LiteralContents("ワールド: " + MessageUtil.getWorldName(loc.getWorld()) + "\n")).withStyle(ChatFormatting.YELLOW)
                                                 .append("座標: " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ())))));
     }
 

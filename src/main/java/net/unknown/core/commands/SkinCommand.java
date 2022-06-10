@@ -90,13 +90,23 @@ public class SkinCommand {
     public static void sendSelfUpdatePackets(ServerPlayer player) {
         ClientboundPlayerInfoPacket toRemove = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, player);
         ClientboundPlayerInfoPacket toAdd = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, player);
+        //this.connection.send(new ClientboundRespawnPacket(
+        // worldserver.dimensionTypeId(),
+        // worldserver.dimension(),
+        // BiomeManager.obfuscateSeed(worldserver.getSeed()),
+        // this.gameMode.getGameModeForPlayer(),
+        // this.gameMode.getPreviousGameModeForPlayer(),
+        // worldserver.isDebug(), worldserver.isFlat(), true, this.getLastDeathLocation()));
         ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(
-                player.getLevel().dimensionType(),
+                player.getLevel().dimensionTypeId(),
                 player.getLevel().dimension(),
                 BiomeManager.obfuscateSeed(player.getLevel().getSeed()),
                 player.gameMode.getGameModeForPlayer(),
-                player.gameMode.getPreviousGameModeForPlayer(), player.getLevel().isDebug(), player.getLevel().isFlat(),
-                true);
+                player.gameMode.getPreviousGameModeForPlayer(),
+                player.getLevel().isDebug(),
+                player.getLevel().isFlat(),
+                true,
+                player.getLastDeathLocation());
         ClientboundPlayerPositionPacket teleport = new ClientboundPlayerPositionPacket(
                 player.position().x(),
                 player.position().y(),

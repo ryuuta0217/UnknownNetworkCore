@@ -43,8 +43,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.unknown.UnknownNetworkCore;
@@ -55,8 +56,7 @@ import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 
 import java.util.Collection;
@@ -118,16 +118,15 @@ public class MsgCommand {
         Entity sender = ctx.getSource().getEntity();
         Collection<ServerPlayer> receivers = EntityArgument.getPlayers(ctx, "対象");
         AtomicReference<String> msg = new AtomicReference<>(StringArgumentType.getString(ctx, "メッセージ"));
-
-        PrivateMessageEvent pEvent = new PrivateMessageEvent((sender == null ? null : sender.getBukkitEntity()), receivers.stream().map(ServerPlayer::getBukkitEntity).collect(Collectors.toSet()), MessageUtil.convertNMS2Adventure(new TextComponent(msg.get())));
+        PrivateMessageEvent pEvent = new PrivateMessageEvent((sender == null ? null : sender.getBukkitEntity()), receivers.stream().map(ServerPlayer::getBukkitEntity).collect(Collectors.toSet()), MessageUtil.convertNMS2Adventure(MutableComponent.create(new LiteralContents(msg.get()))));
         Bukkit.getPluginManager().callEvent(pEvent);
         if (pEvent.isCancelled()) return 1;
 
         Consumer<ServerPlayer> outgoing;
 
-        if (sender instanceof ServerPlayer) {
+        if (sender instanceof ServerPlayer p) {
             outgoing = (receiver) -> {
-                sender.sendMessage(senderMessage(receiver.getName(), msg.get()), sender.getUUID());
+                p.sendSystemMessage(senderMessage(receiver.getName(), msg.get()));
             };
         } else {
             outgoing = (receiver) -> {
@@ -147,7 +146,7 @@ public class MsgCommand {
                     UUID uniqueId = sender != null ? sender.getUUID() : SERVER_UUID;
 
                     outgoing.accept(receiver);
-                    receiver.sendMessage(receiverMessage(name, msg.get()), uniqueId);
+                    receiver.sendSystemMessage(receiverMessage(name, msg.get()));
                 });
 
         return 0;
@@ -200,16 +199,16 @@ public class MsgCommand {
             return 2;
         }
 
-        PrivateMessageEvent pEvent = new PrivateMessageEvent(sender.getBukkitEntity(), (receiverIsServer ? Collections.emptySet() : Collections.singleton(receiver.getBukkitEntity())), MessageUtil.convertNMS2Adventure(new TextComponent(msg)));
+        PrivateMessageEvent pEvent = new PrivateMessageEvent(sender.getBukkitEntity(), (receiverIsServer ? Collections.emptySet() : Collections.singleton(receiver.getBukkitEntity())), MessageUtil.convertNMS2Adventure(MutableComponent.create(new LiteralContents(msg))));
         Bukkit.getPluginManager().callEvent(pEvent);
         if (pEvent.isCancelled()) return 1;
 
         Component message = MessageUtil.convertAdventure2NMS(pEvent.message());
 
-        sender.sendMessage(senderMessage(receiver.getName(), message), sender.getUUID());
+        sender.sendSystemMessage(senderMessage(receiver.getName(), message));
 
         if (!receiverIsServer) {
-            receiver.sendMessage(receiverMessage(sender.getName(), message), sender.getUUID());
+            receiver.sendSystemMessage(receiverMessage(sender.getName(), message));
         } else {
             Bukkit.getServer().sendMessage(MessageUtil.convertNMS2Adventure(receiverMessage(sender.getName(), message)));
         }
@@ -219,27 +218,27 @@ public class MsgCommand {
     }
 
     public static Component senderMessage(Component receiverName, String message) {
-        return senderMessage(receiverName, new TextComponent(message));
+        return senderMessage(receiverName, MutableComponent.create(new LiteralContents(message)));
     }
 
     public static Component senderMessage(Component receiverName, Component message) {
-        return new TextComponent("")
-                .append(new TextComponent("[PM]").setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
+        return MutableComponent.create(new LiteralContents(""))
+                .append(MutableComponent.create(new LiteralContents("[PM]")).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
                 .append(" ")
-                .append(new TextComponent("[→ ").append(receiverName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)))
+                .append(MutableComponent.create(new LiteralContents("[→ ")).append(receiverName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)))
                 .append(" ")
                 .append(message);
     }
 
     public static Component receiverMessage(Component senderName, String message) {
-        return receiverMessage(senderName, new TextComponent(message));
+        return receiverMessage(senderName, MutableComponent.create(new LiteralContents(message)));
     }
 
     public static Component receiverMessage(Component senderName, Component message) {
-        return new TextComponent("")
-                .append(new TextComponent("[PM]").setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
+        return MutableComponent.create(new LiteralContents(""))
+                .append(MutableComponent.create(new LiteralContents("[PM]")).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
                 .append(" ")
-                .append(new TextComponent("[").append(senderName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)))
+                .append(MutableComponent.create(new LiteralContents("[")).append(senderName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)))
                 .append(" ")
                 .append(message);
     }
