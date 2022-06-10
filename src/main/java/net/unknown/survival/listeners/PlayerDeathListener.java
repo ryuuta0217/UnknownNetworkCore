@@ -77,7 +77,7 @@ import java.util.stream.Collectors;
 public class PlayerDeathListener implements Listener {
     private static final Logger LOGGER = Logger.getLogger("UNC/Graveyard");
 
-    private static final Map<UUID, Map<Location, Set<String>>> DEATH_ITEMS = new HashMap<>();
+    private static final Map<UUID, Map<Location, List<String>>> DEATH_ITEMS = new HashMap<>();
     private static final Map<UUID, Map<Location, Long>> REMOVAL_TIMES = new HashMap<>();
     private static final Map<UUID, Map<Location, BukkitTask>> REMOVAL_TASKS = new HashMap<>();
 
@@ -127,13 +127,13 @@ public class PlayerDeathListener implements Listener {
         skull.setOwningPlayer(event.getPlayer());
         skull.update();
 
-        Set<String> itemJsonSet = items.stream().map(is -> {
+        List<String> itemJsonSet = items.stream().map(is -> {
             return is.save(new CompoundTag()).getAsString(); // for load, use ItemStack.of(TagParser.parse(...))
-        }).collect(Collectors.toUnmodifiableSet());
+        }).toList();
 
         event.getDrops().clear();
 
-        if(!DEATH_ITEMS.containsKey(event.getPlayer().getUniqueId())) DEATH_ITEMS.put(event.getPlayer().getUniqueId(), new HashMap<>());
+        if(!DEATH_ITEMS.containsKey(event.getPlayer().getUniqueId())) DEATH_ITEMS.put(event.getPlayer().getUniqueId(), new HashMap<Location, List<String>>());
         DEATH_ITEMS.get(event.getPlayer().getUniqueId()).put(blockPos, itemJsonSet);
 
         if(!REMOVAL_TIMES.containsKey(event.getPlayer().getUniqueId())) REMOVAL_TIMES.put(event.getPlayer().getUniqueId(), new HashMap<>());
@@ -148,7 +148,7 @@ public class PlayerDeathListener implements Listener {
                 .append(" が生成されました。\n" +
                         millisToFormatted(REMOVAL_TIMES.get(event.getPlayer().getUniqueId()).get(blockPos)) + " に自然に還ります。"));
 
-        Hologram holo = HolographicDisplays.get().createHologram(blockPos.add(0, 1, 0));
+        Hologram holo = HolographicDisplays.get().createHologram(blockPos.clone().add(0.5, 1, 0.5));
         HOLOGRAMS.put(blockPos, holo);
         holo.getLines().appendText(ChatColor.RED + "" + event.getPlayer().getName() + " の墓");
         RunnableManager.runAsync(PlayerDeathListener::save);
@@ -158,18 +158,17 @@ public class PlayerDeathListener implements Listener {
     public void onBlockBreak(BlockBreakEvent event) {
         if(event.getBlock().getType() == Material.PLAYER_HEAD) {
             if (event.getBlock().getState() instanceof Skull skull) {
-                new HashSet<>(new String[]{"a"});
                 OfflinePlayer oPlayer = skull.getOwningPlayer();
                 if (oPlayer == null) return;
-                if (DEATH_ITEMS.get(oPlayer.getUniqueId()).containsKey(event.getBlock().getLocation())) {
+                Location blockPos = event.getBlock().getLocation();
+                if (DEATH_ITEMS.get(oPlayer.getUniqueId()).containsKey(blockPos)) {
                     if(!oPlayer.getUniqueId().equals(event.getPlayer().getUniqueId())) {
                         event.setCancelled(true);
                         return;
                     }
                     ServerLevel level = ((CraftWorld) event.getPlayer().getLocation().getWorld()).getHandle();
-                    Location loc = event.getPlayer().getLocation();
                     DEATH_ITEMS.get(event.getPlayer().getUniqueId())
-                            .get(event.getBlock().getLocation())
+                            .get(blockPos)
                             .stream()
                             .map(json -> {
                                 try {
@@ -182,6 +181,7 @@ public class PlayerDeathListener implements Listener {
                             })
                             .map(is -> {
                                 if (is.getItem() != null) {
+                                    Location loc = event.getPlayer().getLocation();
                                     return new ItemEntity(level, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), is, 0, 0, 0);
                                 }
                                 return null;
@@ -191,12 +191,12 @@ public class PlayerDeathListener implements Listener {
                                 }
                             });
 
-                    REMOVAL_TASKS.get(event.getPlayer().getUniqueId()).get(loc).cancel();
-                    REMOVAL_TASKS.get(event.getPlayer().getUniqueId()).remove(loc);
-                    REMOVAL_TIMES.get(event.getPlayer().getUniqueId()).remove(loc);
-                    DEATH_ITEMS.get(event.getPlayer().getUniqueId()).remove(loc);
-                    HOLOGRAMS.get(loc).delete();
-                    HOLOGRAMS.remove(loc);
+                    REMOVAL_TASKS.get(event.getPlayer().getUniqueId()).get(blockPos).cancel();
+                    REMOVAL_TASKS.get(event.getPlayer().getUniqueId()).remove(blockPos);
+                    REMOVAL_TIMES.get(event.getPlayer().getUniqueId()).remove(blockPos);
+                    DEATH_ITEMS.get(event.getPlayer().getUniqueId()).remove(blockPos);
+                    HOLOGRAMS.get(blockPos).delete();
+                    HOLOGRAMS.remove(blockPos);
                     event.setDropItems(false);
                     RunnableManager.runAsync(PlayerDeathListener::save);
                 } else {
@@ -277,8 +277,8 @@ public class PlayerDeathListener implements Listener {
                                 Location loc = ConfigurationSerializer.getLocationData(data, "location");
                                 List<String> items = data.getStringList("items");
 
-                                Map<Location, Set<String>> deathItemsMap = new HashMap<>();
-                                deathItemsMap.put(loc, new HashSet<>(items));
+                                Map<Location, List<String>> deathItemsMap = new HashMap<>();
+                                deathItemsMap.put(loc, new ArrayList<>(items));
                                 DEATH_ITEMS.put(uniqueId, deathItemsMap);
 
                                 Map<Location, Long> removalTimesMap = new HashMap<>();

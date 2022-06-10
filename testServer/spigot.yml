@@ -19,7 +19,7 @@ settings:
   moved-wrongly-threshold: 0.0625
   moved-too-quickly-multiplier: 10.0
   save-user-cache-on-stop-only: false
-  bungeecord: true
+  bungeecord: false
   netty-threads: 4
   timeout-time: 60
   restart-on-crash: true
