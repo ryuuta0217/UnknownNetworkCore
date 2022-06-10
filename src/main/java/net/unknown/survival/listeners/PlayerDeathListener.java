@@ -48,6 +48,7 @@ import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.NewMessageUtil;
+import net.unknown.survival.UnknownNetworkSurvival;
 import net.unknown.survival.dependency.HolographicDisplays;
 import org.bukkit.*;
 import org.bukkit.block.Skull;
@@ -148,9 +149,11 @@ public class PlayerDeathListener implements Listener {
                 .append(" が生成されました。\n" +
                         millisToFormatted(REMOVAL_TIMES.get(event.getPlayer().getUniqueId()).get(blockPos)) + " に自然に還ります。"));
 
-        Hologram holo = HolographicDisplays.get().createHologram(blockPos.clone().add(0.5, 1, 0.5));
-        HOLOGRAMS.put(blockPos, holo);
-        holo.getLines().appendText(ChatColor.RED + "" + event.getPlayer().getName() + " の墓");
+        if(UnknownNetworkSurvival.isHolographicDisplaysEnabled()) {
+            Hologram holo = HolographicDisplays.get().createHologram(blockPos.clone().add(0.5, 1, 0.5));
+            HOLOGRAMS.put(blockPos, holo);
+            holo.getLines().appendText(ChatColor.RED + "" + event.getPlayer().getName() + " の墓");
+        }
         RunnableManager.runAsync(PlayerDeathListener::save);
     }
 
@@ -195,8 +198,10 @@ public class PlayerDeathListener implements Listener {
                     REMOVAL_TASKS.get(event.getPlayer().getUniqueId()).remove(blockPos);
                     REMOVAL_TIMES.get(event.getPlayer().getUniqueId()).remove(blockPos);
                     DEATH_ITEMS.get(event.getPlayer().getUniqueId()).remove(blockPos);
-                    HOLOGRAMS.get(blockPos).delete();
-                    HOLOGRAMS.remove(blockPos);
+                    if(UnknownNetworkSurvival.isHolographicDisplaysEnabled()) {
+                        HOLOGRAMS.get(blockPos).delete();
+                        HOLOGRAMS.remove(blockPos);
+                    }
                     event.setDropItems(false);
                     RunnableManager.runAsync(PlayerDeathListener::save);
                 } else {
@@ -256,10 +261,12 @@ public class PlayerDeathListener implements Listener {
             });
         });
         REMOVAL_TASKS.clear();
-        HOLOGRAMS.forEach((l, h) -> {
-            if(!h.isDeleted()) h.delete();
-        });
-        HOLOGRAMS.clear();
+        if(UnknownNetworkSurvival.isHolographicDisplaysEnabled()) {
+            HOLOGRAMS.forEach((l, h) -> {
+                if(!h.isDeleted()) h.delete();
+            });
+            HOLOGRAMS.clear();
+        }
 
         try {
             if(CONFIG_FILE.exists() || !CONFIG_FILE.exists() && CONFIG_FILE.createNewFile()) {
@@ -288,8 +295,6 @@ public class PlayerDeathListener implements Listener {
                                 Map<Location, BukkitTask> removalTasksMap = new HashMap<>();
                                 removalTasksMap.put(loc, getTask(uniqueId, loc, millisToTicks(toRemovalMillis - System.currentTimeMillis())));
                                 REMOVAL_TASKS.put(uniqueId, removalTasksMap);
-
-
                             }
                         });
                     });
