@@ -1,0 +1,4 @@
+# This is a world configuration file for Paper.
+# This file may start empty but can be filled with settings to override ones in the config/world-defaults.yml
+
+_version: 28
