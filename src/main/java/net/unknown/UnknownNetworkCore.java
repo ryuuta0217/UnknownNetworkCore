@@ -72,6 +72,9 @@ public class UnknownNetworkCore extends JavaPlugin {
     public void onLoad() {
         long start = System.nanoTime();
         getLogger().info("Plugin was loaded with environment: " + ENV.name());
+        if(!this.getDataFolder().exists() && this.getDataFolder().mkdir()) {
+            getLogger().info("Plugin folder created.");
+        }
         Commands.init();
         ENV.onLoad();
         long end = System.nanoTime();
