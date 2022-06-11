@@ -29,36 +29,28 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.economy.repository;
+package net.unknown.core.advancements;
 
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.DisplayInfo;
+import net.minecraft.advancements.FrameType;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.Collections;
 
-// Save to: ~/../economy/banks/UUID/BankName.yml
-// exf) /root/unknown-network/economy/banks/UUID/BankName.yml
-public class BankRepository {
-    private static final Map<UUID, Map<String, Bank>> BANKS = new HashMap<>();
+public class AdvancementManager {
+    public static void sendAll(ServerPlayer player) {
+        Advancement adv = Advancement.Builder
+                .advancement()
+                .display(new DisplayInfo(new ItemStack(Items.TORCH), Component.literal("Example!"), Component.literal("Example Advancement!"), null, FrameType.TASK, true, false, false))
+                .build(ResourceLocation.of("unknown:root", ':'));
 
-    public static void createBank(UUID owner, String bankName) {
-        BANKS.put(owner, new HashMap<>());
-        BANKS.get(owner).put(bankName, new Bank(owner, new BigDecimal(0)));
-    }
-
-    public static class Bank {
-        private final UUID owner;
-        private final BigDecimal value;
-
-        private Bank(UUID owner, BigDecimal value) {
-            this.owner = owner;
-            this.value = value;
-        }
-
-        public void withdraw(double value) {
-
-        }
+        ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, Collections.singletonList(adv), Collections.emptySet(), Collections.emptyMap());
+        player.connection.send(packet);
     }
 }
