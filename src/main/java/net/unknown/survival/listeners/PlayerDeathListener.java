@@ -32,7 +32,7 @@
 package net.unknown.survival.listeners;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import me.filoghost.holographicdisplays.api.beta.hologram.Hologram;
+import me.filoghost.holographicdisplays.api.hologram.Hologram;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
