@@ -48,6 +48,7 @@ import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.unknown.core.managers.RunnableManager;
@@ -63,7 +64,7 @@ import net.unknown.survival.chat.channels.ranged.TitleChatChannel;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
@@ -253,7 +254,7 @@ public class ChannelCommand {
             net.kyori.adventure.text.Component displayName$adv = GsonComponentSerializer.gson().deserialize(Component.Serializer.toJson(displayName$minecraft));
             CustomChannels.createChannel(internalChannelName, player.getUUID(), displayName$adv);
 
-            ctx.getSource().sendSuccess(new TextComponent("チャンネル ").append(displayName$minecraft).append(new TextComponent(" (" + internalChannelName + ") を作成しました")), true);
+            ctx.getSource().sendSuccess(MutableComponent.create(new LiteralContents("チャンネル ")).append(displayName$minecraft).append(MutableComponent.create(new LiteralContents(" (" + internalChannelName + ") を作成しました"))), true);
 
             return ChannelCommand.setChannel(ctx, ChannelType.CUSTOM);
         }
@@ -268,7 +269,7 @@ public class ChannelCommand {
                 if(channel.getType() == ChannelType.CUSTOM && channel instanceof CustomChannel customChannel) {
                     channelName = customChannel.getChannelName();
                 } else {
-                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("システムチャンネルを削除することはできません"));
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("システムチャンネルを削除することはできません")));
                     return 1;
                 }
             }
@@ -279,25 +280,25 @@ public class ChannelCommand {
                     if(TO_REMOVE_CONFIRM.containsKey(player.getUUID()) && TO_REMOVE_CONFIRM.get(player.getUUID()).getChannelName().equals(channelName)) {
                         TO_REMOVE_CONFIRM.remove(player.getUUID());
                         CustomChannels.removeChannel(channelName);
-                        NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("チャンネル ")
+                        NewMessageUtil.sendMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネル "))
                                 .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
-                                .append(new TextComponent(" が削除されました")));
+                                .append(MutableComponent.create(new LiteralContents(" が削除されました"))));
                         return 0;
                     } else {
                         TO_REMOVE_CONFIRM.put(player.getUUID(), channel);
-                        NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("チャンネル ").withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
+                        NewMessageUtil.sendMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネル ")).withStyle(ChatFormatting.RED, ChatFormatting.BOLD)
                                 .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
-                                .append(new TextComponent(" を本当に削除しますか？"))
+                                .append(MutableComponent.create(new LiteralContents(" を本当に削除しますか？")))
                                 .append("\n")
-                                .append(new TextComponent("本当に削除する場合は、もう一度コマンドを実行してください。")));
+                                .append(MutableComponent.create(new LiteralContents("本当に削除する場合は、もう一度コマンドを実行してください。"))));
                         return 0;
                     }
                 } else {
-                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネルのオーナーのみがチャンネルを削除できます"));
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネルのオーナーのみがチャンネルを削除できます")));
                     return 2;
                 }
             } else {
-                NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネル " + channelName + " は存在しません"));
+                NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネル " + channelName + " は存在しません")));
                 return 3;
             }
         }
@@ -353,12 +354,12 @@ public class ChannelCommand {
             Component displayName$minecraft = NewMessageUtil.convertAdventure2Minecraft(inviteChannel.getDisplayName());
 
             if(inviteChannel.getPlayers().contains(inviteTarget.getUUID())) {
-                NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("")
+                NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents(""))
                         .append(inviteTarget.getName())
-                        .append(new TextComponent(" は既にチャンネル "))
+                        .append(MutableComponent.create(new LiteralContents(" は既にチャンネル ")))
                         .append(displayName$minecraft)
-                        .append(new TextComponent("(" + inviteChannel.getChannelName() + ")").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
-                        .append(new TextComponent(" に参加しています")));
+                        .append(MutableComponent.create(new LiteralContents("(" + inviteChannel.getChannelName() + ")")).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                        .append(MutableComponent.create(new LiteralContents(" に参加しています"))));
                 return 5;
             }
 
@@ -367,17 +368,17 @@ public class ChannelCommand {
                 Map<BukkitTask, CustomChannel> invites = CHANNEL_INVITES.get(inviteTarget.getUUID()).get(player.getUUID());
                 invites.entrySet().removeIf(e -> e.getValue().equals(finalInviteChannel) || e.getValue().getChannelName().equals(finalInviteChannel.getChannelName()));
 
-                inviteTarget.sendMessage(new TextComponent("").withStyle(ChatFormatting.RED)
+                inviteTarget.sendSystemMessage(MutableComponent.create(new LiteralContents("")).withStyle(ChatFormatting.RED)
                         .append(player.getName())
-                        .append(new TextComponent(" からのチャンネル "))
+                        .append(MutableComponent.create(new LiteralContents(" からのチャンネル ")))
                         .append(displayName$minecraft)
-                        .append(new TextComponent(" への招待は期限切れとなりました")), player.getUUID());
+                        .append(MutableComponent.create(new LiteralContents(" への招待は期限切れとなりました"))));
 
-                player.sendMessage(new TextComponent("").withStyle(ChatFormatting.RED)
+                player.sendSystemMessage(MutableComponent.create(new LiteralContents("")).withStyle(ChatFormatting.RED)
                         .append(inviteTarget.getName())
-                        .append(new TextComponent(" へのチャンネル "))
+                        .append(MutableComponent.create(new LiteralContents(" へのチャンネル ")))
                         .append(displayName$minecraft)
-                        .append(new TextComponent(" への招待は期限切れとなりました")), inviteTarget.getUUID());
+                        .append(MutableComponent.create(new LiteralContents(" への招待は期限切れとなりました"))));
             }, (20 * 60) * 5);
 
             Map<UUID, Map<BukkitTask, CustomChannel>> inviter2invites = CHANNEL_INVITES.getOrDefault(inviteTarget.getUUID(), new HashMap<>());
@@ -386,23 +387,23 @@ public class ChannelCommand {
             inviter2invites.put(player.getUUID(), invites);
             CHANNEL_INVITES.put(inviteTarget.getUUID(), inviter2invites);
 
-            inviteTarget.sendMessage(new TextComponent("")
+            inviteTarget.sendSystemMessage(MutableComponent.create(new LiteralContents(""))
                     .append(player.getName())
-                    .append(new TextComponent(" にチャンネル "))
+                    .append(MutableComponent.create(new LiteralContents(" にチャンネル ")))
                     .append(displayName$minecraft)
-                    .append(new TextComponent("(" + inviteChannelName + ")").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
-                    .append(new TextComponent(" に招待されました！\n"))
-                    .append(new TextComponent("ここをクリックして承諾").setStyle(Style.EMPTY
+                    .append(MutableComponent.create(new LiteralContents("(" + inviteChannelName + ")")).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                    .append(MutableComponent.create(new LiteralContents(" に招待されました！\n")))
+                    .append(MutableComponent.create(new LiteralContents("ここをクリックして承諾")).setStyle(Style.EMPTY
                             .withColor(TextColor.fromLegacyFormat(ChatFormatting.AQUA))
                             .withBold(true)
                             .withUnderlined(true)
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/channel accept " + player.getScoreboardName() + " " + inviteChannelName)))), player.getUUID());
+                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/channel accept " + player.getScoreboardName() + " " + inviteChannelName)))));
 
-            NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("")
+            NewMessageUtil.sendMessage(ctx.getSource(), MutableComponent.create(new LiteralContents(""))
                     .append(inviteTarget.getScoreboardName())
-                    .append(new TextComponent(" にチャンネル "))
+                    .append(MutableComponent.create(new LiteralContents(" にチャンネル ")))
                     .append(NewMessageUtil.convertAdventure2Minecraft(inviteChannel.getDisplayName()))
-                    .append(new TextComponent(" への招待を送信しました")));
+                    .append(MutableComponent.create(new LiteralContents(" への招待を送信しました"))));
         }
         return 0;
     }
@@ -427,15 +428,15 @@ public class ChannelCommand {
             BukkitTask key = null;
             if (inviteSrc != null) {
                 if (!inviter2invites.containsKey(inviteSrc.getUUID())) {
-                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("")
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents(""))
                             .append(inviteSrc.getDisplayName())
-                            .append(new TextComponent(" からのチャンネルへの招待は届いていません")));
+                            .append(MutableComponent.create(new LiteralContents(" からのチャンネルへの招待は届いていません"))));
                     return 1;
                 }
 
                 if (channelName != null) {
                     if (!CustomChannels.isChannelFound(channelName)) {
-                        NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネル " + channelName + " は存在しません"));
+                        NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネル " + channelName + " は存在しません")));
                         return 2;
                     }
 
@@ -448,9 +449,9 @@ public class ChannelCommand {
                     if (optionalEntry.isPresent()) {
                         key = optionalEntry.get().getKey();
                     } else {
-                        NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("")
+                        NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents(""))
                                 .append(inviteSrc.getDisplayName())
-                                .append(new TextComponent(" からチャンネル " + channelName + " への招待は届いていません")));
+                                .append(MutableComponent.create(new LiteralContents(" からチャンネル " + channelName + " への招待は届いていません"))));
                         return 1;
                     }
                 }
@@ -468,7 +469,7 @@ public class ChannelCommand {
                     invites = inviter2invites.get(optionalUUID.get());
                     inviterUniqueId = optionalUUID.get();
                 } else {
-                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネルへの招待は届いていません"));
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネルへの招待は届いていません")));
                     return 1;
                 }
             } else {
@@ -480,7 +481,7 @@ public class ChannelCommand {
                 if (optionalKey.isPresent()) {
                     key = optionalKey.get();
                 } else {
-                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネルへの招待が届いているはずでしたが、届いていませんでした。"));
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネルへの招待が届いているはずでしたが、届いていませんでした。")));
                     return 1;
                 }
             }
@@ -492,15 +493,15 @@ public class ChannelCommand {
             Component name;
             OfflinePlayer oPlayer = Bukkit.getOfflinePlayer(inviterUniqueId);
             if (oPlayer.isOnline()) name = ((CraftPlayer) oPlayer).getHandle().getDisplayName();
-            else name = new TextComponent(oPlayer.getName());
+            else name = MutableComponent.create(new LiteralContents(oPlayer.getName()));
 
-            NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("")
+            NewMessageUtil.sendMessage(ctx.getSource(), MutableComponent.create(new LiteralContents(""))
                     .append(name)
-                    .append(new TextComponent(" からのチャンネル "))
+                    .append(MutableComponent.create(new LiteralContents(" からのチャンネル ")))
                     .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
-                    .append(new TextComponent("(" + channel.getChannelName() + ")")
+                    .append(MutableComponent.create(new LiteralContents("(" + channel.getChannelName() + ")"))
                             .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
-                    .append(new TextComponent(" への招待を承諾しました")));
+                    .append(MutableComponent.create(new LiteralContents(" への招待を承諾しました"))));
         }
         return 0;
     }
@@ -525,15 +526,15 @@ public class ChannelCommand {
             BukkitTask key = null;
             if (inviteSrc != null) {
                 if (!inviter2invites.containsKey(inviteSrc.getUUID())) {
-                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("")
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents(""))
                             .append(inviteSrc.getDisplayName())
-                            .append(new TextComponent(" からのチャンネルへの招待は届いていません")));
+                            .append(MutableComponent.create(new LiteralContents(" からのチャンネルへの招待は届いていません"))));
                     return 1;
                 }
 
                 if (channelName != null) {
                     if (!CustomChannels.isChannelFound(channelName)) {
-                        NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネル " + channelName + " は存在しません"));
+                        NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネル " + channelName + " は存在しません")));
                         return 2;
                     }
 
@@ -546,9 +547,9 @@ public class ChannelCommand {
                     if (optionalEntry.isPresent()) {
                         key = optionalEntry.get().getKey();
                     } else {
-                        NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("")
+                        NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents(""))
                                 .append(inviteSrc.getDisplayName())
-                                .append(new TextComponent(" からチャンネル " + channelName + " への招待は届いていません")));
+                                .append(MutableComponent.create(new LiteralContents(" からチャンネル " + channelName + " への招待は届いていません"))));
                         return 1;
                     }
                 }
@@ -566,7 +567,7 @@ public class ChannelCommand {
                     invites = inviter2invites.get(optionalUUID.get());
                     inviterUniqueId = optionalUUID.get();
                 } else {
-                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネルへの招待は届いていません"));
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネルへの招待は届いていません")));
                     return 1;
                 }
             } else {
@@ -578,7 +579,7 @@ public class ChannelCommand {
                 if (optionalKey.isPresent()) {
                     key = optionalKey.get();
                 } else {
-                    NewMessageUtil.sendErrorMessage(ctx.getSource(), new TextComponent("チャンネルへの招待が届いているはずでしたが、届いていませんでした。"));
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネルへの招待が届いているはずでしたが、届いていませんでした。")));
                     return 1;
                 }
             }
@@ -589,24 +590,24 @@ public class ChannelCommand {
             Component name;
             OfflinePlayer oPlayer = Bukkit.getOfflinePlayer(inviterUniqueId);
             if (oPlayer.isOnline()) name = ((CraftPlayer) oPlayer).getHandle().getDisplayName();
-            else name = new TextComponent(oPlayer.getName());
+            else name = MutableComponent.create(new LiteralContents(oPlayer.getName()));
 
-            NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("").withStyle(ChatFormatting.RED)
+            NewMessageUtil.sendMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("")).withStyle(ChatFormatting.RED)
                     .append(name)
-                    .append(new TextComponent(" からのチャンネル "))
+                    .append(MutableComponent.create(new LiteralContents(" からのチャンネル ")))
                     .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
-                    .append(new TextComponent("(" + channel.getChannelName() + ")")
+                    .append(MutableComponent.create(new LiteralContents("(" + channel.getChannelName() + ")"))
                             .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
-                    .append(new TextComponent(" への招待を拒否しました")));
+                    .append(MutableComponent.create(new LiteralContents(" への招待を拒否しました"))));
 
             if(oPlayer.isOnline()) {
-                NewMessageUtil.sendMessage(((org.bukkit.entity.Player) oPlayer), new TextComponent("").withStyle(ChatFormatting.RED)
+                NewMessageUtil.sendMessage(((org.bukkit.entity.Player) oPlayer), MutableComponent.create(new LiteralContents("")).withStyle(ChatFormatting.RED)
                         .append(player.getDisplayName())
-                        .append(new TextComponent(" はチャンネル "))
+                        .append(MutableComponent.create(new LiteralContents(" はチャンネル ")))
                         .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
-                        .append(new TextComponent("(" + channel.getChannelName() + ")")
+                        .append(MutableComponent.create(new LiteralContents("(" + channel.getChannelName() + ")"))
                                 .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
-                        .append(new TextComponent(" への招待を拒否しました")));
+                        .append(MutableComponent.create(new LiteralContents(" への招待を拒否しました"))));
             }
         }
         return 0;
@@ -634,10 +635,10 @@ public class ChannelCommand {
 
             if(channel.getPlayers().contains(player.getUUID())) {
                 channel.removePlayer(player.getUUID());
-                NewMessageUtil.sendMessage(ctx.getSource(), new TextComponent("チャンネル ")
+                NewMessageUtil.sendMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネル "))
                         .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
-                        .append(new TextComponent("(" + channel.getChannelName() + ")").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
-                        .append(new TextComponent(" から退出しました")));
+                        .append(MutableComponent.create(new LiteralContents("(" + channel.getChannelName() + ")")).withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                        .append(MutableComponent.create(new LiteralContents(" から退出しました"))));
             } else {
                 NewMessageUtil.sendErrorMessage(ctx.getSource(), "参加していないチャンネルから退出することはできません");
                 return 3;

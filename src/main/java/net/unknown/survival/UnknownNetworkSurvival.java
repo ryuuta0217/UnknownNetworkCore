@@ -41,6 +41,7 @@ import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.enchants.CustomEnchantments;
 import net.unknown.survival.enchants.HatakeWatari;
 import net.unknown.survival.enchants.RangedMining;
 import net.unknown.survival.fml.FMLConnectionListener;
@@ -64,9 +65,11 @@ public class UnknownNetworkSurvival {
     private static boolean WORLD_GUARD_ENABLED = false;
     private static boolean VAULT_ENABLED = false;
     private static boolean JECON_ENABLED = false;
+    private static boolean LUCKPERMS_ENABLED = false;
 
     public static void onLoad() {
         Commands.init();
+        //CustomEnchantments.initialize();
     }
 
     public static void onEnable() {
@@ -74,6 +77,7 @@ public class UnknownNetworkSurvival {
         WORLD_GUARD_ENABLED = Bukkit.getPluginManager().getPlugin("WorldGuard") != null && Bukkit.getPluginManager().isPluginEnabled("WorldGuard");
         VAULT_ENABLED = Bukkit.getPluginManager().getPlugin("Vault") != null && Bukkit.getPluginManager().isPluginEnabled("Vault");
         JECON_ENABLED = Bukkit.getPluginManager().getPlugin("Jecon") != null && Bukkit.getPluginManager().isPluginEnabled("Jecon");
+        LUCKPERMS_ENABLED = Bukkit.getPluginManager().getPlugin("LuckPerms") != null && Bukkit.getPluginManager().isPluginEnabled("LuckPerms");
 
         PlayerData.loadExists();
         CustomChannels.load();
@@ -125,5 +129,9 @@ public class UnknownNetworkSurvival {
 
     public static boolean isJeconEnabled() {
         return JECON_ENABLED;
+    }
+
+    public static boolean isLuckPermsEnabled() {
+        return LUCKPERMS_ENABLED;
     }
 }

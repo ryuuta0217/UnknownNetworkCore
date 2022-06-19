@@ -43,6 +43,7 @@ import net.unknown.core.enums.Permissions;
 import net.unknown.core.util.MessageUtil;
 import org.bukkit.ChatColor;
 
+@SuppressWarnings("removal")
 public class NickCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("nick");

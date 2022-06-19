@@ -37,7 +37,8 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPipeline;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
@@ -50,8 +51,8 @@ import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_18_R1.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -67,7 +68,7 @@ public class SignGui {
     private Player target;
     private Material signType = Material.OAK_SIGN;
     private Component[] defaultLines$adventure = new Component[] {Component.empty(), Component.empty(), Component.empty(), Component.empty()};
-    private net.minecraft.network.chat.Component[] defaultLines = new net.minecraft.network.chat.Component[] {TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY, TextComponent.EMPTY};
+    private net.minecraft.network.chat.Component[] defaultLines = new net.minecraft.network.chat.Component[] {MutableComponent.create(LiteralContents.EMPTY), MutableComponent.create(LiteralContents.EMPTY), MutableComponent.create(LiteralContents.EMPTY), MutableComponent.create(LiteralContents.EMPTY)};
     private Consumer<List<Component>> completeHandler;
     private boolean isOpened = false;
 
@@ -116,10 +117,12 @@ public class SignGui {
         nmsTarget.connection.send(blockUpdatePacket); // set sign block
 
         SignBlockEntity sign = new SignBlockEntity(blockPos, signBlock);
-        System.arraycopy(this.defaultLines, 0, sign.messages, 0, 4);
+        for (int i = 0; i < this.defaultLines.length; i++) {
+            sign.setMessage(i, this.defaultLines[i]);
+        }
+        nmsTarget.connection.send(sign.getUpdatePacket()); // set lines
 
         ClientboundOpenSignEditorPacket signEditorPacket = new ClientboundOpenSignEditorPacket(blockPos);
-        nmsTarget.connection.send(sign.getUpdatePacket()); // set lines
 
         nmsTarget.connection.send(signEditorPacket); // show sign editor
 

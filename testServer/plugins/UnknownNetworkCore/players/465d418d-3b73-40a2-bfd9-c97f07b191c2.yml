@@ -326,5 +326,8 @@ homes:
       z: 11.584633575649615
       yaw: 91.83923
       pitch: 2.8164847
+  dwadwadaw: {}
 homeGroupItems:
   default: ENDER_EYE
+force-global-chat-prefix: g.
+use-kana-convert: false

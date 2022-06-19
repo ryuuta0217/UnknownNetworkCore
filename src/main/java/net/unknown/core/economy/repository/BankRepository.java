@@ -31,7 +31,34 @@
 
 package net.unknown.core.economy.repository;
 
+import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
+
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 // Save to: ~/../economy/banks/UUID/BankName.yml
 // exf) /root/unknown-network/economy/banks/UUID/BankName.yml
 public class BankRepository {
+    private static final Map<UUID, Map<String, Bank>> BANKS = new HashMap<>();
+
+    public static void createBank(UUID owner, String bankName) {
+        BANKS.put(owner, new HashMap<>());
+        BANKS.get(owner).put(bankName, new Bank(owner, new BigDecimal(0)));
+    }
+
+    public static class Bank {
+        private final UUID owner;
+        private final BigDecimal value;
+
+        private Bank(UUID owner, BigDecimal value) {
+            this.owner = owner;
+            this.value = value;
+        }
+
+        public void withdraw(double value) {
+
+        }
+    }
 }

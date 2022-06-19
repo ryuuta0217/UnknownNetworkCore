@@ -31,7 +31,7 @@
 
 package net.unknown.survival.dependency;
 
-import me.filoghost.holographicdisplays.api.beta.HolographicDisplaysAPI;
+import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI;
 import net.unknown.UnknownNetworkCore;
 
 public class HolographicDisplays {

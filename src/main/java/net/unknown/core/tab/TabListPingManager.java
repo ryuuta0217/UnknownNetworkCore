@@ -32,7 +32,8 @@
 package net.unknown.core.tab;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
@@ -43,8 +44,8 @@ import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.managers.RunnableManager;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_18_R1.CraftServer;
-import org.bukkit.craftbukkit.v1_18_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -58,7 +59,7 @@ public class TabListPingManager implements Listener {
     public static final long UPDATE_INTERVAL = 20 * 3; // 3 seconds (60 ticks)
 
     public static final String PING_OBJECTIVE_NAME = "un_ping";
-    public static final Component OBJECTIVE_DISPLAYNAME = new TextComponent("応答速度");
+    public static final Component OBJECTIVE_DISPLAYNAME = MutableComponent.create(new LiteralContents("応答速度"));
     public static final Objective OBJECTIVE = new Objective(
             null,
             PING_OBJECTIVE_NAME,

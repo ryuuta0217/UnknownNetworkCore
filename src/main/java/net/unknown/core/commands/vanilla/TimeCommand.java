@@ -39,15 +39,16 @@ import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.TimeArgument;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerLevel;
 import net.unknown.core.commands.Suggestions;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.util.BrigadierUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.World;
-import org.bukkit.craftbukkit.v1_18_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 
 public class TimeCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -77,8 +78,8 @@ public class TimeCommand {
 
     private static int setTime(CommandContext<CommandSourceStack> ctx, ServerLevel targetLevel, int newDayTimeTicks) {
         targetLevel.setDayTime(newDayTimeTicks);
-        ctx.getSource().sendSuccess(new TextComponent("ワールド " + targetLevel.serverLevelData.getLevelName() + " の")
-                .append(new TranslatableComponent("commands.time.set", newDayTimeTicks)), true);
+        ctx.getSource().sendSuccess(MutableComponent.create(new LiteralContents("ワールド " + targetLevel.serverLevelData.getLevelName() + " の"))
+                .append(MutableComponent.create(new TranslatableContents("commands.time.set", newDayTimeTicks))), true);
         return getDayTime(targetLevel);
     }
 
@@ -87,7 +88,7 @@ public class TimeCommand {
         if (bukkitWorld != null) {
             return setTime(ctx, ((CraftWorld) bukkitWorld).getHandle(), newDayTimeTicks);
         } else {
-            ctx.getSource().sendFailure(new TextComponent("ワールド " + worldName + " は見つかりませんでした"));
+            ctx.getSource().sendFailure(MutableComponent.create(new LiteralContents("ワールド " + worldName + " は見つかりませんでした")));
             return -1;
         }
     }
@@ -101,7 +102,7 @@ public class TimeCommand {
         if (bukkitWorld != null) {
             return addTime(ctx, ((CraftWorld) bukkitWorld).getHandle(), additionalDayTimeTicks);
         } else {
-            ctx.getSource().sendFailure(new TextComponent("ワールド " + worldName + " は見つかりませんでした"));
+            ctx.getSource().sendFailure(MutableComponent.create(new LiteralContents("ワールド " + worldName + " は見つかりませんでした")));
             return -1;
         }
     }

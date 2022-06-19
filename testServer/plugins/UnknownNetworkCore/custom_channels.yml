@@ -1,0 +1,5 @@
+channels:
+  test:
+    display_name: '{"text":"example"}'
+    owner: 465d418d-3b73-40a2-bfd9-c97f07b191c2
+    players: []

@@ -39,6 +39,7 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.unknown.UnknownNetworkCore;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.util.YukiKanaConverter;
@@ -84,8 +85,12 @@ public class ChatManager implements Listener {
     public void onChat(AsyncChatEvent event) {
         event.renderer((source, sourceDisplayName, message, viewer) -> {
             Component base = Component.empty();
-            Component prefix = LuckPerms.getPrefixAsComponent(source.getUniqueId());
-            Component suffix = LuckPerms.getSuffixAsComponent(source.getUniqueId());
+            Component prefix = Component.empty();
+            Component suffix = Component.empty();
+            if(UnknownNetworkSurvival.isLuckPermsEnabled()) {
+                prefix = LuckPerms.getPrefixAsComponent(source.getUniqueId());
+                suffix = LuckPerms.getSuffixAsComponent(source.getUniqueId());
+            }
             return base.append(prefix).append(sourceDisplayName).append(suffix).append(Component.text(": ")).append(message);
         });
 

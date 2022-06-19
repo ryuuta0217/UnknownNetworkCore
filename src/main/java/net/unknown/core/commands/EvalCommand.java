@@ -38,6 +38,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.enums.Permissions;
@@ -104,11 +105,11 @@ public class EvalCommand {
                         Collections.reverse(sts); // trace reverse
                         List<Component> componentTraces = new ArrayList<>();
                         for (StackTraceElement element : sts) {
-                            componentTraces.add(new TextComponent(element.toString()));
+                            componentTraces.add(MutableComponent.create(new LiteralContents(element.toString())));
                         }
                         Collections.reverse(componentTraces);
 
-                        MutableComponent c = new TextComponent("");
+                        MutableComponent c = MutableComponent.create(new LiteralContents(""));
                         componentTraces.forEach(trace -> {
                             c.append(trace).append("\n");
                         });
@@ -118,7 +119,7 @@ public class EvalCommand {
 
                         Style modifier = Style.EMPTY.withColor(ChatFormatting.RED)
                                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, c));
-                        ctx.getSource().sendFailure(new TextComponent("コードの評価中にエラーが発生しました: " + e.getLocalizedMessage()).withStyle(modifier));
+                        ctx.getSource().sendFailure(MutableComponent.create(new LiteralContents("コードの評価中にエラーが発生しました: " + e.getLocalizedMessage())).withStyle(modifier));
                         return e.hashCode();
                     }
                 }));

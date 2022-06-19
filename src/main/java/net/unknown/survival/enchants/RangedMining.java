@@ -33,9 +33,17 @@ package net.unknown.survival.enchants;
 
 import com.google.common.collect.Sets;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentCategory;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.unknown.core.util.RegistryUtil;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
+import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -134,10 +142,15 @@ public class RangedMining implements Listener {
         ItemStack handItem = event.getPlayer().getInventory().getItemInMainHand();
         if (!FACING.containsKey(event.getPlayer().getUniqueId())) return;
         if (!handItem.getType().name().endsWith("_PICKAXE")) return;
-        if (handItem.getLore() == null) return;
-        if (handItem.getLore().stream().noneMatch(lore -> lore.startsWith("§7採掘範囲拡大"))) return;
+        if (handItem.getLore() == null && !((CraftItemStack) handItem).handle.isEnchanted()) return;
+        if (handItem.getLore().stream().noneMatch(lore -> lore.startsWith("§7採掘範囲拡大")) /*&& EnchantmentHelper.getEnchantments(((CraftItemStack) handItem).handle).containsKey(CustomEnchantments.RANGED_MINING)*/) return;
 
-        int range = getLevel(handItem.getLore().stream().filter(lore -> lore.startsWith("§7採掘範囲拡大")).toList().get(0));
+        int range;
+        if(handItem.getLore().stream().anyMatch(lore -> lore.startsWith("§7採掘範囲拡大"))) {
+            range = getLevel(handItem.getLore().stream().filter(lore -> lore.startsWith("§7採掘範囲拡大")).toList().get(0));
+        } else {
+            range = /*EnchantmentHelper.getEnchantments(((CraftItemStack) handItem).handle).get(CustomEnchantments.RANGED_MINING)*/ 1;
+        }
 
         BlockFace bf = FACING.getOrDefault(event.getPlayer().getUniqueId(), event.getPlayer().getFacing());
 
@@ -162,5 +175,39 @@ public class RangedMining implements Listener {
         }
 
         FACING.remove(event.getPlayer().getUniqueId());
+    }
+
+    public static class RangedMiningEnchantment extends Enchantment {
+        private static RangedMiningEnchantment INSTANCE;
+
+        protected RangedMiningEnchantment() {
+            super(Rarity.RARE, EnchantmentCategory.DIGGER, new net.minecraft.world.entity.EquipmentSlot[]{net.minecraft.world.entity.EquipmentSlot.MAINHAND, net.minecraft.world.entity.EquipmentSlot.OFFHAND});
+            //Registry.register(Registry.ENCHANTMENT, "ranged_mining", this);
+        }
+
+        public static RangedMiningEnchantment instance() {
+            if(INSTANCE == null) INSTANCE = new RangedMiningEnchantment();
+            return INSTANCE;
+        }
+
+        @Override
+        public int getMaxLevel() {
+            return 3;
+        }
+
+        @Override
+        public int getMinCost(int level) {
+            return 15 * level;
+        }
+
+        @Override
+        public int getMaxCost(int level) {
+            return super.getMinCost(level) + 30;
+        }
+
+        @Override
+        public boolean canEnchant(net.minecraft.world.item.ItemStack stack) {
+            return stack.getItem() instanceof PickaxeItem && super.canEnchant(stack);
+        }
     }
 }
