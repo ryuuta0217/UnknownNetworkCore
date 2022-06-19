@@ -8,9 +8,9 @@
 # Configuration options here apply to all worlds, unless you specify overrides inside
 # the world-specific config file inside each world folder.
 # 
+# Docs: https://docs.papermc.io/
 # Discord: https://discord.gg/papermc
 # Website: https://papermc.io/
-# Docs: https://docs.papermc.io/
 
 _version: 28
 anticheat:

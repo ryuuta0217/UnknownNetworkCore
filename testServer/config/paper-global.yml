@@ -5,11 +5,12 @@
 # If you need help with the configuration or have any questions related to Paper,
 # join us in our Discord or check the docs page.
 # 
-# The world configuration options have been moved to their own files.
+# The world configuration options have been moved inside
+# their respective world folder. The files are named paper-world.yml
 # 
+# Docs: https://docs.papermc.io/
 # Discord: https://discord.gg/papermc
 # Website: https://papermc.io/
-# Docs: https://docs.papermc.io/
 
 _version: 28
 async-chunks:
@@ -66,6 +67,7 @@ misc:
   load-permissions-yml-before-plugins: true
   max-joins-per-tick: 3
   region-file-cache-size: 256
+  strict-advancement-dimension-check: false
   use-alternative-luck-formula: false
   use-dimension-type-for-custom-spawners: false
 packet-limiter:
