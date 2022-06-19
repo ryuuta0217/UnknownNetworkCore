@@ -117,10 +117,12 @@ public class SignGui {
         nmsTarget.connection.send(blockUpdatePacket); // set sign block
 
         SignBlockEntity sign = new SignBlockEntity(blockPos, signBlock);
-        System.arraycopy(this.defaultLines, 0, sign.messages, 0, 4);
+        for (int i = 0; i < this.defaultLines.length; i++) {
+            sign.setMessage(i, this.defaultLines[i]);
+        }
+        nmsTarget.connection.send(sign.getUpdatePacket()); // set lines
 
         ClientboundOpenSignEditorPacket signEditorPacket = new ClientboundOpenSignEditorPacket(blockPos);
-        nmsTarget.connection.send(sign.getUpdatePacket()); // set lines
 
         nmsTarget.connection.send(signEditorPacket); // show sign editor
 
