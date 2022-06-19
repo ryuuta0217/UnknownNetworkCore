@@ -41,8 +41,12 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class WorldGuard {
+    public static final String SPLITTER = "_";
+    public static final Pattern ID_PATTERN = Pattern.compile("(?i)^[\\dA-F]{8}-[\\dA-F]{4}-4[\\dA-F]{3}-[89AB][\\dA-F]{3}-[\\dA-F]{12}_.*");
+
     public static WorldGuardPlatform getPlatform() {
         return com.sk89q.worldguard.WorldGuard.getInstance().getPlatform();
     }
@@ -54,7 +58,7 @@ public class WorldGuard {
             RegionManager regionManager = getPlatform().getRegionContainer().get(BukkitAdapter.adapt(world));
             if (regionManager != null) {
                 regionManager.getRegions().forEach((name, region) -> {
-                    if (region.getOwners().contains(owner.getUniqueId()))
+                    if (region.getOwners().contains(owner.getUniqueId()) || region.getId().startsWith(owner.getUniqueId().toString()))
                         regions.add(new WrappedProtectedRegion(world, regionManager, region));
                 });
             }
@@ -64,5 +68,15 @@ public class WorldGuard {
     }
 
     public record WrappedProtectedRegion(World world, RegionManager regionManager, ProtectedRegion region) {
+        public String getFullId() {
+            return this.region.getId();
+        }
+
+        public String getId() {
+            if(ID_PATTERN.matcher(this.getFullId()).matches()) {
+                return this.getFullId().split(SPLITTER, 2)[1];
+            }
+            return this.getFullId();
+        }
     }
 }
