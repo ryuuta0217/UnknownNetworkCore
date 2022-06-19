@@ -1,19 +1,19 @@
-buildscript {
+/*buildscript {
     dependencies {
         classpath files('libs/gradle/run-paper.jar')
     }
-}
+}*/
 
 plugins {
     id 'java'
     id 'io.papermc.paperweight.userdev' version '+' // Enable Development of using Mojang Mapping.
-    //id 'xyz.jpenilla.run-paper' version '+' // Run Mojang Mapped or Spigot Mapped Server
+    id 'xyz.jpenilla.run-paper' version '+' // Run Mojang Mapped or Spigot Mapped Server
     id 'com.github.johnrengelman.shadow' version '7.1.0' // fatJar
     id 'org.cadixdev.licenser' version '0.6.1' // Add License Header to source code headers.
     id "de.undercouch.download" version "4.1.2" // File Downloader
 }
 
-apply plugin: xyz.jpenilla.runpaper.RunPaper
+//apply plugin: xyz.jpenilla.runpaper.RunPaper
 
 group 'net.unknown'
 version '1.0-Alpha'
@@ -64,17 +64,17 @@ shadowJar {
 
 runMojangMappedServer {
     runDirectory(project.file("testServer"))
-    setSystemProperty("net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false")
-    setSystemProperty("Paper.ignoreWorldDataVersion", "true")
-    setSystemProperty("un.env", System.getProperty("un.env", "SURVIVAL"))
+    systemProperty "net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false"
+    systemProperty "Paper.ignoreWorldDataVersion", "true"
+    systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
     args("-P pluginsMapped")
 }
 
 runServer {
     runDirectory.set(project.file("testServer"))
-    setSystemProperty("net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false") // default is false, but run-paper is set this option force true.
-    setSystemProperty("Paper.ignoreWorldDataVersion", "true")
-    setSystemProperty("un.env", System.getProperty("un.env", "SURVIVAL"))
+    systemProperty "net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false" // default is false, but run-paper is set this option force true.
+    systemProperty "Paper.ignoreWorldDataVersion", "true"
+    systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
 }
 
 task downloadWaterfall(type: Task) {
@@ -82,7 +82,7 @@ task downloadWaterfall(type: Task) {
 
     if (!wf.exists()) {
         download {
-            src "https://papermc.io/api/v2/projects/waterfall/versions/1.18/builds/485/downloads/waterfall-1.18-485.jar"
+            src "https://api.papermc.io/v2/projects/waterfall/versions/1.19/builds/496/downloads/waterfall-1.19-496.jar"
             dest 'libs/standalone/waterfall.jar'
         }
 
