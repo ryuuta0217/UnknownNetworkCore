@@ -41,6 +41,7 @@ import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.enchants.CustomEnchantments;
 import net.unknown.survival.enchants.HatakeWatari;
 import net.unknown.survival.enchants.RangedMining;
 import net.unknown.survival.fml.FMLConnectionListener;
@@ -68,6 +69,7 @@ public class UnknownNetworkSurvival {
 
     public static void onLoad() {
         Commands.init();
+        //CustomEnchantments.initialize();
     }
 
     public static void onEnable() {
