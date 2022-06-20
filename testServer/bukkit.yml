@@ -13,6 +13,7 @@
 
 
 settings:
+  use-map-color-cache: true
   allow-end: true
   warn-on-overload: true
   permissions-file: permissions.yml
