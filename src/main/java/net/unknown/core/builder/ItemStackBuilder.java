@@ -34,6 +34,7 @@ package net.unknown.core.builder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.unknown.core.define.DefinedTextColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -43,6 +44,7 @@ import org.bukkit.inventory.meta.ItemMeta;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class ItemStackBuilder {
     private final ItemStack original;
@@ -94,7 +96,12 @@ public class ItemStackBuilder {
 
     public ItemStackBuilder lore(Component... lore) {
         ItemMeta meta = this.original.getItemMeta();
-        meta.lore(List.of(lore));
+        meta.lore(Stream.of(lore).map(c -> {
+            Style style = c.style();
+            if(style.color() == null) style = style.color(DefinedTextColor.WHITE);
+            if(!style.hasDecoration(TextDecoration.ITALIC)) style = style.decoration(TextDecoration.ITALIC, false);
+            return c.style(style);
+        }).toList());
         this.original.setItemMeta(meta);
         return this;
     }
