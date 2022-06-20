@@ -70,7 +70,7 @@ public class DefinedItemStackBuilders {
     public static ItemStackBuilder downArrow() {
         return new ItemStackBuilder(Material.PLAYER_HEAD).custom(is -> {
             SkullMeta meta = (SkullMeta) is.getItemMeta();
-            meta.setOwningPlayer(Bukkit.getOfflinePlayer(Bukkit.getPlayerUniqueId("MHF_ArrowDown")));
+            meta.setPlayerProfile(createPlayerProfileFromBase64("ewogICJ0aW1lc3RhbXAiIDogMTY1NTc0NjI3Nzg5MSwKICAicHJvZmlsZUlkIiA6ICI2OGY1OWI5YjViMGI0YjA1YTlmMmUxZDE0MDVhYTM0OCIsCiAgInByb2ZpbGVOYW1lIiA6ICJNSEZfQXJyb3dEb3duIiwKICAic2lnbmF0dXJlUmVxdWlyZWQiIDogdHJ1ZSwKICAidGV4dHVyZXMiIDogewogICAgIlNLSU4iIDogewogICAgICAidXJsIiA6ICJodHRwOi8vdGV4dHVyZXMubWluZWNyYWZ0Lm5ldC90ZXh0dXJlL2ZlM2Q3NTVjZWNiYjEzYTM5ZThlOTM1NDgyM2E5YTAyYTAxZGNlMGFjYTY4ZmZkNDJlM2VhOWE5ZDI5ZTJkZjIiCiAgICB9CiAgfQp9", null));
             is.setItemMeta(meta);
         });
     }
@@ -83,10 +83,18 @@ public class DefinedItemStackBuilders {
         });
     }
 
+    public static ItemStackBuilder minus() {
+        return new ItemStackBuilder(Material.PLAYER_HEAD).custom(is -> {
+            SkullMeta meta = (SkullMeta) is.getItemMeta();
+            meta.setPlayerProfile(createPlayerProfileFromBase64("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvYmQ4YTk5ZGIyYzM3ZWM3MWQ3MTk5Y2Q1MjYzOTk4MWE3NTEzY2U5Y2NhOTYyNmEzOTM2Zjk2NWIxMzExOTMifX19", null));
+            is.setItemMeta(meta);
+        });
+    }
+
     public static ItemStackBuilder question() {
         return new ItemStackBuilder(Material.PLAYER_HEAD).custom(is -> {
             SkullMeta meta = (SkullMeta) is.getItemMeta();
-            meta.setOwningPlayer(Bukkit.getOfflinePlayer(Bukkit.getPlayerUniqueId("MHF_Question")));
+            meta.setPlayerProfile(createPlayerProfileFromBase64("ewogICJ0aW1lc3RhbXAiIDogMTY1NTc0NjE5NzMxMCwKICAicHJvZmlsZUlkIiA6ICI2MDZlMmZmMGVkNzc0ODQyOWQ2Y2UxZDMzMjFjNzgzOCIsCiAgInByb2ZpbGVOYW1lIiA6ICJNSEZfUXVlc3Rpb24iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0ZTA2M2NhZmI0NjdhNWM4ZGU0M2VjNzg2MTkzOTlmMzY5ZjRhNTI0MzRkYTgwMTdhOTgzY2RkOTI1MTZhMCIKICAgIH0KICB9Cn0=", null));
             is.setItemMeta(meta);
         });
     }
