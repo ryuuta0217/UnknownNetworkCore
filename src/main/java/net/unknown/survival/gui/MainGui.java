@@ -36,12 +36,15 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.unknown.core.builder.ItemStackBuilder;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.survival.UnknownNetworkSurvival;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 public class MainGui extends GuiBase {
@@ -51,21 +54,24 @@ public class MainGui extends GuiBase {
         super(null, 27, Component.text("メインGUI"),
                 (inv) -> {
                     inv.setItem(12, new ItemStackBuilder(Material.RESPAWN_ANCHOR)
-                            .displayName(Component.text("Home", TextColor.color(16755200)))
-                            .lore(Component.text("ホームを追加したり", Style.style(TextColor.color(0xFF00), TextDecoration.ITALIC.as(false))),
-                                    Component.text("テレポートしたり", Style.style(TextColor.color(0xFFFF00), TextDecoration.ITALIC.as(false))),
-                                    Component.text("削除したり", Style.style(TextColor.color(0xFF0000), TextDecoration.ITALIC.as(false))),
-                                    Component.text("できます。", Style.style(TextColor.color(0xFF00), TextDecoration.ITALIC.as(false))))
+                            .displayName(Component.text("Home", DefinedTextColor.GOLD))
+                            .lore(Component.text("ホームを追加したり",DefinedTextColor.GREEN),
+                                    Component.text("テレポートしたり", DefinedTextColor.YELLOW),
+                                    Component.text("削除したり", DefinedTextColor.RED),
+                                    Component.text("できます。", DefinedTextColor.GREEN))
                             .build());
 
-                    inv.setItem(13, new ItemStackBuilder(Material.WOODEN_AXE)
-                            .displayName(Component.text("保護", TextColor.color(0xFFFF00)))
-                            .lore(Component.text("建物を保護しよう", Style.style(TextColor.color(0xFF00), TextDecoration.ITALIC.as(false))))
-                            .build());
+                    if(UnknownNetworkSurvival.isWorldGuardEnabled()) {
+                        inv.setItem(13, new ItemStackBuilder(Material.WOODEN_AXE)
+                                .displayName(Component.text("保護", DefinedTextColor.YELLOW))
+                                .lore(Component.text("建物を保護しよう", DefinedTextColor.GREEN))
+                                .itemFlags(ItemFlag.HIDE_ATTRIBUTES)
+                                .build());
+                    }
 
                     inv.setItem(18, new ItemStackBuilder(Material.PLAYER_HEAD)
                             .displayName(Component.text("頭に被る", TextColor.color(0x657CFF)))
-                            .lore(Component.text("アイテムを持ってここを左クリックで頭に被ります", Style.style(TextColor.color(0xFF76A6), TextDecoration.ITALIC.as(false))))
+                            .lore(Component.text("アイテムを持ってここを左クリックで頭に被ります", TextColor.color(0xFF76A6)))
                             .build());
                 }, false);
     }
@@ -78,7 +84,11 @@ public class MainGui extends GuiBase {
     public void onClick(InventoryClickEvent event) {
         switch (event.getSlot()) {
             case 12 -> event.getWhoClicked().openInventory(new HomeGui((Player) event.getWhoClicked()).getInventory());
-            case 13 -> event.getWhoClicked().openInventory(ProtectionGui.of((Player) event.getWhoClicked()).getInventory());
+            case 13 -> {
+                if(UnknownNetworkSurvival.isWorldGuardEnabled()) {
+                    event.getWhoClicked().openInventory(ProtectionGui.of((Player) event.getWhoClicked()).getInventory());
+                }
+            }
             case 18 -> {
                 if (event.getCursor() == null || event.getCursor().getType() == Material.AIR) return;
                 if (event.getClick() != ClickType.LEFT) return;
