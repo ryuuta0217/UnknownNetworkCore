@@ -41,6 +41,7 @@ import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.enchants.CustomEnchantments;
 import net.unknown.survival.enchants.HatakeWatari;
 import net.unknown.survival.enchants.RangedMining;
@@ -103,6 +104,10 @@ public class UnknownNetworkSurvival {
         if (isVaultEnabled() && isJeconEnabled()) {
             WrappedEconomy wrapped = new WrappedEconomy(Bukkit.getServicesManager().getRegistration(Economy.class).getProvider());
             Bukkit.getServicesManager().register(Economy.class, wrapped, UnknownNetworkCore.getInstance(), ServicePriority.Highest);
+        }
+
+        if (isWorldGuardEnabled()) {
+            WorldGuard.PermissionsResolver.inject();
         }
         LOGGER.info("Plugin enabled - Running as Survival mode.");
     }
