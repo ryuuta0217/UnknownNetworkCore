@@ -37,7 +37,10 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.server.commands.TitleCommand;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.managers.RunnableManager;
+import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.chat.channels.CustomChannel;
+import net.unknown.survival.chat.channels.GlobalChannel;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import javax.annotation.Nullable;
@@ -45,6 +48,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class CustomChannels {
     public static final Set<String> RESERVED_NAMES = new HashSet<>(Arrays.asList("global", "near", "heads_up", "title", "me", "private"));
@@ -80,6 +84,13 @@ public class CustomChannels {
         return CHANNELS;
     }
 
+    public static Set<CustomChannel> getJoinedChannels(UUID uniqueId) {
+        return getChannels().values()
+                .stream()
+                .filter(channel -> channel.getPlayers().contains(uniqueId))
+                .collect(Collectors.toUnmodifiableSet());
+    }
+
     public static Set<String> getChannelNames() {
         return CHANNELS.keySet();
     }
@@ -103,7 +114,13 @@ public class CustomChannels {
         if(!isChannelFound(channelName)) throw new IllegalArgumentException("Channel not found!");
         CustomChannel channel = getChannel(channelName);
         if(channel == null) throw new IllegalArgumentException("Channel not found!");
-        channel.sendMessage(null, Component.text("チャンネルが削除されました"));
+        channel.sendSystemMessage(Component.text("チャンネルが削除されました"));
+        channel.getPlayers().forEach(uuid -> {
+            ChatManager.setChannel(uuid, GlobalChannel.getInstance());
+            if(Bukkit.getOfflinePlayer(uuid).isOnline()) {
+                MessageUtil.sendMessage(Bukkit.getPlayer(uuid), "デフォルトの発言先を " + ChatManager.getCurrentChannel(uuid).getChannelName() + " に変更しました");
+            }
+        });
         CHANNELS.remove(channelName);
         RunnableManager.runAsync(CustomChannels::save);
     }
