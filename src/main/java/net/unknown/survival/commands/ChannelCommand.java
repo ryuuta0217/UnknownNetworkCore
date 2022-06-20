@@ -238,7 +238,13 @@ public class ChannelCommand {
         }
 
         ChatManager.setChannel(ctx.getSource().getPlayerOrException().getUUID(), newChannel);
-        MessageUtil.sendMessage(ctx.getSource(), "デフォルトの発言先を " + newChannel.getChannelName() + " に変更しました");
+        if(newChannel instanceof CustomChannel channel) NewMessageUtil.sendMessage(ctx.getSource(),
+                Component.literal("デフォルトの発言先を ")
+                        .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                        .append(Component.literal("(" + channel.getChannelName() + ")")
+                                .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                        .append(" に変更しました"));
+        else MessageUtil.sendMessage(ctx.getSource(), "デフォルトの発言先を " + newChannel.getChannelName() + " に変更しました");
         return 0;
     }
 
@@ -251,10 +257,15 @@ public class ChannelCommand {
             }
 
             Component displayName$minecraft = ComponentArgument.getComponent(ctx, "表示名");
-            net.kyori.adventure.text.Component displayName$adv = GsonComponentSerializer.gson().deserialize(Component.Serializer.toJson(displayName$minecraft));
-            CustomChannels.createChannel(internalChannelName, player.getUUID(), displayName$adv);
+            net.kyori.adventure.text.Component displayName$adv = NewMessageUtil.convertMinecraft2Adventure(displayName$minecraft);
+            CustomChannel channel = CustomChannels.createChannel(internalChannelName, player.getUUID(), displayName$adv);
 
-            ctx.getSource().sendSuccess(MutableComponent.create(new LiteralContents("チャンネル ")).append(displayName$minecraft).append(MutableComponent.create(new LiteralContents(" (" + internalChannelName + ") を作成しました"))), true);
+            NewMessageUtil.sendMessage(ctx.getSource(),
+                    Component.literal("チャンネル ")
+                            .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                            .append(Component.literal("(" + channel.getChannelName() + ")")
+                                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                            .append("を作成しました"), true);
 
             return ChannelCommand.setChannel(ctx, ChannelType.CUSTOM);
         }
