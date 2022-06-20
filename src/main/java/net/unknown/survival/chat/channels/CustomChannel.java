@@ -115,9 +115,7 @@ public class CustomChannel extends ChatChannel {
     public void addPlayer(UUID uniqueId) {
         if(this.players.contains(uniqueId)) throw new IllegalArgumentException("プレイヤー " + uniqueId + " はチャンネル " + this.channelName + " に既に参加しています。");
         this.players.add(uniqueId);
-        this.sendMessage(null, Component.empty().color(DefinedTextColor.GRAY).decoration(TextDecoration.ITALIC, true)
-                .append(this.getChannelPrefix(true))
-                .append(Component.text(Bukkit.getOfflinePlayer(uniqueId).getName() + " がチャンネルに参加しました")));
+        this.sendSystemMessage(Component.text(Bukkit.getOfflinePlayer(uniqueId).getName() + " がチャンネルに参加しました"));
         RunnableManager.runAsync(CustomChannels::save);
     }
 
@@ -127,10 +125,14 @@ public class CustomChannel extends ChatChannel {
         if(ChatManager.getCurrentChannel(uniqueId).equals(this)) {
             ChatManager.setChannel(uniqueId, GlobalChannel.getInstance());
         }
-        this.sendMessage(null, Component.empty().color(DefinedTextColor.GRAY).decoration(TextDecoration.ITALIC, true)
-                .append(this.getChannelPrefix(true))
-                .append(Component.text(Bukkit.getOfflinePlayer(uniqueId).getName() + " がチャンネルから退出しました")));
+        this.sendSystemMessage(Component.text(Bukkit.getOfflinePlayer(uniqueId).getName() + " がチャンネルから退出しました"));
         RunnableManager.runAsync(CustomChannels::save);
+    }
+
+    public void sendSystemMessage(Component message) {
+        this.sendMessage(null, Component.empty().style(Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC))
+                .append(this.getChannelPrefix(true))
+                .append(message));
     }
 
     public void sendMessage(Player player, Component message) {
