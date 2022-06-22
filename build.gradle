@@ -6,6 +6,7 @@
 
 plugins {
     id 'java'
+    id 'maven-publish'
     id 'io.papermc.paperweight.userdev' version '+' // Enable Development of using Mojang Mapping.
     id 'xyz.jpenilla.run-paper' version '+' // Run Mojang Mapped or Spigot Mapped Server
     id 'com.github.johnrengelman.shadow' version '7.1.0' // fatJar
@@ -17,7 +18,7 @@ plugins {
 //apply plugin: xyz.jpenilla.runpaper.RunPaper
 
 group 'net.unknown'
-version '1.0'
+version 'git-' + project.name + '-' + versionDetails().gitHash[0..7]
 
 compileJava.dependsOn = ["licenseFormat"]
 compileJava.options.encoding = "UTF-8"
@@ -47,6 +48,7 @@ repositories {
     maven { url = "https://maven.quiltmc.org/repository/release/" }
     maven { url = "https://maven.enginehub.org/repo/" }
     maven { url = "https://jitpack.io" }
+    maven { url = "https://repo.ryuuta0217.com/repository/unknown-network/" }
 }
 
 dependencies {
@@ -142,4 +144,16 @@ task copyArtifactToProxy(type: Copy) {
     from project.file("build/libs/UnknownNetworkCore-${version}.jar")
     rename("UnknownNetworkCore-${version}.jar", "UNC.jar")
     into project.file("testProxy/plugins")
+}
+
+publishing {
+    repositories {
+        maven {
+            url 'https://repo.ryuuta0217.com/repository/unknown-network/'
+            credentials {
+                username = System.getenv("NEXUS_USERNAME")
+                password = System.getenv("NEXUS_PASSWORD")
+            }
+        }
+    }
 }

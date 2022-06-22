@@ -18,7 +18,10 @@ jobs:
       - name: Grant execution permission to gradlew
         run: chmod +x gradlew
       - name: Build
-        run: ./gradlew clean downloadWaterfall reCompressWaterfall compileJava jar shadowJar reobfJar
+        env:
+          NEXUS_USERNAME: ${{secrets.NEXUS_USERNAME}}
+          NEXUS_PASSWORD: ${{secrets.NEXUS_PASSWORD}}
+        run: ./gradlew clean downloadWaterfall reCompressWaterfall compileJava jar shadowJar reobfJar publish
       - name: Save artifacts
         uses: actions/upload-artifact@v2
         with:
