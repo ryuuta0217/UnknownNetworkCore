@@ -142,9 +142,8 @@ public class RangedMining implements Listener {
         ItemStack handItem = event.getPlayer().getInventory().getItemInMainHand();
         if (!FACING.containsKey(event.getPlayer().getUniqueId())) return;
         if (!handItem.getType().name().endsWith("_PICKAXE")) return;
-        if (handItem.getLore() == null && !((CraftItemStack) handItem).handle.isEnchanted()) return;
+        if (handItem.getLore() == null /*&& !((CraftItemStack) handItem).handle.isEnchanted()*/) return;
         if (handItem.getLore().stream().noneMatch(lore -> lore.startsWith("§7採掘範囲拡大")) /*&& EnchantmentHelper.getEnchantments(((CraftItemStack) handItem).handle).containsKey(CustomEnchantments.RANGED_MINING)*/) return;
-
         int range;
         if(handItem.getLore().stream().anyMatch(lore -> lore.startsWith("§7採掘範囲拡大"))) {
             range = getLevel(handItem.getLore().stream().filter(lore -> lore.startsWith("§7採掘範囲拡大")).toList().get(0));
