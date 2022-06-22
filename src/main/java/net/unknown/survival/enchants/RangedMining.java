@@ -33,17 +33,13 @@ package net.unknown.survival.enchants;
 
 import com.google.common.collect.Sets;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.unknown.core.util.RegistryUtil;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -139,17 +135,20 @@ public class RangedMining implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockBreak(BlockBreakEvent event) {
-        ItemStack handItem = event.getPlayer().getInventory().getItemInMainHand();
-        if (!FACING.containsKey(event.getPlayer().getUniqueId())) return;
+        Player player = event.getPlayer();
+
+        if (!FACING.containsKey(player.getUniqueId())) return;
+
+        ItemStack handItem = player.getInventory().getItemInMainHand();
         if (!handItem.getType().name().endsWith("_PICKAXE")) return;
         if (handItem.getLore() == null /*&& !((CraftItemStack) handItem).handle.isEnchanted()*/) return;
         if (handItem.getLore().stream().noneMatch(lore -> lore.startsWith("§7採掘範囲拡大")) /*&& EnchantmentHelper.getEnchantments(((CraftItemStack) handItem).handle).containsKey(CustomEnchantments.RANGED_MINING)*/) return;
-        int range;
-        if(handItem.getLore().stream().anyMatch(lore -> lore.startsWith("§7採掘範囲拡大"))) {
-            range = getLevel(handItem.getLore().stream().filter(lore -> lore.startsWith("§7採掘範囲拡大")).toList().get(0));
+        int range = getLevel(handItem.getLore().stream().filter(lore -> lore.startsWith("§7採掘範囲拡大")).toList().get(0));
+        /*if(handItem.getLore().stream().anyMatch(lore -> lore.startsWith("§7採掘範囲拡大"))) {
+            range = ;
         } else {
-            range = /*EnchantmentHelper.getEnchantments(((CraftItemStack) handItem).handle).get(CustomEnchantments.RANGED_MINING)*/ 1;
-        }
+            range = /*EnchantmentHelper.getEnchantments(((CraftItemStack) handItem).handle).get(CustomEnchantments.RANGED_MINING)*//* 1;
+        }*/
 
         BlockFace bf = FACING.getOrDefault(event.getPlayer().getUniqueId(), event.getPlayer().getFacing());
 
