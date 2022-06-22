@@ -1,6 +1,6 @@
 name: UnknownNetworkCore
-version: 1.0-Alpha
-api-version: 1.18
+version: "@version@"
+api-version: 1.19
 main: net.unknown.UnknownNetworkCore
 softdepend: ["WorldGuard", "Multiverse-Core", "HolographicDisplays", "Vault", "Jecon"]
 permissions:

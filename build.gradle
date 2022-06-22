@@ -11,12 +11,13 @@ plugins {
     id 'com.github.johnrengelman.shadow' version '7.1.0' // fatJar
     id 'org.cadixdev.licenser' version '0.6.1' // Add License Header to source code headers.
     id "de.undercouch.download" version "4.1.2" // File Downloader
+    id 'com.palantir.git-version' version '+' // Git Information Getter
 }
 
 //apply plugin: xyz.jpenilla.runpaper.RunPaper
 
 group 'net.unknown'
-version '1.0-Alpha'
+version '1.0'
 
 compileJava.dependsOn = ["licenseFormat"]
 compileJava.options.encoding = "UTF-8"
@@ -59,7 +60,25 @@ dependencies {
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
 }
 
+import org.apache.tools.ant.filters.ReplaceTokens
+
+processResources {
+    filesMatching("*.yml") {
+        duplicatesStrategy(DuplicatesStrategy.INCLUDE)
+        filter ReplaceTokens, tokens: [version: "git-" + project.name + "-" + versionDetails().gitHash[0..7]]
+    }
+}
+
+jar {
+    archiveFileName = "original-" + archiveBaseName.get() + "." + archiveExtension.get()
+}
+
 shadowJar {
+    archiveFileName = archiveBaseName.get() + "-mojang." + archiveExtension.get()
+}
+
+reobfJar {
+    outputJar = layout.buildDirectory.file("libs/${project.name}.jar")
 }
 
 runMojangMappedServer {
