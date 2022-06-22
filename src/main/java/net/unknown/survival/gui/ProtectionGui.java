@@ -636,7 +636,7 @@ public class ProtectionGui extends GuiBase {
                             .build()); // -
 
                     this.gui.inventory.setItem(45, DefinedItemStackBuilders.leftArrow()
-                            .displayName(Component.text("も鶴", DefinedTextColor.GREEN))
+                            .displayName(Component.text("戻る", DefinedTextColor.GREEN))
                             .build());
                 }
 
@@ -657,13 +657,13 @@ public class ProtectionGui extends GuiBase {
                                         Collections.singletonList(Component.text("プレイヤー " + name + " は見つかりませんでした", DefinedTextColor.YELLOW)),
                                         this.gui, this, STATE, null);
                             }, player -> {
-                                if(this.gui.guiState == State.WAITING_CALLBACK) {
-                                    this.gui.guiState = State.MANAGE_MEMBERS;
-                                    this.gui.player.openInventory(this.gui.getInventory());
-                                }
                                 this.regionInfoView.region.region().getOwners().addPlayer(player.getUniqueId());
                                 this.gui.view = this;
                                 this.initialize();
+                                if(this.gui.guiState == State.WAITING_CALLBACK) {
+                                    this.gui.player.openInventory(this.gui.getInventory());
+                                    this.gui.guiState = State.MANAGE_MEMBERS;
+                                }
                             });
                         }
 
@@ -702,13 +702,13 @@ public class ProtectionGui extends GuiBase {
                                         Collections.singletonList(Component.text("プレイヤー " + name + " は見つかりませんでした", DefinedTextColor.YELLOW)),
                                         this.gui, this, STATE, null);
                             }, player -> {
-                                if(this.gui.guiState == State.WAITING_CALLBACK) {
-                                    this.gui.guiState = State.MANAGE_MEMBERS;
-                                    this.gui.player.openInventory(this.gui.getInventory());
-                                }
                                 this.regionInfoView.region.region().getMembers().addPlayer(player.getUniqueId());
                                 this.gui.view = this;
                                 this.initialize();
+                                if(this.gui.guiState == State.WAITING_CALLBACK) {
+                                    this.gui.player.openInventory(this.gui.getInventory());
+                                    this.gui.guiState = State.MANAGE_MEMBERS;
+                                }
                             });
                         }
 
