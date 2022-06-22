@@ -33,6 +33,7 @@ package net.unknown.survival.enchants;
 
 import com.google.common.collect.Sets;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
@@ -105,18 +106,27 @@ public class RangedMining implements Listener {
         return new Location(world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
-    private static Set<BlockPos> getBlockPosListWithinManhattan(BlockPos origin, int manhattanDistance) {
-        Set<BlockPos> set = Sets.newHashSet();
-        for (var x = manhattanDistance * -1; x <= manhattanDistance; x++) {
-            for (var y = manhattanDistance * -1; y <= manhattanDistance; y++) {
-                for (var z = manhattanDistance * -1; z <= manhattanDistance; z++) {
-                    if (Math.abs(x) + Math.abs(y) + Math.abs(z) <= manhattanDistance) {
-                        set.add(origin.offset(x, y, z));
-                    }
-                }
-            }
+    private static Iterable<BlockPos> withinManhattan(Direction direction, BlockPos center, int range) {
+        int x = 0;
+        int y = 0;
+        int z = 0;
+
+        if(direction == Direction.SOUTH || direction == Direction.NORTH) {
+            x = range;
+            y = range;
         }
-        return set;
+
+        if(direction == Direction.EAST || direction == Direction.WEST) {
+            y = range;
+            z = range;
+        }
+
+        if(direction == Direction.UP || direction == Direction.DOWN) {
+            x = range;
+            z = range;
+        }
+
+        return BlockPos.withinManhattan(center, x, y, z);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
