@@ -110,6 +110,8 @@ task downloadWaterfall(type: Task) {
 
     if (wf.exists()) {
         if(!file("libs/waterfall").exists()) {
+            println "Extracting waterfall"
+
             copy {
                 from zipTree(file("libs/standalone/waterfall.jar"))
                 into file("libs/waterfall/")
@@ -119,6 +121,8 @@ task downloadWaterfall(type: Task) {
         }
 
         if(file("libs/waterfall/com/mojang/brigadier").exists()) {
+            println "Removing brigadier from extracted waterfall"
+
             delete {
                 delete file("libs/waterfall/com/mojang/brigadier")
             }
