@@ -18,7 +18,7 @@ plugins {
 //apply plugin: xyz.jpenilla.runpaper.RunPaper
 
 group 'net.unknown'
-version 'git-' + project.name + '-' + versionDetails().gitHash[0..7]
+version versionDetails().gitHash[0..7]
 
 compileJava.dependsOn = ["licenseFormat"]
 compileJava.options.encoding = "UTF-8"
@@ -146,7 +146,45 @@ task copyArtifactToProxy(type: Copy) {
     into project.file("testProxy/plugins")
 }
 
+artifacts {
+    jar
+    //sourceJar
+    //javaDocJar
+    shadowJar
+    reobfJar
+}
+
 publishing {
+    publications {
+        release(MavenPublication) {
+            groupId = 'net.unknown'
+            artifactId = project.name
+            version = version
+            artifact "build/libs/UnknownNetworkCore.jar"
+
+            pom {
+                name = project.name
+                description = "Unknown Network Core plugin"
+                url = "https://www.unknownnet.jp"
+                inceptionYear = "2022"
+
+                licenses {
+                    license {
+                        name = "All rights reserved"
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = "ryuuta0217"
+                        name = "Ryuta Iwakura"
+                        email = "ryuuta.iwakura@gmail.com"
+                    }
+                }
+            }
+        }
+    }
+
     repositories {
         maven {
             url 'https://repo.ryuuta0217.com/repository/unknown-network/'
