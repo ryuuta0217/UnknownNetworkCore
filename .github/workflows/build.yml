@@ -22,4 +22,4 @@ jobs:
       - name: Save artifacts
         uses: actions/upload-artifact@v2
         with:
-          path: "build/libs/UnknownNetworkCore*.jar"
+          path: "build/libs/*UnknownNetworkCore*.jar"
