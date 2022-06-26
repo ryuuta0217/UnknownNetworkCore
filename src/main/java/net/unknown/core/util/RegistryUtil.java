@@ -83,11 +83,11 @@ public class RegistryUtil {
     public static <T> boolean forceReplace(Registry<T> registry, T objectSrc, T objectTo) {
         if (registry instanceof MappedRegistry<T>) {
             try {
-                ObjectList<T> byId = (ObjectList<T>) getObject(MappedRegistry.class.getDeclaredField("byId"), registry);
-                Reference2IntOpenHashMap<T> toId = (Reference2IntOpenHashMap<T>) getObject(MappedRegistry.class.getDeclaredField("toId"), registry);
-                BiMap<ResourceLocation, T> storage = (BiMap<ResourceLocation, T>) getObject(MappedRegistry.class.getDeclaredField("storage"), registry);
-                BiMap<ResourceKey<T>, T> keyStorage = (BiMap<ResourceKey<T>, T>) getObject(MappedRegistry.class.getDeclaredField("keyStorage"), registry);
-                Map<T, Lifecycle> lifecycles = (Map<T, Lifecycle>) getObject(MappedRegistry.class.getDeclaredField("lifecycles"), registry);
+                ObjectList<T> byId = (ObjectList<T>) getObject(MappedRegistry.class.getDeclaredField("bz"), registry);
+                Reference2IntOpenHashMap<T> toId = (Reference2IntOpenHashMap<T>) getObject(MappedRegistry.class.getDeclaredField("bA"), registry);
+                BiMap<ResourceLocation, T> storage = (BiMap<ResourceLocation, T>) getObject(MappedRegistry.class.getDeclaredField("bB"), registry);
+                BiMap<ResourceKey<T>, T> keyStorage = (BiMap<ResourceKey<T>, T>) getObject(MappedRegistry.class.getDeclaredField("bC"), registry);
+                Map<T, Lifecycle> lifecycles = (Map<T, Lifecycle>) getObject(MappedRegistry.class.getDeclaredField("bD"), registry);
                 if (byId == null || toId == null || storage == null || keyStorage == null || lifecycles == null)
                     return false;
 
@@ -103,7 +103,8 @@ public class RegistryUtil {
                 Lifecycle lc = lifecycles.get(objectSrc);
                 lifecycles.remove(objectSrc);
                 lifecycles.put(objectTo, lc);
-            } catch (NoSuchFieldException ignored) {
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
             }
         }
         return false;

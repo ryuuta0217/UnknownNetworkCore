@@ -35,20 +35,26 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.LiteralContents;
+import io.netty.buffer.Unpooled;
+import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 import net.unknown.UnknownNetworkCore;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
+import org.mozilla.javascript.JavaAdapter;
 
 public class CustomFallingBlockEntity extends FallingBlockEntity {
     private final ServerPlayer srcPlayer;
-    private BlockPos lastPos;
+    private Vec3 lastPos;
     private long stayTick = 0L;
     private boolean isStayed = false;
 
@@ -57,6 +63,7 @@ public class CustomFallingBlockEntity extends FallingBlockEntity {
         this.srcPlayer = srcPlayer;
         this.dropItem = false;
         this.setNoGravity(true);
+        this.time = 590;
         // TODO world.addFreshEntity(this, CreatureSpawnEvent.SpawnReason.NATURAL);
     }
 
@@ -75,11 +82,22 @@ public class CustomFallingBlockEntity extends FallingBlockEntity {
         return e.getStringUUID();
     }
 
+    int ticks = 0;
+    long sec = 0;
+
     @Override
     public void tick() {
         if (this.isRemoved()) return;
+        this.time = 101;
+        if(!this.srcPlayer.position().equals(this.lastPos)) {
+            this.copyPosition(this.srcPlayer);
+            this.setDeltaMovement(Vec3.ZERO);
+            this.srcPlayer.connection.send(new ClientboundTeleportEntityPacket(this));
+            this.lastPos = this.position();
+        }
+        //this.copyPosition(this.srcPlayer);
 
-        if (!this.isStayed) this.setPos(this.srcPlayer.position());
+        /*if (!this.isStayed) this.setPos(this.srcPlayer.position());
         this.time = 590;
         if (!this.srcPlayer.blockPosition().equals(this.lastPos)) {
             this.isStayed = false;
@@ -105,7 +123,7 @@ public class CustomFallingBlockEntity extends FallingBlockEntity {
             }
             this.stayTick++;
         }
-        this.lastPos = this.srcPlayer.blockPosition();
-        super.tick();
+        this.lastPos = this.srcPlayer.blockPosition();*/
+        //super.tick();
     }
 }
