@@ -32,9 +32,6 @@
 package net.unknown.survival;
 
 import net.milkbowl.vault.economy.Economy;
-import net.minecraft.core.Registry;
-import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
-import net.minecraft.world.level.block.ComposterBlock;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.survival.antivillagerlag.AntiVillagerLag;
 import net.unknown.survival.chat.ChatManager;
@@ -42,9 +39,9 @@ import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.dependency.WorldGuard;
-import net.unknown.survival.enchants.CustomEnchantments;
 import net.unknown.survival.enchants.HatakeWatari;
 import net.unknown.survival.enchants.RangedMining;
+import net.unknown.survival.feature.BlockDisassembler;
 import net.unknown.survival.fml.FMLConnectionListener;
 import net.unknown.survival.fml.ModdedPlayerManager;
 import net.unknown.survival.fun.DemolitionGun;
@@ -53,7 +50,6 @@ import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.listeners.ColorCodeListener;
 import net.unknown.survival.listeners.MainGuiOpenListener;
 import net.unknown.survival.listeners.PlayerDeathListener;
-import net.unknown.survival.worldseparator.WorldSeparator;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
@@ -62,6 +58,7 @@ import java.util.logging.Logger;
 
 public class UnknownNetworkSurvival {
     private static final Logger LOGGER = Logger.getLogger("UNC/Survival");
+    private static boolean BOOTSTRAPPED = false;
     private static boolean HOLOGRAPHIC_DISPLAYS_ENABLED = false;
     private static boolean WORLD_GUARD_ENABLED = false;
     private static boolean VAULT_ENABLED = false;
@@ -71,6 +68,10 @@ public class UnknownNetworkSurvival {
     public static void onLoad() {
         Commands.init();
         //CustomEnchantments.initialize();
+        try {
+            Class.forName("net.unknown.launchwrapper.Main");
+            BOOTSTRAPPED = true;
+        } catch(ClassNotFoundException ignored) {}
     }
 
     public static void onEnable() {
@@ -96,6 +97,9 @@ public class UnknownNetworkSurvival {
         Bukkit.getPluginManager().registerEvents(new MonsterBall(), UnknownNetworkCore.getInstance());
         Bukkit.getPluginManager().registerEvents(new PlayerDeathListener(), UnknownNetworkCore.getInstance());
         //Bukkit.getPluginManager().registerEvents(new WorldSeparator(), UnknownNetworkCore.getInstance());
+        if(isBootstrapped()) {
+            Bukkit.getPluginManager().registerEvents(new BlockDisassembler(), UnknownNetworkCore.getInstance());
+        }
 
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());
 
@@ -118,6 +122,10 @@ public class UnknownNetworkSurvival {
 
     public static Logger getLogger() {
         return LOGGER;
+    }
+
+    public static boolean isBootstrapped() {
+        return BOOTSTRAPPED;
     }
 
     public static boolean isHolographicDisplaysEnabled() {
