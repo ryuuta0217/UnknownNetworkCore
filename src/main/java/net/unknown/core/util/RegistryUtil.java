@@ -36,6 +36,7 @@ import com.google.common.collect.BiMap;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
@@ -52,6 +53,7 @@ import org.bukkit.craftbukkit.v1_19_R1.util.CraftNamespacedKey;
 import java.lang.reflect.Field;
 import java.util.Locale;
 import java.util.Map;
+import java.util.OptionalInt;
 
 public class RegistryUtil {
     public static <T> boolean forceUnregister(Registry<T> registry, T object) {
@@ -83,28 +85,36 @@ public class RegistryUtil {
     public static <T> boolean forceReplace(Registry<T> registry, T objectSrc, T objectTo) {
         if (registry instanceof MappedRegistry<T>) {
             try {
-                ObjectList<T> byId = (ObjectList<T>) getObject(MappedRegistry.class.getDeclaredField("bz"), registry);
-                Reference2IntOpenHashMap<T> toId = (Reference2IntOpenHashMap<T>) getObject(MappedRegistry.class.getDeclaredField("bA"), registry);
-                BiMap<ResourceLocation, T> storage = (BiMap<ResourceLocation, T>) getObject(MappedRegistry.class.getDeclaredField("bB"), registry);
-                BiMap<ResourceKey<T>, T> keyStorage = (BiMap<ResourceKey<T>, T>) getObject(MappedRegistry.class.getDeclaredField("bC"), registry);
-                Map<T, Lifecycle> lifecycles = (Map<T, Lifecycle>) getObject(MappedRegistry.class.getDeclaredField("bD"), registry);
-                if (byId == null || toId == null || storage == null || keyStorage == null || lifecycles == null)
+                ObjectList<Holder.Reference<T>> byId = (ObjectList<Holder.Reference<T>>) getObject(MappedRegistry.class.getDeclaredField("bS"), registry);
+                Reference2IntOpenHashMap<T> toId = (Reference2IntOpenHashMap<T>) getObject(MappedRegistry.class.getDeclaredField("bT"), registry);
+                Map<ResourceLocation, Holder.Reference<T>> byLocation = (Map<ResourceLocation, Holder.Reference<T>>) getObject(MappedRegistry.class.getDeclaredField("bU"), registry);
+                Map<ResourceKey<T>, Holder.Reference<T>> byKey = (Map<ResourceKey<T>, Holder.Reference<T>>) getObject(MappedRegistry.class.getDeclaredField("bV"), registry);
+                Map<T, Holder.Reference<T>> byValue = (Map<T, Holder.Reference<T>>) getObject(MappedRegistry.class.getDeclaredField("bW"), registry);
+                Map<T, Lifecycle> lifecycles = (Map<T, Lifecycle>) getObject(MappedRegistry.class.getDeclaredField("bX"), registry);
+                if (byId == null || toId == null || byLocation == null || byKey == null || byValue == null || lifecycles == null)
                     return false;
 
                 int id = registry.getId(objectSrc);
-                ResourceKey<T> rk = registry.getResourceKey(objectSrc).orElseThrow();
-                ResourceLocation rl = registry.getKey(objectSrc);
+                ResourceKey<T> key = registry.getResourceKey(objectSrc).orElseThrow();
+                ResourceLocation location = registry.getKey(objectSrc);
 
-                byId.set(id, objectTo);
+                Holder.Reference<T> ref = byId.get(id);
+                Field f = Holder.Reference.class.getDeclaredField("e");
+                if(f.trySetAccessible()) f.set(ref, objectTo);
+                else return false;
+
+                toId.remove(objectSrc, id);
                 toId.put(objectTo, id);
-                storage.put(rl, objectTo);
-                keyStorage.put(rk, objectTo);
+
+                byValue.remove(objectSrc);
+                byValue.put(objectTo, ref);
 
                 Lifecycle lc = lifecycles.get(objectSrc);
                 lifecycles.remove(objectSrc);
                 lifecycles.put(objectTo, lc);
-            } catch (NoSuchFieldException e) {
-                e.printStackTrace();
+                return true;
+            } catch (IllegalAccessException | NoSuchFieldException e) {
+                throw new RuntimeException(e);
             }
         }
         return false;
