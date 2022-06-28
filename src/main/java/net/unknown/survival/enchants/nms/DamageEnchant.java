@@ -50,13 +50,10 @@ public class DamageEnchant extends Enchantment {
     private static final String[] NAMES = new String[]{"all", "undead", "arthropods"};
     private static final int[] MIN_COST = new int[]{1, 5, 5};
     private static final int[] LEVEL_COST = new int[]{11, 8, 8};
-    private static final int[] LEVEL_COST_SPAN = new int[]{20, 20, 20};
+    private static final int[] LEVEL_COST_SPAN = new int[]{24, 20, 20};
 
     public static void register() {
         RegistryUtil.forceReplace(Registry.ENCHANTMENT, Enchantments.SHARPNESS, new DamageEnchant(Rarity.COMMON, 0, EquipmentSlot.MAINHAND));
-        //RegistryUtil.forceUnregister(Registry.ENCHANTMENT, Enchantments.SHARPNESS);
-        //"sharpness", new DamageEnchantment(Enchantment.Rarity.COMMON, 0, new EquipmentSlot[]{EquipmentSlot.MAINHAND})
-        //Registry.register(Registry.ENCHANTMENT, "sharpness", );
     }
 
     public final int type;
