@@ -44,6 +44,5 @@ public class BlockDisassembler implements Listener {
     public void onDispenserShoot(BlockDispenseBeforeEvent event) {
         DispenserBlockEntity dispenser = event.getBlockSource().getEntity();
         Dispenser dispenserBukkit = (Dispenser) event.getBukkitBlock().getState();
-        dispenserBukkit.get
     }
 }
