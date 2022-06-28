@@ -41,6 +41,7 @@ import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.enchants.HatakeWatari;
 import net.unknown.survival.enchants.RangedMining;
+import net.unknown.survival.enchants.nms.DamageEnchant;
 import net.unknown.survival.feature.BlockDisassembler;
 import net.unknown.survival.fml.FMLConnectionListener;
 import net.unknown.survival.fml.ModdedPlayerManager;
@@ -67,7 +68,7 @@ public class UnknownNetworkSurvival {
 
     public static void onLoad() {
         Commands.init();
-        //CustomEnchantments.initialize();
+        DamageEnchant.register();
         try {
             Class.forName("net.unknown.launchwrapper.Main");
             BOOTSTRAPPED = true;
