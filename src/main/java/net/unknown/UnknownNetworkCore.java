@@ -35,6 +35,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.unknown.core.commands.Commands;
+import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.managers.PacketManager;
 import net.unknown.core.managers.TrashManager;
@@ -98,6 +99,7 @@ public class UnknownNetworkCore extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new TabListPingManager(), this);
         TabListPingManager.startTask();
         TrashManager.loadExists();
+        ThirdPartyPluginPermissionsFixer.scheduleNextTick();
         getLogger().info("");
         getLogger().info("");
         getLogger().info("""
