@@ -31,7 +31,50 @@
 
 package net.unknown.core.economy.repository;
 
+import java.math.BigDecimal;
+import java.util.UUID;
+
 // Save to: ~/../economy/players/UUID.yml
 // exf) /root/unknown-network/economy/players/UUID.yml
-public class PlayerMoneyRepository {
+public class PlayerRepository implements Repository {
+    private final UUID owner;
+    private BigDecimal balance;
+
+    public PlayerRepository(UUID owner, BigDecimal balance) {
+        this.owner = owner;
+        this.balance = balance;
+    }
+
+    /**
+     * プレイヤーの所持金に指定した金額を入金します。
+     *
+     * @param value 入金する金額
+     * @return 入金後のプレイヤーの所持金
+     */
+    @Override
+    public BigDecimal deposit(BigDecimal value) {
+
+        return null;
+    }
+
+    /**
+     * プレイヤーの所持金から指定した金額を出金します。
+     *
+     * @param value 出金する金額
+     * @return 出金後のプレイヤーの所持金
+     */
+    @Override
+    public BigDecimal withdraw(BigDecimal value) {
+        return null;
+    }
+
+    /**
+     * プレイヤーの所持金を取得します。
+     *
+     * @return プレイヤーの所持金
+     */
+    @Override
+    public BigDecimal getBalance() {
+        return null;
+    }
 }
