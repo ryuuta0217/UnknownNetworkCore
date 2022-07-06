@@ -50,5 +50,6 @@ public class Commands {
         DeepFakeCommand.register(UnknownNetworkCore.getBrigadier());
         KillCommand.register(UnknownNetworkCore.getBrigadier());
         SkullCommand.register(UnknownNetworkCore.getBrigadier());
+        TrashCommand.register(UnknownNetworkCore.getBrigadier());
     }
 }

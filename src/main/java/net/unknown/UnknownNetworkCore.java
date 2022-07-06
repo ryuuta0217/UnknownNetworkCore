@@ -36,6 +36,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.unknown.core.commands.Commands;
 import net.unknown.core.gui.SignGui;
+import net.unknown.core.managers.TrashManager;
 import net.unknown.core.tab.TabListPingManager;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
@@ -43,7 +44,10 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
 
+import java.io.File;
+
 public class UnknownNetworkCore extends JavaPlugin {
+    private static final File SHARED_DATA_FOLDER = new File("../shared");
     private static final JSONParser JSON_PARSER = new JSONParser();
     private static final Environment ENV = Environment.valueOf(System.getProperty("un.env", "SURVIVAL"));
     private static UnknownNetworkCore INSTANCE;
@@ -54,6 +58,10 @@ public class UnknownNetworkCore extends JavaPlugin {
 
     public static CommandDispatcher<CommandSourceStack> getBrigadier() {
         return getDedicatedServer().vanillaCommandDispatcher.getDispatcher();
+    }
+
+    public static File getSharedDataFolder() {
+        return SHARED_DATA_FOLDER;
     }
 
     public static DedicatedServer getDedicatedServer() {
@@ -87,6 +95,7 @@ public class UnknownNetworkCore extends JavaPlugin {
         Bukkit.getPluginManager().registerEvents(new SignGui.Listener(), this);
         Bukkit.getPluginManager().registerEvents(new TabListPingManager(), this);
         TabListPingManager.startTask();
+        TrashManager.loadExists();
         getLogger().info("");
         getLogger().info("");
         getLogger().info("""
