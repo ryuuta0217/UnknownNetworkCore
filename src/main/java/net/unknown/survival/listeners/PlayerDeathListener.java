@@ -100,14 +100,15 @@ public class PlayerDeathListener implements Listener {
 
         Location playerPos = event.getPlayer().getLocation().toBlockLocation();
         Location blockPos = new Location(playerPos.getWorld(), playerPos.getX(), playerPos.getY(), playerPos.getZ()); // for Block Event Location Normalize
-        if(blockPos.getBlock().getType() != Material.AIR) {
+        if(blockPos.getBlock().getType() != Material.AIR && blockPos.getBlock().getType() != Material.WATER && blockPos.getBlock().getType() == Material.LAVA) {
             Set<Location> airs = new HashSet<>();
 
             for(int x = -3; x <= 3; x++) {
                 for(int y = -3; y <= 3; y++) {
                     for(int z = -3; z <= 3; z++) {
                         Location l = event.getPlayer().getLocation().toBlockLocation().add(x, y, z);
-                        if(l.getBlock().getType() == Material.AIR) {
+                        Material type = l.getBlock().getType();
+                        if(type == Material.AIR || type == Material.WATER || type == Material.LAVA) {
                             airs.add(l);
                         }
                     }
