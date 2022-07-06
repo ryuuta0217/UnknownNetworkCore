@@ -44,6 +44,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Field;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ThirdPartyPluginPermissionsFixer {
@@ -154,12 +156,14 @@ public class ThirdPartyPluginPermissionsFixer {
     @Nullable
     public static Map<String, Command> getKnownCommands() {
         try {
-            return (Map<String, Command>) SimpleCommandMap.class
-                    .getDeclaredField("knownCommands")
-                    .get(Bukkit.getCommandMap());
+            Field f = SimpleCommandMap.class.getDeclaredField("knownCommands");
+            if(f.trySetAccessible()) {
+                return (Map<String, Command>) f.get(Bukkit.getCommandMap());
+            }
         } catch (IllegalAccessException | NoSuchFieldException e) {
             LOGGER.error("Incompatible Bukkit server environment!", e);
-            return null;
         }
+
+        return new HashMap<>();
     }
 }
