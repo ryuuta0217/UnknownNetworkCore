@@ -31,10 +31,6 @@
 
 package net.unknown.core.gui;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.MutableComponent;
@@ -46,16 +42,18 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.unknown.core.events.interfaces.PacketListener;
+import net.unknown.core.managers.PacketManager;
 import net.unknown.core.managers.RunnableManager;
+import net.unknown.core.events.PacketReceivedEvent;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.*;
@@ -136,38 +134,31 @@ public class SignGui {
                 .toArray(net.minecraft.network.chat.Component[]::new);
     }
 
-    public static class Listener implements org.bukkit.event.Listener {
-        @EventHandler
-        public void onPlayerJoin(PlayerJoinEvent event) {
-            Player player = event.getPlayer();
-            ChannelDuplexHandler packetHandler = new ChannelDuplexHandler() {
-                @Override
-                public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                    if (msg instanceof ServerboundSignUpdatePacket packet) {
-                        if (SignGui.SIGN_GUI_OPENED.containsKey(event.getPlayer().getUniqueId())) {
-                            SignGui gui = SignGui.SIGN_GUI_OPENED.get(event.getPlayer().getUniqueId());
-                            if (gui.isOpened) {
-                                gui.isOpened = false;
-                                SignGui.SIGN_GUI_OPENED.remove(event.getPlayer().getUniqueId());
-                                if (gui.completeHandler != null) {
-                                    RunnableManager.runDelayed(() -> {
-                                        gui.completeHandler.accept(Arrays.stream(packet.getLines()).map(line -> (Component) Component.text(line)).toList());
-                                    }, 1L);
-                                }
-                            }
+    public static class Listener extends PacketListener implements org.bukkit.event.Listener {
+        public Listener() {
+            PacketManager.getInstance().registerListener(ServerboundSignUpdatePacket.class, this);
+        }
+
+        @Override
+        public void onPacketReceived(PacketReceivedEvent event) {
+            if(event.getPacket() instanceof ServerboundSignUpdatePacket packet) {
+                if (SignGui.SIGN_GUI_OPENED.containsKey(event.getPlayer().getUniqueId())) {
+                    SignGui gui = SignGui.SIGN_GUI_OPENED.get(event.getPlayer().getUniqueId());
+                    if (gui.isOpened) {
+                        gui.isOpened = false;
+                        SignGui.SIGN_GUI_OPENED.remove(event.getPlayer().getUniqueId());
+                        if (gui.completeHandler != null) {
+                            RunnableManager.runDelayed(() -> {
+                                gui.completeHandler.accept(Arrays.stream(packet.getLines()).map(line -> (Component) Component.text(line)).toList());
+                            }, 1L);
                         }
                     }
-                    super.channelRead(ctx, msg);
                 }
-            };
-            ChannelPipeline pipeline = ((CraftPlayer) player).getHandle().connection.connection.channel.pipeline();
-            pipeline.addBefore("packet_handler", player.getName(), packetHandler);
+            }
         }
 
         @EventHandler
         public void onPlayerQuit(PlayerQuitEvent event) {
-            Channel c = ((CraftPlayer) event.getPlayer()).getHandle().connection.connection.channel;
-            c.eventLoop().submit(() -> c.pipeline().remove(event.getPlayer().getName()));
             if (SIGN_GUI_OPENED.containsKey(event.getPlayer().getUniqueId())) {
                 SignGui gui = SIGN_GUI_OPENED.get(event.getPlayer().getUniqueId());
                 gui.isOpened = false;

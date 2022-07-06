@@ -36,6 +36,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.unknown.core.commands.Commands;
 import net.unknown.core.gui.SignGui;
+import net.unknown.core.managers.PacketManager;
 import net.unknown.core.managers.TrashManager;
 import net.unknown.core.tab.TabListPingManager;
 import org.bukkit.Bukkit;
@@ -92,6 +93,7 @@ public class UnknownNetworkCore extends JavaPlugin {
     @Override
     public void onEnable() {
         long start = System.nanoTime();
+        Bukkit.getPluginManager().registerEvents(PacketManager.getInstance(), this);
         Bukkit.getPluginManager().registerEvents(new SignGui.Listener(), this);
         Bukkit.getPluginManager().registerEvents(new TabListPingManager(), this);
         TabListPingManager.startTask();
