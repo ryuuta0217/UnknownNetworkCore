@@ -99,7 +99,7 @@ public class UnknownNetworkSurvival {
         Bukkit.getPluginManager().registerEvents(new PlayerDeathListener(), UnknownNetworkCore.getInstance());
         //Bukkit.getPluginManager().registerEvents(new WorldSeparator(), UnknownNetworkCore.getInstance());
         if(isBootstrapped()) {
-            Bukkit.getPluginManager().registerEvents(new BlockDisassembler(), UnknownNetworkCore.getInstance());
+            //Bukkit.getPluginManager().registerEvents(new BlockDisassembler(), UnknownNetworkCore.getInstance());
         }
 
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());

@@ -43,6 +43,6 @@ public class BlockDisassembler implements Listener {
     @EventHandler
     public void onDispenserShoot(BlockDispenseBeforeEvent event) {
         DispenserBlockEntity dispenser = event.getBlockSource().getEntity();
-        Dispenser dispenserBukkit = (Dispenser) event.getBukkitBlock().getState();
+        Dispenser dispenserBukkit = (Dispenser) event.getBukkitBlock().getState(); // Dropperの場合もあるぞ！
     }
 }
