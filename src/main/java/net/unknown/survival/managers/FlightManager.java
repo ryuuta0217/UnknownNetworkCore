@@ -37,6 +37,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.dependency.Vault;
@@ -178,7 +179,7 @@ public class FlightManager {
                         .append(Component.text(" - "))
                         .append(Component.text("¥" + currentPrice, TextColor.color(16777045))));
             }, 0L, 40L);
-            ListenerManager.registerListener(this, UnknownNetworkCore.getInstance());
+            ListenerManager.registerListener(this);
             this.player.setAllowFlight(true);
             MessageUtil.sendMessage(this.player, "有料飛行が有効になりました。飛行時間1分ごとに、" + FLIGHT_PRICE_PER_MINUTES + "円が加算されます。");
             runOnGroundTimeTask();
