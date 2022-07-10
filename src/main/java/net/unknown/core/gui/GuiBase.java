@@ -33,6 +33,7 @@ package net.unknown.core.gui;
 
 import net.kyori.adventure.text.Component;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.managers.ListenerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -126,7 +127,7 @@ public class GuiBase implements Listener {
     }
 
     protected void registerAsListener() {
-        Bukkit.getPluginManager().registerEvents(this, UnknownNetworkCore.getInstance());
+        ListenerManager.registerListener(this);
     }
 
     protected void unRegisterAsListener() {

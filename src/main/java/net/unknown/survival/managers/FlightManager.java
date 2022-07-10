@@ -178,7 +178,7 @@ public class FlightManager {
                         .append(Component.text(" - "))
                         .append(Component.text("¥" + currentPrice, TextColor.color(16777045))));
             }, 0L, 40L);
-            Bukkit.getPluginManager().registerEvents(this, UnknownNetworkCore.getInstance());
+            ListenerManager.registerListener(this, UnknownNetworkCore.getInstance());
             this.player.setAllowFlight(true);
             MessageUtil.sendMessage(this.player, "有料飛行が有効になりました。飛行時間1分ごとに、" + FLIGHT_PRICE_PER_MINUTES + "円が加算されます。");
             runOnGroundTimeTask();

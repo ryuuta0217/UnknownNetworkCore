@@ -33,6 +33,7 @@ package net.unknown.survival;
 
 import net.milkbowl.vault.economy.Economy;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.antivillagerlag.AntiVillagerLag;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
@@ -87,19 +88,19 @@ public class UnknownNetworkSurvival {
         AntiVillagerLag.startLoopTask();
         PlayerDeathListener.load();
 
-        Bukkit.getPluginManager().registerEvents(new MainGuiOpenListener(), UnknownNetworkCore.getInstance());
-        Bukkit.getPluginManager().registerEvents(new ChatManager(), UnknownNetworkCore.getInstance());
-        Bukkit.getPluginManager().registerEvents(new ColorCodeListener(), UnknownNetworkCore.getInstance());
-        Bukkit.getPluginManager().registerEvents(new ModdedPlayerManager(), UnknownNetworkCore.getInstance());
-        Bukkit.getPluginManager().registerEvents(new PathfinderGrapple(), UnknownNetworkCore.getInstance());
-        Bukkit.getPluginManager().registerEvents(new DemolitionGun(), UnknownNetworkCore.getInstance());
-        Bukkit.getPluginManager().registerEvents(new HatakeWatari(), UnknownNetworkCore.getInstance());
-        Bukkit.getPluginManager().registerEvents(new RangedMining(), UnknownNetworkCore.getInstance());
-        Bukkit.getPluginManager().registerEvents(new MonsterBall(), UnknownNetworkCore.getInstance());
-        Bukkit.getPluginManager().registerEvents(new PlayerDeathListener(), UnknownNetworkCore.getInstance());
-        //Bukkit.getPluginManager().registerEvents(new WorldSeparator(), UnknownNetworkCore.getInstance());
+        ListenerManager.registerListener(new MainGuiOpenListener());
+        ListenerManager.registerListener(new ChatManager());
+        ListenerManager.registerListener(new ColorCodeListener());
+        ListenerManager.registerListener(new ModdedPlayerManager());
+        ListenerManager.registerListener(new PathfinderGrapple());
+        ListenerManager.registerListener(new DemolitionGun());
+        ListenerManager.registerListener(new HatakeWatari());
+        ListenerManager.registerListener(new RangedMining());
+        ListenerManager.registerListener(new MonsterBall());
+        ListenerManager.registerListener(new PlayerDeathListener());
+        //ListenerManager.registerListener(new WorldSeparator());
         if(isBootstrapped()) {
-            //Bukkit.getPluginManager().registerEvents(new BlockDisassembler(), UnknownNetworkCore.getInstance());
+            //ListenerManager.registerListener(new BlockDisassembler());
         }
 
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());

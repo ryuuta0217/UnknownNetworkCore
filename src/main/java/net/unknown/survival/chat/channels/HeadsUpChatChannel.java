@@ -39,6 +39,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.enums.Permissions;
+import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import org.bukkit.Bukkit;
@@ -65,7 +66,7 @@ public class HeadsUpChatChannel extends ChatChannel implements Listener {
     public HeadsUpChatChannel(UUID target) {
         super("頭上", ChannelType.HEADS_UP);
         this.target = target;
-        Bukkit.getPluginManager().registerEvents(this, UnknownNetworkCore.getInstance());
+        ListenerManager.registerListener(this);
     }
 
     private static double getYPos(double base, int count, double per) {
