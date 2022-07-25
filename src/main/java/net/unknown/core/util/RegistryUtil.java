@@ -53,7 +53,6 @@ import org.bukkit.craftbukkit.v1_19_R1.util.CraftNamespacedKey;
 import java.lang.reflect.Field;
 import java.util.Locale;
 import java.util.Map;
-import java.util.OptionalInt;
 
 public class RegistryUtil {
     public static <T> boolean forceUnregister(Registry<T> registry, T object) {
@@ -85,12 +84,13 @@ public class RegistryUtil {
     public static <T> boolean forceReplace(Registry<T> registry, T objectSrc, T objectTo) {
         if (registry instanceof MappedRegistry<T>) {
             try {
-                ObjectList<Holder.Reference<T>> byId = (ObjectList<Holder.Reference<T>>) getObject(MappedRegistry.class.getDeclaredField("bS"), registry);
-                Reference2IntOpenHashMap<T> toId = (Reference2IntOpenHashMap<T>) getObject(MappedRegistry.class.getDeclaredField("bT"), registry);
-                Map<ResourceLocation, Holder.Reference<T>> byLocation = (Map<ResourceLocation, Holder.Reference<T>>) getObject(MappedRegistry.class.getDeclaredField("bU"), registry);
-                Map<ResourceKey<T>, Holder.Reference<T>> byKey = (Map<ResourceKey<T>, Holder.Reference<T>>) getObject(MappedRegistry.class.getDeclaredField("bV"), registry);
-                Map<T, Holder.Reference<T>> byValue = (Map<T, Holder.Reference<T>>) getObject(MappedRegistry.class.getDeclaredField("bW"), registry);
-                Map<T, Lifecycle> lifecycles = (Map<T, Lifecycle>) getObject(MappedRegistry.class.getDeclaredField("bX"), registry);
+                ObfuscationUtil.Class mappedRegistryMapping = ObfuscationUtil.getClassByMojangName("net.minecraft.core.MappedRegistry");
+                ObjectList<Holder.Reference<T>> byId = (ObjectList<Holder.Reference<T>>) getObject(mappedRegistryMapping.getFieldByMojangName("byId").getField(), registry);
+                Reference2IntOpenHashMap<T> toId = (Reference2IntOpenHashMap<T>) getObject(mappedRegistryMapping.getFieldByMojangName("toId").getField(), registry);
+                Map<ResourceLocation, Holder.Reference<T>> byLocation = (Map<ResourceLocation, Holder.Reference<T>>) getObject(mappedRegistryMapping.getFieldByMojangName("byLocation").getField(), registry);
+                Map<ResourceKey<T>, Holder.Reference<T>> byKey = (Map<ResourceKey<T>, Holder.Reference<T>>) getObject(mappedRegistryMapping.getFieldByMojangName("byKey").getField(), registry);
+                Map<T, Holder.Reference<T>> byValue = (Map<T, Holder.Reference<T>>) getObject(mappedRegistryMapping.getFieldByMojangName("byValue").getField(), registry);
+                Map<T, Lifecycle> lifecycles = (Map<T, Lifecycle>) getObject(mappedRegistryMapping.getFieldByMojangName("lifecycles").getField(), registry);
                 if (byId == null || toId == null || byLocation == null || byKey == null || byValue == null || lifecycles == null)
                     return false;
 
@@ -99,7 +99,8 @@ public class RegistryUtil {
                 ResourceLocation location = registry.getKey(objectSrc);
 
                 Holder.Reference<T> ref = byId.get(id);
-                Field f = Holder.Reference.class.getDeclaredField("e");
+
+                Field f = ObfuscationUtil.getClassByMojangName("net.minecraft.core.Holder$Reference").getFieldByMojangName("value").getField();
                 if(f.trySetAccessible()) f.set(ref, objectTo);
                 else return false;
 
