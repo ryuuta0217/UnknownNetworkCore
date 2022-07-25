@@ -40,10 +40,13 @@ import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.dependency.WorldGuard;
+import net.unknown.survival.enchants.AutoSmelting;
+import net.unknown.survival.enchants.ChainDestruction;
 import net.unknown.survival.enchants.HatakeWatari;
 import net.unknown.survival.enchants.RangedMining;
 import net.unknown.survival.enchants.nms.DamageEnchant;
 import net.unknown.survival.feature.BlockDisassembler;
+import net.unknown.survival.feature.gnarms.GNArms;
 import net.unknown.survival.fml.FMLConnectionListener;
 import net.unknown.survival.fml.ModdedPlayerManager;
 import net.unknown.survival.fun.DemolitionGun;
@@ -88,6 +91,8 @@ public class UnknownNetworkSurvival {
         AntiVillagerLag.startLoopTask();
         PlayerDeathListener.load();
 
+        GNArms.initialize();
+
         ListenerManager.registerListener(new MainGuiOpenListener());
         ListenerManager.registerListener(new ChatManager());
         ListenerManager.registerListener(new ColorCodeListener());
@@ -98,6 +103,8 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new RangedMining());
         ListenerManager.registerListener(new MonsterBall());
         ListenerManager.registerListener(new PlayerDeathListener());
+        ListenerManager.registerListener(new ChainDestruction());
+        ListenerManager.registerListener(new AutoSmelting());
         //ListenerManager.registerListener(new WorldSeparator());
         if(isBootstrapped()) {
             //ListenerManager.registerListener(new BlockDisassembler());
