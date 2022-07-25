@@ -1,0 +1,9 @@
+{
+    "type": "minecraft:stonecutting",
+    "ingredient": {
+        "item": "minecraft:crimson_stem"
+    },
+    "result": "minecraft:stripped_crimson_stem",
+    "group": "stonecutter",
+    "count": 1
+}

@@ -1,0 +1,1 @@
+summon chicken ~ ~ ~ {Silent:1b,Age:-2147483648,Tags:["nori"],Passengers:[{id:"minecraft:boat",Type:"oak",Tags:["nori"]}],ActiveEffects:[{Id:11b,Amplifier:5b,Duration:999999,ShowParticles:0b},{Id:14b,Amplifier:1b,Duration:999999,ShowParticles:0b},{Id:25b,Amplifier:1b,Duration:999999,ShowParticles:0b}]}

@@ -1,0 +1,84 @@
+{
+    "type": "minecraft:chest",
+    "pools": [
+      {
+        "rolls": 6,
+        "entries": [
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:candle",
+            "conditions": [
+              {
+                "condition": "minecraft:random_chance",
+                "chance": 0.5
+              }
+            ]
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:white_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:orange_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:magenta_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:light_blue_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:yellow_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:lime_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:pink_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:gray_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:light_gray_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:cyan_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:purple_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:blue_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:brown_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:green_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:red_candle"
+          },
+          {
+            "type": "minecraft:item",
+            "name": "minecraft:black_candle"
+          }
+        ]
+      }
+    ]
+  }

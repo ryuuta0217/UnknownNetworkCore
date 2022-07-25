@@ -1,0 +1,13 @@
+{
+    "criteria": {
+      "unlock": {
+        "trigger": "minecraft:recipe_unlocked",
+        "conditions": {
+          "recipe": "us:campfire"
+        }
+      }
+    },
+    "rewards": {
+      "function": "us:craft/campfire"
+    }
+  }

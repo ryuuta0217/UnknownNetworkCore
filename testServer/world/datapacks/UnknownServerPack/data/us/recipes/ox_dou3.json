@@ -1,0 +1,21 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "minecraft:coal"
+        },
+        {
+            "item": "minecraft:weathered_copper"
+        },
+        {
+            "item": "minecraft:charcoal"
+        },
+        {
+            "item": "minecraft:flint"
+        }
+    ],
+    "result": {
+        "item": "minecraft:oxidized_copper",
+        "count": 1
+    }
+}

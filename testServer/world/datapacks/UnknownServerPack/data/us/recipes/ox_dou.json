@@ -1,0 +1,21 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "minecraft:coal"
+        },
+        {
+            "item": "minecraft:copper_block"
+        },
+        {
+            "item": "minecraft:charcoal"
+        },
+        {
+            "item": "minecraft:flint"
+        }
+    ],
+    "result": {
+        "item": "minecraft:exposed_copper",
+        "count": 1
+    }
+}
