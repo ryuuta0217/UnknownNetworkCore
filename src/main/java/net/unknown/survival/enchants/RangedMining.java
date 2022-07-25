@@ -58,45 +58,6 @@ import java.util.UUID;
 
 public class RangedMining implements Listener {
     private static final Map<UUID, BlockFace> FACING = new HashMap<>();
-    private static final Map<String, Integer> ROMAN_TO_ARABIC = new HashMap<>() {{
-        put("Ⅰ", 1);
-        put("I", 1);
-        put("Ⅱ", 2);
-        put("II", 2);
-        put("Ⅲ", 3);
-        put("III", 3);
-        put("Ⅳ", 4);
-        put("IV", 4);
-        put("Ⅴ", 5);
-        put("V", 5);
-        put("Ⅵ", 6);
-        put("VI", 6);
-        put("Ⅶ", 7);
-        put("VII", 7);
-        put("Ⅷ", 8);
-        put("VIII", 8);
-        put("Ⅸ", 9);
-        put("IX", 9);
-        put("Ⅹ", 10);
-        put("X", 10);
-    }};
-
-    private static int getLevel(String input) {
-        String[] s = input.split(" ", 2);
-        if (s.length == 1) return 1;
-        String l = s[1];
-        if (ROMAN_TO_ARABIC.containsKey(l)) {
-            return ROMAN_TO_ARABIC.get(l);
-        } else if (l.matches("\\d+")) {
-            try {
-                return Integer.parseInt(l);
-            } catch (NumberFormatException ignored) {
-            }
-        }
-
-        return -1;
-
-    }
 
     private static BlockPos location2BlockPos(Location loc) {
         return new BlockPos(loc.getX(), loc.getY(), loc.getZ());
@@ -153,7 +114,7 @@ public class RangedMining implements Listener {
         if (!handItem.getType().name().endsWith("_PICKAXE")) return;
         if (handItem.getLore() == null /*&& !((CraftItemStack) handItem).handle.isEnchanted()*/) return;
         if (handItem.getLore().stream().noneMatch(lore -> lore.startsWith("§7採掘範囲拡大")) /*&& EnchantmentHelper.getEnchantments(((CraftItemStack) handItem).handle).containsKey(CustomEnchantments.RANGED_MINING)*/) return;
-        int range = getLevel(handItem.getLore().stream().filter(lore -> lore.startsWith("§7採掘範囲拡大")).toList().get(0));
+        int range = CustomEnchantUtil.getEnchantmentLevel(handItem.getLore().stream().filter(lore -> lore.startsWith("§7採掘範囲拡大")).toList().get(0));
         /*if(handItem.getLore().stream().anyMatch(lore -> lore.startsWith("§7採掘範囲拡大"))) {
             range = ;
         } else {
