@@ -261,4 +261,10 @@ public class NewMessageUtil {
     public static net.kyori.adventure.text.Component convertMinecraft2Adventure(Component component) {
         return GsonComponentSerializer.gson().deserializeFromTree(Component.Serializer.toJsonTree(component));
     }
+
+    public static boolean equalsComponent(net.kyori.adventure.text.Component a, net.kyori.adventure.text.Component b) {
+        GsonComponentSerializer gson = GsonComponentSerializer.gson();
+        return gson.serializeToTree(a).equals(gson.serializeToTree(b));
+        //return false;
+    }
 }
