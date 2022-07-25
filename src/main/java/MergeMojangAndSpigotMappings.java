@@ -40,6 +40,7 @@ public class MergeMojangAndSpigotMappings {
     private static final Pattern CLASS_OBF_PATTERN = Pattern.compile("^([a-zA-Z_\\$0-9\\.]+) -> ([a-z\\$]+):$");
     private static final Pattern FIELD_OBF_PATTERN = Pattern.compile("^    ([a-zA-Z_\\$0-9\\.]+) ([a-zA-Z_0-9]+) -> ([a-z]+)$");
     private static final Pattern METHOD_OBF_PATTERN = Pattern.compile("^    (\\d+:\\d+):([a-zA-Z_\\$0-9\\.]+) ([a-zA-Z_0-9]+)(\\(.*\\)) -> ([a-z]+)$");
+
     public static void main(String[] args) throws IOException {
         Map<String, String> mojang2obf = new LinkedHashMap<>();
         Map<String, String> obf2mojang = new LinkedHashMap<>();
@@ -66,7 +67,7 @@ public class MergeMojangAndSpigotMappings {
 
             Matcher fieldMatcher = FIELD_OBF_PATTERN.matcher(line);
             if (fieldMatcher.matches()) {
-                if(!mojang2fields.containsKey(currentClass)) mojang2fields.put(currentClass, new LinkedList<>());
+                if (!mojang2fields.containsKey(currentClass)) mojang2fields.put(currentClass, new LinkedList<>());
                 mojang2fields.get(currentClass)
                         .add(new FieldInfo(
                                 fieldMatcher.group(1),
@@ -78,7 +79,7 @@ public class MergeMojangAndSpigotMappings {
 
             Matcher methodMatcher = METHOD_OBF_PATTERN.matcher(line);
             if (methodMatcher.matches()) {
-                if(!mojang2methods.containsKey(currentClass)) mojang2methods.put(currentClass, new LinkedList<>());
+                if (!mojang2methods.containsKey(currentClass)) mojang2methods.put(currentClass, new LinkedList<>());
                 mojang2methods.get(currentClass)
                         .add(new MethodInfo(
                                 methodMatcher.group(2),
@@ -97,7 +98,7 @@ public class MergeMojangAndSpigotMappings {
         Map<String, String> obf2spigot = new LinkedHashMap<>();
         Map<String, String> mojang2spigot = new LinkedHashMap<>();
         spigotMapping.forEach(line -> {
-            if(line.startsWith("#")) return;
+            if (line.startsWith("#")) return;
 
             String[] spl = line.split(" ", 2);
             String obfuscatedClass = spl[0];
@@ -113,10 +114,10 @@ public class MergeMojangAndSpigotMappings {
          * ClassExample$SubClass -> a$a -> a$a <- FIX THIS!
          */
         mojang2obf.forEach((mojang, obf) -> {
-            if(obf.contains("$") && !obf2spigot.containsKey(obf)) {
+            if (obf.contains("$") && !obf2spigot.containsKey(obf)) {
                 String[] spl = obf.split("\\$", 2);
                 String parentClass = spl[0];
-                if(obf2spigot.containsKey(parentClass)) {
+                if (obf2spigot.containsKey(parentClass)) {
                     obf2spigot.put(obf, obf2spigot.get(parentClass) + "$" + spl[1]);
                 }
             }
@@ -126,8 +127,8 @@ public class MergeMojangAndSpigotMappings {
         System.out.println("Fixing \"Used Mojang Mapping\"");
         /* Not de-obfuscated Classes (Spigot used Mojang mapping!) */
         mojang2obf.forEach((mojang, obf) -> {
-            if(!obf2spigot.containsKey(obf)) {
-                if(mojang.contains("$") && obf.contains("$")) {
+            if (!obf2spigot.containsKey(obf)) {
+                if (mojang.contains("$") && obf.contains("$")) {
                     String[] mspl = mojang.split("\\$", 2);
                     String[] ospl = obf.split("\\$", 2);
                     obf2spigot.put(obf, mspl[0] + "$" + ospl[1]);
@@ -140,7 +141,7 @@ public class MergeMojangAndSpigotMappings {
 
         System.out.println("Writing to file");
         File writeTarget = new File("1.19-mojang-spigot.txt");
-        if(writeTarget.exists() || !writeTarget.exists() && writeTarget.createNewFile()) {
+        if (writeTarget.exists() || !writeTarget.exists() && writeTarget.createNewFile()) {
             FileWriter fWriter = new FileWriter(writeTarget, false);
             PrintWriter pWriter = new PrintWriter(new BufferedWriter(fWriter));
             mojang2obf.forEach((mojang, obf) -> {

@@ -37,8 +37,6 @@ import org.bukkit.block.Dispenser;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
-import java.util.Optional;
-
 public class BlockDisassembler implements Listener {
     @EventHandler
     public void onDispenserShoot(BlockDispenseBeforeEvent event) {

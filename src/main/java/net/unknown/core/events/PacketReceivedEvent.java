@@ -61,12 +61,12 @@ public class PacketReceivedEvent implements Cancellable {
     }
 
     @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
+    public boolean isCancelled() {
+        return this.cancelled;
     }
 
     @Override
-    public boolean isCancelled() {
-        return this.cancelled;
+    public void setCancelled(boolean cancel) {
+        this.cancelled = cancel;
     }
 }

@@ -32,22 +32,16 @@
 package net.unknown.survival.dependency;
 
 import com.sk89q.util.yaml.YAMLProcessor;
-import com.sk89q.wepif.PermissionsProvider;
-import com.sk89q.wepif.PermissionsResolver;
 import com.sk89q.wepif.PermissionsResolverManager;
-import com.sk89q.wepif.VaultResolver;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.internal.platform.WorldGuardPlatform;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.milkbowl.vault.permission.Permission;
-import net.unknown.core.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
-import org.bukkit.configuration.Configuration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
@@ -90,7 +84,7 @@ public class WorldGuard {
 
     public record WrappedProtectedRegion(World world, ProtectedRegion region) {
         public UUID getCreatorUniqueId() {
-            if(ID_PATTERN.matcher(this.getFullId()).matches()) {
+            if (ID_PATTERN.matcher(this.getFullId()).matches()) {
                 return UUID.fromString(this.getFullId().split(SPLITTER, 2)[0]);
             }
             return null;
@@ -101,7 +95,7 @@ public class WorldGuard {
         }
 
         public String getId() {
-            if(ID_PATTERN.matcher(this.getFullId()).matches()) {
+            if (ID_PATTERN.matcher(this.getFullId()).matches()) {
                 return this.getFullId().split(SPLITTER, 2)[1];
             }
             return this.getFullId();
@@ -114,17 +108,23 @@ public class WorldGuard {
 
     public static class PermissionsResolver implements com.sk89q.wepif.PermissionsResolver {
         private static Permission perms = null;
+        private final Server server;
+
+        public PermissionsResolver(Server server) {
+            this.server = server;
+        }
 
         public static void inject() {
             try {
                 Field f = PermissionsResolverManager.class.getDeclaredField("enabledResolvers");
-                if(f.trySetAccessible()) {
+                if (f.trySetAccessible()) {
                     List<Class<? extends com.sk89q.wepif.PermissionsResolver>> enabledResolvers = (List<Class<? extends com.sk89q.wepif.PermissionsResolver>>) f.get(PermissionsResolverManager.getInstance());
                     enabledResolvers.clear();
                     enabledResolvers.add(PermissionsResolver.class);
                     PermissionsResolverManager.getInstance().findResolver();
                 }
-            } catch (NoSuchFieldException | IllegalAccessException ignored) {}
+            } catch (NoSuchFieldException | IllegalAccessException ignored) {
+            }
         }
 
         public static PermissionsResolver factory(Server server, YAMLProcessor config) {
@@ -137,12 +137,6 @@ public class WorldGuard {
             }
             perms = rsp.getProvider();
             return new PermissionsResolver(Bukkit.getServer());
-        }
-
-        private final Server server;
-
-        public PermissionsResolver(Server server) {
-            this.server = server;
         }
 
         @Override

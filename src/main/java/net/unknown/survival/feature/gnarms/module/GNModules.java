@@ -39,12 +39,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GNModules {
+    public static final GNModule FLY = FlyModule.INSTANCE;
     private static final Map<ResourceLocation, GNModule> ALL_MODULES = new HashMap<>();
 
-    public static final GNModule FLY = FlyModule.INSTANCE;
-
     public static void registerMapping(ResourceLocation id, GNModule module) {
-        if(ALL_MODULES.containsKey(id)) {
+        if (ALL_MODULES.containsKey(id)) {
             LoggerFactory.getLogger("GNModules").warn("Overwriting already mapped Module " + id + " from " + ALL_MODULES.get(id) + " to " + module);
         }
         ALL_MODULES.put(id, module);

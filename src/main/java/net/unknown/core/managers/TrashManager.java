@@ -37,7 +37,6 @@ import net.unknown.UnknownNetworkCore;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +53,7 @@ public class TrashManager {
     private static final Map<UUID, Map<Integer, ItemStack>> TRASHES = new HashMap<>();
 
     public static Map<Integer, ItemStack> getItems(UUID uuid) {
-        if(!TRASHES.containsKey(uuid)) TRASHES.put(uuid, new HashMap<>(54));
+        if (!TRASHES.containsKey(uuid)) TRASHES.put(uuid, new HashMap<>(54));
         return TRASHES.get(uuid);
     }
 
@@ -67,7 +66,7 @@ public class TrashManager {
     }
 
     public static void setItem(UUID uuid, int slot, ItemStack minecraft) {
-        if(!TRASHES.containsKey(uuid)) TRASHES.put(uuid, new HashMap<>());
+        if (!TRASHES.containsKey(uuid)) TRASHES.put(uuid, new HashMap<>());
         TRASHES.get(uuid).put(slot, minecraft);
         RunnableManager.runAsync(() -> TrashManager.save(uuid));
     }
@@ -84,13 +83,13 @@ public class TrashManager {
     }
 
     public static void clear(UUID uuid) {
-        if(TRASHES.containsKey(uuid)) TRASHES.get(uuid).clear();
+        if (TRASHES.containsKey(uuid)) TRASHES.get(uuid).clear();
         TRASHES.put(uuid, new HashMap<>());
     }
 
     public static void loadExists() {
         TRASHES.clear();
-        if(DATA_FOLDER.exists() || DATA_FOLDER.mkdirs()) {
+        if (DATA_FOLDER.exists() || DATA_FOLDER.mkdirs()) {
             Arrays.stream(DATA_FOLDER.listFiles())
                     .filter(file -> file.isFile() && file.getName().endsWith(".yml"))
                     .forEach(file -> {
@@ -102,7 +101,8 @@ public class TrashManager {
                                 int slot = Integer.parseInt(slotStr);
                                 ItemStack item = MinecraftAdapter.ItemStack.json(items.getString(slotStr));
                                 setItem(uuid, slot, item);
-                            } catch(NumberFormatException ignored) {}
+                            } catch (NumberFormatException ignored) {
+                            }
                         });
                     });
         }
@@ -111,8 +111,8 @@ public class TrashManager {
     public synchronized static void save(UUID uuid) {
         try {
             File file = new File(DATA_FOLDER, uuid.toString() + ".yml");
-            if(file.getParentFile().exists() || file.getParentFile().mkdirs()) {
-                if(file.exists() || file.createNewFile()) {
+            if (file.getParentFile().exists() || file.getParentFile().mkdirs()) {
+                if (file.exists() || file.createNewFile()) {
                     YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
                     config.set("items", null);
                     Map<Integer, ItemStack> items = TRASHES.getOrDefault(uuid, new HashMap<>());
@@ -125,7 +125,7 @@ public class TrashManager {
                     config.save(file);
                 }
             }
-        } catch(IOException e) {
+        } catch (IOException e) {
             LOGGER.error("Failed to save trash items for " + uuid, e);
         }
     }

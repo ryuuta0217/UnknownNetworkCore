@@ -87,9 +87,9 @@ public class DemolitionGun implements Listener {
     }
 
     public static class BowPullIndicator extends BukkitRunnable {
+        private static final Map<UUID, BossBar> PROGRESS = new HashMap<>();
         private static BowPullIndicator INSTANCE;
         private static BukkitTask TASK;
-        private static final Map<UUID, BossBar> PROGRESS = new HashMap<>();
 
         private BowPullIndicator() {
             if (INSTANCE != null && !INSTANCE.isCancelled()) {

@@ -32,7 +32,6 @@
 package net.unknown.survival.feature.gnarms;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.ItemStack;
 import org.bukkit.entity.Player;
 
 public class GNContext {
@@ -41,8 +40,8 @@ public class GNContext {
     private final boolean immutable;
     private long particlesToUse;
     private long generatorParticlesOutput;
-    private long currentParticles;
-    private long maximumParticles;
+    private final long currentParticles;
+    private final long maximumParticles;
 
     public GNContext(Player player, CompoundTag data, long particlesToUse, long generatorParticlesOutput, long currentParticles, long maximumParticles) {
         this(player, data, particlesToUse, generatorParticlesOutput, currentParticles, maximumParticles, false);
@@ -66,8 +65,18 @@ public class GNContext {
         return this.particlesToUse;
     }
 
+    public void setParticlesToUse(long particlesToUse) {
+        if (this.immutable) throw new IllegalStateException("this GNContext is Immutable!");
+        this.particlesToUse = particlesToUse;
+    }
+
     public long getGeneratorParticlesOutput() {
         return this.generatorParticlesOutput;
+    }
+
+    public void setGeneratorParticlesOutput(long generatorParticlesOutput) {
+        if (this.immutable) throw new IllegalStateException("this GNContext is Immutable!");
+        this.generatorParticlesOutput = generatorParticlesOutput;
     }
 
     public long getCurrentParticles() {
@@ -83,17 +92,7 @@ public class GNContext {
     }
 
     public void addParticlesToUse(long toAddParticlesToUse) {
-        if(this.immutable) throw new IllegalStateException("this GNContext is Immutable!");
+        if (this.immutable) throw new IllegalStateException("this GNContext is Immutable!");
         this.particlesToUse += toAddParticlesToUse;
-    }
-
-    public void setParticlesToUse(long particlesToUse) {
-        if(this.immutable) throw new IllegalStateException("this GNContext is Immutable!");
-        this.particlesToUse = particlesToUse;
-    }
-
-    public void setGeneratorParticlesOutput(long generatorParticlesOutput) {
-        if(this.immutable) throw new IllegalStateException("this GNContext is Immutable!");
-        this.generatorParticlesOutput = generatorParticlesOutput;
     }
 }

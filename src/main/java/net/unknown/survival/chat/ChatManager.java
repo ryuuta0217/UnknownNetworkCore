@@ -96,7 +96,7 @@ public class ChatManager implements Listener {
             Component base = Component.empty();
             Component prefix = Component.empty();
             Component suffix = Component.empty();
-            if(UnknownNetworkSurvival.isLuckPermsEnabled()) {
+            if (UnknownNetworkSurvival.isLuckPermsEnabled()) {
                 prefix = LuckPerms.getPrefixAsComponent(source.getUniqueId());
                 suffix = LuckPerms.getSuffixAsComponent(source.getUniqueId());
             }
@@ -131,19 +131,19 @@ public class ChatManager implements Listener {
 
                         List<Component> hoverTexts = new ArrayList<>();
 
-                        if(item.isPresent()) {
+                        if (item.isPresent()) {
                             hoverTexts.add(Component.empty()
                                     .append(Component.text("アイテム: "))
                                     .append(Component.translatable("item." + rl.getNamespace() + "." + rl.getPath())));
                         }
 
-                        if(block.isPresent()) {
+                        if (block.isPresent()) {
                             hoverTexts.add(Component.empty()
                                     .append(Component.text("ブロック: "))
                                     .append(Component.translatable("block." + rl.getNamespace() + "." + rl.getPath())));
                         }
 
-                        if(entity.isPresent()) {
+                        if (entity.isPresent()) {
                             hoverTexts.add(Component.empty()
                                     .append(Component.text("エンティティ: "))
                                     .append(Component.translatable("entity." + rl.getNamespace() + "." + rl.getPath())));
@@ -153,19 +153,19 @@ public class ChatManager implements Listener {
                                 .append(Component.text("進捗: "))
                                 .append(NewMessageUtil.convertMinecraft2Adventure(value.getDisplay().getTitle()))));
 
-                        if(biome.isPresent()) {
+                        if (biome.isPresent()) {
                             hoverTexts.add(Component.empty()
                                     .append(Component.text("バイオーム: "))
                                     .append(Component.translatable("biome." + rl.getNamespace() + "." + rl.getPath())));
                         }
 
-                        if(effect.isPresent()) {
+                        if (effect.isPresent()) {
                             hoverTexts.add(Component.empty()
                                     .append(Component.text("ポーション効果: "))
                                     .append(Component.translatable("effect." + rl.getNamespace() + "." + rl.getPath())));
                         }
 
-                        if(enchantment.isPresent()) {
+                        if (enchantment.isPresent()) {
                             hoverTexts.add(Component.empty()
                                     .append(Component.text("エンチャント: "))
                                     .append(Component.translatable("enchantment." + rl.getNamespace() + "." + rl.getPath())));
@@ -177,7 +177,7 @@ public class ChatManager implements Listener {
                             boolean isFinal = i == (hoverTexts.size() - 1);
                             Component text = hoverTexts.get(i);
                             hoverText = hoverText.append(text);
-                            if(!isFinal) {
+                            if (!isFinal) {
                                 hoverText = hoverText.append(newLine);
                             }
                         }
@@ -186,11 +186,11 @@ public class ChatManager implements Listener {
                     });
         }));
 
-        if(PlayerData.of(event.getPlayer()).isUseKanaConvert()) {
+        if (PlayerData.of(event.getPlayer()).isUseKanaConvert()) {
             ChatRenderer baseRenderer = event.renderer();
             event.renderer((source, displayName, message, viewer) -> {
                 String msgStr = PlainTextComponentSerializer.plainText().serialize(message);
-                if(YukiKanaConverter.isNeedToJapanize(msgStr)) {
+                if (YukiKanaConverter.isNeedToJapanize(msgStr)) {
                     String kanaMsgStr = YukiKanaConverter.conv(msgStr);
                     Component msg = PlainTextComponentSerializer.plainText().deserialize(kanaMsgStr);
                     return baseRenderer.render(source, displayName, Component.empty()
@@ -202,7 +202,7 @@ public class ChatManager implements Listener {
             });
         }
 
-        if(PlainTextComponentSerializer.plainText().serialize(event.message()).startsWith(PlayerData.of(event.getPlayer()).getForceGlobalChatPrefix())) {
+        if (PlainTextComponentSerializer.plainText().serialize(event.message()).startsWith(PlayerData.of(event.getPlayer()).getForceGlobalChatPrefix())) {
             event.message(event.message().replaceText((b) -> {
                 b.match(PlayerData.of(event.getPlayer()).getForceGlobalChatPrefix()).once().replacement(Component.empty());
             }));

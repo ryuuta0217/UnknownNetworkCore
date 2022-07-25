@@ -41,14 +41,11 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.unknown.core.builder.ItemStackBuilder;
-import net.unknown.core.commands.Suggestions;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftInventory;
-import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftInventoryPlayer;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
@@ -71,7 +68,7 @@ public class SkullCommand {
         int count = BrigadierUtil.getArgumentOrDefault(ctx, int.class, "個数", 1);
 
         UUID uniqueId = Bukkit.getPlayerUniqueId(id);
-        if(uniqueId == null) {
+        if (uniqueId == null) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), Component.text("プレイヤー " + id + " は見つかりませんでした"));
             return 1;
         }
@@ -87,7 +84,7 @@ public class SkullCommand {
 
 
         Inventory inv = ctx.getSource().getPlayerOrException().getBukkitEntity().getInventory();
-        if(inv.firstEmpty() != -1) {
+        if (inv.firstEmpty() != -1) {
             inv.addItem(playerHead);
             NewMessageUtil.sendMessage(ctx.getSource(), Component.text(id + " の頭を" + (count != 1 ? count + "個" : "") + "入手しました"));
             return 0;

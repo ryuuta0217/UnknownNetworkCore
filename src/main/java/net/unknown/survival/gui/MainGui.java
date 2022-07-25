@@ -32,9 +32,7 @@
 package net.unknown.survival.gui;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
@@ -55,13 +53,13 @@ public class MainGui extends GuiBase {
                 (inv) -> {
                     inv.setItem(12, new ItemStackBuilder(Material.RESPAWN_ANCHOR)
                             .displayName(Component.text("Home", DefinedTextColor.GOLD))
-                            .lore(Component.text("ホームを追加したり",DefinedTextColor.GREEN),
+                            .lore(Component.text("ホームを追加したり", DefinedTextColor.GREEN),
                                     Component.text("テレポートしたり", DefinedTextColor.YELLOW),
                                     Component.text("削除したり", DefinedTextColor.RED),
                                     Component.text("できます。", DefinedTextColor.GREEN))
                             .build());
 
-                    if(UnknownNetworkSurvival.isWorldGuardEnabled()) {
+                    if (UnknownNetworkSurvival.isWorldGuardEnabled()) {
                         inv.setItem(13, new ItemStackBuilder(Material.WOODEN_AXE)
                                 .displayName(Component.text("保護", DefinedTextColor.YELLOW))
                                 .lore(Component.text("建物を保護しよう", DefinedTextColor.GREEN))
@@ -85,7 +83,7 @@ public class MainGui extends GuiBase {
         switch (event.getSlot()) {
             case 12 -> event.getWhoClicked().openInventory(new HomeGui((Player) event.getWhoClicked()).getInventory());
             case 13 -> {
-                if(UnknownNetworkSurvival.isWorldGuardEnabled()) {
+                if (UnknownNetworkSurvival.isWorldGuardEnabled()) {
                     event.getWhoClicked().openInventory(ProtectionGui.of((Player) event.getWhoClicked()).getInventory());
                 }
             }

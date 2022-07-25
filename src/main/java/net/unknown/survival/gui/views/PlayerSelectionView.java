@@ -62,7 +62,7 @@ public class PlayerSelectionView implements View {
     private final Consumer<String> customInputError;
     private final Consumer<OfflinePlayer> onSelected;
     private List<Set<OfflinePlayer>> players;
-    private Map<Integer, OfflinePlayer> slot2player = new HashMap<Integer, OfflinePlayer>();
+    private final Map<Integer, OfflinePlayer> slot2player = new HashMap<Integer, OfflinePlayer>();
     private int currentPage = 1;
 
     public PlayerSelectionView(GuiBase gui, boolean allowCustomInput, @Nullable List<OfflinePlayer> players, @Nullable Consumer<InventoryClickEvent> onBack,
@@ -73,12 +73,12 @@ public class PlayerSelectionView implements View {
         this.onBack = onBack;
         this.beforeOpenCustomInput = beforeOpenCustomInput;
         this.customInputError = customInputError;
-        if(this.allowCustomInput) {
+        if (this.allowCustomInput) {
             Objects.requireNonNull(this.beforeOpenCustomInput);
             Objects.requireNonNull(this.customInputError);
         }
         this.onSelected = onSelected;
-        if(players != null) {
+        if (players != null) {
             this.players = ListUtil.splitListAsLinkedSet(players.stream()
                     .filter(Objects::nonNull)
                     .toList(), 44);
@@ -88,7 +88,7 @@ public class PlayerSelectionView implements View {
 
     @Override
     public void initialize() {
-        if(this.players == null) {
+        if (this.players == null) {
             this.players = ListUtil.splitListAsLinkedSet(Bukkit.getOnlinePlayers()
                     .stream()
                     .filter(Objects::nonNull)
@@ -106,7 +106,7 @@ public class PlayerSelectionView implements View {
         AtomicInteger i = new AtomicInteger(0);
         this.players.get(this.currentPage - 1).forEach(p -> {
             gui.getInventory().setItem(i.get(), new ItemStackBuilder(Material.PLAYER_HEAD)
-                    .displayName((p.isOnline() ? p.getPlayer().displayName() :  Component.text(p.getName())))
+                    .displayName((p.isOnline() ? p.getPlayer().displayName() : Component.text(p.getName())))
                     .custom(is -> {
                         SkullMeta skull = ((SkullMeta) is.getItemMeta());
                         skull.setOwningPlayer(p);
@@ -116,19 +116,19 @@ public class PlayerSelectionView implements View {
             this.slot2player.put(i.getAndIncrement(), p);
         });
 
-        if(this.onBack != null) {
+        if (this.onBack != null) {
             this.gui.getInventory().setItem(45, DefinedItemStackBuilders.leftArrow()
                     .displayName(Component.text("戻る", DefinedTextColor.GREEN))
                     .build());
         }
 
-        if(this.allowCustomInput) {
+        if (this.allowCustomInput) {
             this.gui.getInventory().setItem(49, new ItemStackBuilder(Material.OAK_SIGN)
                     .displayName(Component.text("IDを入力する", DefinedTextColor.AQUA))
                     .build());
         }
 
-        if(this.currentPage > 1) {
+        if (this.currentPage > 1) {
             this.gui.getInventory().setItem(52, DefinedItemStackBuilders.leftArrow()
                     .displayName(Component.text("前のページ", DefinedTextColor.GREEN))
                     .build());
@@ -136,7 +136,7 @@ public class PlayerSelectionView implements View {
             this.gui.getInventory().clear(52);
         }
 
-        if(this.players.size() > this.currentPage) {
+        if (this.players.size() > this.currentPage) {
             this.gui.getInventory().setItem(53, DefinedItemStackBuilders.rightArrow()
                     .displayName(Component.text("次のページ", DefinedTextColor.GREEN))
                     .build());
@@ -151,14 +151,14 @@ public class PlayerSelectionView implements View {
         switch (slot) {
             case 45 -> {
                 // Back Button
-                if(this.onBack != null) {
+                if (this.onBack != null) {
                     this.clearInventory();
                     this.onBack.accept(event);
                 }
             }
 
             case 49 -> {
-                if(this.allowCustomInput) {
+                if (this.allowCustomInput) {
                     this.beforeOpenCustomInput.accept(this);
                     new SignGui().withTarget((Player) event.getWhoClicked())
                             .withLines(Component.empty(),
@@ -168,7 +168,7 @@ public class PlayerSelectionView implements View {
                             .onComplete(lines -> {
                                 String playerName = PlainTextComponentSerializer.plainText().serialize(lines.get(0));
                                 UUID playerUniqueId = Bukkit.getPlayerUniqueId(playerName);
-                                if(playerUniqueId != null) {
+                                if (playerUniqueId != null) {
                                     this.clearInventory();
                                     this.onSelected.accept(Bukkit.getOfflinePlayer(playerUniqueId));
                                 } else {
@@ -179,19 +179,19 @@ public class PlayerSelectionView implements View {
             }
 
             case 52 -> {
-                if(this.currentPage > 1) {
+                if (this.currentPage > 1) {
                     this.showPage(this.currentPage - 1);
                 }
             }
 
             case 53 -> {
-                if(this.players.size() > this.currentPage) {
+                if (this.players.size() > this.currentPage) {
                     this.showPage(this.currentPage + 1);
                 }
             }
 
             default -> {
-                if(slot2player.containsKey(slot)) {
+                if (slot2player.containsKey(slot)) {
                     OfflinePlayer player = slot2player.get(slot);
                     this.clearInventory();
                     this.onSelected.accept(player);

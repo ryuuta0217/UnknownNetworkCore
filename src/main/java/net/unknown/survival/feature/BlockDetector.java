@@ -36,13 +36,10 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.ObserverBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.unknown.launchwrapper.event.ObserverBlockCheckNeighborEvent;
-import net.unknown.launchwrapper.mixins.MixinObserverBlock;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,7 +49,7 @@ public class BlockDetector implements Listener {
 
     @EventHandler
     public void onCheckNeighbor(ObserverBlockCheckNeighborEvent event) {
-        if(DETECT_WHITELIST.containsKey(event.getObserverPos())) {
+        if (DETECT_WHITELIST.containsKey(event.getObserverPos())) {
             event.setPredicate((data -> {
                 boolean validBlock = DETECT_WHITELIST.get(event.getObserverPos()).contains(data.neighborState().getBlock());
                 boolean validFacing = data.observer().getValue(ObserverBlock.FACING) == data.observerDirection();

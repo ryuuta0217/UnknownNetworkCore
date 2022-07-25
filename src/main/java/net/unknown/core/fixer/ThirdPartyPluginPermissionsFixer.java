@@ -31,11 +31,7 @@
 
 package net.unknown.core.fixer;
 
-import com.sk89q.bukkit.util.DynamicPluginCommand;
-import net.minecraft.resources.ResourceLocation;
-import net.unknown.UnknownNetworkCore;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.core.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.PluginCommand;
@@ -74,7 +70,7 @@ public class ThirdPartyPluginPermissionsFixer {
                     String k = e.getKey();
                     PluginCommand v = e.getValue();
 
-                    if(v.getPermission() == null) v.setPermission("multiverse.core.command." + v.getName());
+                    if (v.getPermission() == null) v.setPermission("multiverse.core.command." + v.getName());
                 });
     }
 
@@ -89,7 +85,7 @@ public class ThirdPartyPluginPermissionsFixer {
                     String k = e.getKey();
                     PluginCommand v = e.getValue();
 
-                    if(v.getPermission() == null) v.setPermission("multiverse.inventories.command." + v.getName());
+                    if (v.getPermission() == null) v.setPermission("multiverse.inventories.command." + v.getName());
                 });
     }
 
@@ -104,7 +100,7 @@ public class ThirdPartyPluginPermissionsFixer {
                     String k = e.getKey();
                     PluginCommand v = e.getValue();
 
-                    if(v.getPermission() == null) v.setPermission("multiverse.netherportals.command." + v.getName());
+                    if (v.getPermission() == null) v.setPermission("multiverse.netherportals.command." + v.getName());
                 });
     }
 
@@ -119,9 +115,9 @@ public class ThirdPartyPluginPermissionsFixer {
                     String k = e.getKey();
                     PluginCommand v = e.getValue();
 
-                    if(v.getPermission() != null) return;
+                    if (v.getPermission() != null) return;
 
-                    if(v.getName().equals("gsit")) {
+                    if (v.getName().equals("gsit")) {
                         v.setPermission("gsit.sit");
                     } else if (v.getName().equals("glay")) {
                         v.setPermission("gsit.lay");
@@ -146,8 +142,8 @@ public class ThirdPartyPluginPermissionsFixer {
                     String k = e.getKey();
                     PluginCommand v = e.getValue();
 
-                    if(v.getPermission() == null) {
-                        if(!v.getName().equals("spark")) v.setPermission("spark." + v.getName());
+                    if (v.getPermission() == null) {
+                        if (!v.getName().equals("spark")) v.setPermission("spark." + v.getName());
                         else v.setPermission("spark");
                     }
                 });
@@ -157,7 +153,7 @@ public class ThirdPartyPluginPermissionsFixer {
     public static Map<String, Command> getKnownCommands() {
         try {
             Field f = SimpleCommandMap.class.getDeclaredField("knownCommands");
-            if(f.trySetAccessible()) {
+            if (f.trySetAccessible()) {
                 return (Map<String, Command>) f.get(Bukkit.getCommandMap());
             }
         } catch (IllegalAccessException | NoSuchFieldException e) {

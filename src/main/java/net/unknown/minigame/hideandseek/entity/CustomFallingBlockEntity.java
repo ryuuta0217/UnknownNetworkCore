@@ -31,14 +31,8 @@
 
 package net.unknown.minigame.hideandseek.entity;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.contents.LiteralContents;
-import io.netty.buffer.Unpooled;
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -49,14 +43,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
-import org.mozilla.javascript.JavaAdapter;
 
 public class CustomFallingBlockEntity extends FallingBlockEntity {
     private final ServerPlayer srcPlayer;
+    int ticks = 0;
+    long sec = 0;
     private Vec3 lastPos;
-    private long stayTick = 0L;
-    private boolean isStayed = false;
+    private final long stayTick = 0L;
+    private final boolean isStayed = false;
 
     public CustomFallingBlockEntity(Level world, ServerPlayer srcPlayer, BlockState block) {
         super(world, srcPlayer.getX(), srcPlayer.getY(), srcPlayer.getZ(), block);
@@ -82,14 +76,11 @@ public class CustomFallingBlockEntity extends FallingBlockEntity {
         return e.getStringUUID();
     }
 
-    int ticks = 0;
-    long sec = 0;
-
     @Override
     public void tick() {
         if (this.isRemoved()) return;
         this.time = 101;
-        if(!this.srcPlayer.position().equals(this.lastPos)) {
+        if (!this.srcPlayer.position().equals(this.lastPos)) {
             this.copyPosition(this.srcPlayer);
             this.setDeltaMovement(Vec3.ZERO);
             this.srcPlayer.connection.send(new ClientboundTeleportEntityPacket(this));

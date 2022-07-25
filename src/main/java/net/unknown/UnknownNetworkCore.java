@@ -49,10 +49,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 public class UnknownNetworkCore extends JavaPlugin {
     private static final File SHARED_DATA_FOLDER = new File("../shared");
@@ -88,7 +84,7 @@ public class UnknownNetworkCore extends JavaPlugin {
     public void onLoad() {
         long start = System.nanoTime();
         getLogger().info("Plugin was loaded with environment: " + ENV.name());
-        if(!this.getDataFolder().exists() && this.getDataFolder().mkdir()) {
+        if (!this.getDataFolder().exists() && this.getDataFolder().mkdir()) {
             getLogger().info("Plugin folder created.");
         }
         ObfuscationUtil.loadAllMappings();

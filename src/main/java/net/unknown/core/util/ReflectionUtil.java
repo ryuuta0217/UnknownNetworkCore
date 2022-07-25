@@ -33,8 +33,6 @@ package net.unknown.core.util;
 
 import sun.misc.Unsafe;
 
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -63,13 +61,13 @@ public class ReflectionUtil {
 
     public static void setStaticFinalObject(Field targetField, Object newValue) {
         try {
-            if(!Modifier.isStatic(targetField.getModifiers())) {
+            if (!Modifier.isStatic(targetField.getModifiers())) {
                 throw new RuntimeException("Only it works static fields!");
             }
 
             Class<Unsafe> classUnsafe = Unsafe.class;
             Field fieldTheUnsafe = classUnsafe.getDeclaredField("theUnsafe");
-            if(!fieldTheUnsafe.trySetAccessible()) {
+            if (!fieldTheUnsafe.trySetAccessible()) {
                 throw new RuntimeException("Failed to Unsafe.theUnsafe #trySetAccessible");
             }
             Unsafe unsafe = (Unsafe) fieldTheUnsafe.get(null);

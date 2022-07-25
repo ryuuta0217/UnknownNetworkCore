@@ -55,7 +55,7 @@ public class S2CModList {
 
     public static S2CModList decode(ByteBuf buf) {
         short magic = buf.readUnsignedByte();
-        if(magic != MAGIC) throw new IllegalArgumentException("Invalid discriminator byte " + magic);
+        if (magic != MAGIC) throw new IllegalArgumentException("Invalid discriminator byte " + magic);
 
         int count = MinecraftPacketReader.readVarInt(buf);
         Set<String> mods = new HashSet<>();

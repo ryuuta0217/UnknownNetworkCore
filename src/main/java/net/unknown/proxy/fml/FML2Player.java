@@ -35,7 +35,6 @@ import com.ryuuta0217.packets.C2SModListReply;
 import io.netty.buffer.ByteBuf;
 import net.md_5.bungee.protocol.DefinedPacket;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;

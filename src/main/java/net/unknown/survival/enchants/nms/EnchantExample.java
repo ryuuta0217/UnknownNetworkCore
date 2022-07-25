@@ -31,7 +31,6 @@
 
 package net.unknown.survival.enchants.nms;
 
-import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -42,12 +41,12 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 
 public class EnchantExample extends Enchantment {
-    public static void register() {
-        Registry.register(Registry.ENCHANTMENT, "example", new EnchantExample(Rarity.COMMON, EquipmentSlot.MAINHAND));
-    }
-
     protected EnchantExample(Rarity weight, EquipmentSlot... slotTypes) {
         super(weight, EnchantmentCategory.BREAKABLE, slotTypes);
+    }
+
+    public static void register() {
+        Registry.register(Registry.ENCHANTMENT, "example", new EnchantExample(Rarity.COMMON, EquipmentSlot.MAINHAND));
     }
 
     @Override
@@ -72,7 +71,7 @@ public class EnchantExample extends Enchantment {
 
     @Override
     public void doPostAttack(LivingEntity user, Entity entity, int level) {
-        if(entity instanceof LivingEntity target) {
+        if (entity instanceof LivingEntity target) {
             user.sendSystemMessage(Component.literal(":eyes:"));
             target.sendSystemMessage(Component.literal((":eyes:")));
         }

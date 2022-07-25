@@ -31,7 +31,6 @@
 
 package net.unknown.survival.dependency;
 
-import io.papermc.paper.text.PaperComponents;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPermsProvider;
@@ -71,7 +70,8 @@ public class LuckPerms {
     public static Component getPrefixAsComponent(UUID uniqueId) {
         String raw = getPrefix(uniqueId);
         if (raw == null) return Component.empty();
-        else return LegacyComponentSerializer.legacySection().deserialize(ChatColor.translateAlternateColorCodes('&', raw));
+        else
+            return LegacyComponentSerializer.legacySection().deserialize(ChatColor.translateAlternateColorCodes('&', raw));
     }
 
     @Nullable

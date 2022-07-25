@@ -33,31 +33,24 @@ package net.unknown.survival.fun;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ThrownEgg;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEgg;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers;
-import org.bukkit.entity.Arrow;
-import org.bukkit.entity.Egg;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
-import org.bukkit.material.MonsterEggs;
-import org.bukkit.material.SpawnEgg;
 
 public class MonsterBall implements Listener {
     @EventHandler
     public void onEggHit(ProjectileHitEvent event) {
-        if(((CraftEntity) event.getEntity()).getHandle() instanceof ThrownEgg egg) {
-            if(event.getHitEntity() != null) {
-                if(((CraftEntity) event.getHitEntity()).getHandle() instanceof Mob mob) {
-                    if(SpawnEggItem.BY_ID.containsKey(mob.getType())) {
+        if (((CraftEntity) event.getEntity()).getHandle() instanceof ThrownEgg egg) {
+            if (event.getHitEntity() != null) {
+                if (((CraftEntity) event.getHitEntity()).getHandle() instanceof Mob mob) {
+                    if (SpawnEggItem.BY_ID.containsKey(mob.getType())) {
                         CompoundTag entityTag = new CompoundTag();
                         mob.save(entityTag);
                         mob.remove(Entity.RemovalReason.DISCARDED);

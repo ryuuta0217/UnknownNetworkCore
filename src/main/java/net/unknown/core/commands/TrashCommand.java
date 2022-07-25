@@ -53,7 +53,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class TrashCommand {
@@ -62,23 +61,24 @@ public class TrashCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("trash");
         builder.executes(ctx -> {
-            if(ctx.getSource().getBukkitEntity() instanceof Player player) {
+            if (ctx.getSource().getBukkitEntity() instanceof Player player) {
                 Inventory bukkitInventory = Bukkit.createInventory(player, 54, INVENTORY_TITLE);
                 Container minecraftInventory = MinecraftAdapter.container(bukkitInventory);
-                if(minecraftInventory != null) {
+                if (minecraftInventory != null) {
                     TrashManager.getItems(player.getUniqueId()).forEach(minecraftInventory::setItem);
                 } else {
                     TrashManager.getItemsBukkit(player.getUniqueId()).forEach(bukkitInventory::setItem);
                 }
                 player.openInventory(bukkitInventory);
 
-                Listener dummy = new Listener() {};
+                Listener dummy = new Listener() {
+                };
 
                 Bukkit.getPluginManager().registerEvent(InventoryCloseEvent.class, dummy, EventPriority.MONITOR, (l, e) -> {
                     if (e instanceof InventoryCloseEvent event) {
-                        if(event.getPlayer().getUniqueId().equals(player.getUniqueId())) {
-                            if(event.getView().title().contains(INVENTORY_TITLE)) {
-                                if(event.getInventory().equals(bukkitInventory)) {
+                        if (event.getPlayer().getUniqueId().equals(player.getUniqueId())) {
+                            if (event.getView().title().contains(INVENTORY_TITLE)) {
+                                if (event.getInventory().equals(bukkitInventory)) {
                                     Container nmsInv = MinecraftAdapter.container(event.getInventory());
                                     TrashManager.setItems(player.getUniqueId(), new ArrayList<>(nmsInv.getContents()));
                                     HandlerList.unregisterAll(dummy);
@@ -91,9 +91,9 @@ public class TrashCommand {
             return 0;
         }).then(Commands.literal("clear")
                 .executes(ctx -> {
-                    if(ctx.getSource().getBukkitEntity() instanceof Player player) {
+                    if (ctx.getSource().getBukkitEntity() instanceof Player player) {
                         Map<Integer, ItemStack> nmsItems = TrashManager.getItems(player.getUniqueId());
-                        if(nmsItems.values().stream().anyMatch(is -> !is.is(Items.AIR))) {
+                        if (nmsItems.values().stream().anyMatch(is -> !is.is(Items.AIR))) {
                             TrashManager.clear(player.getUniqueId());
                             NewMessageUtil.sendMessage(ctx.getSource(), "ゴミ箱からすべてのアイテムを削除しました");
                         } else {

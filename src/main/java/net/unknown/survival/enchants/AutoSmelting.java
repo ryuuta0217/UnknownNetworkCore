@@ -60,7 +60,7 @@ public class AutoSmelting implements Listener {
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         ServerPlayer player = MinecraftAdapter.player(event.getPlayer());
-        if(player == null) return;
+        if (player == null) return;
 
         BlockPos blockPos = MinecraftAdapter.blockPos(event.getBlock().getLocation());
 
@@ -79,9 +79,9 @@ public class AutoSmelting implements Listener {
         FurnaceBlockEntity dummyFurnace = new FurnaceBlockEntity(BlockPos.ZERO, Blocks.FURNACE.defaultBlockState());
         dummyFurnace.setItem(1, new ItemStack(Items.COAL, 1));
         List<ItemStack> drops = Block.getDrops(blockState, level, blockPos, blockEntity, player, player.getMainHandItem());
-        if(drops.size() > 0) dummyFurnace.setItem(0, drops.get(0));
+        if (drops.size() > 0) dummyFurnace.setItem(0, drops.get(0));
         List<SmeltingRecipe> recipe = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, dummyFurnace, level);
-        if(level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && event.isDropItems() && recipe.size() != 0 && drops.size() > 0) {
+        if (level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && event.isDropItems() && recipe.size() != 0 && drops.size() > 0) {
             Block.popResource(level, blockPos, recipe.get(0).getResultItem());
             player.playNotifySound(SoundEvents.GENERIC_BURN, SoundSource.BLOCKS, 0.3f, 1.0f);
             event.setDropItems(false);

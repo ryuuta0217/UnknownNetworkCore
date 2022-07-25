@@ -166,7 +166,7 @@ public class ModdedInitialHandler extends InitialHandler {
             FORGE_PLAYERS.put(this.getName(), new FML2Player(handshake.getMods(), handshake.getChannels(), handshake.getRegistries()));
             LOGGER.info("[" + this.getName() + "|" + this.getSocketAddress() + "] <-> Successfully FML2 handshake completed");
             LOGGER.info("[" + this.getName() + "|" + this.getSocketAddress() + "] <-> Connected as using mods: " + handshake.getMods());
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             e.printStackTrace();
         }
     }

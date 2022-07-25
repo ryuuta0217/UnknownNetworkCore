@@ -70,7 +70,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.player.PlayerSwapHandItemsEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
@@ -133,7 +136,7 @@ public class ProtectionGui extends GuiBase {
             TEMP_DATA.remove(this.player.getUniqueId());
             this.unRegisterAsListener();
         }
-        if(this.guiState == State.NEW_REGION) {
+        if (this.guiState == State.NEW_REGION) {
             TEMP_DATA.put(this.player.getUniqueId(), this);
         }
     }
@@ -306,7 +309,7 @@ public class ProtectionGui extends GuiBase {
                                                 TextDecoration.ITALIC.withState(false))))
                         .build());
 
-                if(this.newRegionName != null && this.min != null && this.max != null) {
+                if (this.newRegionName != null && this.min != null && this.max != null) {
                     this.gui.inventory.setItem(49, new ItemStackBuilder(Material.LIME_WOOL)
                             .displayName(Component.text("保護を確定", Style.style(
                                     DefinedTextColor.GREEN,
@@ -361,7 +364,7 @@ public class ProtectionGui extends GuiBase {
                     this.regionsView.showRegions(1);
                 } else if (event.getSlot() == 49 && event.getCurrentItem() != null) {
                     /* 保護領域作成確定 */
-                    if(this.newRegionName != null && this.min != null && this.max != null) {
+                    if (this.newRegionName != null && this.min != null && this.max != null) {
                         ProtectedCuboidRegion region = new ProtectedCuboidRegion(this.gui.player.getUniqueId() + WorldGuard.SPLITTER + this.newRegionName, false, this.min, this.max);
                         region.getOwners().addPlayer(this.gui.player.getUniqueId());
 
@@ -370,7 +373,7 @@ public class ProtectionGui extends GuiBase {
 
                         // 保護領域重複チェック
                         List<ProtectedRegion> intersectedRegions = region.getIntersectingRegions(manager.getRegions().values());
-                        if(intersectedRegions.size() > 0) {
+                        if (intersectedRegions.size() > 0) {
                             Util.showRegionAreaIntersectedError(intersectedRegions, this, State.NEW_REGION);
                             this.min = null;
                             this.max = null;
@@ -421,25 +424,25 @@ public class ProtectionGui extends GuiBase {
                 this.gui.inventory.setItem(33, new ItemStackBuilder(Material.DIAMOND_CHESTPLATE)
                         .displayName(Component.text("メンバーの管理", Style.style(DefinedTextColor.LIGHT_PURPLE, TextDecoration.ITALIC.withState(false))))
                         .lore(new ArrayList<Component>() {{
-                                DefaultDomain owners = region.region().getOwners();
-                                PlayerDomain ownerPlayers = owners.getPlayerDomain();
-                                GroupDomain ownerGroups = owners.getGroupDomain();
-                                DefaultDomain members = region.region().getMembers();
-                                PlayerDomain memberPlayers = members.getPlayerDomain();
-                                GroupDomain memberGroups = members.getGroupDomain();
+                            DefaultDomain owners = region.region().getOwners();
+                            PlayerDomain ownerPlayers = owners.getPlayerDomain();
+                            GroupDomain ownerGroups = owners.getGroupDomain();
+                            DefaultDomain members = region.region().getMembers();
+                            PlayerDomain memberPlayers = members.getPlayerDomain();
+                            GroupDomain memberGroups = members.getGroupDomain();
 
-                                add(Component.text("オーナー", DefinedTextColor.AQUA));
-                                ownerPlayers.getUniqueIds().forEach(uuid -> Util.appendPlayerComponent(this, uuid));
-                                ownerGroups.getGroups().forEach(group -> Util.appendGroupComponent(this, group));
+                            add(Component.text("オーナー", DefinedTextColor.AQUA));
+                            ownerPlayers.getUniqueIds().forEach(uuid -> Util.appendPlayerComponent(this, uuid));
+                            ownerGroups.getGroups().forEach(group -> Util.appendGroupComponent(this, group));
 
-                                if(members.size() > 0) {
-                                    add(Component.empty());
+                            if (members.size() > 0) {
+                                add(Component.empty());
 
-                                    add(Component.text("メンバー", DefinedTextColor.GREEN));
-                                    memberPlayers.getUniqueIds().forEach(uuid -> Util.appendPlayerComponent(this, uuid));
-                                    memberGroups.getGroups().forEach(group -> Util.appendGroupComponent(this, group));
-                                }
-                            }}.toArray(new Component[0]))
+                                add(Component.text("メンバー", DefinedTextColor.GREEN));
+                                memberPlayers.getUniqueIds().forEach(uuid -> Util.appendPlayerComponent(this, uuid));
+                                memberGroups.getGroups().forEach(group -> Util.appendGroupComponent(this, group));
+                            }
+                        }}.toArray(new Component[0]))
                         .addItemFlag(ItemFlag.HIDE_ATTRIBUTES)
                         .build());
 
@@ -469,18 +472,18 @@ public class ProtectionGui extends GuiBase {
                 switch (event.getSlot()) {
                     // 名前変更
                     case 29 -> {
-                        if(this.region.region() instanceof ProtectedCuboidRegion) {
+                        if (this.region.region() instanceof ProtectedCuboidRegion) {
                             this.gui.guiState = State.WAITING_CALLBACK;
                             this.gui.player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
                             String oldFullId = this.region.getFullId();
                             String oldId = this.region.getId();
                             Util.openSetNameWindow(this.region.getId(), this, State.REGION_INFORMATION, (newId) -> {
                                 String newFullId = this.gui.player.getUniqueId() + WorldGuard.SPLITTER + newId;
-                                if(newFullId.equals(oldFullId)) {
+                                if (newFullId.equals(oldFullId)) {
                                     this.gui.guiState = State.REGION_INFORMATION;
                                     this.initialize();
                                 } else {
-                                    if(!this.region.regionManager().hasRegion(newFullId)) {
+                                    if (!this.region.regionManager().hasRegion(newFullId)) {
                                         ProtectedRegion renamed = new ProtectedCuboidRegion(newFullId,
                                                 false,
                                                 this.region.region().getMinimumPoint(),
@@ -529,7 +532,7 @@ public class ProtectionGui extends GuiBase {
 
                     // 範囲再設定
                     case 52 -> {
-                        if(this.region.region() instanceof ProtectedCuboidRegion region) {
+                        if (this.region.region() instanceof ProtectedCuboidRegion region) {
                             this.gui.guiState = State.WAITING_CALLBACK;
                             this.gui.player.closeInventory();
 
@@ -537,7 +540,7 @@ public class ProtectionGui extends GuiBase {
                                 World world = result.world();
                                 BlockVector3 min = result.min();
                                 BlockVector3 max = result.max();
-                                if(world == null || min == null || max == null) {
+                                if (world == null || min == null || max == null) {
                                     this.gui.guiState = State.REGION_INFORMATION;
                                 } else {
                                     ProtectedCuboidRegion newRegion = new ProtectedCuboidRegion(region.getId(), min, max);
@@ -618,13 +621,13 @@ public class ProtectionGui extends GuiBase {
                     this.gui.inventory.setItem(14, new ItemStackBuilder(Material.BIRCH_SIGN)
                             .displayName(Component.text("メンバー一覧", DefinedTextColor.GREEN))
                             .lore(new ArrayList<Component>() {{
-                                    DefaultDomain members = regionInfoView.region.region().getMembers();
-                                    PlayerDomain memberPlayers = members.getPlayerDomain();
-                                    GroupDomain memberGroups = members.getGroupDomain();
+                                DefaultDomain members = regionInfoView.region.region().getMembers();
+                                PlayerDomain memberPlayers = members.getPlayerDomain();
+                                GroupDomain memberGroups = members.getGroupDomain();
 
-                                    memberPlayers.getUniqueIds().forEach(uuid -> Util.appendPlayerComponent(this, uuid));
-                                    memberGroups.getGroups().forEach(group -> Util.appendGroupComponent(this, group));
-                                }}.toArray(new Component[0]))
+                                memberPlayers.getUniqueIds().forEach(uuid -> Util.appendPlayerComponent(this, uuid));
+                                memberGroups.getGroups().forEach(group -> Util.appendGroupComponent(this, group));
+                            }}.toArray(new Component[0]))
                             .build());
 
                     this.gui.inventory.setItem(32, DefinedItemStackBuilders.plus()
@@ -660,7 +663,7 @@ public class ProtectionGui extends GuiBase {
                                 this.regionInfoView.region.region().getOwners().addPlayer(player.getUniqueId());
                                 this.gui.view = this;
                                 this.initialize();
-                                if(this.gui.guiState == State.WAITING_CALLBACK) {
+                                if (this.gui.guiState == State.WAITING_CALLBACK) {
                                     this.gui.player.openInventory(this.gui.getInventory());
                                     this.gui.guiState = State.MANAGE_MEMBERS;
                                 }
@@ -705,7 +708,7 @@ public class ProtectionGui extends GuiBase {
                                 this.regionInfoView.region.region().getMembers().addPlayer(player.getUniqueId());
                                 this.gui.view = this;
                                 this.initialize();
-                                if(this.gui.guiState == State.WAITING_CALLBACK) {
+                                if (this.gui.guiState == State.WAITING_CALLBACK) {
                                     this.gui.player.openInventory(this.gui.getInventory());
                                     this.gui.guiState = State.MANAGE_MEMBERS;
                                 }
@@ -733,12 +736,12 @@ public class ProtectionGui extends GuiBase {
                                     });
                         }
 
-                         case 45 -> {
+                        case 45 -> {
                             this.gui.guiState = State.REGION_INFORMATION;
                             this.clearInventory();
                             this.gui.view = this.regionInfoView;
                             this.gui.view.initialize();
-                         }
+                        }
                     }
                 }
             }
@@ -800,6 +803,7 @@ public class ProtectionGui extends GuiBase {
         private final View prevView;
         private final State prevState;
         private final Consumer<Inventory> initializer;
+
         public ErrorView(@Nullable Component errorTitle,
                          @Nullable List<Component> errorDetail,
                          @Nonnull ProtectionGui gui,
@@ -816,11 +820,11 @@ public class ProtectionGui extends GuiBase {
         }
 
         private void showError() {
-            if(this.initializer != null) this.initializer.accept(this.gui.inventory);
+            if (this.initializer != null) this.initializer.accept(this.gui.inventory);
             IntStream.rangeClosed(0, 44).forEach(i -> {
                 this.gui.inventory.setItem(i, new ItemStackBuilder(Material.BARRIER).displayName(Component.empty()).build());
             });
-            if(this.errorTitle == null) return;
+            if (this.errorTitle == null) return;
             this.gui.inventory.setItem(13, new ItemStackBuilder(Material.PAPER)
                     .displayName(Component.empty()
                             .style(Style.style(DefinedTextColor.WHITE, TextDecoration.ITALIC.withState(false)))
@@ -839,7 +843,7 @@ public class ProtectionGui extends GuiBase {
 
         @Override
         public void onClick(InventoryClickEvent event) {
-            if(event.getSlot() == 45) {
+            if (event.getSlot() == 45) {
                 this.clearInventory();
                 this.gui.guiState = prevState;
                 this.gui.view = prevView;
@@ -877,7 +881,7 @@ public class ProtectionGui extends GuiBase {
                     .onComplete(lines -> {
                         String newRegionName = PlainTextComponentSerializer.plainText().serialize(lines.get(0));
                         view.clearInventory();
-                        if(ProtectedRegion.isValidId(newRegionName)) {
+                        if (ProtectedRegion.isValidId(newRegionName)) {
                             onComplete.accept(newRegionName);
                         } else {
                             view.gui.guiState = State.ERROR;
@@ -927,7 +931,7 @@ public class ProtectionGui extends GuiBase {
                     e.setCancelled(true);
                     Location clickedLoc = e.getClickedBlock().getLocation();
                     BlockVector3 clickedLocConv = BlockVector3.at(clickedLoc.getX(), clickedLoc.getY(), clickedLoc.getZ());
-                    if(result.world() != null && !clickedLoc.getWorld().equals(result.world())) {
+                    if (result.world() != null && !clickedLoc.getWorld().equals(result.world())) {
                         result.min(null);
                         result.max(null);
                         NewMessageUtil.sendMessage(player, Component.text("ワールドが変更されたようです。選択範囲がリセットされました。"));
@@ -955,7 +959,7 @@ public class ProtectionGui extends GuiBase {
                         NewMessageUtil.sendMessage(player, Component.text("両地点を選択しました。"), false);
                         LocalSession session = WorldEdit.getSession(player);
                         RegionSelector selector = WorldEdit.getRegionSelector(player, result.world());
-                        if(!(selector instanceof CuboidRegionSelector)) {
+                        if (!(selector instanceof CuboidRegionSelector)) {
                             selector = new CuboidRegionSelector();
                             session.setRegionSelector(BukkitAdapter.adapt(result.world()), selector);
                         }
@@ -966,31 +970,32 @@ public class ProtectionGui extends GuiBase {
             }, UnknownNetworkCore.getInstance(), false);
 
             Bukkit.getPluginManager().registerEvent(PlayerDropItemEvent.class, createListener(listeners), EventPriority.MONITOR, (l, ev) -> {
-                if(ev instanceof PlayerDropItemEvent e) {
-                    if(!e.getPlayer().equals(player)) return;
-                    if(e.getItemDrop().getItemStack().getType() != Material.GOLDEN_AXE) return;
-                    if(e.getItemDrop().getItemStack().getItemMeta() == null || e.getItemDrop().getItemStack().getItemMeta().displayName() == null) return;
-                    if(!e.getItemDrop().getItemStack().getEnchantments().containsKey(Enchantment.DIG_SPEED)) return;
+                if (ev instanceof PlayerDropItemEvent e) {
+                    if (!e.getPlayer().equals(player)) return;
+                    if (e.getItemDrop().getItemStack().getType() != Material.GOLDEN_AXE) return;
+                    if (e.getItemDrop().getItemStack().getItemMeta() == null || e.getItemDrop().getItemStack().getItemMeta().displayName() == null)
+                        return;
+                    if (!e.getItemDrop().getItemStack().getEnchantments().containsKey(Enchantment.DIG_SPEED)) return;
                     player.getInventory().setItem(player.getInventory().getHeldItemSlot(), currentHand);
                     unregisterAllListeners(listeners);
-                    if(!task.isCancelled()) task.cancel();
+                    if (!task.isCancelled()) task.cancel();
                     e.getItemDrop().remove();
                     onComplete.accept(result);
                 }
             }, UnknownNetworkCore.getInstance(), false);
 
             Bukkit.getPluginManager().registerEvent(PlayerQuitEvent.class, createListener(listeners), EventPriority.MONITOR, (l, ev) -> {
-                if(ev instanceof PlayerQuitEvent e) {
-                    if(e.getPlayer().equals(player)) {
+                if (ev instanceof PlayerQuitEvent e) {
+                    if (e.getPlayer().equals(player)) {
                         player.getInventory().setItem(player.getInventory().getHeldItemSlot(), currentHand);
                         unregisterAllListeners(listeners);
-                        if(!task.isCancelled()) task.cancel();
+                        if (!task.isCancelled()) task.cancel();
                     }
                 }
             }, UnknownNetworkCore.getInstance(), false);
             Bukkit.getPluginManager().registerEvent(PlayerSwapHandItemsEvent.class, createListener(listeners), EventPriority.LOWEST, (l, ev) -> {
-                if(ev instanceof PlayerSwapHandItemsEvent e) {
-                    if(e.getPlayer().equals(player)) {
+                if (ev instanceof PlayerSwapHandItemsEvent e) {
+                    if (e.getPlayer().equals(player)) {
                         e.setCancelled(true);
                     }
                 }
@@ -998,7 +1003,8 @@ public class ProtectionGui extends GuiBase {
         }
 
         public static Listener createListener(Set<Listener> listeners) {
-            Listener listener = new Listener() {};
+            Listener listener = new Listener() {
+            };
             listeners.add(listener);
             return listener;
         }

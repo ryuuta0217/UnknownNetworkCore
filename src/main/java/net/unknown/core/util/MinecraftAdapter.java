@@ -64,16 +64,16 @@ public class MinecraftAdapter {
 
     @Nullable
     public static net.minecraft.server.level.ServerPlayer player(Player bukkit) {
-        if(bukkit instanceof CraftPlayer craft) {
-            if(craft.getHandle() != null) return craft.getHandle();
+        if (bukkit instanceof CraftPlayer craft) {
+            if (craft.getHandle() != null) return craft.getHandle();
         }
         return null;
     }
 
     @Nullable
     public static net.minecraft.world.entity.Entity entity(org.bukkit.entity.Entity bukkit) {
-        if(bukkit instanceof CraftEntity craft) {
-            if(craft.getHandle() != null) return craft.getHandle();
+        if (bukkit instanceof CraftEntity craft) {
+            if (craft.getHandle() != null) return craft.getHandle();
         }
         return null;
     }
@@ -82,8 +82,8 @@ public class MinecraftAdapter {
     public static net.minecraft.world.Container container(Inventory bukkit) {
         // Bukkit#createInventoryで作成されたインベントリ(Container)の実態は CraftInventoryCustom$MinecraftInventory
         // その他の（タイルエンティティを含む）インベントリの変換は CraftInventoryCreator を参照
-        if(bukkit instanceof CraftInventory craft) {
-            if(craft.getInventory() != null) return craft.getInventory();
+        if (bukkit instanceof CraftInventory craft) {
+            if (craft.getInventory() != null) return craft.getInventory();
         }
         return null;
     }
@@ -118,8 +118,8 @@ public class MinecraftAdapter {
         }
 
         public static net.minecraft.world.item.ItemStack itemStack(org.bukkit.inventory.ItemStack bukkit) {
-            if(bukkit instanceof CraftItemStack craft) {
-                if(craft.handle != null) return craft.handle;
+            if (bukkit instanceof CraftItemStack craft) {
+                if (craft.handle != null) return craft.handle;
             }
             return CraftItemStack.asNMSCopy(bukkit);
         }
@@ -129,7 +129,7 @@ public class MinecraftAdapter {
         }
 
         public static org.bukkit.inventory.ItemStack itemStack(net.minecraft.world.item.ItemStack minecraft, boolean mirror) {
-            if(mirror) return CraftItemStack.asCraftMirror(minecraft);
+            if (mirror) return CraftItemStack.asCraftMirror(minecraft);
             else return CraftItemStack.asBukkitCopy(minecraft);
         }
     }

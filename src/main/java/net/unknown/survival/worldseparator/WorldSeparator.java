@@ -33,7 +33,6 @@ package net.unknown.survival.worldseparator;
 
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import org.bukkit.World;
@@ -48,7 +47,7 @@ import java.util.stream.IntStream;
 /**
  * インベントリ、体力、経験値、進捗、統計をワールドごとに分離します。
  * なるべくBukkit APIを使用せず、Minecraft内部クラス、関数を使用すること (挑戦、というより、アイテムNBTとかがJSONで出てくるほうがいいので)
- *
+ * <p>
  * インベントリ・・・ ((CraftPlayerInventory) Player#getInventory).getInventory(), ItemStack#getTag
  * 進捗・・・ ServerPlayer#getAdvancements, PlayerAdvancements#save, PlayerAdvancements#load(ServerAdvancementManager)
  */
@@ -75,13 +74,22 @@ public class WorldSeparator implements Listener {
     private static final Map<String, Map<UUID, Float>> HEALTH = new HashMap<>();
     private static final Map<String, Map<UUID, Map<Advancement, AdvancementProgress>>> ADVANCEMENTS = new HashMap<>();
 
+    public static String getWorldGroup(World world) {
+        return WORLD_GROUP.entrySet()
+                .stream()
+                .filter(e -> e.getValue().contains(world.getName()))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .orElse(world.getName());
+    }
+
     @EventHandler
     public void onWorldChanged(PlayerChangedWorldEvent event) {
         World from = event.getFrom();
         String fromGroup = getWorldGroup(from);
         World to = event.getPlayer().getWorld();
         String toGroup = getWorldGroup(to);
-        if(!fromGroup.equals(toGroup)) {
+        if (!fromGroup.equals(toGroup)) {
             ServerPlayer player = ((CraftPlayer) event.getPlayer()).getHandle();
 
             /* SAVE */
@@ -107,21 +115,12 @@ public class WorldSeparator implements Listener {
             /* LOAD */
 
             player.getInventory().clearContent();
-            if(INVENTORIES.containsKey(toGroup) && INVENTORIES.get(toGroup).containsKey(player.getUUID())) {
+            if (INVENTORIES.containsKey(toGroup) && INVENTORIES.get(toGroup).containsKey(player.getUUID())) {
                 List<ItemStack> items = INVENTORIES.get(toGroup).get(player.getUUID());
                 IntStream.range(0, items.size()).forEach(i -> player.getInventory().setItem(i, items.get(i).copy()));
             }
 
             player.setHealth(HEALTH.getOrDefault(toGroup, new HashMap<>()).getOrDefault(player.getUUID(), 20F));
         }
-    }
-
-    public static String getWorldGroup(World world) {
-        return WORLD_GROUP.entrySet()
-                .stream()
-                .filter(e -> e.getValue().contains(world.getName()))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .orElse(world.getName());
     }
 }

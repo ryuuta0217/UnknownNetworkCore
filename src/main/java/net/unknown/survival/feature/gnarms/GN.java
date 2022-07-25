@@ -38,17 +38,30 @@ import java.util.UUID;
 
 public interface GN {
     void startTick();
+
     void tick();
+
     void stopTick();
+
     void installModule(GNModule module);
+
     void enableModule(GNModule module);
+
     void uninstallModule(GNModule module);
+
     void disableModule(GNModule module);
+
     Set<GNModule> getInstalledModules();
+
     Set<GNModule> getEnabledModules();
+
     Set<GNModule> getDisabledModules();
+
     Set<GNModule> getAvailableModules();
+
     void updateLore();
+
     UUID getOwner();
+
     UUID getId();
 }

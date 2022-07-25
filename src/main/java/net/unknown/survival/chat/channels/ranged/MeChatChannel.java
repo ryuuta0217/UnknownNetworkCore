@@ -34,9 +34,7 @@ package net.unknown.survival.chat.channels.ranged;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
-import net.minecraft.world.level.block.ComposterBlock;
 import net.unknown.survival.chat.channels.ChannelType;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Collection;

@@ -97,7 +97,7 @@ public class MinecraftPacketReader {
             }
 
             out.writeByte(part);
-        } while(value != 0);
+        } while (value != 0);
     }
 
     public static void writeString(String s, ByteBuf out) {

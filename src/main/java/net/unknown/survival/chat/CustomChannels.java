@@ -31,10 +31,8 @@
 
 package net.unknown.survival.chat;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.minecraft.server.commands.TitleCommand;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
@@ -65,7 +63,7 @@ public class CustomChannels {
             if (CONFIG_FILE.exists() || CONFIG_FILE.createNewFile()) {
                 CONFIG = YamlConfiguration.loadConfiguration(CONFIG_FILE);
 
-                if(CONFIG.contains("channels")) {
+                if (CONFIG.contains("channels")) {
                     CONFIG.getConfigurationSection("channels").getKeys(false).forEach(channelName -> {
                         UUID owner = UUID.fromString(CONFIG.getString("channels." + channelName + ".owner"));
                         Component displayName = GsonComponentSerializer.gson().deserialize(CONFIG.getString("channels." + channelName + ".display_name"));
@@ -100,7 +98,7 @@ public class CustomChannels {
     }
 
     public static CustomChannel createChannel(String channelName, UUID owner, Component displayName) throws IllegalArgumentException {
-        if(isChannelFound(channelName) || RESERVED_NAMES.contains(channelName)) {
+        if (isChannelFound(channelName) || RESERVED_NAMES.contains(channelName)) {
             throw new IllegalArgumentException("Channel already exists!");
         }
 
@@ -111,13 +109,13 @@ public class CustomChannels {
     }
 
     public static void removeChannel(String channelName) {
-        if(!isChannelFound(channelName)) throw new IllegalArgumentException("Channel not found!");
+        if (!isChannelFound(channelName)) throw new IllegalArgumentException("Channel not found!");
         CustomChannel channel = getChannel(channelName);
-        if(channel == null) throw new IllegalArgumentException("Channel not found!");
+        if (channel == null) throw new IllegalArgumentException("Channel not found!");
         channel.sendSystemMessage(Component.text("チャンネルが削除されました"));
         channel.getPlayers().forEach(uuid -> {
             ChatManager.setChannel(uuid, GlobalChannel.getInstance());
-            if(Bukkit.getOfflinePlayer(uuid).isOnline()) {
+            if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
                 MessageUtil.sendMessage(Bukkit.getPlayer(uuid), "デフォルトの発言先を " + ChatManager.getCurrentChannel(uuid).getChannelName() + " に変更しました");
             }
         });

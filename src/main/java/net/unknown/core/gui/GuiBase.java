@@ -32,7 +32,6 @@
 package net.unknown.core.gui;
 
 import net.kyori.adventure.text.Component;
-import net.unknown.UnknownNetworkCore;
 import net.unknown.core.managers.ListenerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;

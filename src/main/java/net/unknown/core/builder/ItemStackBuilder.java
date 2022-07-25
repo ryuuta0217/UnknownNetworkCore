@@ -41,7 +41,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -98,8 +97,8 @@ public class ItemStackBuilder {
         ItemMeta meta = this.original.getItemMeta();
         meta.lore(Stream.of(lore).map(c -> {
             Style style = c.style();
-            if(style.color() == null) style = style.color(DefinedTextColor.WHITE);
-            if(!style.hasDecoration(TextDecoration.ITALIC)) style = style.decoration(TextDecoration.ITALIC, false);
+            if (style.color() == null) style = style.color(DefinedTextColor.WHITE);
+            if (!style.hasDecoration(TextDecoration.ITALIC)) style = style.decoration(TextDecoration.ITALIC, false);
             return c.style(style);
         }).toList());
         this.original.setItemMeta(meta);

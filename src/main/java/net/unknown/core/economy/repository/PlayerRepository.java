@@ -38,7 +38,7 @@ import java.util.UUID;
 // exf) /root/unknown-network/economy/players/UUID.yml
 public class PlayerRepository implements Repository {
     private final UUID owner;
-    private BigDecimal balance;
+    private final BigDecimal balance;
 
     public PlayerRepository(UUID owner, BigDecimal balance) {
         this.owner = owner;

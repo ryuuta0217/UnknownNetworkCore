@@ -31,7 +31,6 @@
 
 package net.unknown.survival.listeners;
 
-import io.papermc.paper.text.PaperComponents;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;

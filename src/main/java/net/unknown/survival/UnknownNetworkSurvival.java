@@ -45,7 +45,6 @@ import net.unknown.survival.enchants.ChainDestruction;
 import net.unknown.survival.enchants.HatakeWatari;
 import net.unknown.survival.enchants.RangedMining;
 import net.unknown.survival.enchants.nms.DamageEnchant;
-import net.unknown.survival.feature.BlockDisassembler;
 import net.unknown.survival.feature.gnarms.GNArms;
 import net.unknown.survival.fml.FMLConnectionListener;
 import net.unknown.survival.fml.ModdedPlayerManager;
@@ -76,7 +75,8 @@ public class UnknownNetworkSurvival {
         try {
             Class.forName("net.unknown.launchwrapper.Main");
             BOOTSTRAPPED = true;
-        } catch(ClassNotFoundException ignored) {}
+        } catch (ClassNotFoundException ignored) {
+        }
     }
 
     public static void onEnable() {
@@ -106,7 +106,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new ChainDestruction());
         ListenerManager.registerListener(new AutoSmelting());
         //ListenerManager.registerListener(new WorldSeparator());
-        if(isBootstrapped()) {
+        if (isBootstrapped()) {
             //ListenerManager.registerListener(new BlockDisassembler());
         }
 

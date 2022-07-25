@@ -33,9 +33,9 @@ package net.unknown.core.util;
 
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.player.Player;
@@ -48,7 +48,7 @@ public class NewMessageUtil {
     /* START - Minecraft Components & ROOT */
     public static void sendMessage(CommandSourceStack source, Component component, boolean broadcastToOps) {
         source.sendSuccess(NewMessageUtil.format(component), false);
-        if(broadcastToOps) broadcastCommandFeedback(component, source, false);
+        if (broadcastToOps) broadcastCommandFeedback(component, source, false);
     }
 
     public static void sendMessage(CommandSourceStack source, Component component) {
@@ -129,7 +129,7 @@ public class NewMessageUtil {
     /* START - Minecraft Components */
     public static void sendErrorMessage(CommandSourceStack source, Component component, boolean broadcastToOps) {
         source.sendFailure(component);
-        if(broadcastToOps) broadcastCommandFeedback(component, source, true);
+        if (broadcastToOps) broadcastCommandFeedback(component, source, true);
     }
 
     public static void sendErrorMessage(CommandSourceStack source, Component component) {
@@ -207,30 +207,30 @@ public class NewMessageUtil {
     /* ERROR MESSAGES END */
 
     //public static void broadcast(Component component, UUID sender, ChatType type, String permission) {
-        //CraftServer bukkit = (CraftServer) Bukkit.getServer();
-        //bukkit.getServer().getPlayerList().broadcastMessage();
+    //CraftServer bukkit = (CraftServer) Bukkit.getServer();
+    //bukkit.getServer().getPlayerList().broadcastMessage();
     //}
 
     private static void broadcastCommandFeedback(Component component, CommandSourceStack source, boolean error) {
         // commandBlockOutput: false の時にコマンドブロックからfeedbackが出ることを防ぐが、エラーの時は無視する
-        if(!error && !source.source.shouldInformAdmins()) return;
+        if (!error && !source.source.shouldInformAdmins()) return;
         MutableComponent msg = MutableComponent.create(new TranslatableContents("chat.type.admin", source.getDisplayName(), component))
                 .withStyle(error ? ChatFormatting.RED : ChatFormatting.GRAY, ChatFormatting.ITALIC);
 
         source.getServer().getPlayerList().getPlayers().forEach(player -> {
-            if(player != source.source && player.getBukkitEntity().hasPermission("minecraft.admin.command_feedback")) {
+            if (player != source.source && player.getBukkitEntity().hasPermission("minecraft.admin.command_feedback")) {
                 // TODO iterateの前にチェックを挟むか？
                 //  前にチェックを挟むと、
                 //  ワールドA(sendCommandFeedback: false) で実行されたコマンドがワールドB(sendCommandFeedback: true)のワールドで表示される
                 //  → プレイヤーの行動追跡に若干の難が生まれる？
                 //  ただし、実行者のワールドAがtrueでも受信者のいるワールドBがfalseだとフィードバックを受信できない
-                if(player.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
+                if (player.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
                     player.sendSystemMessage(msg);
                 }
             }
         });
 
-        if(source.source != source.getServer() && source.getServer().getGameRules().getBoolean(GameRules.RULE_LOGADMINCOMMANDS) && !SpigotConfig.silentCommandBlocks) {
+        if (source.source != source.getServer() && source.getServer().getGameRules().getBoolean(GameRules.RULE_LOGADMINCOMMANDS) && !SpigotConfig.silentCommandBlocks) {
             source.getServer().sendSystemMessage(msg);
         }
     }

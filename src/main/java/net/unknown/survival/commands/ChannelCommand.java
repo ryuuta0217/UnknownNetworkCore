@@ -32,15 +32,12 @@
 package net.unknown.survival.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -197,7 +194,7 @@ public class ChannelCommand {
             }
             case CUSTOM -> {
                 String channelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
-                if(CustomChannels.isChannelFound(channelName)) {
+                if (CustomChannels.isChannelFound(channelName)) {
                     if (!(currentChannel instanceof CustomChannel channel) || !channel.getChannelName().equals(channelName)) {
                         newChannel = CustomChannels.getChannel(channelName);
                     }
@@ -238,7 +235,7 @@ public class ChannelCommand {
         }
 
         ChatManager.setChannel(ctx.getSource().getPlayerOrException().getUUID(), newChannel);
-        if(newChannel instanceof CustomChannel channel) NewMessageUtil.sendMessage(ctx.getSource(),
+        if (newChannel instanceof CustomChannel channel) NewMessageUtil.sendMessage(ctx.getSource(),
                 Component.literal("デフォルトの発言先を ")
                         .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
                         .append(Component.literal("(" + channel.getChannelName() + ")")
@@ -249,7 +246,7 @@ public class ChannelCommand {
     }
 
     private static int createChannel(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
             String internalChannelName = StringArgumentType.getString(ctx, "チャンネル名");
             if (CustomChannels.isChannelFound(internalChannelName)) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "チャンネル名 " + internalChannelName + " は既に使用されています");
@@ -273,11 +270,11 @@ public class ChannelCommand {
     }
 
     private static int removeChannel(CommandContext<CommandSourceStack> ctx) {
-        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
             String channelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
-            if(channelName == null) {
+            if (channelName == null) {
                 ChatChannel channel = ChatManager.getCurrentChannel(player.getUUID());
-                if(channel.getType() == ChannelType.CUSTOM && channel instanceof CustomChannel customChannel) {
+                if (channel.getType() == ChannelType.CUSTOM && channel instanceof CustomChannel customChannel) {
                     channelName = customChannel.getChannelName();
                 } else {
                     NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("システムチャンネルを削除することはできません")));
@@ -285,10 +282,10 @@ public class ChannelCommand {
                 }
             }
 
-            if(CustomChannels.isChannelFound(channelName)) {
+            if (CustomChannels.isChannelFound(channelName)) {
                 CustomChannel channel = CustomChannels.getChannel(channelName);
-                if(channel.getOwner().equals(player.getUUID())) {
-                    if(TO_REMOVE_CONFIRM.containsKey(player.getUUID()) && TO_REMOVE_CONFIRM.get(player.getUUID()).getChannelName().equals(channelName)) {
+                if (channel.getOwner().equals(player.getUUID())) {
+                    if (TO_REMOVE_CONFIRM.containsKey(player.getUUID()) && TO_REMOVE_CONFIRM.get(player.getUUID()).getChannelName().equals(channelName)) {
                         TO_REMOVE_CONFIRM.remove(player.getUUID());
                         CustomChannels.removeChannel(channelName);
                         NewMessageUtil.sendMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネル "))
@@ -325,18 +322,18 @@ public class ChannelCommand {
                                         .suggests(Suggestions.JOINED_CHANNELS_SUGGEST)
                                         .executes(ChannelCommand::inviteToChannel)))) // invite specified channel
          */
-        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
             ServerPlayer inviteTarget = EntityArgument.getPlayer(ctx, "対象");
             String inviteChannelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
-            if(inviteChannelName != null && !CustomChannels.isChannelFound(inviteChannelName)) {
+            if (inviteChannelName != null && !CustomChannels.isChannelFound(inviteChannelName)) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "チャンネル " + inviteChannelName + " は存在しません");
                 return 1;
             }
 
             CustomChannel inviteChannel = CustomChannels.getChannel(inviteChannelName);
-            if(inviteChannel == null) {
+            if (inviteChannel == null) {
                 ChatChannel channel = ChatManager.getCurrentChannel(player.getUUID());
-                if(channel.getType() == ChannelType.CUSTOM && channel instanceof CustomChannel) {
+                if (channel.getType() == ChannelType.CUSTOM && channel instanceof CustomChannel) {
                     inviteChannel = (CustomChannel) channel;
                     inviteChannelName = inviteChannel.getChannelName();
                 } else {
@@ -346,25 +343,25 @@ public class ChannelCommand {
             }
 
             /* Pre-flight Check */
-            if(CHANNEL_INVITES.containsKey(inviteTarget.getUUID())) {
+            if (CHANNEL_INVITES.containsKey(inviteTarget.getUUID())) {
                 Map<UUID, Map<BukkitTask, CustomChannel>> invites = CHANNEL_INVITES.get(inviteTarget.getUUID());
-                if(invites.containsKey(player.getUUID())) {
+                if (invites.containsKey(player.getUUID())) {
                     Map<BukkitTask, CustomChannel> invitedChannels = invites.get(player.getUUID());
-                    if(invitedChannels.containsValue(inviteChannel)) {
+                    if (invitedChannels.containsValue(inviteChannel)) {
                         MessageUtil.sendErrorMessage(ctx.getSource(), "既に " + inviteTarget.getScoreboardName() + " をチャンネル " + inviteChannelName + " に招待しています");
                         return 3;
                     }
                 }
             }
 
-            if(inviteChannel == null) {
+            if (inviteChannel == null) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "招待先チャンネルが見つかりませんでした。");
                 return 4;
             }
 
             Component displayName$minecraft = NewMessageUtil.convertAdventure2Minecraft(inviteChannel.getDisplayName());
 
-            if(inviteChannel.getPlayers().contains(inviteTarget.getUUID())) {
+            if (inviteChannel.getPlayers().contains(inviteTarget.getUUID())) {
                 NewMessageUtil.sendErrorMessage(ctx.getSource(), MutableComponent.create(new LiteralContents(""))
                         .append(inviteTarget.getName())
                         .append(MutableComponent.create(new LiteralContents(" は既にチャンネル ")))
@@ -420,7 +417,7 @@ public class ChannelCommand {
     }
 
     private static int acceptInvite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
             if (!CHANNEL_INVITES.containsKey(player.getUUID())) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "チャンネルへの招待は届いていません");
                 return 1;
@@ -518,7 +515,7 @@ public class ChannelCommand {
     }
 
     private static int denyInvite(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
             if (!CHANNEL_INVITES.containsKey(player.getUUID())) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "チャンネルへの招待は届いていません");
                 return 1;
@@ -611,7 +608,7 @@ public class ChannelCommand {
                             .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
                     .append(MutableComponent.create(new LiteralContents(" への招待を拒否しました"))));
 
-            if(oPlayer.isOnline()) {
+            if (oPlayer.isOnline()) {
                 NewMessageUtil.sendMessage(((org.bukkit.entity.Player) oPlayer), MutableComponent.create(new LiteralContents("")).withStyle(ChatFormatting.RED)
                         .append(player.getDisplayName())
                         .append(MutableComponent.create(new LiteralContents(" はチャンネル ")))
@@ -625,11 +622,11 @@ public class ChannelCommand {
     }
 
     private static int leaveChannel(CommandContext<CommandSourceStack> ctx) {
-        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
             String channelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
             if (channelName == null) {
                 ChatChannel channel = ChatManager.getCurrentChannel(player.getUUID());
-                if(channel.getType() == ChannelType.CUSTOM && channel instanceof CustomChannel) {
+                if (channel.getType() == ChannelType.CUSTOM && channel instanceof CustomChannel) {
                     channelName = channel.getChannelName();
                 } else {
                     NewMessageUtil.sendErrorMessage(ctx.getSource(), "システムチャンネルから退出することはできません");
@@ -637,14 +634,14 @@ public class ChannelCommand {
                 }
             }
 
-            if(!CustomChannels.isChannelFound(channelName)) {
+            if (!CustomChannels.isChannelFound(channelName)) {
                 NewMessageUtil.sendErrorMessage(ctx.getSource(), "チャンネル " + channelName + " は存在しません");
                 return 2;
             }
 
             CustomChannel channel = CustomChannels.getChannel(channelName);
 
-            if(channel.getPlayers().contains(player.getUUID())) {
+            if (channel.getPlayers().contains(player.getUUID())) {
                 channel.removePlayer(player.getUUID());
                 NewMessageUtil.sendMessage(ctx.getSource(), MutableComponent.create(new LiteralContents("チャンネル "))
                         .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
@@ -684,7 +681,8 @@ public class ChannelCommand {
 
             @Override
             public void setValue(UUID uniqueId, Object newValue) {
-                if(!(newValue instanceof String)) throw new IllegalArgumentException("Required \"String\" but found \"" + newValue.getClass().getName() + "\"");
+                if (!(newValue instanceof String))
+                    throw new IllegalArgumentException("Required \"String\" but found \"" + newValue.getClass().getName() + "\"");
                 PlayerData.of(uniqueId).setForceGlobalChatPrefix((String) newValue);
             }
         },
@@ -701,7 +699,8 @@ public class ChannelCommand {
 
             @Override
             public void setValue(UUID uniqueId, Object newValue) {
-                if(!(newValue instanceof Boolean)) throw new IllegalArgumentException("Requires \"Boolean\" but found \"" + newValue.getClass().getName() + "\"");
+                if (!(newValue instanceof Boolean))
+                    throw new IllegalArgumentException("Requires \"Boolean\" but found \"" + newValue.getClass().getName() + "\"");
                 PlayerData.of(uniqueId).setUseKanaConvert((boolean) newValue);
             }
         };

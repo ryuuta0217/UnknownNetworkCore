@@ -187,9 +187,12 @@ public class PlayerData extends Config {
         this.homeBaseCount = this.getConfig().isSet("home-base-count") ? this.getConfig().getInt("home-base-count") : DEFAULT_MAX_HOME_COUNT;
         this.homeAdditionalCount = this.getConfig().isSet("home-additional-count") ? this.getConfig().getInt("home-additional-count") : 0;
 
-        if (this.getConfig().isSet("reply-target")) this.replyTarget = UUID.fromString(this.getConfig().getString("reply-target"));
-        if (this.getConfig().isSet("force-global-chat-prefix")) this.forceGlobalChatPrefix = this.getConfig().getString("force-global-chat-prefix");
-        if (this.getConfig().isSet("use-kana-convert")) this.useKanaConvert = this.getConfig().getBoolean("use-kana-convert");
+        if (this.getConfig().isSet("reply-target"))
+            this.replyTarget = UUID.fromString(this.getConfig().getString("reply-target"));
+        if (this.getConfig().isSet("force-global-chat-prefix"))
+            this.forceGlobalChatPrefix = this.getConfig().getString("force-global-chat-prefix");
+        if (this.getConfig().isSet("use-kana-convert"))
+            this.useKanaConvert = this.getConfig().getBoolean("use-kana-convert");
     }
 
     @Override
@@ -211,7 +214,8 @@ public class PlayerData extends Config {
         this.getConfig().set("home-base-count", homeBaseCount);
         this.getConfig().set("home-additional-count", homeAdditionalCount);
         if (this.replyTarget != null) this.getConfig().set("reply-target", this.replyTarget.toString());
-        if (this.forceGlobalChatPrefix != null) this.getConfig().set("force-global-chat-prefix", this.forceGlobalChatPrefix);
+        if (this.forceGlobalChatPrefix != null)
+            this.getConfig().set("force-global-chat-prefix", this.forceGlobalChatPrefix);
         this.getConfig().set("use-kana-convert", this.useKanaConvert);
         super.save();
     }

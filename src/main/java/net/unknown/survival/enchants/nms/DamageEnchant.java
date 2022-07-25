@@ -40,27 +40,29 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.*;
+import net.minecraft.world.item.enchantment.DamageEnchantment;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentCategory;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.unknown.core.util.RegistryUtil;
 
 public class DamageEnchant extends Enchantment {
     public static final int ALL = 0;
     public static final int UNDEAD = 1;
     public static final int ARTHROPODS = 2;
-    private static final String[] NAMES = new String[]{"all", "undead", "arthropods"};
-    private static final int[] MIN_COST = new int[]{1, 5, 5};
-    private static final int[] LEVEL_COST = new int[]{11, 8, 8};
-    private static final int[] LEVEL_COST_SPAN = new int[]{24, 20, 20};
-
-    public static void register() {
-        RegistryUtil.forceReplace(Registry.ENCHANTMENT, Enchantments.SHARPNESS, new DamageEnchant(Rarity.COMMON, 0, EquipmentSlot.MAINHAND));
-    }
-
+    private static final String[] NAMES = new String[] {"all", "undead", "arthropods"};
+    private static final int[] MIN_COST = new int[] {1, 5, 5};
+    private static final int[] LEVEL_COST = new int[] {11, 8, 8};
+    private static final int[] LEVEL_COST_SPAN = new int[] {24, 20, 20};
     public final int type;
 
     public DamageEnchant(Enchantment.Rarity weight, int typeIndex, EquipmentSlot... slots) {
         super(weight, EnchantmentCategory.WEAPON, slots);
         this.type = typeIndex;
+    }
+
+    public static void register() {
+        RegistryUtil.forceReplace(Registry.ENCHANTMENT, Enchantments.SHARPNESS, new DamageEnchant(Rarity.COMMON, 0, EquipmentSlot.MAINHAND));
     }
 
     @Override
@@ -90,7 +92,7 @@ public class DamageEnchant extends Enchantment {
 
     @Override
     public boolean canEnchant(ItemStack stack) {
-        return stack.getItem() instanceof AxeItem ? true : super.canEnchant(stack);
+        return stack.getItem() instanceof AxeItem || super.canEnchant(stack);
     }
 
     @Override

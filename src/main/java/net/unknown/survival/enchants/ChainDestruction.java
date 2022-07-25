@@ -96,61 +96,12 @@ public class ChainDestruction implements Listener {
 
     public static final Map<UUID, Set<BlockPos>> IGNORE_EVENT = new HashMap<>();
 
-    @EventHandler
-    public void onBlockBreak(BlockBreakEvent event) {
-        BlockPos breakBlockPos = MinecraftAdapter.blockPos(event.getBlock().getLocation());
-
-        if(IGNORE_EVENT.containsKey(event.getPlayer().getUniqueId())) {
-            if(IGNORE_EVENT.get(event.getPlayer().getUniqueId()).contains(breakBlockPos)) {
-                IGNORE_EVENT.get(event.getPlayer().getUniqueId()).remove(breakBlockPos);
-                return;
-            }
-        }
-
-        ServerPlayer player = MinecraftAdapter.player(event.getPlayer());
-        if(player == null) return;
-
-        /* Enchant test */
-        ItemStack selectedITem = player.getMainHandItem();
-        org.bukkit.inventory.ItemStack selectedItemB = event.getPlayer().getInventory().getItemInMainHand();
-        if(!(selectedITem.getItem() instanceof PickaxeItem) && !(selectedITem.getItem() instanceof AxeItem)) return;
-        if (selectedItemB.lore() == null) return;
-        List<String> lore = selectedItemB.lore().stream().map(LegacyComponentSerializer.legacySection()::serialize).toList();
-        if (lore.stream().noneMatch(s -> s.startsWith("§7一括破壊"))) return;
-        int maxBlocks = 8 * CustomEnchantUtil.getEnchantmentLevel(lore.stream().filter(s -> s.startsWith("§7一括破壊")).toList().get(0));
-
-        ServerLevel level = MinecraftAdapter.level(event.getBlock().getLocation().getWorld());
-        BlockState blockState = MinecraftAdapter.blockState(event.getBlock());
-        Block chainDestructTarget = blockState.getBlock();
-        if (!CHAIN_DESTRUCT_TARGETS.contains(chainDestructTarget)) return;
-        if (blockState.is(BlockTags.LOGS) && !(selectedITem.getItem() instanceof AxeItem)) return;
-        if (!player.hasCorrectToolForDrops(blockState)) return;
-        if (selectedITem.getItem().getMaxDamage() - selectedITem.getDamageValue() == 1) return;
-
-        Set<BlockPos> toBreak = new HashSet<>();
-
-        searchBlock(breakBlockPos, maxBlocks, level, chainDestructTarget, toBreak);
-
-        IGNORE_EVENT.put(event.getPlayer().getUniqueId(), new HashSet<>(toBreak));
-
-        AtomicInteger count = new AtomicInteger(1);
-        toBreak.forEach(pos -> {
-            RunnableManager.runDelayed(() -> {
-                if(player.getMainHandItem().equals(selectedITem)) {
-                    if (selectedITem.getItem().getMaxDamage() - selectedITem.getDamageValue() > 1) {
-                        destroyBlock(player, level, pos, selectedITem);
-                    }
-                }
-            }, count.getAndIncrement());
-        });
-    }
-
     private static void searchBlock(BlockPos center, int maxBlockCount, Level level, Block searchTarget, Set<BlockPos> data) {
-        if(searchTarget == Blocks.AIR) return;
+        if (searchTarget == Blocks.AIR) return;
         BlockPos.withinManhattan(center, 1, 1, 1).forEach(pos -> {
             BlockPos immPos = pos.immutable();
             BlockState state = level.getBlockState(immPos);
-            if(state.is(searchTarget) && !data.contains(immPos) && data.size() <= maxBlockCount && !center.equals(immPos)) {
+            if (state.is(searchTarget) && !data.contains(immPos) && data.size() <= maxBlockCount && !center.equals(immPos)) {
                 data.add(immPos);
                 searchBlock(immPos, maxBlockCount, level, searchTarget, data);
             }
@@ -165,7 +116,7 @@ public class ChainDestruction implements Listener {
         if (block instanceof GameMasterBlock && !player.canUseGameMasterBlocks() && !player.isCreative() && !(block instanceof CommandBlock && player.getBukkitEntity().hasPermission("minecraft.commandblock"))) {
             level.sendBlockUpdated(pos, blockState, blockState, Block.UPDATE_ALL);
         } else {
-            if(player.blockActionRestricted(level, pos, player.gameMode.getGameModeForPlayer())) return;
+            if (player.blockActionRestricted(level, pos, player.gameMode.getGameModeForPlayer())) return;
 
             block.playerWillDestroy(level, pos, blockState, player);
             boolean hasRemoved = level.removeBlock(pos, false);
@@ -176,16 +127,16 @@ public class ChainDestruction implements Listener {
 
             boolean isCorrectTool = player.hasCorrectToolForDrops(blockState);
 
-            if(!player.isCreative()) {
+            if (!player.isCreative()) {
                 usedTool.mineBlock(level, blockState, pos, player);
 
-                if(hasRemoved && isCorrectTool) {
+                if (hasRemoved && isCorrectTool) {
                     block.playerDestroy(level, player, pos, blockState, blockEntity, usedTool);
                     block.popExperience(level, pos, block.getExpDrop(blockState, level, pos, usedTool, true), player);
                 }
             }
 
-            if(hasRemoved && isCorrectTool && block instanceof BeehiveBlock && blockEntity instanceof BeehiveBlockEntity hive) {
+            if (hasRemoved && isCorrectTool && block instanceof BeehiveBlock && blockEntity instanceof BeehiveBlockEntity hive) {
                 CriteriaTriggers.BEE_NEST_DESTROYED.trigger(player, blockState, usedTool, hive.getOccupantCount());
             }
         }
@@ -207,7 +158,7 @@ public class ChainDestruction implements Listener {
         if (event.isCancelled()) {
             player.connection.send(new ClientboundBlockUpdatePacket(level, pos));
 
-            for(Direction direction : Direction.values()) {
+            for (Direction direction : Direction.values()) {
                 player.connection.send(new ClientboundBlockUpdatePacket(level, pos.relative(direction)));
             }
 
@@ -227,7 +178,7 @@ public class ChainDestruction implements Listener {
         if (block instanceof GameMasterBlock && !player.canUseGameMasterBlocks() && !player.isCreative() && !(block instanceof CommandBlock && player.getBukkitEntity().hasPermission("minecraft.commandblock"))) {
             level.sendBlockUpdated(pos, blockState, blockState, Block.UPDATE_ALL);
         } else {
-            if(player.blockActionRestricted(level, pos, player.gameMode.getGameModeForPlayer())) return;
+            if (player.blockActionRestricted(level, pos, player.gameMode.getGameModeForPlayer())) return;
 
             org.bukkit.block.BlockState bukkitBlockState = bukkitBlock.getState();
             level.captureDrops = new ArrayList<>();
@@ -235,7 +186,7 @@ public class ChainDestruction implements Listener {
 
             boolean removed = level.removeBlock(pos, false);
 
-            if(removed) {
+            if (removed) {
                 block.destroy(level, pos, blockState);
             }
 
@@ -261,5 +212,54 @@ public class ChainDestruction implements Listener {
                 CriteriaTriggers.BEE_NEST_DESTROYED.trigger(player, blockState, usedToolCopy, beeHive.getOccupantCount());
             }
         }
+    }
+
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event) {
+        BlockPos breakBlockPos = MinecraftAdapter.blockPos(event.getBlock().getLocation());
+
+        if (IGNORE_EVENT.containsKey(event.getPlayer().getUniqueId())) {
+            if (IGNORE_EVENT.get(event.getPlayer().getUniqueId()).contains(breakBlockPos)) {
+                IGNORE_EVENT.get(event.getPlayer().getUniqueId()).remove(breakBlockPos);
+                return;
+            }
+        }
+
+        ServerPlayer player = MinecraftAdapter.player(event.getPlayer());
+        if (player == null) return;
+
+        /* Enchant test */
+        ItemStack selectedITem = player.getMainHandItem();
+        org.bukkit.inventory.ItemStack selectedItemB = event.getPlayer().getInventory().getItemInMainHand();
+        if (!(selectedITem.getItem() instanceof PickaxeItem) && !(selectedITem.getItem() instanceof AxeItem)) return;
+        if (selectedItemB.lore() == null) return;
+        List<String> lore = selectedItemB.lore().stream().map(LegacyComponentSerializer.legacySection()::serialize).toList();
+        if (lore.stream().noneMatch(s -> s.startsWith("§7一括破壊"))) return;
+        int maxBlocks = 8 * CustomEnchantUtil.getEnchantmentLevel(lore.stream().filter(s -> s.startsWith("§7一括破壊")).toList().get(0));
+
+        ServerLevel level = MinecraftAdapter.level(event.getBlock().getLocation().getWorld());
+        BlockState blockState = MinecraftAdapter.blockState(event.getBlock());
+        Block chainDestructTarget = blockState.getBlock();
+        if (!CHAIN_DESTRUCT_TARGETS.contains(chainDestructTarget)) return;
+        if (blockState.is(BlockTags.LOGS) && !(selectedITem.getItem() instanceof AxeItem)) return;
+        if (!player.hasCorrectToolForDrops(blockState)) return;
+        if (selectedITem.getItem().getMaxDamage() - selectedITem.getDamageValue() == 1) return;
+
+        Set<BlockPos> toBreak = new HashSet<>();
+
+        searchBlock(breakBlockPos, maxBlocks, level, chainDestructTarget, toBreak);
+
+        IGNORE_EVENT.put(event.getPlayer().getUniqueId(), new HashSet<>(toBreak));
+
+        AtomicInteger count = new AtomicInteger(1);
+        toBreak.forEach(pos -> {
+            RunnableManager.runDelayed(() -> {
+                if (player.getMainHandItem().equals(selectedITem)) {
+                    if (selectedITem.getItem().getMaxDamage() - selectedITem.getDamageValue() > 1) {
+                        destroyBlock(player, level, pos, selectedITem);
+                    }
+                }
+            }, count.getAndIncrement());
+        });
     }
 }

@@ -36,17 +36,17 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.unknown.survival.feature.gnarms.GNArms;
 import net.unknown.survival.feature.gnarms.GNContext;
-import net.unknown.survival.feature.gnarms.module.GNModules;
 import net.unknown.survival.feature.gnarms.module.GNModule;
+import net.unknown.survival.feature.gnarms.module.GNModules;
 import org.bukkit.GameMode;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class FlyModule implements GNModule {
+    public static final FlyModule INSTANCE = new FlyModule();
     private static final long USE_PARTICLE_IN_IDLE = 20;
     private static final long USE_PARTICLE_IN_USE = 170;
-    public static final FlyModule INSTANCE = new FlyModule();
 
     FlyModule() {
         GNModules.registerMapping(this.getId(), this);
@@ -54,14 +54,14 @@ public class FlyModule implements GNModule {
 
     @Override
     public void onEnable(GNContext ctx) {
-        if(ctx.getPlayer().getGameMode() != GameMode.CREATIVE && ctx.getPlayer().getGameMode() != GameMode.SPECTATOR) {
+        if (ctx.getPlayer().getGameMode() != GameMode.CREATIVE && ctx.getPlayer().getGameMode() != GameMode.SPECTATOR) {
             ctx.getPlayer().setAllowFlight(true);
         }
     }
 
     @Override
     public void onDisable(GNContext ctx) {
-        if(ctx.getPlayer().getGameMode() != GameMode.CREATIVE && ctx.getPlayer().getGameMode() != GameMode.SPECTATOR) {
+        if (ctx.getPlayer().getGameMode() != GameMode.CREATIVE && ctx.getPlayer().getGameMode() != GameMode.SPECTATOR) {
             ctx.getPlayer().setAllowFlight(false);
             ctx.getPlayer().setFlying(false);
             ctx.getPlayer().setFlySpeed(0.1f);
@@ -71,11 +71,11 @@ public class FlyModule implements GNModule {
     @Override
     public void tick(GNContext ctx) {
         this.onEnable(ctx);
-        if(ctx.getPlayer().getGameMode() != GameMode.CREATIVE && ctx.getPlayer().getGameMode() != GameMode.SPECTATOR) {
-            if(ctx.getPlayer().getAllowFlight()) {
-                if(ctx.getPlayer().isFlying()) {
+        if (ctx.getPlayer().getGameMode() != GameMode.CREATIVE && ctx.getPlayer().getGameMode() != GameMode.SPECTATOR) {
+            if (ctx.getPlayer().getAllowFlight()) {
+                if (ctx.getPlayer().isFlying()) {
                     ctx.addParticlesToUse(USE_PARTICLE_IN_USE);
-                    if(ctx.getPlayer().isSprinting()) {
+                    if (ctx.getPlayer().isSprinting()) {
                         ctx.getPlayer().setFlySpeed(Mth.clamp(ctx.getPlayer().getFlySpeed() + 0.005f, -1.0f, 1.0f));
                     } // TODO 静止時、徐々に減少
                 } else {

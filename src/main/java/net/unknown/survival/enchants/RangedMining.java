@@ -31,7 +31,6 @@
 
 package net.unknown.survival.enchants;
 
-import com.google.common.collect.Sets;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.PickaxeItem;
@@ -53,7 +52,6 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 public class RangedMining implements Listener {
@@ -72,17 +70,17 @@ public class RangedMining implements Listener {
         int y = 0;
         int z = 0;
 
-        if(direction == Direction.SOUTH || direction == Direction.NORTH) {
+        if (direction == Direction.SOUTH || direction == Direction.NORTH) {
             x = range;
             y = range;
         }
 
-        if(direction == Direction.EAST || direction == Direction.WEST) {
+        if (direction == Direction.EAST || direction == Direction.WEST) {
             y = range;
             z = range;
         }
 
-        if(direction == Direction.UP || direction == Direction.DOWN) {
+        if (direction == Direction.UP || direction == Direction.DOWN) {
             x = range;
             z = range;
         }
@@ -113,7 +111,8 @@ public class RangedMining implements Listener {
         ItemStack handItem = player.getInventory().getItemInMainHand();
         if (!handItem.getType().name().endsWith("_PICKAXE")) return;
         if (handItem.getLore() == null /*&& !((CraftItemStack) handItem).handle.isEnchanted()*/) return;
-        if (handItem.getLore().stream().noneMatch(lore -> lore.startsWith("§7採掘範囲拡大")) /*&& EnchantmentHelper.getEnchantments(((CraftItemStack) handItem).handle).containsKey(CustomEnchantments.RANGED_MINING)*/) return;
+        if (handItem.getLore().stream().noneMatch(lore -> lore.startsWith("§7採掘範囲拡大")) /*&& EnchantmentHelper.getEnchantments(((CraftItemStack) handItem).handle).containsKey(CustomEnchantments.RANGED_MINING)*/)
+            return;
         int range = CustomEnchantUtil.getEnchantmentLevel(handItem.getLore().stream().filter(lore -> lore.startsWith("§7採掘範囲拡大")).toList().get(0));
         /*if(handItem.getLore().stream().anyMatch(lore -> lore.startsWith("§7採掘範囲拡大"))) {
             range = ;
@@ -150,12 +149,12 @@ public class RangedMining implements Listener {
         private static RangedMiningEnchantment INSTANCE;
 
         protected RangedMiningEnchantment() {
-            super(Rarity.RARE, EnchantmentCategory.DIGGER, new net.minecraft.world.entity.EquipmentSlot[]{net.minecraft.world.entity.EquipmentSlot.MAINHAND, net.minecraft.world.entity.EquipmentSlot.OFFHAND});
+            super(Rarity.RARE, EnchantmentCategory.DIGGER, new net.minecraft.world.entity.EquipmentSlot[] {net.minecraft.world.entity.EquipmentSlot.MAINHAND, net.minecraft.world.entity.EquipmentSlot.OFFHAND});
             //Registry.register(Registry.ENCHANTMENT, "ranged_mining", this);
         }
 
         public static RangedMiningEnchantment instance() {
-            if(INSTANCE == null) INSTANCE = new RangedMiningEnchantment();
+            if (INSTANCE == null) INSTANCE = new RangedMiningEnchantment();
             return INSTANCE;
         }
 

@@ -113,16 +113,18 @@ public class CustomChannel extends ChatChannel {
     }
 
     public void addPlayer(UUID uniqueId) {
-        if(this.players.contains(uniqueId)) throw new IllegalArgumentException("プレイヤー " + uniqueId + " はチャンネル " + this.channelName + " に既に参加しています。");
+        if (this.players.contains(uniqueId))
+            throw new IllegalArgumentException("プレイヤー " + uniqueId + " はチャンネル " + this.channelName + " に既に参加しています。");
         this.players.add(uniqueId);
         this.sendSystemMessage(Component.text(Bukkit.getOfflinePlayer(uniqueId).getName() + " がチャンネルに参加しました"));
         RunnableManager.runAsync(CustomChannels::save);
     }
 
     public void removePlayer(UUID uniqueId) {
-        if(!this.players.contains(uniqueId)) throw new IllegalArgumentException("プレイヤー " + uniqueId + " はチャンネル " + this.channelName + " に参加していません");
+        if (!this.players.contains(uniqueId))
+            throw new IllegalArgumentException("プレイヤー " + uniqueId + " はチャンネル " + this.channelName + " に参加していません");
         this.players.remove(uniqueId);
-        if(ChatManager.getCurrentChannel(uniqueId).equals(this)) {
+        if (ChatManager.getCurrentChannel(uniqueId).equals(this)) {
             ChatManager.setChannel(uniqueId, GlobalChannel.getInstance());
         }
         this.sendSystemMessage(Component.text(Bukkit.getOfflinePlayer(uniqueId).getName() + " がチャンネルから退出しました"));
@@ -142,7 +144,7 @@ public class CustomChannel extends ChatChannel {
                 .map(off -> (Player) off)
                 .collect(Collectors.toSet()), this);
         Bukkit.getPluginManager().callEvent(event);
-        if(event.isCancelled()) return;
+        if (event.isCancelled()) return;
         Bukkit.getServer().getConsoleSender().sendMessage(player == null ? Identity.nil() : player.identity(), message);
         event.getReceivers().forEach(receiver -> receiver.sendMessage((event.getSender() == null ? Identity.nil() : event.getSender().identity()), event.getRenderedMessage()));
     }

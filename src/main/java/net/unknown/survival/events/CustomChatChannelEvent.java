@@ -31,26 +31,23 @@
 
 package net.unknown.survival.events;
 
-import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.unknown.survival.chat.channels.CustomChannel;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nonnull;
 import java.util.Set;
 
 public class CustomChatChannelEvent extends Event implements Cancellable {
     public static final HandlerList handlers = new HandlerList();
-
-    private boolean cancelled = false;
     private final Player sender;
-    private Component renderedMessage;
     private final Set<Player> receivers;
     private final CustomChannel channel;
+    private boolean cancelled = false;
+    private Component renderedMessage;
 
     public CustomChatChannelEvent(boolean async, Player sender, Component renderedMessage, Set<Player> receivers, CustomChannel channel) {
         super(async);
@@ -58,6 +55,11 @@ public class CustomChatChannelEvent extends Event implements Cancellable {
         this.renderedMessage = renderedMessage;
         this.receivers = receivers;
         this.channel = channel;
+    }
+
+    @Nonnull
+    public static HandlerList getHandlerList() {
+        return handlers;
     }
 
     public Player getSender() {
@@ -100,11 +102,6 @@ public class CustomChatChannelEvent extends Event implements Cancellable {
     @Override
     public void setCancelled(boolean cancel) {
         this.cancelled = cancel;
-    }
-
-    @Nonnull
-    public static HandlerList getHandlerList() {
-        return handlers;
     }
 
     @Nonnull

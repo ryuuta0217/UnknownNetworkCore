@@ -32,12 +32,10 @@
 package net.unknown.survival.fml;
 
 import com.ryuuta0217.packets.C2SModListReply;
-import com.ryuuta0217.packets.FML2HandshakePacket;
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.kyori.adventure.text.Component;
-import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.enums.ConnectionEnvironment;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;

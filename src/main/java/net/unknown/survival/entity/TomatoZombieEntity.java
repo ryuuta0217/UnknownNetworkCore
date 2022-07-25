@@ -58,9 +58,9 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import java.util.EnumSet;
 
 public class TomatoZombieEntity extends Zombie {
+    private static boolean monsters = false;
     private final MeleeAttackGoal attackGoal = new MeleeAttackGoal(this, 1.0, false);
     private final FireBallAttackGoal fireBallGoal = new FireBallAttackGoal(this);
-    private static boolean monsters = false;
 
     public TomatoZombieEntity(Level world) {
         super(EntityType.ZOMBIE, world);

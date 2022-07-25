@@ -43,13 +43,10 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.managers.RunnableManager;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Map;
@@ -88,7 +85,7 @@ public class TabListPingManager implements Listener {
     }
 
     public static void stopTask() {
-        if(UPDATE_TASK != null && !UPDATE_TASK.isCancelled()) UPDATE_TASK.cancel();
+        if (UPDATE_TASK != null && !UPDATE_TASK.isCancelled()) UPDATE_TASK.cancel();
 
         UnknownNetworkCore.getDedicatedServer()
                 .getPlayerList()
@@ -131,6 +128,7 @@ public class TabListPingManager implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if(UPDATE_TASK != null && !UPDATE_TASK.isCancelled()) createDummyObjective(((CraftPlayer) event.getPlayer()).getHandle());
+        if (UPDATE_TASK != null && !UPDATE_TASK.isCancelled())
+            createDummyObjective(((CraftPlayer) event.getPlayer()).getHandle());
     }
 }

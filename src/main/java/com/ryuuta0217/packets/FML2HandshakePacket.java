@@ -33,7 +33,6 @@ package com.ryuuta0217.packets;
 
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 
 import java.util.ArrayList;
 import java.util.HashMap;

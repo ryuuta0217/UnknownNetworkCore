@@ -101,7 +101,7 @@ public class RegistryUtil {
                 Holder.Reference<T> ref = byId.get(id);
 
                 Field f = ObfuscationUtil.getClassByMojangName("net.minecraft.core.Holder$Reference").getFieldByMojangName("value").getField();
-                if(f.trySetAccessible()) f.set(ref, objectTo);
+                if (f.trySetAccessible()) f.set(ref, objectTo);
                 else return false;
 
                 toId.remove(objectSrc, id);

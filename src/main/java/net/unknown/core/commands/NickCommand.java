@@ -38,7 +38,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.Level;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.util.MessageUtil;
 import org.bukkit.ChatColor;

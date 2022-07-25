@@ -52,13 +52,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ObfuscationUtil {
+    public static final ClassMapping OBF_STATE;
+    public static final Pattern DESCRIPTOR_PARAMS_PATTERN = Pattern.compile("\\[*(L[^;]+;|[ZBCSIFDJ])");
+    // (Ljava/util/function/Function;Ljava/util/function/Predicate;)Ljava/lang/Object;
+    public static final Pattern DESCRIPTOR_PATTERN = Pattern.compile("^\\((.*)\\)(.*)$");
     private static final Logger LOGGER = LoggerFactory.getLogger("ObfuscationUtil");
-
     private static final Pattern CLASS_OBF_PATTERN = Pattern.compile("^([a-zA-Z_$0-9.]+) -> ([a-z$]+):$");
     private static final Pattern FIELD_OBF_PATTERN = Pattern.compile("^    ([a-zA-Z_$0-9.\\[\\]]+) ([a-zA-Z_0-9$]+) -> ([a-zA-Z_]+)$");
     private static final Pattern METHOD_OBF_PATTERN = Pattern.compile("^    (\\d+:\\d+):([a-zA-Z_$0-9.]+) ([a-zA-Z_0-9]+)(\\(.*\\)) -> ([a-z]+)$");
-
-    public static final ClassMapping OBF_STATE;
+    private static final Map<String, Class> CLASSES = new HashMap<>();
 
     static {
         ClassMapping state;
@@ -75,8 +77,6 @@ public class ObfuscationUtil {
         }
         OBF_STATE = state;
     }
-
-    private static final Map<String, Class> CLASSES = new HashMap<>();
 
     public static void loadAllMappings() {
         loadMojangMappings();
@@ -103,12 +103,12 @@ public class ObfuscationUtil {
                         String[] classes = originalClass.split("\\$");
                         String[] obfClasses = obfuscatedClass.split("\\$");
                         Class parent = CLASSES.getOrDefault(classes[0], null);
-                        if(parent != null) {
+                        if (parent != null) {
                             for (int i = 1; i < classes.length; i++) {
                                 String subClassStr = classes[i];
                                 String obfSubClassStr = obfClasses[i];
                                 SubClass child = parent.getSubClass(subClassStr, obfSubClassStr);
-                                if(child == null) {
+                                if (child == null) {
                                     SubClass newChild = new SubClass(parent, subClassStr, obfSubClassStr);
                                     parent.addSubClass(newChild);
                                     parent = newChild;
@@ -158,7 +158,7 @@ public class ObfuscationUtil {
             List<String> spigotMapping = new BufferedReader(new InputStreamReader(ObfuscationUtil.class.getClassLoader().getResourceAsStream("mapping-spigot.txt"), StandardCharsets.UTF_8)).lines().toList();
 
             for (String line : spigotMapping) {
-                if(line.startsWith("#")) continue;
+                if (line.startsWith("#")) continue;
                 String[] spl = line.split(" ", 2);
                 String obfuscatedClass = spl[0];
                 String spigotClass = spl[1].replace("/", ".");
@@ -167,11 +167,11 @@ public class ObfuscationUtil {
                 String[] spigotSplitClass = spigotClass.split("\\$");
 
                 Class parent = getClassByObfuscatedName(obfSplitClass[0]);
-                if(parent != null) {
+                if (parent != null) {
                     parent.setSpigotName(spigotSplitClass[0]);
                     for (int i = 1; i < obfSplitClass.length; i++) {
                         Class child = parent.getSubClassByObfuscatedName(obfSplitClass[i]);
-                        if(child != null) {
+                        if (child != null) {
                             child.setSpigotName(spigotSplitClass[i]);
                             parent = child;
                         }
@@ -179,19 +179,17 @@ public class ObfuscationUtil {
                 }
             }
             LOGGER.info("Spigot mappings was successfully loaded.");
-        } catch(Throwable e) {
+        } catch (Throwable e) {
             LOGGER.error("Failed to load spigot mappings", e);
         }
     }
-    public static final Pattern DESCRIPTOR_PARAMS_PATTERN = Pattern.compile("\\[*(L[^;]+;|[ZBCSIFDJ])");
-    // (Ljava/util/function/Function;Ljava/util/function/Predicate;)Ljava/lang/Object;
-    public static final Pattern DESCRIPTOR_PATTERN = Pattern.compile("^\\((.*)\\)(.*)$");
+
     public static void loadTinyMappings() {
         //CLASSES.clear();
         LOGGER.info("Loading tiny mappings...");
         Map<String, Class> tinyClasses = new HashMap<>();
         try (InputStream mappingRaw = ObfHelper.class.getClassLoader().getResourceAsStream("META-INF/mappings/reobf.tiny")) {
-            if(mappingRaw == null) {
+            if (mappingRaw == null) {
                 LOGGER.warn("Failed to load tiny mapping.");
                 return;
             }
@@ -206,7 +204,7 @@ public class ObfuscationUtil {
 
                 Class clazz;
 
-                if(!isSubClass) {
+                if (!isSubClass) {
                     clazz = new Class(mojangClassName, spigotClassName);
                     //clazz = tinyClasses.getOrDefault(mojangClassName, new Class(mojangClassName, spigotClassName));
                 } else {
@@ -219,7 +217,7 @@ public class ObfuscationUtil {
                     Class parent = tinyClasses.get(mojangNames[0]);
                     for (int i = 1; i < mojangNames.length; i++) {
                         SubClass subClazz = parent.getSubClass(mojangNames[i], spigotNames[i]);
-                        if(subClazz == null) {
+                        if (subClazz == null) {
                             subClazz = new SubClass(parent, mojangNames[i], spigotNames[i]);
                             parent.addSubClass(subClazz);
                         }
@@ -232,13 +230,13 @@ public class ObfuscationUtil {
                 for (MappingTree.MethodMapping methodMapping : classMapping.getMethods()) {
                     String descriptor = methodMapping.getDesc(ObfHelper.MOJANG_PLUS_YARN_NAMESPACE);
                     Matcher descMatcher = DESCRIPTOR_PATTERN.matcher(descriptor);
-                    if(descMatcher.matches()) {
+                    if (descMatcher.matches()) {
                         String argsRaw = descMatcher.group(1);
                         String returnTypeRaw = descMatcher.group(2);
 
                         Matcher argsMatcher = DESCRIPTOR_PARAMS_PATTERN.matcher(argsRaw);
                         List<String> params = new ArrayList<>();
-                        while(argsMatcher.find()) {
+                        while (argsMatcher.find()) {
                             params.add(argsMatcher.group());
                         }
                         clazz.addMethod(new Method(
@@ -260,7 +258,7 @@ public class ObfuscationUtil {
                             fieldMapping.getName(ObfHelper.SPIGOT_NAMESPACE)));
                 }
 
-                if(!isSubClass) tinyClasses.put(clazz.getName(), clazz);
+                if (!isSubClass) tinyClasses.put(clazz.getName(), clazz);
 
             }
 
@@ -269,7 +267,7 @@ public class ObfuscationUtil {
                     .forEach(e -> {
                         System.out.println("Unknown class detected: " + e.getKey());
                     });
-        } catch(IOException e) {
+        } catch (IOException e) {
             LOGGER.warn("Failed to load tiny mappings", e);
         }
     }
@@ -280,9 +278,9 @@ public class ObfuscationUtil {
 
     public static Class getClassByMojangName(String mojangClassName) {
         String[] classes = mojangClassName.split("\\$");
-        if(CLASSES.containsKey(classes[0])) {
+        if (CLASSES.containsKey(classes[0])) {
             Class clazz = CLASSES.get(classes[0]);
-            for(int i = 1; i < classes.length; i++) {
+            for (int i = 1; i < classes.length; i++) {
                 clazz = clazz.getSubClassByMojangName(classes[i]);
             }
             return clazz;
@@ -298,10 +296,10 @@ public class ObfuscationUtil {
                 .findAny()
                 .orElse(null);
 
-        if(parent != null) {
+        if (parent != null) {
             for (int i = 1; i < classes.length; i++) {
                 Class subClass = parent.getSubClassByObfuscatedName(classes[i]);
-                if(subClass != null) parent = subClass;
+                if (subClass != null) parent = subClass;
                 else return null;
             }
             return parent;
@@ -312,6 +310,7 @@ public class ObfuscationUtil {
     /**
      * format type descriptor to pattern "[Lsome.package.ClassName;", "some.package.ClassName"
      * for primitive: I -> int | Z -> boolean
+     *
      * @param input as known Lsome/package/ClassName, IFFZ format
      * @return formatted pattern
      */
@@ -319,7 +318,7 @@ public class ObfuscationUtil {
         StringReader reader = new StringReader(input);
         boolean isArray = false;
         StringBuilder result = new StringBuilder();
-        while(reader.canRead()) {
+        while (reader.canRead()) {
             switch (reader.read()) {
                 case '[' -> {
                     result.append("[");
@@ -380,14 +379,14 @@ public class ObfuscationUtil {
     private static String obfuscateTypeDescriptor(String typeDescriptor) {
         boolean isArray = false;
         String array = "";
-        if(typeDescriptor.matches("^\\[+L.*;")) {
+        if (typeDescriptor.matches("^\\[+L.*;")) {
             isArray = true;
             array = typeDescriptor.substring(0, typeDescriptor.indexOf("L"));
             typeDescriptor = typeDescriptor.substring(typeDescriptor.indexOf("L") + 1, typeDescriptor.indexOf(";") - 1);
         }
         Class clazz = ObfuscationUtil.getClassByMojangName(typeDescriptor);
-        if(clazz != null) {
-            return (isArray ? array : "") +  clazz.getObfuscatedName() + (isArray ? ";" : "");
+        if (clazz != null) {
+            return (isArray ? array : "") + clazz.getObfuscatedName() + (isArray ? ";" : "");
         }
         return typeDescriptor;
     }
@@ -416,10 +415,10 @@ public class ObfuscationUtil {
     public static class Class {
         private final String name;
         private final String obfuscatedName;
-        private String spigotName = null;
         private final Set<Field> fields = new HashSet<>();
         private final Set<Method> methods = new HashSet<>();
         private final Set<SubClass> subClasses = new HashSet<>();
+        private String spigotName = null;
 
         public Class(String name, String obfuscatedName) {
             this.name = name;
@@ -435,13 +434,17 @@ public class ObfuscationUtil {
         }
 
         public String getSpigotName() {
-            if(this.spigotName == null) return this.obfuscatedName;
+            if (this.spigotName == null) return this.obfuscatedName;
             return this.spigotName;
+        }
+
+        private void setSpigotName(String spigotName) {
+            this.spigotName = spigotName;
         }
 
         public String getEffectiveClassName() {
             if (OBF_STATE == ClassMapping.SPIGOT) {
-                if(this.hasSpigotName()) return this.getSpigotName();
+                if (this.hasSpigotName()) return this.getSpigotName();
                 else return this.getName();
             }
 
@@ -500,10 +503,10 @@ public class ObfuscationUtil {
                 try {
                     return java.lang.Class.forName(this.getObfuscatedName());
                 } catch (ClassNotFoundException ignored2) {
-                    if(this.hasSpigotName()) {
+                    if (this.hasSpigotName()) {
                         try {
                             return java.lang.Class.forName(this.getSpigotName());
-                        } catch(ClassNotFoundException ignored3) {
+                        } catch (ClassNotFoundException ignored3) {
                             return null;
                         }
                     }
@@ -517,13 +520,10 @@ public class ObfuscationUtil {
             return this.name.hashCode();
         }
 
-        private void setSpigotName(String spigotName) {
-            this.spigotName = spigotName;
-        }
-
         private void addField(Field field) {
             this.fields.add(field);
         }
+
         private void addMethod(Method method) {
             this.methods.add(method);
         }
@@ -569,7 +569,7 @@ public class ObfuscationUtil {
         }
 
         public Class getParent() {
-            if(this.parent instanceof SubClass subClass) {
+            if (this.parent instanceof SubClass subClass) {
                 return subClass.getParent();
             } else {
                 return this.parent;
@@ -582,8 +582,8 @@ public class ObfuscationUtil {
         private final String returnType;
         private final String mojangMethodName;
         private final String[] argTypes;
-        private String[] obfuscatedArgTypes;
         private final String obfuscatedMethodName;
+        private String[] obfuscatedArgTypes;
 
         public Method(Class parent, String returnType, String mojangMethodName, String[] argTypes, String obfuscatedMethodName) {
             this.parent = parent;

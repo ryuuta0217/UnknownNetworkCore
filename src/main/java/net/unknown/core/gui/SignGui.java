@@ -42,10 +42,10 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
+import net.unknown.core.events.PacketReceivedEvent;
 import net.unknown.core.events.interfaces.PacketListener;
 import net.unknown.core.managers.PacketManager;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.core.events.PacketReceivedEvent;
 import net.unknown.core.util.MessageUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -53,7 +53,6 @@ import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.*;
@@ -141,7 +140,7 @@ public class SignGui {
 
         @Override
         public void onPacketReceived(PacketReceivedEvent event) {
-            if(event.getPacket() instanceof ServerboundSignUpdatePacket packet) {
+            if (event.getPacket() instanceof ServerboundSignUpdatePacket packet) {
                 if (SignGui.SIGN_GUI_OPENED.containsKey(event.getPlayer().getUniqueId())) {
                     SignGui gui = SignGui.SIGN_GUI_OPENED.get(event.getPlayer().getUniqueId());
                     if (gui.isOpened) {

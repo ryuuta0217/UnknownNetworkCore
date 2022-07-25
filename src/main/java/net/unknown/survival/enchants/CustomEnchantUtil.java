@@ -31,9 +31,6 @@
 
 package net.unknown.survival.enchants;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,7 +75,8 @@ public class CustomEnchantUtil {
         } else if (split[1].matches("\\d+")) {
             try {
                 return Integer.parseInt(split[1]);
-            } catch(NumberFormatException ignored) {}
+            } catch (NumberFormatException ignored) {
+            }
         }
 
         return -1;

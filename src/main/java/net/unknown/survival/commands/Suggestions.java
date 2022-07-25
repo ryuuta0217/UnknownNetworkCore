@@ -43,9 +43,7 @@ import net.unknown.survival.chat.channels.ChatChannel;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.List;
 import java.util.UUID;
 
 public class Suggestions {
@@ -68,7 +66,7 @@ public class Suggestions {
         return SharedSuggestionProvider.suggest(new String[0], builder);
     };
     public static final SuggestionProvider<CommandSourceStack> JOINED_CHANNELS_SUGGEST = (ctx, builder) -> {
-        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
             return SharedSuggestionProvider.suggest(CustomChannels.getChannels()
                     .values()
                     .stream()
@@ -80,7 +78,7 @@ public class Suggestions {
     };
 
     public static final SuggestionProvider<CommandSourceStack> OWNED_CHANNELS_SUGGEST = (ctx, builder) -> {
-        if(ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
             return SharedSuggestionProvider.suggest(CustomChannels.getChannels()
                     .values()
                     .stream()

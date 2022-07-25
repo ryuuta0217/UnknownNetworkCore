@@ -43,13 +43,21 @@ import java.util.List;
 @MethodsNonnullByDefault
 public interface GNModule {
     void onEnable(GNContext ctx);
+
     void onDisable(GNContext ctx);
+
     void tick(GNContext ctx);
+
     boolean onInstall(GNContext ctx);
+
     boolean onUninstall(GNContext ctx);
+
     @Nullable
     List<Item> getInstallRequiredItem();
+
     GNArms.Type[] getAcceptableGNArmTypes();
+
     ResourceLocation getId();
+
     String getName();
 }

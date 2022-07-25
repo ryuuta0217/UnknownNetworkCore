@@ -39,7 +39,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.events.PacketReceivedEvent;
 import net.unknown.core.events.interfaces.PacketListener;
-import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -56,17 +55,17 @@ import java.util.Set;
 public class PacketManager implements Listener {
     private static final Logger LOGGER = LoggerFactory.getLogger("PacketManager");
     private static final PacketManager INSTANCE = new PacketManager();
+    private final Map<String, Set<PacketListener>> REGISTERED_LISTENERS = new HashMap<>();
+
+    protected PacketManager() {
+    }
 
     public static PacketManager getInstance() {
         return INSTANCE;
     }
 
-    private final Map<String, Set<PacketListener>> REGISTERED_LISTENERS = new HashMap<>();
-
-    protected PacketManager() {}
-
     public void registerListener(Class<? extends Packet<?>> packetClass, PacketListener listener) {
-        if(!REGISTERED_LISTENERS.containsKey(packetClass.getName())) {
+        if (!REGISTERED_LISTENERS.containsKey(packetClass.getName())) {
             REGISTERED_LISTENERS.put(packetClass.getName(), new HashSet<>());
         }
 
@@ -74,9 +73,9 @@ public class PacketManager implements Listener {
     }
 
     public boolean unregisterListener(Class<? extends Packet<?>> packetClass, PacketListener listener) {
-        if(REGISTERED_LISTENERS.containsKey(packetClass.getName())) {
+        if (REGISTERED_LISTENERS.containsKey(packetClass.getName())) {
             Set<PacketListener> listeners = REGISTERED_LISTENERS.get(packetClass.getName());
-            if(listeners.contains(listener)) {
+            if (listeners.contains(listener)) {
                 listeners.remove(listener);
                 return true;
             }
@@ -93,13 +92,13 @@ public class PacketManager implements Listener {
                 //long start = System.nanoTime();
                 if (msg instanceof Packet packet) {
                     PacketReceivedEvent event = new PacketReceivedEvent(player, packet);
-                    if(REGISTERED_LISTENERS.containsKey(packet.getClass().getName())) {
+                    if (REGISTERED_LISTENERS.containsKey(packet.getClass().getName())) {
                         REGISTERED_LISTENERS.get(packet.getClass().getName()).forEach(listener -> {
-                            if(listener.isIgnoreCancelled() && event.isCancelled()) return;
+                            if (listener.isIgnoreCancelled() && event.isCancelled()) return;
                             listener.onPacketReceived(event);
                         });
                     }
-                    if(event.isCancelled()) return;
+                    if (event.isCancelled()) return;
                 } else {
                     LOGGER.info("PacketManager detected unknown instance packet: " + msg.getClass().getName());
                 }
