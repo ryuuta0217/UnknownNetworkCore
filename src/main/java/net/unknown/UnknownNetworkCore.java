@@ -41,6 +41,7 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.PacketManager;
 import net.unknown.core.managers.TrashManager;
 import net.unknown.core.tab.TabListPingManager;
+import net.unknown.core.util.ObfuscationUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
 import org.bukkit.event.HandlerList;
@@ -48,6 +49,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
 
 import java.io.File;
+import java.lang.reflect.Field;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Set;
 
 public class UnknownNetworkCore extends JavaPlugin {
     private static final File SHARED_DATA_FOLDER = new File("../shared");
@@ -86,6 +91,25 @@ public class UnknownNetworkCore extends JavaPlugin {
         if(!this.getDataFolder().exists() && this.getDataFolder().mkdir()) {
             getLogger().info("Plugin folder created.");
         }
+        ObfuscationUtil.loadAllMappings();
+        getLogger().info("Server launched in " + ObfuscationUtil.OBF_STATE);
+        /*ObfuscationUtil.getMapping().forEach((mojangName, clazz) -> {
+            try {
+                Class<?> spigotClass = Class.forName(clazz.getEffectiveClassName());
+                Arrays.stream(spigotClass.getDeclaredFields()).forEach(field -> {
+                    if(clazz.getFields().stream().noneMatch(mappingField -> mappingField.obfuscatedFieldName().equals(field.getName()) || mappingField.fieldName().equals(field.getName()))) {
+                        getLogger().info(mojangName + "." + field.getName());
+                    }
+                });
+            } catch (Throwable t) {
+                if(clazz.hasSpigotName()) {
+                    getLogger().info("Unknown Class " + mojangName + "(" + clazz.getSpigotName() + ") found!");
+                } else {
+                    getLogger().info("Unknown Class " + mojangName + " found!");
+                }
+                t.printStackTrace();
+            }
+        });*/
         Commands.init();
         ENV.onLoad();
         long end = System.nanoTime();
