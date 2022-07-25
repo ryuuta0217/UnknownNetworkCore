@@ -61,7 +61,7 @@ public class ReflectionUtil {
         }
     }*/
 
-    public static void setFinalObject(Field targetField, Object newValue) {
+    public static void setStaticFinalObject(Field targetField, Object newValue) {
         try {
             if(!Modifier.isStatic(targetField.getModifiers())) {
                 throw new RuntimeException("Only it works static fields!");

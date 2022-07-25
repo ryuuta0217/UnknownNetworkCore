@@ -32,7 +32,6 @@
 package net.unknown.proxy;
 
 import com.ryuuta0217.packets.C2SModListReply;
-import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -122,7 +121,7 @@ public class ModdedInitialHandler extends InitialHandler {
 
             LOGGER.info(" -> Injecting");
             /* MODIFY */
-            ReflectionUtil.setFinalObject(serverChildField, moddedInitializer);
+            ReflectionUtil.setStaticFinalObject(serverChildField, moddedInitializer);
 
             /* CHECK */
             if (PipelineUtils.SERVER_CHILD.equals(moddedInitializer)) {
