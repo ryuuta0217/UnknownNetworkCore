@@ -34,14 +34,11 @@ package net.unknown.core.util;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
-import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftInventory;
@@ -49,6 +46,7 @@ import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.jetbrains.annotations.Contract;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -88,6 +86,19 @@ public class MinecraftAdapter {
             if(craft.getInventory() != null) return craft.getInventory();
         }
         return null;
+    }
+
+    @Contract("_ -> new;")
+    public static net.minecraft.core.BlockPos blockPos(Location bukkit) {
+        return new net.minecraft.core.BlockPos(bukkit.getX(), bukkit.getY(), bukkit.getZ());
+    }
+
+    public static net.minecraft.server.level.ServerLevel level(World world) {
+        return ((CraftWorld) world).getHandle();
+    }
+
+    public static net.minecraft.world.level.block.state.BlockState blockState(Block block) {
+        return level(block.getLocation().getWorld()).getBlockState(blockPos(block.getLocation()));
     }
 
     @ParametersAreNonnullByDefault
