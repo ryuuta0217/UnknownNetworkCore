@@ -491,6 +491,20 @@ public class ObfuscationUtil {
             return this.fields;
         }
 
+        public Method getMethodByMojangName(String mojangMethodName) {
+            return methods.stream().filter(method -> method.getName().equals(mojangMethodName)).findFirst().orElse(null);
+        }
+
+        public Method getMethodByObfuscatedName(String obfuscatedMethodName) {
+            return methods.stream().filter(method -> method.getObfuscatedName().equals(obfuscatedMethodName)).findFirst().orElse(null);
+        }
+
+        public Method getMethod(String mojangMethodName, String obfuscatedMethodName) {
+            return methods.stream()
+                    .filter(method -> method.getName().equals(mojangMethodName) && method.getObfuscatedName().equals(obfuscatedMethodName))
+                    .findFirst().orElse(null);
+        }
+
         public Set<Method> getMethods() {
             return this.methods;
         }
