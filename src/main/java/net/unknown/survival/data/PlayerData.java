@@ -472,4 +472,33 @@ public class PlayerData extends Config {
             }
         }
     }
+
+    public static class MigrateToV4FromV3 {
+        public static void migrate(UUID uniqueId, File configFile, FileConfiguration config) {
+            if (config.isSet("config-version") && config.getInt("config-version") == 3) {
+                String playerName = uniqueId.toString();
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
+                if(offlinePlayer.getName() != null) playerName = offlinePlayer.getName();
+                Logger LOGGER = Logger.getLogger("PlayerDataMigrator/V3 -> V4/" + playerName);
+
+                Map<String, String> channelChatForcePrefixes = new HashMap<>();
+
+                if(config.isSet("force-global-chat-prefix")) {
+                    channelChatForcePrefixes.put("global", config.getString("force-global-chat-prefix"));
+                }
+
+                config.set("force-global-chat-prefix", null);
+
+                config.createSection("force-channel-chat-prefixes", channelChatForcePrefixes);
+
+                config.set("config-version", 4);
+
+                try {
+                    config.save(configFile);
+                } catch (IOException e) {
+                    LOGGER.warning("Failed to save migrated configuration data.");
+                }
+            }
+        }
+    }
 }
