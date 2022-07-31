@@ -34,6 +34,7 @@ package net.unknown.core.gui;
 import net.kyori.adventure.text.Component;
 import net.unknown.core.managers.ListenerManager;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -82,6 +83,14 @@ public class GuiBase implements Listener {
     public void onClose(InventoryCloseEvent event) {
     }
 
+    public void onUnregistering() {
+
+    }
+
+    public void onUnregistered() {
+
+    }
+
     public void onClick(InventoryClickEvent event) {
         if (this.onClick != null) {
             event.setCancelled(true);
@@ -125,11 +134,18 @@ public class GuiBase implements Listener {
         return this.inventory;
     }
 
+    public void open(Player target) {
+        this.registerAsListener();
+        target.openInventory(this.inventory);
+    }
+
     protected void registerAsListener() {
         ListenerManager.registerListener(this);
     }
 
     protected void unRegisterAsListener() {
+        this.onUnregistering();
         HandlerList.unregisterAll(this);
+        this.onUnregistered();
     }
 }
