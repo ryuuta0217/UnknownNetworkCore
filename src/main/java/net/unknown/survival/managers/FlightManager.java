@@ -59,8 +59,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class FlightManager {
-    public static final int FLIGHT_PRICE_BASE = 300;
-    public static final int FLIGHT_PRICE_PER_MINUTES = 150;
+    public static final int FLIGHT_PRICE_BASE = 200; // @see https://discord.com/channels/608774418440912896/907934241260728361/1003668624583708733
+    public static final int FLIGHT_PRICE_PER_MINUTES = 43; // @see https://discord.com/channels/608774418440912896/907934241260728361/1003668570959527956
     public static final int MAX_ON_GROUND_MINUTES = 3;
     public static final int MAX_ON_GROUND_TICKS = (20 * 60) * MAX_ON_GROUND_MINUTES;
 
