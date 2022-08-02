@@ -31,6 +31,7 @@
 
 package net.unknown.proxy;
 
+import com.google.common.base.Preconditions;
 import com.ryuuta0217.packets.C2SModListReply;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -42,19 +43,25 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.event.ClientConnectEvent;
+import net.md_5.bungee.api.event.PlayerHandshakeEvent;
 import net.md_5.bungee.connection.InitialHandler;
+import net.md_5.bungee.netty.ChannelWrapper;
 import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.protocol.*;
+import net.md_5.bungee.protocol.packet.Handshake;
 import net.md_5.bungee.protocol.packet.LoginPayloadResponse;
+import net.md_5.bungee.util.QuietException;
 import net.unknown.core.util.ReflectionUtil;
 import net.unknown.proxy.fml.FML2Player;
 import net.unknown.proxy.fml.ModdedPlayer;
 
 import java.lang.reflect.Field;
+import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ModdedInitialHandler extends InitialHandler {
@@ -168,6 +175,15 @@ public class ModdedInitialHandler extends InitialHandler {
             LOGGER.info("[" + this.getName() + "|" + this.getSocketAddress() + "] <-> Connected as using mods: " + handshake.getMods());
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
+        }
+    }
+
+    public ChannelWrapper getChannel() {
+        try {
+            Field field = InitialHandler.class.getDeclaredField("ch");
+            return (ChannelWrapper) field.get(this);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            return null;
         }
     }
 
