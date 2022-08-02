@@ -50,7 +50,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public class SkinManager implements Listener {
-    private static final Logger LOGGER = Logger.getLogger("SkinManager");
+    private static final Logger LOGGER = Logger.getLogger("UNC/SkinManager");
     private static final Map<UUID, Map<String, Skin>> SAVED_SKINS = new HashMap<>();
     private static final Map<UUID, Skin> CACHED_SKINS = new HashMap<>();
     private static final Map<UUID, Skin> CURRENT_SKINS = new HashMap<>();

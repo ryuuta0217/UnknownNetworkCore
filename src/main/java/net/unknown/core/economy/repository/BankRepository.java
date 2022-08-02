@@ -46,7 +46,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 public class BankRepository implements Repository {
-    private static final Logger LOGGER = LoggerFactory.getLogger("BankRepository");
+    private static final Logger LOGGER = LoggerFactory.getLogger("UNC/BankRepository");
     // /root/unknown-network/2.Survival/../economy/banks
     private static final File SAVE_DIR = new File(UnknownNetworkCore.getSharedDataFolder(), "economy/banks");
 

@@ -56,7 +56,7 @@ public class ObfuscationUtil {
     public static final Pattern DESCRIPTOR_PARAMS_PATTERN = Pattern.compile("\\[*(L[^;]+;|[ZBCSIFDJ])");
     // (Ljava/util/function/Function;Ljava/util/function/Predicate;)Ljava/lang/Object;
     public static final Pattern DESCRIPTOR_PATTERN = Pattern.compile("^\\((.*)\\)(.*)$");
-    private static final Logger LOGGER = LoggerFactory.getLogger("ObfuscationUtil");
+    private static final Logger LOGGER = LoggerFactory.getLogger("UNC/ObfuscationUtil");
     private static final Pattern CLASS_OBF_PATTERN = Pattern.compile("^([a-zA-Z_$0-9.]+) -> ([a-z$]+):$");
     private static final Pattern FIELD_OBF_PATTERN = Pattern.compile("^    ([a-zA-Z_$0-9.\\[\\]]+) ([a-zA-Z_0-9$]+) -> ([a-zA-Z_]+)$");
     private static final Pattern METHOD_OBF_PATTERN = Pattern.compile("^    (\\d+:\\d+):([a-zA-Z_$0-9.]+) ([a-zA-Z_0-9]+)(\\(.*\\)) -> ([a-z]+)$");

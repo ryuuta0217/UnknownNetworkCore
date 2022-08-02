@@ -53,7 +53,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class PacketManager implements Listener {
-    private static final Logger LOGGER = LoggerFactory.getLogger("PacketManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger("UNC/PacketManager");
     private static final PacketManager INSTANCE = new PacketManager();
     private final Map<String, Set<PacketListener>> REGISTERED_LISTENERS = new HashMap<>();
 

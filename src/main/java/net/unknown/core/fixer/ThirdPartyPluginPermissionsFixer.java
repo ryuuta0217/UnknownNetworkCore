@@ -45,7 +45,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ThirdPartyPluginPermissionsFixer {
-    private static final Logger LOGGER = LoggerFactory.getLogger("PermissionsFixer");
+    private static final Logger LOGGER = LoggerFactory.getLogger("UNC/PermissionsFixer");
 
     public static void scheduleNextTick() {
         RunnableManager.runDelayed(ThirdPartyPluginPermissionsFixer::fixAll, 1);

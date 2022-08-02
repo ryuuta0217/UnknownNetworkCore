@@ -58,7 +58,7 @@ public class PlayerPunishmentData {
     public PlayerPunishmentData(UUID uniqueId) {
         this.uniqueId = uniqueId;
         this.source = new File(DATA_FOLDER, this.uniqueId.toString() + ".yml");
-        this.logger = Logger.getLogger("PunishmentData/" + (Bukkit.getOfflinePlayer(uniqueId).getName() == null ? uniqueId.toString() : Bukkit.getOfflinePlayer(uniqueId).getName()));
+        this.logger = Logger.getLogger("UNC/PunishmentData/" + (Bukkit.getOfflinePlayer(uniqueId).getName() == null ? uniqueId.toString() : Bukkit.getOfflinePlayer(uniqueId).getName()));
         this.load();
     }
 

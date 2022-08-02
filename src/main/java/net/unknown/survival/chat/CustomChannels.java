@@ -51,7 +51,7 @@ import java.util.stream.Collectors;
 public class CustomChannels {
     public static final Set<String> RESERVED_NAMES = new HashSet<>(Arrays.asList("global", "near", "heads_up", "title", "me", "private"));
 
-    private static final Logger LOGGER = Logger.getLogger("CCLoader");
+    private static final Logger LOGGER = Logger.getLogger("UNC/CCLoader");
 
     private static final Map<String, CustomChannel> CHANNELS = new HashMap<>();
 

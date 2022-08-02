@@ -61,7 +61,7 @@ import java.util.logging.Logger;
 
 public class SignGui {
     private static final Map<UUID, SignGui> SIGN_GUI_OPENED = new HashMap<>();
-    private final Logger logger = Logger.getLogger("SignGui@" + this.hashCode());
+    private final Logger logger = Logger.getLogger("UNC/SignGui@" + this.hashCode());
     private Player target;
     private Material signType = Material.OAK_SIGN;
     private Component[] defaultLines$adventure = new Component[] {Component.empty(), Component.empty(), Component.empty(), Component.empty()};

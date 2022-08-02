@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 public class TrashManager {
     private static final int TRASH_BOX_SIZE = 54;
     private static final File DATA_FOLDER = new File(UnknownNetworkCore.getSharedDataFolder(), "trash");
-    private static final Logger LOGGER = LoggerFactory.getLogger("TrashManager");
+    private static final Logger LOGGER = LoggerFactory.getLogger("UNC/TrashManager");
     private static final Map<UUID, Map<Integer, ItemStack>> TRASHES = new HashMap<>();
 
     public static Map<Integer, ItemStack> getItems(UUID uuid) {
