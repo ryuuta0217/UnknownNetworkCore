@@ -39,8 +39,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GNModules {
-    public static final GNModule FLY = FlyModule.INSTANCE;
     private static final Map<ResourceLocation, GNModule> ALL_MODULES = new HashMap<>();
+    public static final GNModule FLY = FlyModule.INSTANCE;
 
     public static void registerMapping(ResourceLocation id, GNModule module) {
         if (ALL_MODULES.containsKey(id)) {
