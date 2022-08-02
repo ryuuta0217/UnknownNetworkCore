@@ -444,15 +444,10 @@ public class ObfuscationUtil {
 
         public String getEffectiveClassName() {
             if (OBF_STATE == ClassMapping.SPIGOT) {
-                if (this.hasSpigotName()) return this.getSpigotName();
-                else return this.getName();
+                return this.getSpigotName();
             }
 
             return this.getName();
-        }
-
-        public boolean hasSpigotName() {
-            return this.spigotName != null;
         }
 
         public Set<SubClass> getSubClasses() {
@@ -512,19 +507,20 @@ public class ObfuscationUtil {
         @Nullable
         public java.lang.Class<?> asClass() {
             try {
-                return java.lang.Class.forName(this.getName());
-            } catch (ClassNotFoundException ignored) {
+                return java.lang.Class.forName(this.getEffectiveClassName());
+            } catch(ClassNotFoundException ignored) {
                 try {
-                    return java.lang.Class.forName(this.getObfuscatedName());
+                    return java.lang.Class.forName(this.getName());
                 } catch (ClassNotFoundException ignored2) {
-                    if (this.hasSpigotName()) {
+                    try {
+                        return java.lang.Class.forName(this.getObfuscatedName());
+                    } catch (ClassNotFoundException ignored3) {
                         try {
                             return java.lang.Class.forName(this.getSpigotName());
-                        } catch (ClassNotFoundException ignored3) {
+                        } catch (ClassNotFoundException ignored4) {
                             return null;
                         }
                     }
-                    return null;
                 }
             }
         }
