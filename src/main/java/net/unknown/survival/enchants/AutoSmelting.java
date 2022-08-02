@@ -54,6 +54,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class AutoSmelting implements Listener {
@@ -79,10 +80,20 @@ public class AutoSmelting implements Listener {
         FurnaceBlockEntity dummyFurnace = new FurnaceBlockEntity(BlockPos.ZERO, Blocks.FURNACE.defaultBlockState());
         dummyFurnace.setItem(1, new ItemStack(Items.COAL, 1));
         List<ItemStack> drops = Block.getDrops(blockState, level, blockPos, blockEntity, player, player.getMainHandItem());
-        if (drops.size() > 0) dummyFurnace.setItem(0, drops.get(0));
-        List<SmeltingRecipe> recipe = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, dummyFurnace, level);
-        if (level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && event.isDropItems() && recipe.size() != 0 && drops.size() > 0) {
-            Block.popResource(level, blockPos, recipe.get(0).getResultItem());
+        List<ItemStack> newDrops = new ArrayList<>();
+        if (drops.size() > 0) {
+            drops.forEach(drop -> {
+                dummyFurnace.setItem(0, drop);
+                List<SmeltingRecipe> recipe = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, dummyFurnace, level);
+                ItemStack result = recipe.get(0).getResultItem();
+                result.setCount(drop.getCount());
+                newDrops.add(result);
+            });
+        }
+        if (level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && event.isDropItems() && newDrops.size() > 0) {
+            newDrops.forEach(drop -> {
+                Block.popResource(level, blockPos, drop);
+            });
             player.playNotifySound(SoundEvents.GENERIC_BURN, SoundSource.BLOCKS, 0.3f, 1.0f);
             event.setDropItems(false);
         }
