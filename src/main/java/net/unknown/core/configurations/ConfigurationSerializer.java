@@ -50,6 +50,10 @@ public class ConfigurationSerializer {
         Arrays.stream(LOCATION_VALUES).forEach(s -> config.set(path + "." + s, ConfigurationSerializer.getLocation(s, loc)));
     }
 
+    public static void setLocationData(ConfigurationSection config, String path, Location loc) {
+        Arrays.stream(LOCATION_VALUES).forEach(s -> config.set(path + "." + s, ConfigurationSerializer.getLocation(s, loc)));
+    }
+
     @Nullable
     public static Location getLocationData(ConfigurationSection config, String path) {
         String worldName = "world";
