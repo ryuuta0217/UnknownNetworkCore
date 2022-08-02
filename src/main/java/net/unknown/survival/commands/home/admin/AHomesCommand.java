@@ -48,7 +48,7 @@ import net.unknown.core.commands.Suggestions;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.commands.home.HomesCommand;
-import net.unknown.survival.data.Home;
+import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;

@@ -42,7 +42,7 @@ import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.survival.data.Home;
+import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Location;
 import org.bukkit.Material;

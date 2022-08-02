@@ -43,7 +43,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.survival.data.Home;
+import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
