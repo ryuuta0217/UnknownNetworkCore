@@ -39,6 +39,7 @@ import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.enchants.AutoSmelting;
 import net.unknown.survival.enchants.ChainDestruction;
@@ -54,6 +55,7 @@ import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.listeners.ColorCodeListener;
 import net.unknown.survival.listeners.MainGuiOpenListener;
 import net.unknown.survival.listeners.PlayerDeathListener;
+import net.unknown.survival.listeners.ServerRestartListener;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
@@ -86,6 +88,7 @@ public class UnknownNetworkSurvival {
         JECON_ENABLED = Bukkit.getPluginManager().getPlugin("Jecon") != null && Bukkit.getPluginManager().isPluginEnabled("Jecon");
         LUCKPERMS_ENABLED = Bukkit.getPluginManager().getPlugin("LuckPerms") != null && Bukkit.getPluginManager().isPluginEnabled("LuckPerms");
 
+        Warps.load();
         PlayerData.loadExists();
         CustomChannels.load();
         AntiVillagerLag.startLoopTask();
@@ -105,11 +108,13 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new PlayerDeathListener());
         ListenerManager.registerListener(new ChainDestruction());
         ListenerManager.registerListener(new AutoSmelting());
+        ListenerManager.registerListener(new ServerRestartListener());
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             //ListenerManager.registerListener(new BlockDisassembler());
         }
 
+        Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());
 
         DemolitionGun.BowPullIndicator.boot();
