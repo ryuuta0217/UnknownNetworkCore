@@ -60,7 +60,7 @@ public class WarpsView implements View {
 
     @Override
     public void initialize() {
-        this.pages = ListUtil.splitListAsSet(Warps.getWarps().values(), 45);
+        this.pages = ListUtil.splitListAsLinkedSet(Warps.getWarps().values(), 45);
         this.showPage(1);
     }
 
@@ -100,9 +100,23 @@ public class WarpsView implements View {
 
     @Override
     public void onClick(InventoryClickEvent event) {
-        if(this.slot2warp.containsKey(event.getSlot())) {
-            event.getWhoClicked().teleportAsync(this.slot2warp.get(event.getSlot()).getLocation());
-            event.getWhoClicked().closeInventory();
+        switch (event.getSlot()) {
+            case 52 -> {
+                if((this.page - 1) > 0) {
+                    this.showPage(this.page - 1);
+                }
+            }
+            case 53 -> {
+                if((this.page + 1) <= this.pages.size()) {
+                    this.showPage(this.page + 1);
+                }
+            }
+            default -> {
+                if(this.slot2warp.containsKey(event.getSlot())) {
+                    event.getWhoClicked().teleportAsync(this.slot2warp.get(event.getSlot()).getLocation());
+                    event.getWhoClicked().closeInventory();
+                }
+            }
         }
     }
 
