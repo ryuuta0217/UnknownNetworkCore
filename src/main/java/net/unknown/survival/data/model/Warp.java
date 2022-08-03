@@ -77,7 +77,7 @@ public class Warp {
         this.expiresIn = data.isSet("expires_in") ? data.getLong("expires_in") : -1;
     }
 
-    public Warp(String internalName, Component displayName, Location location, Material icon, UUID createdBy, long expiresIn) {
+    public Warp(String internalName, Component displayName, Location location, @Nullable Material icon, @Nullable UUID createdBy, long expiresIn) {
         this.internalName = internalName;
         this.displayName = displayName;
         this.location = location;
