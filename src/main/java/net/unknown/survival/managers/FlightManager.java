@@ -175,7 +175,7 @@ public class FlightManager {
 
             this.displayUpdateTask = RunnableManager.runAsyncRepeating(() -> {
                 this.player.sendActionBar(Component.empty()
-                        .append(Component.text("有料飛行" + (this.flightTimeUpdateTask != null ? "中[" + this.flightMinutes + "分]" : "が有効"), Style.style(TextColor.color(16755200), TextDecoration.BOLD.as(true))))
+                        .append(Component.text("有料飛行" + (this.flightTimeUpdateTask != null ? "中[" + this.flightMinutes + "分]" : "が有効"), Style.style(TextColor.color(16755200), TextDecoration.BOLD.withState(true))))
                         .append(Component.text(" - "))
                         .append(Component.text("¥" + currentPrice, TextColor.color(16777045))));
             }, 0L, 40L);

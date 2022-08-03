@@ -59,7 +59,7 @@ public class MessageUtil {
     private static final String PREFIX = "§7[§6§lU.N.§r§7] §r";
     private static final Component PREFIX_ADVENTURE_COMPONENT = Component.empty()
             .append(Component.text("[", DefinedTextColor.GRAY))
-            .append(Component.text("U.N.", net.kyori.adventure.text.format.Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD.as(true))))
+            .append(Component.text("U.N.", net.kyori.adventure.text.format.Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD.withState(true))))
             .append(Component.text("]", DefinedTextColor.GRAY))
             .append(Component.text(" "));
     private static final MutableComponent PREFIX_MINECRAFT_COMPONENT = MutableComponent.create(new LiteralContents(""))

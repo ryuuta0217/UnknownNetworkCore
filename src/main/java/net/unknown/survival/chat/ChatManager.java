@@ -35,6 +35,7 @@ import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -182,7 +183,7 @@ public class ChatManager implements Listener {
                             }
                         }
 
-                        return b2;
+                        return Component.text(b2.content(), DefinedTextColor.GOLD).hoverEvent(HoverEvent.showText(hoverText));
                     });
         }));
 
@@ -196,7 +197,7 @@ public class ChatManager implements Listener {
                     return baseRenderer.render(source, displayName, Component.empty()
                             .append(msg)
                             .append(Component.text(" (" + msgStr + ")",
-                                    Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC.as(true)))), viewer);
+                                    Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC.withState(true)))), viewer);
                 }
                 return baseRenderer.render(source, displayName, message, viewer);
             });

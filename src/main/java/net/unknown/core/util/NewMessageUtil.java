@@ -248,7 +248,7 @@ public class NewMessageUtil {
         return convertMinecraft2Adventure(format(convertAdventure2Minecraft(component)));
         /*return net.kyori.adventure.text.Component.empty()
                 .append(net.kyori.adventure.text.Component.text("[", DefinedTextColor.GRAY))
-                .append(net.kyori.adventure.text.Component.text("U.N.", net.kyori.adventure.text.format.Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD.as(true))))
+                .append(net.kyori.adventure.text.Component.text("U.N.", net.kyori.adventure.text.format.Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD.withState(true))))
                 .append(net.kyori.adventure.text.Component.text("]", DefinedTextColor.GRAY))
                 .append(net.kyori.adventure.text.Component.text(" "))
                 .append(component);*/

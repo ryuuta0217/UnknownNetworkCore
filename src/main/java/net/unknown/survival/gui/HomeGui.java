@@ -237,11 +237,11 @@ public class HomeGui extends GuiBase {
         this.splitCategories.get(page - 1).forEach(category -> {
             this.slot2CategoryMap.put(this.inventory.firstEmpty(), category);
             this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(data.getGroupMaterial(category))
-                    .displayName(Component.text(category, Style.style(TextColor.color(5635925), TextDecoration.ITALIC.as(false))))
-                    .lore(Component.text("登録ホーム数: " + data.getHomes(category).size(), Style.style(TextColor.color(5635935), TextDecoration.ITALIC.as(false))),
+                    .displayName(Component.text(category, Style.style(TextColor.color(5635925), TextDecoration.ITALIC.withState(false))))
+                    .lore(Component.text("登録ホーム数: " + data.getHomes(category).size(), Style.style(TextColor.color(5635935), TextDecoration.ITALIC.withState(false))),
                             Component.text(""),
-                            Component.text("持ち物からアイテムを掴んで右クリックで", Style.style(TextColor.color(5636095), TextDecoration.ITALIC.as(false))),
-                            Component.text("          表示アイテムを変更できます", Style.style(TextColor.color(5636095), TextDecoration.ITALIC.as(false))))
+                            Component.text("持ち物からアイテムを掴んで右クリックで", Style.style(TextColor.color(5636095), TextDecoration.ITALIC.withState(false))),
+                            Component.text("          表示アイテムを変更できます", Style.style(TextColor.color(5636095), TextDecoration.ITALIC.withState(false))))
                     .build());
         });
 
@@ -272,13 +272,13 @@ public class HomeGui extends GuiBase {
         this.splitHomes.get(this.selectedCategory).get(page - 1).forEach(home -> {
             this.slot2HomeMap.put(this.inventory.firstEmpty(), home);
             this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(dimension2Material(home.location()))
-                    .displayName(Component.text(home.name(), Style.style(dimension2TextColor(home.location()), TextDecoration.ITALIC.as(false))))
-                    .lore(Component.text("ワールド: " + MessageUtil.getWorldNameDisplay(home.getWorld()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
-                            Component.text("座標: " + getCoordinateAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
-                            Component.text("向き: " + getRotationAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
+                    .displayName(Component.text(home.name(), Style.style(dimension2TextColor(home.location()), TextDecoration.ITALIC.withState(false))))
+                    .lore(Component.text("ワールド: " + MessageUtil.getWorldNameDisplay(home.getWorld()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
+                            Component.text("座標: " + getCoordinateAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
+                            Component.text("向き: " + getRotationAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
                             Component.text(""),
-                            Component.text("クリックでテレポート", Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.as(false))),
-                            Component.text("Shiftキーを押しながら右クリックで削除", Style.style(TextColor.color(255, 0, 0), TextDecoration.ITALIC.as(false))))
+                            Component.text("クリックでテレポート", Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
+                            Component.text("Shiftキーを押しながら右クリックで削除", Style.style(TextColor.color(255, 0, 0), TextDecoration.ITALIC.withState(false))))
                     .build());
         });
 
