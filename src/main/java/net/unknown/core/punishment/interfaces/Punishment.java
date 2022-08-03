@@ -29,7 +29,18 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.punishment.interfaces;
+package net.unknown.core.punishment.interfaces;
 
-public interface PermanentPunishment extends Punishment {
+import net.unknown.core.punishment.PunishmentType;
+
+import java.util.UUID;
+
+public interface Punishment {
+    PunishmentType getType();
+
+    UUID getTarget();
+
+    UUID getExecutor();
+
+    String getReason();
 }

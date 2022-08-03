@@ -29,7 +29,15 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.punishment;
+package net.unknown.core.punishment;
 
-public class PunishmentManager {
+public enum PunishmentType {
+    NONE,
+    MUTE,
+    TEMP_MUTE,
+    UNMUTE,
+    KICK,
+    BAN,
+    TEMP_BAN,
+    UNBAN
 }

@@ -29,12 +29,12 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.punishment;
+package net.unknown.core.punishment;
 
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.survival.punishment.interfaces.Punishment;
-import net.unknown.survival.punishment.interfaces.TemporaryPunishment;
+import net.unknown.core.punishment.interfaces.Punishment;
+import net.unknown.core.punishment.interfaces.TemporaryPunishment;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;

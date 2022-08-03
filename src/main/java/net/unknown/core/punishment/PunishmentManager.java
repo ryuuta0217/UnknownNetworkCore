@@ -29,14 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.punishment;
+package net.unknown.core.punishment;
 
-public class PunishmentHistory {
-    private final long executedIn;
-    private final PunishmentState data;
-
-    public PunishmentHistory(long executedIn, PunishmentState data) {
-        this.executedIn = executedIn;
-        this.data = data;
-    }
+public class PunishmentManager {
 }

@@ -29,11 +29,11 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.punishment;
+package net.unknown.core.punishment;
 
-import net.unknown.survival.punishment.interfaces.PermanentPunishment;
-import net.unknown.survival.punishment.interfaces.Punishment;
-import net.unknown.survival.punishment.interfaces.TemporaryPunishment;
+import net.unknown.core.punishment.interfaces.PermanentPunishment;
+import net.unknown.core.punishment.interfaces.Punishment;
+import net.unknown.core.punishment.interfaces.TemporaryPunishment;
 
 import java.util.UUID;
 
