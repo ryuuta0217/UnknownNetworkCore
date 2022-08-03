@@ -34,6 +34,7 @@ package net.unknown;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.unknown.core.bossbar.TPSBar;
 import net.unknown.core.commands.Commands;
 import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
@@ -118,6 +119,7 @@ public class UnknownNetworkCore extends JavaPlugin {
         ListenerManager.registerListener(PacketManager.getInstance());
         ListenerManager.registerListener(new SignGui.Listener());
         ListenerManager.registerListener(new TabListPingManager());
+        TPSBar.initialize();
         TabListPingManager.startTask();
         TrashManager.loadExists();
         ThirdPartyPluginPermissionsFixer.scheduleNextTick();
