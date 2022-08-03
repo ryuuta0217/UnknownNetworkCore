@@ -80,7 +80,7 @@ public class Warps {
         }
     }
 
-    public static void save() {
+    public static synchronized void save() {
         CONFIG.set("warps", null);
         ConfigurationSection warps = CONFIG.createSection("warps");
         WARPS.forEach((name, data) -> data.write(warps));
@@ -101,14 +101,14 @@ public class Warps {
         return WARPS.getOrDefault(internalName, null);
     }
 
-    public static boolean addWarp(String internalName, Component displayName, Location location, Material icon, Player creator, long expiresIn) {
+    public static synchronized boolean addWarp(String internalName, Component displayName, Location location, Material icon, @Nullable Player creator, long expiresIn) {
         if(WARPS.containsKey(internalName)) return false;
-        WARPS.put(internalName, new Warp(internalName, displayName, location, icon, creator.getUniqueId(), expiresIn));
+        WARPS.put(internalName, new Warp(internalName, displayName, location, icon, creator == null ? null : creator.getUniqueId(), expiresIn));
         Warps.save(true);
         return WARPS.containsKey(internalName);
     }
 
-    public static boolean removeWarp(String internalName) {
+    public static synchronized boolean removeWarp(String internalName) {
         if(WARPS.containsKey(internalName)) {
             WARPS.remove(internalName);
             Warps.save(true);
