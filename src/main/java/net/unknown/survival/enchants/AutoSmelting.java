@@ -84,8 +84,8 @@ public class AutoSmelting implements Listener {
         if (drops.size() > 0) {
             drops.forEach(drop -> {
                 dummyFurnace.setItem(0, drop);
-                List<SmeltingRecipe> recipe = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, dummyFurnace, level);
-                ItemStack result = recipe.get(0).getResultItem();
+                List<SmeltingRecipe> recipes = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, dummyFurnace, level);
+                ItemStack result = recipes.get(0).getResultItem();
                 result.setCount(drop.getCount());
                 newDrops.add(result);
             });
