@@ -46,6 +46,7 @@ import net.unknown.survival.enchants.ChainDestruction;
 import net.unknown.survival.enchants.HatakeWatari;
 import net.unknown.survival.enchants.RangedMining;
 import net.unknown.survival.enchants.nms.DamageEnchant;
+import net.unknown.survival.feature.DebugStickEntityEditor;
 import net.unknown.survival.feature.gnarms.GNArms;
 import net.unknown.survival.fml.FMLConnectionListener;
 import net.unknown.survival.fml.ModdedPlayerManager;
@@ -95,6 +96,7 @@ public class UnknownNetworkSurvival {
         PlayerDeathListener.load();
 
         GNArms.initialize();
+        DebugStickEntityEditor.Listener.register();
 
         ListenerManager.registerListener(new MainGuiOpenListener());
         ListenerManager.registerListener(new ChatManager());
