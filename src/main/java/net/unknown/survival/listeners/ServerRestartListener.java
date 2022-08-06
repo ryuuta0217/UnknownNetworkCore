@@ -47,6 +47,7 @@ public class ServerRestartListener implements Listener {
             out.writeUTF("Connect");
             out.writeUTF("lobby");
             event.getPlayer().sendPluginMessage(UnknownNetworkCore.getInstance(), "BungeeCord", out.toByteArray());
+            event.setCancelled(true);
         }
     }
 }
