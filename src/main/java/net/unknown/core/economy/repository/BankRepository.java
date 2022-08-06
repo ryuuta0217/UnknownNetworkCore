@@ -31,7 +31,7 @@
 
 package net.unknown.core.economy.repository;
 
-import net.unknown.UnknownNetworkCore;
+import net.unknown.shared.SharedConstants;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ import java.util.stream.Stream;
 public class BankRepository implements Repository {
     private static final Logger LOGGER = LoggerFactory.getLogger("UNC/BankRepository");
     // /root/unknown-network/2.Survival/../economy/banks
-    private static final File SAVE_DIR = new File(UnknownNetworkCore.getSharedDataFolder(), "economy/banks");
+    private static final File SAVE_DIR = new File(SharedConstants.DATA_FOLDER, "economy/banks");
 
     private static final Map<UUID, Map<String, BankRepository>> BANKS = new HashMap<>();
     private final UUID owner;

@@ -35,6 +35,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.util.MinecraftAdapter;
+import net.unknown.shared.SharedConstants;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.slf4j.Logger;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
 // save to ~/unknown-network/shared/trash/uuid.yml
 public class TrashManager {
     private static final int TRASH_BOX_SIZE = 54;
-    private static final File DATA_FOLDER = new File(UnknownNetworkCore.getSharedDataFolder(), "trash");
+    private static final File DATA_FOLDER = new File(SharedConstants.DATA_FOLDER, "trash");
     private static final Logger LOGGER = LoggerFactory.getLogger("UNC/TrashManager");
     private static final Map<UUID, Map<Integer, ItemStack>> TRASHES = new HashMap<>();
 
