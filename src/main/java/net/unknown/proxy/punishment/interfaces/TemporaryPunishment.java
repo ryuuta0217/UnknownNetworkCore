@@ -29,18 +29,8 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.punishment.interfaces;
+package net.unknown.proxy.punishment.interfaces;
 
-import net.unknown.core.punishment.PunishmentType;
-
-import java.util.UUID;
-
-public interface Punishment {
-    PunishmentType getType();
-
-    UUID getTarget();
-
-    UUID getExecutor();
-
-    String getReason();
+public interface TemporaryPunishment extends Punishment {
+    long getExpiresIn();
 }

@@ -29,7 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.punishment;
+package net.unknown.proxy.punishment;
 
 public class PunishmentHistory {
     private final long executedIn;

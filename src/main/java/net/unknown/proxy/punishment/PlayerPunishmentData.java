@@ -29,12 +29,12 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.punishment;
+package net.unknown.proxy.punishment;
 
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.core.punishment.interfaces.Punishment;
-import net.unknown.core.punishment.interfaces.TemporaryPunishment;
+import net.unknown.proxy.punishment.interfaces.Punishment;
+import net.unknown.proxy.punishment.interfaces.TemporaryPunishment;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -47,7 +47,7 @@ import java.util.UUID;
 import java.util.logging.Logger;
 
 public class PlayerPunishmentData {
-    private static final File DATA_FOLDER = new File(UnknownNetworkCore.getInstance().getDataFolder(), "punishments");
+    private static final File DATA_FOLDER = new File(UnknownNetworkCore.getSharedDataFolder(), "punishments");
     private final Map<Long, PunishmentState> punishmentHistories = new HashMap<>();
     private final UUID uniqueId;
     private final File source;

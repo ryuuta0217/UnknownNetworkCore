@@ -29,15 +29,18 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.punishment;
+package net.unknown.proxy.punishment.interfaces;
 
-public enum PunishmentType {
-    NONE,
-    MUTE,
-    TEMP_MUTE,
-    UNMUTE,
-    KICK,
-    BAN,
-    TEMP_BAN,
-    UNBAN
+import net.unknown.proxy.punishment.PunishmentType;
+
+import java.util.UUID;
+
+public interface Punishment {
+    PunishmentType getType();
+
+    UUID getTarget();
+
+    UUID getExecutor();
+
+    String getReason();
 }

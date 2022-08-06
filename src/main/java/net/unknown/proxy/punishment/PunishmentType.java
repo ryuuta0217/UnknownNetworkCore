@@ -29,8 +29,15 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.punishment.interfaces;
+package net.unknown.proxy.punishment;
 
-public interface TemporaryPunishment extends Punishment {
-    long getExpiresIn();
+public enum PunishmentType {
+    NONE,
+    MUTE,
+    TEMP_MUTE,
+    UNMUTE,
+    KICK,
+    BAN,
+    TEMP_BAN,
+    UNBAN
 }
