@@ -31,7 +31,6 @@
 
 package net.unknown.core.util;
 
-import com.google.common.base.Function;
 import com.google.common.collect.BiMap;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -51,34 +50,96 @@ import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers;
 import org.bukkit.craftbukkit.v1_19_R1.util.CraftNamespacedKey;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Function;
 
+@SuppressWarnings("unchecked")
 public class RegistryUtil {
-    public static <T> boolean forceUnregister(Registry<T> registry, T object) {
+    public static <T> T forceRegister(Registry<T> registry, ResourceLocation id, T value) {
         if (registry instanceof MappedRegistry<T>) {
             try {
-                ObjectList<T> byId = (ObjectList<T>) getObject(MappedRegistry.class.getDeclaredField("byId"), registry);
-                Reference2IntOpenHashMap<T> toId = (Reference2IntOpenHashMap<T>) getObject(MappedRegistry.class.getDeclaredField("toId"), registry);
-                BiMap<ResourceLocation, T> storage = (BiMap<ResourceLocation, T>) getObject(MappedRegistry.class.getDeclaredField("storage"), registry);
-                BiMap<ResourceKey<T>, T> keyStorage = (BiMap<ResourceKey<T>, T>) getObject(MappedRegistry.class.getDeclaredField("keyStorage"), registry);
-                Map<T, Lifecycle> lifecycles = (Map<T, Lifecycle>) getObject(MappedRegistry.class.getDeclaredField("lifecycles"), registry);
-                if (byId == null || toId == null || storage == null || keyStorage == null || lifecycles == null)
+                ObfuscationUtil.Class mappedRegistry = ObfuscationUtil.getClassByMojangName("net.minecraft.core.MappedRegistry");
+                Field frozenField = mappedRegistry.getFieldByMojangName("frozen").getField();
+                if (frozenField == null || !frozenField.trySetAccessible()) return null;
+                frozenField.set(registry, false);
+                Registry.register(registry, id, value);
+                return registry.freeze().get(id) != null ? value : null;
+                /*ObfuscationUtil.Class holderReference = ObfuscationUtil.getClassByMojangName("net.minecraft.core.Holder$Reference");
+                if (mappedRegistry == null || holderReference == null) return false;
+
+                Method referenceBindMethod = holderReference.getMethodByMojangName("bind").getMethod();
+                if (referenceBindMethod == null) return false;
+
+                if (!referenceBindMethod.trySetAccessible()) return false;
+
+                Field byIdField = mappedRegistry.getFieldByMojangName("byId").getField();
+                Field toIdField = mappedRegistry.getFieldByMojangName("toId").getField();
+                Field byLocationField = mappedRegistry.getFieldByMojangName("byLocation").getField();
+                Field byKeyField = mappedRegistry.getFieldByMojangName("byKey").getField();
+                Field byValueField = mappedRegistry.getFieldByMojangName("byValue").getField();
+                Field lifecyclesField = mappedRegistry.getFieldByMojangName("lifecycles").getField();
+                Field elementsLifecycleField = mappedRegistry.getFieldByMojangName("elementsLifecycle").getField();
+                Field nextIdField = mappedRegistry.getFieldByMojangName("nextId").getField();
+                Field holdersInOrderField = mappedRegistry.getFieldByMojangName("holdersInOrder").getField();
+                Field customHolderProviderField = mappedRegistry.getFieldByMojangName("customHolderProvider").getField();
+                if (byIdField == null || toIdField == null || byLocationField == null || byKeyField == null
+                        || byValueField == null || lifecyclesField == null || elementsLifecycleField == null
+                        || nextIdField == null || holdersInOrderField == null || customHolderProviderField == null) {
                     return false;
+                }
 
-                int id = registry.getId(object);
-                ResourceKey<T> rk = registry.getResourceKey(object).orElseThrow();
-                ResourceLocation rl = registry.getKey(object);
+                if (!byIdField.trySetAccessible() || !toIdField.trySetAccessible() || !byLocationField.trySetAccessible()
+                        || !byKeyField.trySetAccessible() || !byValueField.trySetAccessible() || !lifecyclesField.trySetAccessible()
+                        || !elementsLifecycleField.trySetAccessible() || !nextIdField.trySetAccessible() || !holdersInOrderField.trySetAccessible()
+                        || !customHolderProviderField.trySetAccessible()) {
+                    return false;
+                }
 
-                byId.remove(id);
-                toId.remove(object, id);
-                storage.remove(rl);
-                keyStorage.remove(rk);
-                lifecycles.remove(object);
-            } catch (NoSuchFieldException ignored) {
+                ObjectList<Holder.Reference<T>> byId = (ObjectList<Holder.Reference<T>>) byIdField.get(registry);
+                Reference2IntOpenHashMap<T> toId = (Reference2IntOpenHashMap<T>) toIdField.get(registry);
+                Map<ResourceLocation, Holder.Reference<T>> byLocation = (Map<ResourceLocation, Holder.Reference<T>>) byLocationField.get(registry);
+                Map<ResourceKey<T>, Holder.Reference<T>> byKey = (Map<ResourceKey<T>, Holder.Reference<T>>) byKeyField.get(registry);
+                Map<T, Holder.Reference<T>> byValue = (Map<T, Holder.Reference<T>>) byValueField.get(registry);
+                Map<T, Lifecycle> lifecycles = (Map<T, Lifecycle>) lifecyclesField.get(registry);
+                Lifecycle elementsLifecycle = (Lifecycle) elementsLifecycleField.get(registry);
+                Function<T, Holder.Reference<T>> customHolderProvider = (Function<T, Holder.Reference<T>>) customHolderProviderField.get(registry);
+                int nextId = nextIdField.getInt(registry);
+                if (byId == null || toId == null || byLocation == null || byKey == null || byValue == null
+                        || lifecycles == null || elementsLifecycle == null|| customHolderProvider == null) {
+                    return false;
+                }
+
+                byId.size(Math.max(byId.size(), nextId + 1));
+                toId.put(value, nextId);
+                holdersInOrderField.set(registry, null);
+
+                lifecycles.put(value, lifecycle);
+                elementsLifecycleField.set(registry, elementsLifecycle.add(lifecycle));
+                nextIdField.set(registry, nextId + 1);
+
+                Holder.Reference<T> reference;
+                if (customHolderProvider != null) {
+                    reference = customHolderProvider.apply(value);
+                    Holder.Reference<T> overwrittenReference = byKey.put(key, reference);
+                    if (overwrittenReference != null && overwrittenReference != reference) {
+                        throw new IllegalStateException("Invalid holder present for key " + key);
+                    }
+                } else {
+                    reference = byKey.computeIfAbsent(key, (keyx) -> Holder.Reference.createStandAlone(registry, keyx));
+                }
+
+                byLocation.put(key.location(), reference);
+                byValue.put(value, reference);
+                referenceBindMethod.invoke(reference, key, value);
+                byId.set(nextId, reference);*/
+            } catch(IllegalAccessException | NoSuchFieldException /*| InvocationTargetException*/ e) {
+                throw new RuntimeException(e);
             }
         }
-        return false;
+        return null;
     }
 
     public static <T> boolean forceReplace(Registry<T> registry, T objectSrc, T objectTo) {
