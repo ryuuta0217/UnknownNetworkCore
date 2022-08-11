@@ -31,27 +31,21 @@
 
 package net.unknown.survival.enchants;
 
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PickaxeItem;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.managers.RunnableManager;
+import net.unknown.core.util.BlockUtil;
 import net.unknown.core.util.MinecraftAdapter;
-import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
-import org.bukkit.craftbukkit.v1_19_R1.event.CraftEventFactory;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -96,124 +90,6 @@ public class ChainDestruction implements Listener {
 
     public static final Map<UUID, Set<BlockPos>> IGNORE_EVENT = new HashMap<>();
 
-    private static void searchBlock(BlockPos center, int maxBlockCount, Level level, Block searchTarget, Set<BlockPos> data) {
-        if (searchTarget == Blocks.AIR) return;
-        BlockPos.withinManhattan(center, 1, 1, 1).forEach(pos -> {
-            BlockPos immPos = pos.immutable();
-            BlockState state = level.getBlockState(immPos);
-            if (state.is(searchTarget) && !data.contains(immPos) && data.size() <= maxBlockCount && !center.equals(immPos)) {
-                data.add(immPos);
-                searchBlock(immPos, maxBlockCount, level, searchTarget, data);
-            }
-        });
-    }
-
-    private static void destroyBlockWithNoEvent(ServerPlayer player, ServerLevel level, BlockPos pos, ItemStack usedTool) {
-        BlockState blockState = level.getBlockState(pos);
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        Block block = blockState.getBlock();
-
-        if (block instanceof GameMasterBlock && !player.canUseGameMasterBlocks() && !player.isCreative() && !(block instanceof CommandBlock && player.getBukkitEntity().hasPermission("minecraft.commandblock"))) {
-            level.sendBlockUpdated(pos, blockState, blockState, Block.UPDATE_ALL);
-        } else {
-            if (player.blockActionRestricted(level, pos, player.gameMode.getGameModeForPlayer())) return;
-
-            block.playerWillDestroy(level, pos, blockState, player);
-            boolean hasRemoved = level.removeBlock(pos, false);
-
-            if (hasRemoved) {
-                block.destroy(level, pos, blockState);
-            }
-
-            boolean isCorrectTool = player.hasCorrectToolForDrops(blockState);
-
-            if (!player.isCreative()) {
-                usedTool.mineBlock(level, blockState, pos, player);
-
-                if (hasRemoved && isCorrectTool) {
-                    block.playerDestroy(level, player, pos, blockState, blockEntity, usedTool);
-                    block.popExperience(level, pos, block.getExpDrop(blockState, level, pos, usedTool, true), player);
-                }
-            }
-
-            if (hasRemoved && isCorrectTool && block instanceof BeehiveBlock && blockEntity instanceof BeehiveBlockEntity hive) {
-                CriteriaTriggers.BEE_NEST_DESTROYED.trigger(player, blockState, usedTool, hive.getOccupantCount());
-            }
-        }
-    }
-
-    private static void destroyBlock(ServerPlayer player, ServerLevel level, BlockPos pos, ItemStack usedTool) {
-        org.bukkit.block.Block bukkitBlock = CraftBlock.at(level, pos);
-        BlockBreakEvent event = new BlockBreakEvent(bukkitBlock, player.getBukkitEntity());
-
-        BlockState blockState = level.getBlockState(pos);
-        Block block = blockState.getBlock();
-
-        if (!event.isCancelled() && !player.isCreative() && player.hasCorrectToolForDrops(blockState)) {
-            event.setExpToDrop(block.getExpDrop(blockState, level, pos, usedTool, true));
-        }
-
-        level.getCraftServer().getPluginManager().callEvent(event);
-
-        if (event.isCancelled()) {
-            player.connection.send(new ClientboundBlockUpdatePacket(level, pos));
-
-            for (Direction direction : Direction.values()) {
-                player.connection.send(new ClientboundBlockUpdatePacket(level, pos.relative(direction)));
-            }
-
-            BlockEntity blockEntity = level.getBlockEntity(pos);
-            if (blockEntity != null) {
-                player.connection.send(blockEntity.getUpdatePacket());
-            }
-
-            return;
-        }
-
-        blockState = level.getBlockState(pos); // CraftBukkit - update state from plugins
-        if (blockState.isAir()) return; // CraftBukkit - A plugin set block to air without cancelling
-        BlockEntity blockEntity = level.getBlockEntity(pos);
-        block = blockState.getBlock();
-
-        if (block instanceof GameMasterBlock && !player.canUseGameMasterBlocks() && !player.isCreative() && !(block instanceof CommandBlock && player.getBukkitEntity().hasPermission("minecraft.commandblock"))) {
-            level.sendBlockUpdated(pos, blockState, blockState, Block.UPDATE_ALL);
-        } else {
-            if (player.blockActionRestricted(level, pos, player.gameMode.getGameModeForPlayer())) return;
-
-            org.bukkit.block.BlockState bukkitBlockState = bukkitBlock.getState();
-            level.captureDrops = new ArrayList<>();
-            block.playerWillDestroy(level, pos, blockState, player);
-
-            boolean removed = level.removeBlock(pos, false);
-
-            if (removed) {
-                block.destroy(level, pos, blockState);
-            }
-
-            ItemStack usedToolCopy = usedTool.copy();
-            boolean isCorrectTool = !blockState.requiresCorrectToolForDrops() || usedTool.isCorrectToolForDrops(blockState);
-
-            if (!player.isCreative()) {
-                usedTool.mineBlock(level, blockState, pos, player);
-                if (removed && isCorrectTool && event.isDropItems()) {
-                    block.playerDestroy(level, player, pos, blockState, blockEntity, usedToolCopy);
-                }
-            }
-
-            List<ItemEntity> itemsToDrop = level.captureDrops;
-            level.captureDrops = null;
-            if (event.isDropItems()) {
-                CraftEventFactory.handleBlockDropItemEvent(bukkitBlock, bukkitBlockState, player, itemsToDrop);
-            }
-
-            blockState.getBlock().popExperience(level, pos, event.getExpToDrop(), player);
-
-            if (isCorrectTool && event.isDropItems() && block instanceof BeehiveBlock && blockEntity instanceof BeehiveBlockEntity beeHive) {
-                CriteriaTriggers.BEE_NEST_DESTROYED.trigger(player, blockState, usedToolCopy, beeHive.getOccupantCount());
-            }
-        }
-    }
-
     @EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         BlockPos breakBlockPos = MinecraftAdapter.blockPos(event.getBlock().getLocation());
@@ -235,7 +111,9 @@ public class ChainDestruction implements Listener {
         if (selectedItemB.lore() == null) return;
         List<String> lore = selectedItemB.lore().stream().map(LegacyComponentSerializer.legacySection()::serialize).toList();
         if (lore.stream().noneMatch(s -> s.startsWith("§7一括破壊"))) return;
-        int maxBlocks = 8 * CustomEnchantUtil.getEnchantmentLevel(lore.stream().filter(s -> s.startsWith("§7一括破壊")).toList().get(0));
+        /* test end */
+
+        int maxBlocks = (selectedITem.getItem() instanceof PickaxeItem ? 8 : 16) * CustomEnchantUtil.getEnchantmentLevel(lore.stream().filter(s -> s.startsWith("§7一括破壊")).toList().get(0));
 
         ServerLevel level = MinecraftAdapter.level(event.getBlock().getLocation().getWorld());
         BlockState blockState = MinecraftAdapter.blockState(event.getBlock());
@@ -247,7 +125,7 @@ public class ChainDestruction implements Listener {
 
         Set<BlockPos> toBreak = new HashSet<>();
 
-        searchBlock(breakBlockPos, maxBlocks, level, chainDestructTarget, toBreak);
+        BlockUtil.searchBlock(breakBlockPos, maxBlocks, level, chainDestructTarget, toBreak);
 
         IGNORE_EVENT.put(event.getPlayer().getUniqueId(), new HashSet<>(toBreak));
 
@@ -256,7 +134,9 @@ public class ChainDestruction implements Listener {
             RunnableManager.runDelayed(() -> {
                 if (player.getMainHandItem().equals(selectedITem)) {
                     if (selectedITem.getItem().getMaxDamage() - selectedITem.getDamageValue() > 1) {
-                        destroyBlock(player, level, pos, selectedITem);
+                        BlockUtil.destroyBlock(player, level, pos, selectedITem);
+                    } else {
+                        player.getBukkitEntity().sendActionBar(Component.text("耐久値がなくなりました", DefinedTextColor.RED));
                     }
                 }
             }, count.getAndIncrement());
