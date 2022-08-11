@@ -54,61 +54,55 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.function.Function;
 
 @SuppressWarnings("unchecked")
 public class RegistryUtil {
-    public static <T> T forceRegister(Registry<T> registry, ResourceLocation id, T value) {
+    public static <T> boolean unfreeze(Registry<T> registry) {
         if (registry instanceof MappedRegistry<T>) {
             try {
                 ObfuscationUtil.Class mappedRegistry = ObfuscationUtil.getClassByMojangName("net.minecraft.core.MappedRegistry");
                 Field frozenField = mappedRegistry.getFieldByMojangName("frozen").getField();
-                if (frozenField == null || !frozenField.trySetAccessible()) return null;
+                if (frozenField == null || !frozenField.trySetAccessible()) return false;
                 frozenField.set(registry, false);
-                Registry.register(registry, id, value);
-                return registry.freeze().get(id) != null ? value : null;
-            } catch(IllegalAccessException | NoSuchFieldException /*| InvocationTargetException*/ e) {
+                return true;
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 throw new RuntimeException(e);
             }
+        }
+        return false;
+    }
+
+    public static <T> Registry<T> freeze(Registry<T> registry) {
+        if (registry instanceof MappedRegistry<T>) {
+            return registry.freeze();
         }
         return null;
     }
 
-    public static <T> boolean forceReplace(Registry<T> registry, T objectSrc, T objectTo) {
-        if (registry instanceof MappedRegistry<T>) {
-            try {
-                ObfuscationUtil.Class mappedRegistryMapping = ObfuscationUtil.getClassByMojangName("net.minecraft.core.MappedRegistry");
-                ObjectList<Holder.Reference<T>> byId = (ObjectList<Holder.Reference<T>>) getObject(mappedRegistryMapping.getFieldByMojangName("byId").getField(), registry);
-                Reference2IntOpenHashMap<T> toId = (Reference2IntOpenHashMap<T>) getObject(mappedRegistryMapping.getFieldByMojangName("toId").getField(), registry);
-                Map<ResourceLocation, Holder.Reference<T>> byLocation = (Map<ResourceLocation, Holder.Reference<T>>) getObject(mappedRegistryMapping.getFieldByMojangName("byLocation").getField(), registry);
-                Map<ResourceKey<T>, Holder.Reference<T>> byKey = (Map<ResourceKey<T>, Holder.Reference<T>>) getObject(mappedRegistryMapping.getFieldByMojangName("byKey").getField(), registry);
-                Map<T, Holder.Reference<T>> byValue = (Map<T, Holder.Reference<T>>) getObject(mappedRegistryMapping.getFieldByMojangName("byValue").getField(), registry);
-                Map<T, Lifecycle> lifecycles = (Map<T, Lifecycle>) getObject(mappedRegistryMapping.getFieldByMojangName("lifecycles").getField(), registry);
-                if (byId == null || toId == null || byLocation == null || byKey == null || byValue == null || lifecycles == null)
-                    return false;
+    public static <T> T forceRegister(Registry<T> registry, ResourceLocation id, T value) {
+        unfreeze(registry);
+        Registry.register(registry, id, value);
+        freeze(registry);
+        return registry.get(id) != null ? value : null;
+    }
 
-                int id = registry.getId(objectSrc);
-                ResourceKey<T> key = registry.getResourceKey(objectSrc).orElseThrow();
-                ResourceLocation location = registry.getKey(objectSrc);
+    public static <T> boolean forceReplace(Registry<T> registry, ResourceLocation id, T objectTo) {
+        if (registry instanceof MappedRegistry<T> mappedRegistry) {
+            T objectFrom = mappedRegistry.get(id);
+            if (objectFrom != null) {
+                ResourceKey<T> key = mappedRegistry.getResourceKey(objectFrom).orElse(null);
+                Lifecycle lifecycle = mappedRegistry.lifecycle(objectFrom);
+                if (key != null) {
+                    int rawId = mappedRegistry.getId(objectFrom);
+                    unfreeze(registry);
+                    mappedRegistry.registerOrOverride(OptionalInt.of(rawId), key, objectTo, lifecycle);
+                    freeze(registry);
 
-                Holder.Reference<T> ref = byId.get(id);
-
-                Field f = ObfuscationUtil.getClassByMojangName("net.minecraft.core.Holder$Reference").getFieldByMojangName("value").getField();
-                if (f.trySetAccessible()) f.set(ref, objectTo);
-                else return false;
-
-                toId.remove(objectSrc, id);
-                toId.put(objectTo, id);
-
-                byValue.remove(objectSrc);
-                byValue.put(objectTo, ref);
-
-                Lifecycle lc = lifecycles.get(objectSrc);
-                lifecycles.remove(objectSrc);
-                lifecycles.put(objectTo, lc);
-                return true;
-            } catch (IllegalAccessException | NoSuchFieldException e) {
-                throw new RuntimeException(e);
+                    T result = registry.get(id);
+                    return result != null && result.equals(objectTo);
+                }
             }
         }
         return false;

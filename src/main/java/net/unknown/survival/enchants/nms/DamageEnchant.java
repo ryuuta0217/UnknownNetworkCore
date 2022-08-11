@@ -32,6 +32,7 @@
 package net.unknown.survival.enchants.nms;
 
 import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -62,7 +63,7 @@ public class DamageEnchant extends Enchantment {
     }
 
     public static void register() {
-        RegistryUtil.forceReplace(Registry.ENCHANTMENT, Enchantments.SHARPNESS, new DamageEnchant(Rarity.COMMON, 0, EquipmentSlot.MAINHAND));
+        RegistryUtil.forceReplace(Registry.ENCHANTMENT, ResourceLocation.of("minecraft:sharpness", ':'), new DamageEnchant(Rarity.COMMON, 0, EquipmentSlot.MAINHAND));
     }
 
     @Override
