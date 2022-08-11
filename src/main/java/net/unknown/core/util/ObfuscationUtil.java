@@ -647,7 +647,7 @@ public class ObfuscationUtil {
             else return this.getObfuscatedName();
         }
 
-        public java.lang.reflect.Method getMethod() throws NoSuchMethodException {
+        public java.lang.reflect.Method getMethod() {
             // Input examples: int, float, [I, [[D, [Lnet.minecraft.core.Class;, net.minecraft.core.Class2
             java.lang.Class<?>[] argTypeClasses = Arrays.stream(this.getEffectiveArgTypes())
                     .map(className -> {
@@ -657,7 +657,13 @@ public class ObfuscationUtil {
                             return null;
                         }
                     }).toArray(java.lang.Class[]::new);
-            return this.getParent().asClass().getMethod(this.getEffectiveName(), argTypeClasses);
+            java.lang.Class<?> clazz = this.getParent().asClass();
+            if (clazz == null) return null;
+            try {
+                return clazz.getMethod(this.getEffectiveName(), argTypeClasses);
+            } catch(NoSuchMethodException e) {
+                return null;
+            }
         }
     }
 
@@ -700,7 +706,13 @@ public class ObfuscationUtil {
         }
 
         public java.lang.reflect.Field getField() throws NoSuchFieldException {
-            return this.getParent().asClass().getDeclaredField(this.getEffectiveName());
+            java.lang.Class<?> clazz = this.getParent().asClass();
+            if (clazz == null) return null;
+            try {
+                return clazz.getDeclaredField(this.getEffectiveName());
+            } catch(NoSuchFieldException e) {
+                return null;
+            }
         }
     }
 }
