@@ -1,0 +1,2101 @@
+warps:
+  warp_0:
+    internal_name: warp_0
+    display_name: '{"text":"Warp 0"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_1:
+    internal_name: warp_1
+    display_name: '{"text":"Warp 1"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_2:
+    internal_name: warp_2
+    display_name: '{"text":"Warp 2"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_3:
+    internal_name: warp_3
+    display_name: '{"text":"Warp 3"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_4:
+    internal_name: warp_4
+    display_name: '{"text":"Warp 4"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_5:
+    internal_name: warp_5
+    display_name: '{"text":"Warp 5"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_6:
+    internal_name: warp_6
+    display_name: '{"text":"Warp 6"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_7:
+    internal_name: warp_7
+    display_name: '{"text":"Warp 7"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_8:
+    internal_name: warp_8
+    display_name: '{"text":"Warp 8"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_9:
+    internal_name: warp_9
+    display_name: '{"text":"Warp 9"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_10:
+    internal_name: warp_10
+    display_name: '{"text":"Warp 10"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_11:
+    internal_name: warp_11
+    display_name: '{"text":"Warp 11"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_12:
+    internal_name: warp_12
+    display_name: '{"text":"Warp 12"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_13:
+    internal_name: warp_13
+    display_name: '{"text":"Warp 13"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_14:
+    internal_name: warp_14
+    display_name: '{"text":"Warp 14"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_15:
+    internal_name: warp_15
+    display_name: '{"text":"Warp 15"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_16:
+    internal_name: warp_16
+    display_name: '{"text":"Warp 16"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_17:
+    internal_name: warp_17
+    display_name: '{"text":"Warp 17"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_18:
+    internal_name: warp_18
+    display_name: '{"text":"Warp 18"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_19:
+    internal_name: warp_19
+    display_name: '{"text":"Warp 19"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_20:
+    internal_name: warp_20
+    display_name: '{"text":"Warp 20"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_21:
+    internal_name: warp_21
+    display_name: '{"text":"Warp 21"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_22:
+    internal_name: warp_22
+    display_name: '{"text":"Warp 22"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_23:
+    internal_name: warp_23
+    display_name: '{"text":"Warp 23"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_24:
+    internal_name: warp_24
+    display_name: '{"text":"Warp 24"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_25:
+    internal_name: warp_25
+    display_name: '{"text":"Warp 25"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_26:
+    internal_name: warp_26
+    display_name: '{"text":"Warp 26"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_27:
+    internal_name: warp_27
+    display_name: '{"text":"Warp 27"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_28:
+    internal_name: warp_28
+    display_name: '{"text":"Warp 28"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_29:
+    internal_name: warp_29
+    display_name: '{"text":"Warp 29"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_30:
+    internal_name: warp_30
+    display_name: '{"text":"Warp 30"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_31:
+    internal_name: warp_31
+    display_name: '{"text":"Warp 31"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_32:
+    internal_name: warp_32
+    display_name: '{"text":"Warp 32"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_33:
+    internal_name: warp_33
+    display_name: '{"text":"Warp 33"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_34:
+    internal_name: warp_34
+    display_name: '{"text":"Warp 34"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_35:
+    internal_name: warp_35
+    display_name: '{"text":"Warp 35"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_36:
+    internal_name: warp_36
+    display_name: '{"text":"Warp 36"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_37:
+    internal_name: warp_37
+    display_name: '{"text":"Warp 37"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_38:
+    internal_name: warp_38
+    display_name: '{"text":"Warp 38"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_39:
+    internal_name: warp_39
+    display_name: '{"text":"Warp 39"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_40:
+    internal_name: warp_40
+    display_name: '{"text":"Warp 40"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_41:
+    internal_name: warp_41
+    display_name: '{"text":"Warp 41"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_42:
+    internal_name: warp_42
+    display_name: '{"text":"Warp 42"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_43:
+    internal_name: warp_43
+    display_name: '{"text":"Warp 43"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_44:
+    internal_name: warp_44
+    display_name: '{"text":"Warp 44"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_45:
+    internal_name: warp_45
+    display_name: '{"text":"Warp 45"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_46:
+    internal_name: warp_46
+    display_name: '{"text":"Warp 46"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_47:
+    internal_name: warp_47
+    display_name: '{"text":"Warp 47"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_48:
+    internal_name: warp_48
+    display_name: '{"text":"Warp 48"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_49:
+    internal_name: warp_49
+    display_name: '{"text":"Warp 49"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_50:
+    internal_name: warp_50
+    display_name: '{"text":"Warp 50"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_51:
+    internal_name: warp_51
+    display_name: '{"text":"Warp 51"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_52:
+    internal_name: warp_52
+    display_name: '{"text":"Warp 52"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_53:
+    internal_name: warp_53
+    display_name: '{"text":"Warp 53"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_54:
+    internal_name: warp_54
+    display_name: '{"text":"Warp 54"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_55:
+    internal_name: warp_55
+    display_name: '{"text":"Warp 55"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_56:
+    internal_name: warp_56
+    display_name: '{"text":"Warp 56"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_57:
+    internal_name: warp_57
+    display_name: '{"text":"Warp 57"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_58:
+    internal_name: warp_58
+    display_name: '{"text":"Warp 58"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_59:
+    internal_name: warp_59
+    display_name: '{"text":"Warp 59"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_60:
+    internal_name: warp_60
+    display_name: '{"text":"Warp 60"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_61:
+    internal_name: warp_61
+    display_name: '{"text":"Warp 61"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_62:
+    internal_name: warp_62
+    display_name: '{"text":"Warp 62"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_63:
+    internal_name: warp_63
+    display_name: '{"text":"Warp 63"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_64:
+    internal_name: warp_64
+    display_name: '{"text":"Warp 64"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_65:
+    internal_name: warp_65
+    display_name: '{"text":"Warp 65"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_66:
+    internal_name: warp_66
+    display_name: '{"text":"Warp 66"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_67:
+    internal_name: warp_67
+    display_name: '{"text":"Warp 67"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_68:
+    internal_name: warp_68
+    display_name: '{"text":"Warp 68"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_69:
+    internal_name: warp_69
+    display_name: '{"text":"Warp 69"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_70:
+    internal_name: warp_70
+    display_name: '{"text":"Warp 70"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_71:
+    internal_name: warp_71
+    display_name: '{"text":"Warp 71"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_72:
+    internal_name: warp_72
+    display_name: '{"text":"Warp 72"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_73:
+    internal_name: warp_73
+    display_name: '{"text":"Warp 73"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_74:
+    internal_name: warp_74
+    display_name: '{"text":"Warp 74"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_75:
+    internal_name: warp_75
+    display_name: '{"text":"Warp 75"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_76:
+    internal_name: warp_76
+    display_name: '{"text":"Warp 76"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_77:
+    internal_name: warp_77
+    display_name: '{"text":"Warp 77"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_78:
+    internal_name: warp_78
+    display_name: '{"text":"Warp 78"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_79:
+    internal_name: warp_79
+    display_name: '{"text":"Warp 79"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_80:
+    internal_name: warp_80
+    display_name: '{"text":"Warp 80"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_81:
+    internal_name: warp_81
+    display_name: '{"text":"Warp 81"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_82:
+    internal_name: warp_82
+    display_name: '{"text":"Warp 82"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_83:
+    internal_name: warp_83
+    display_name: '{"text":"Warp 83"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_84:
+    internal_name: warp_84
+    display_name: '{"text":"Warp 84"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_85:
+    internal_name: warp_85
+    display_name: '{"text":"Warp 85"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_86:
+    internal_name: warp_86
+    display_name: '{"text":"Warp 86"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_87:
+    internal_name: warp_87
+    display_name: '{"text":"Warp 87"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_88:
+    internal_name: warp_88
+    display_name: '{"text":"Warp 88"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_89:
+    internal_name: warp_89
+    display_name: '{"text":"Warp 89"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_90:
+    internal_name: warp_90
+    display_name: '{"text":"Warp 90"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_91:
+    internal_name: warp_91
+    display_name: '{"text":"Warp 91"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_92:
+    internal_name: warp_92
+    display_name: '{"text":"Warp 92"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_93:
+    internal_name: warp_93
+    display_name: '{"text":"Warp 93"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_94:
+    internal_name: warp_94
+    display_name: '{"text":"Warp 94"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_95:
+    internal_name: warp_95
+    display_name: '{"text":"Warp 95"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_96:
+    internal_name: warp_96
+    display_name: '{"text":"Warp 96"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_97:
+    internal_name: warp_97
+    display_name: '{"text":"Warp 97"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_98:
+    internal_name: warp_98
+    display_name: '{"text":"Warp 98"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_99:
+    internal_name: warp_99
+    display_name: '{"text":"Warp 99"}'
+    location:
+      world: world
+      x: -16.829943728790866
+      y: 5.3866260797722
+      z: -6.653648613026737
+      yaw: -52.527588
+      pitch: 7.9499145
+    created_by: 65922e55-04b3-48c2-a4f7-5b393692adf4
+  warp_100:
+    internal_name: warp_100
+    display_name: '{"text":"Warp 100"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_101:
+    internal_name: warp_101
+    display_name: '{"text":"Warp 101"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_102:
+    internal_name: warp_102
+    display_name: '{"text":"Warp 102"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_103:
+    internal_name: warp_103
+    display_name: '{"text":"Warp 103"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_104:
+    internal_name: warp_104
+    display_name: '{"text":"Warp 104"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_105:
+    internal_name: warp_105
+    display_name: '{"text":"Warp 105"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_106:
+    internal_name: warp_106
+    display_name: '{"text":"Warp 106"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_107:
+    internal_name: warp_107
+    display_name: '{"text":"Warp 107"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_108:
+    internal_name: warp_108
+    display_name: '{"text":"Warp 108"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_109:
+    internal_name: warp_109
+    display_name: '{"text":"Warp 109"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_110:
+    internal_name: warp_110
+    display_name: '{"text":"Warp 110"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_111:
+    internal_name: warp_111
+    display_name: '{"text":"Warp 111"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_112:
+    internal_name: warp_112
+    display_name: '{"text":"Warp 112"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_113:
+    internal_name: warp_113
+    display_name: '{"text":"Warp 113"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_114:
+    internal_name: warp_114
+    display_name: '{"text":"Warp 114"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_115:
+    internal_name: warp_115
+    display_name: '{"text":"Warp 115"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_116:
+    internal_name: warp_116
+    display_name: '{"text":"Warp 116"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_117:
+    internal_name: warp_117
+    display_name: '{"text":"Warp 117"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_118:
+    internal_name: warp_118
+    display_name: '{"text":"Warp 118"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_119:
+    internal_name: warp_119
+    display_name: '{"text":"Warp 119"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_120:
+    internal_name: warp_120
+    display_name: '{"text":"Warp 120"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_121:
+    internal_name: warp_121
+    display_name: '{"text":"Warp 121"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_122:
+    internal_name: warp_122
+    display_name: '{"text":"Warp 122"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_123:
+    internal_name: warp_123
+    display_name: '{"text":"Warp 123"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_124:
+    internal_name: warp_124
+    display_name: '{"text":"Warp 124"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_125:
+    internal_name: warp_125
+    display_name: '{"text":"Warp 125"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_126:
+    internal_name: warp_126
+    display_name: '{"text":"Warp 126"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_127:
+    internal_name: warp_127
+    display_name: '{"text":"Warp 127"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_128:
+    internal_name: warp_128
+    display_name: '{"text":"Warp 128"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_129:
+    internal_name: warp_129
+    display_name: '{"text":"Warp 129"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_130:
+    internal_name: warp_130
+    display_name: '{"text":"Warp 130"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_131:
+    internal_name: warp_131
+    display_name: '{"text":"Warp 131"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_132:
+    internal_name: warp_132
+    display_name: '{"text":"Warp 132"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_133:
+    internal_name: warp_133
+    display_name: '{"text":"Warp 133"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_134:
+    internal_name: warp_134
+    display_name: '{"text":"Warp 134"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_135:
+    internal_name: warp_135
+    display_name: '{"text":"Warp 135"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_136:
+    internal_name: warp_136
+    display_name: '{"text":"Warp 136"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_137:
+    internal_name: warp_137
+    display_name: '{"text":"Warp 137"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_138:
+    internal_name: warp_138
+    display_name: '{"text":"Warp 138"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_139:
+    internal_name: warp_139
+    display_name: '{"text":"Warp 139"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_140:
+    internal_name: warp_140
+    display_name: '{"text":"Warp 140"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_141:
+    internal_name: warp_141
+    display_name: '{"text":"Warp 141"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_142:
+    internal_name: warp_142
+    display_name: '{"text":"Warp 142"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_143:
+    internal_name: warp_143
+    display_name: '{"text":"Warp 143"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_144:
+    internal_name: warp_144
+    display_name: '{"text":"Warp 144"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_145:
+    internal_name: warp_145
+    display_name: '{"text":"Warp 145"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_146:
+    internal_name: warp_146
+    display_name: '{"text":"Warp 146"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_147:
+    internal_name: warp_147
+    display_name: '{"text":"Warp 147"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_148:
+    internal_name: warp_148
+    display_name: '{"text":"Warp 148"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_149:
+    internal_name: warp_149
+    display_name: '{"text":"Warp 149"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_150:
+    internal_name: warp_150
+    display_name: '{"text":"Warp 150"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_151:
+    internal_name: warp_151
+    display_name: '{"text":"Warp 151"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_152:
+    internal_name: warp_152
+    display_name: '{"text":"Warp 152"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_153:
+    internal_name: warp_153
+    display_name: '{"text":"Warp 153"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_154:
+    internal_name: warp_154
+    display_name: '{"text":"Warp 154"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_155:
+    internal_name: warp_155
+    display_name: '{"text":"Warp 155"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_156:
+    internal_name: warp_156
+    display_name: '{"text":"Warp 156"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_157:
+    internal_name: warp_157
+    display_name: '{"text":"Warp 157"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_158:
+    internal_name: warp_158
+    display_name: '{"text":"Warp 158"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_159:
+    internal_name: warp_159
+    display_name: '{"text":"Warp 159"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_160:
+    internal_name: warp_160
+    display_name: '{"text":"Warp 160"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_161:
+    internal_name: warp_161
+    display_name: '{"text":"Warp 161"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_162:
+    internal_name: warp_162
+    display_name: '{"text":"Warp 162"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_163:
+    internal_name: warp_163
+    display_name: '{"text":"Warp 163"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_164:
+    internal_name: warp_164
+    display_name: '{"text":"Warp 164"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_165:
+    internal_name: warp_165
+    display_name: '{"text":"Warp 165"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_166:
+    internal_name: warp_166
+    display_name: '{"text":"Warp 166"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_167:
+    internal_name: warp_167
+    display_name: '{"text":"Warp 167"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_168:
+    internal_name: warp_168
+    display_name: '{"text":"Warp 168"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_169:
+    internal_name: warp_169
+    display_name: '{"text":"Warp 169"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_170:
+    internal_name: warp_170
+    display_name: '{"text":"Warp 170"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_171:
+    internal_name: warp_171
+    display_name: '{"text":"Warp 171"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_172:
+    internal_name: warp_172
+    display_name: '{"text":"Warp 172"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_173:
+    internal_name: warp_173
+    display_name: '{"text":"Warp 173"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_174:
+    internal_name: warp_174
+    display_name: '{"text":"Warp 174"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_175:
+    internal_name: warp_175
+    display_name: '{"text":"Warp 175"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_176:
+    internal_name: warp_176
+    display_name: '{"text":"Warp 176"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_177:
+    internal_name: warp_177
+    display_name: '{"text":"Warp 177"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_178:
+    internal_name: warp_178
+    display_name: '{"text":"Warp 178"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_179:
+    internal_name: warp_179
+    display_name: '{"text":"Warp 179"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_180:
+    internal_name: warp_180
+    display_name: '{"text":"Warp 180"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_181:
+    internal_name: warp_181
+    display_name: '{"text":"Warp 181"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_182:
+    internal_name: warp_182
+    display_name: '{"text":"Warp 182"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_183:
+    internal_name: warp_183
+    display_name: '{"text":"Warp 183"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_184:
+    internal_name: warp_184
+    display_name: '{"text":"Warp 184"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_185:
+    internal_name: warp_185
+    display_name: '{"text":"Warp 185"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_186:
+    internal_name: warp_186
+    display_name: '{"text":"Warp 186"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_187:
+    internal_name: warp_187
+    display_name: '{"text":"Warp 187"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_188:
+    internal_name: warp_188
+    display_name: '{"text":"Warp 188"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_189:
+    internal_name: warp_189
+    display_name: '{"text":"Warp 189"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_190:
+    internal_name: warp_190
+    display_name: '{"text":"Warp 190"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_191:
+    internal_name: warp_191
+    display_name: '{"text":"Warp 191"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_192:
+    internal_name: warp_192
+    display_name: '{"text":"Warp 192"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_193:
+    internal_name: warp_193
+    display_name: '{"text":"Warp 193"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_194:
+    internal_name: warp_194
+    display_name: '{"text":"Warp 194"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_195:
+    internal_name: warp_195
+    display_name: '{"text":"Warp 195"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_196:
+    internal_name: warp_196
+    display_name: '{"text":"Warp 196"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_197:
+    internal_name: warp_197
+    display_name: '{"text":"Warp 197"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_198:
+    internal_name: warp_198
+    display_name: '{"text":"Warp 198"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
+  warp_199:
+    internal_name: warp_199
+    display_name: '{"text":"Warp 199"}'
+    location:
+      world: world
+      x: 47.40940335955735
+      y: 8.0
+      z: 21.51832438096455
+      yaw: 1.1489258
+      pitch: 29.699911
