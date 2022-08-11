@@ -73,7 +73,7 @@ public class TPSBar implements Listener {
             if(tps > 15) BAR.setColor(BossEvent.BossBarColor.GREEN);
             else if(tps > 10) BAR.setColor(BossEvent.BossBarColor.YELLOW);
             else BAR.setColor(BossEvent.BossBarColor.RED);
-        }, 20, 20);
+        }, 10, 10);
     }
 
     // format: [HH:mm:ss] TPS: tps | MSPT: mspt
