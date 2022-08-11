@@ -52,7 +52,6 @@ import org.json.simple.parser.JSONParser;
 import java.io.File;
 
 public class UnknownNetworkCore extends JavaPlugin {
-    private static final File SHARED_DATA_FOLDER = new File("../shared");
     private static final JSONParser JSON_PARSER = new JSONParser();
     private static final Environment ENV = Environment.valueOf(System.getProperty("un.env", "SURVIVAL"));
     private static UnknownNetworkCore INSTANCE;
@@ -63,10 +62,6 @@ public class UnknownNetworkCore extends JavaPlugin {
 
     public static CommandDispatcher<CommandSourceStack> getBrigadier() {
         return getDedicatedServer().vanillaCommandDispatcher.getDispatcher();
-    }
-
-    public static File getSharedDataFolder() {
-        return SHARED_DATA_FOLDER;
     }
 
     public static DedicatedServer getDedicatedServer() {
