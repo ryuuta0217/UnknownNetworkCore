@@ -31,13 +31,17 @@
 
 package net.unknown.survival.enchants;
 
+import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import org.bukkit.Location;
-import org.bukkit.World;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.util.BlockUtil;
+import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -45,25 +49,13 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class RangedMining implements Listener {
     private static final Map<UUID, BlockFace> FACING = new HashMap<>();
-
-    private static BlockPos location2BlockPos(Location loc) {
-        return new BlockPos(loc.getX(), loc.getY(), loc.getZ());
-    }
-
-    private static Location blockPos2Location(BlockPos blockPos, World world) {
-        return new Location(world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
-    }
 
     private static Iterable<BlockPos> withinManhattan(Direction direction, BlockPos center, int range) {
         int x = 0;
@@ -84,7 +76,6 @@ public class RangedMining implements Listener {
             x = range;
             z = range;
         }
-
         return BlockPos.withinManhattan(center, x, y, z);
     }
 
@@ -97,52 +88,41 @@ public class RangedMining implements Listener {
         }
     }
 
-    @EventHandler
-    public void onAttackPlayer(EntityDamageByEntityEvent event) {
-
-    }
+    public static final Map<UUID, Set<BlockPos>> IGNORE_EVENT = new HashMap<>();
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
-
-        if (!FACING.containsKey(player.getUniqueId())) return;
-
-        ItemStack handItem = player.getInventory().getItemInMainHand();
-        if (!handItem.getType().name().endsWith("_PICKAXE")) return;
-        if (handItem.getLore() == null /*&& !((CraftItemStack) handItem).handle.isEnchanted()*/) return;
-        if (handItem.getLore().stream().noneMatch(lore -> lore.startsWith("§7採掘範囲拡大")) /*&& EnchantmentHelper.getEnchantments(((CraftItemStack) handItem).handle).containsKey(CustomEnchantments.RANGED_MINING)*/)
-            return;
-        int range = CustomEnchantUtil.getEnchantmentLevel(handItem.getLore().stream().filter(lore -> lore.startsWith("§7採掘範囲拡大")).toList().get(0));
-        /*if(handItem.getLore().stream().anyMatch(lore -> lore.startsWith("§7採掘範囲拡大"))) {
-            range = ;
-        } else {
-            range = /*EnchantmentHelper.getEnchantments(((CraftItemStack) handItem).handle).get(CustomEnchantments.RANGED_MINING)*//* 1;
-        }*/
-
-        BlockFace bf = FACING.getOrDefault(event.getPlayer().getUniqueId(), event.getPlayer().getFacing());
-
-        if (bf == BlockFace.SOUTH || bf == BlockFace.NORTH) {
-            for (long x = -range; x <= range; x++) {
-                for (long y = -range; y <= range; y++) {
-                    event.getBlock().getLocation().add(x, y, 0).getBlock().breakNaturally(handItem);
-                }
-            }
-        } else if (bf == BlockFace.EAST || bf == BlockFace.WEST) {
-            for (long y = -range; y <= range; y++) {
-                for (long z = -range; z <= range; z++) {
-                    event.getBlock().getLocation().add(0, y, z).getBlock().breakNaturally(handItem);
-                }
-            }
-        } else if (bf == BlockFace.UP || bf == BlockFace.DOWN) {
-            for (long x = -range; x <= range; x++) {
-                for (long z = -range; z <= range; z++) {
-                    event.getBlock().getLocation().add(x, 0, z).getBlock().breakNaturally(handItem);
-                }
+        if (IGNORE_EVENT.containsKey(player.getUniqueId())) {
+            BlockPos blockPos = MinecraftAdapter.blockPos(event.getBlock().getLocation());
+            Set<BlockPos> ignoreEventPoses = IGNORE_EVENT.get(player.getUniqueId());
+            if (ignoreEventPoses.contains(blockPos)) {
+                ignoreEventPoses.remove(blockPos);
+                return;
             }
         }
 
-        FACING.remove(event.getPlayer().getUniqueId());
+        if (!FACING.containsKey(player.getUniqueId())) return;
+
+        ItemStack handItem = MinecraftAdapter.ItemStack.itemStack(player.getInventory().getItemInMainHand());
+        if (!(handItem.getItem() instanceof PickaxeItem)) return;
+        int level = EnchantmentHelper.getItemEnchantmentLevel(CustomEnchantments.RANGED_MINING, handItem);
+        if (!handItem.isEnchanted() && level == 0) return;
+
+        Direction direction = MinecraftAdapter.direction(FACING.getOrDefault(player.getUniqueId(), player.getFacing()));
+        FACING.remove(player.getUniqueId());
+        if (!IGNORE_EVENT.containsKey(player.getUniqueId())) IGNORE_EVENT.put(player.getUniqueId(), new HashSet<>());
+
+        Iterable<BlockPos> toBreak = withinManhattan(direction, MinecraftAdapter.blockPos(event.getBlock().getLocation()), level);
+        toBreak.forEach(blockPos -> {
+            int durabilityRemaining = handItem.getMaxDamage() - handItem.getDamageValue();
+            if(durabilityRemaining != 1) {
+                IGNORE_EVENT.get(player.getUniqueId()).add(blockPos);
+                BlockUtil.destroyBlock(MinecraftAdapter.player(player), MinecraftAdapter.level(event.getBlock().getWorld()), blockPos, MinecraftAdapter.ItemStack.itemStack(player.getInventory().getItemInMainHand()));
+            } else {
+                player.sendActionBar(Component.text("耐久値が無くなりました", DefinedTextColor.RED));
+            }
+        });
     }
 
     public static class RangedMiningEnchantment extends Enchantment {
@@ -150,7 +130,6 @@ public class RangedMining implements Listener {
 
         protected RangedMiningEnchantment() {
             super(Rarity.RARE, EnchantmentCategory.DIGGER, new net.minecraft.world.entity.EquipmentSlot[] {net.minecraft.world.entity.EquipmentSlot.MAINHAND, net.minecraft.world.entity.EquipmentSlot.OFFHAND});
-            //Registry.register(Registry.ENCHANTMENT, "ranged_mining", this);
         }
 
         public static RangedMiningEnchantment instance() {

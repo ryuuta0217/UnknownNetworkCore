@@ -41,10 +41,7 @@ import net.unknown.survival.commands.Commands;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
-import net.unknown.survival.enchants.AutoSmelting;
-import net.unknown.survival.enchants.ChainDestruction;
-import net.unknown.survival.enchants.HatakeWatari;
-import net.unknown.survival.enchants.RangedMining;
+import net.unknown.survival.enchants.*;
 import net.unknown.survival.enchants.nms.DamageEnchant;
 import net.unknown.survival.feature.DebugStickEntityEditor;
 import net.unknown.survival.feature.gnarms.GNArms;
@@ -73,6 +70,7 @@ public class UnknownNetworkSurvival {
     private static boolean LUCKPERMS_ENABLED = false;
 
     public static void onLoad() {
+        CustomEnchantments.initialize();
         Commands.init();
         DamageEnchant.register();
         try {
