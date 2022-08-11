@@ -32,12 +32,14 @@
 package net.unknown.core.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
@@ -60,6 +62,18 @@ public class MinecraftAdapter {
 
     public static net.minecraft.world.level.block.Block block(Material bukkit) {
         return CraftMagicNumbers.getBlock(bukkit);
+    }
+
+    public static net.minecraft.core.Direction direction(BlockFace bukkit) {
+        return switch (bukkit) {
+            case DOWN -> Direction.DOWN;
+            case UP -> Direction.UP;
+            case NORTH -> Direction.NORTH;
+            case SOUTH -> Direction.SOUTH;
+            case WEST -> Direction.WEST;
+            case EAST -> Direction.EAST;
+            default -> null;
+        };
     }
 
     @Nullable
