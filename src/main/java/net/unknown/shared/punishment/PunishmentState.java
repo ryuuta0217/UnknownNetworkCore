@@ -29,11 +29,11 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.proxy.punishment;
+package net.unknown.shared.punishment;
 
-import net.unknown.proxy.punishment.interfaces.PermanentPunishment;
-import net.unknown.proxy.punishment.interfaces.Punishment;
-import net.unknown.proxy.punishment.interfaces.TemporaryPunishment;
+import net.unknown.shared.punishment.interfaces.PermanentPunishment;
+import net.unknown.shared.punishment.interfaces.Punishment;
+import net.unknown.shared.punishment.interfaces.TemporaryPunishment;
 
 import java.util.UUID;
 

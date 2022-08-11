@@ -29,10 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared;
+package net.unknown.shared.punishment.interfaces;
 
-import java.io.File;
-
-public class SharedConstants {
-    public static final File DATA_FOLDER = new File("../shared");
+public interface PermanentPunishment extends Punishment {
 }

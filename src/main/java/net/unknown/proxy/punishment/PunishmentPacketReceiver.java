@@ -29,10 +29,15 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared;
+package net.unknown.proxy.punishment;
 
-import java.io.File;
+import net.md_5.bungee.api.event.PluginMessageEvent;
+import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.event.EventHandler;
 
-public class SharedConstants {
-    public static final File DATA_FOLDER = new File("../shared");
+public class PunishmentPacketReceiver implements Listener {
+    @EventHandler
+    public void onPluginMessageReceived(PluginMessageEvent event) {
+        
+    }
 }

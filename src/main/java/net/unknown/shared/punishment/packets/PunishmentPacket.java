@@ -29,18 +29,17 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.proxy.punishment.interfaces;
+package net.unknown.shared.punishment.packets;
 
-import net.unknown.proxy.punishment.PunishmentType;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
-import java.util.UUID;
+public class PunishmentPacket {
+    public ByteBuf encode() {
+        return Unpooled.buffer();
+    }
 
-public interface Punishment {
-    PunishmentType getType();
-
-    UUID getTarget();
-
-    UUID getExecutor();
-
-    String getReason();
+    public static PunishmentPacket handle(ByteBuf buf) {
+        return new PunishmentPacket();
+    }
 }

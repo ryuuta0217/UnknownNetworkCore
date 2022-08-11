@@ -29,14 +29,18 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.proxy.punishment;
+package net.unknown.shared.punishment.interfaces;
 
-public class PunishmentHistory {
-    private final long executedIn;
-    private final PunishmentState data;
+import net.unknown.shared.punishment.PunishmentType;
 
-    public PunishmentHistory(long executedIn, PunishmentState data) {
-        this.executedIn = executedIn;
-        this.data = data;
-    }
+import java.util.UUID;
+
+public interface Punishment {
+    PunishmentType getType();
+
+    UUID getTarget();
+
+    UUID getExecutor();
+
+    String getReason();
 }

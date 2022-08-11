@@ -29,7 +29,14 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.proxy.punishment;
+package net.unknown.shared.punishment;
 
-public class PunishmentManager {
+public class PunishmentHistory {
+    private final long executedIn;
+    private final PunishmentState data;
+
+    public PunishmentHistory(long executedIn, PunishmentState data) {
+        this.executedIn = executedIn;
+        this.data = data;
+    }
 }

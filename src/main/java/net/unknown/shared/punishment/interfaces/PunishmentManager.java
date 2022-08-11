@@ -29,8 +29,12 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.proxy.punishment.interfaces;
+package net.unknown.shared.punishment.interfaces;
 
-public interface TemporaryPunishment extends Punishment {
-    long getExpiresIn();
+import net.unknown.shared.punishment.PlayerPunishmentData;
+
+import java.util.UUID;
+
+public interface PunishmentManager {
+    PlayerPunishmentData getData(UUID uniqueId);
 }

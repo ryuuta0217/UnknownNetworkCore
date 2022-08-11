@@ -29,7 +29,27 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.proxy.punishment.interfaces;
+package net.unknown.proxy.punishment;
 
-public interface PermanentPunishment extends Punishment {
+import net.unknown.shared.punishment.PlayerPunishmentData;
+import net.unknown.shared.punishment.interfaces.PunishmentManager;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
+public class ProxyPunishmentManager implements PunishmentManager {
+    private static final ProxyPunishmentManager INSTANCE = new ProxyPunishmentManager();
+
+    public static PunishmentManager getInstance() {
+        return INSTANCE;
+    }
+
+    private final Map<UUID, ProxyPlayerPunishmentData> DATA = new HashMap<>();
+
+    @Override
+    public PlayerPunishmentData getData(UUID uniqueId) {
+        if(!DATA.containsKey(uniqueId)) DATA.put(uniqueId, new ProxyPlayerPunishmentData(uniqueId));
+        return DATA.get(uniqueId);
+    }
 }

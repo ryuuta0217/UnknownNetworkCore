@@ -31,38 +31,25 @@
 
 package net.unknown.proxy.punishment;
 
-import net.unknown.UnknownNetworkCore;
-import net.unknown.core.managers.RunnableManager;
-import net.unknown.proxy.punishment.interfaces.Punishment;
-import net.unknown.proxy.punishment.interfaces.TemporaryPunishment;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
+import net.md_5.bungee.config.Configuration;
+import net.md_5.bungee.config.ConfigurationProvider;
+import net.md_5.bungee.config.YamlConfiguration;
+import net.unknown.shared.punishment.PlayerPunishmentData;
+import net.unknown.shared.punishment.interfaces.Punishment;
+import net.unknown.shared.punishment.interfaces.TemporaryPunishment;
+import net.unknown.shared.punishment.PunishmentState;
+import net.unknown.shared.punishment.PunishmentType;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 
-public class PlayerPunishmentData {
-    private static final File DATA_FOLDER = new File(UnknownNetworkCore.getSharedDataFolder(), "punishments");
-    private final Map<Long, PunishmentState> punishmentHistories = new HashMap<>();
-    private final UUID uniqueId;
-    private final File source;
-    private final Logger logger;
-    private PunishmentState currentState = PunishmentState.Default.getInstance();
-    private YamlConfiguration data;
-
-    public PlayerPunishmentData(UUID uniqueId) {
-        this.uniqueId = uniqueId;
-        this.source = new File(DATA_FOLDER, this.uniqueId.toString() + ".yml");
-        this.logger = Logger.getLogger("UNC/PunishmentData/" + (Bukkit.getOfflinePlayer(uniqueId).getName() == null ? uniqueId.toString() : Bukkit.getOfflinePlayer(uniqueId).getName()));
-        this.load();
+public class ProxyPlayerPunishmentData extends PlayerPunishmentData {
+    private Configuration data;
+    public ProxyPlayerPunishmentData(UUID uniqueId) {
+        super(uniqueId);
     }
 
-    private static PunishmentState getStateFromConfigSection(ConfigurationSection section) {
+    private static PunishmentState getStateFromConfigSection(Configuration section) {
         if (section != null && section.contains("type")) {
             PunishmentType type = PunishmentType.valueOf(section.getString("type").toUpperCase());
             if (type != PunishmentType.NONE) {
@@ -83,8 +70,8 @@ public class PlayerPunishmentData {
         return PunishmentState.Default.getInstance();
     }
 
-    private static void writeStateToConfiguration(PunishmentState state, String key, YamlConfiguration config) {
-        ConfigurationSection section = config.createSection(key);
+    private static void writeStateToConfiguration(PunishmentState state, String key, Configuration config) {
+        Configuration section = new Configuration();
         section.set("type", state.getType().name().toLowerCase());
         if (state instanceof Punishment data) {
             section.set("target", data.getTarget().toString());
@@ -102,15 +89,15 @@ public class PlayerPunishmentData {
         try {
             if (!this.source.exists() && !this.source.createNewFile())
                 throw new IOException("ファイルの作成に失敗しました: " + this.source);
-            this.data = YamlConfiguration.loadConfiguration(this.source);
+            this.data = ConfigurationProvider.getProvider(YamlConfiguration.class).load(this.source);
             if (this.data.contains("current_state"))
-                this.currentState = getStateFromConfigSection(this.data.getConfigurationSection("current_state"));
+                this.currentState = getStateFromConfigSection(this.data.getSection("current_state"));
             if (this.data.contains("histories")) {
-                ConfigurationSection histories = this.data.getConfigurationSection("histories");
+                Configuration histories = this.data.getSection("histories");
                 if (histories != null) {
-                    histories.getKeys(false).forEach(timeStampStr -> {
+                    histories.getKeys().forEach(timeStampStr -> {
                         long executedTimeStamp = Long.parseLong(timeStampStr);
-                        this.punishmentHistories.put(executedTimeStamp, getStateFromConfigSection(histories.getConfigurationSection(timeStampStr)));
+                        this.punishmentHistories.put(executedTimeStamp, getStateFromConfigSection(histories.getSection(timeStampStr)));
                     });
                 }
             }
@@ -119,48 +106,7 @@ public class PlayerPunishmentData {
         }
     }
 
-    public void mute(UUID executor, String reason) {
-        this.currentState = new PunishmentState.Mute(this.uniqueId, executor, reason);
-        this.punishmentHistories.put(System.currentTimeMillis(), this.currentState);
-        RunnableManager.runAsync(this::write);
-    }
-
-    public void muteTemp(UUID executor, String reason, long expiresIn) {
-        this.currentState = new PunishmentState.Mute.Temp(this.uniqueId, executor, reason, expiresIn);
-        this.punishmentHistories.put(System.currentTimeMillis(), this.currentState);
-        RunnableManager.runAsync(this::write);
-    }
-
-    public void unMute(UUID executor, String reason) {
-        this.currentState = PunishmentState.Default.getInstance();
-        this.punishmentHistories.put(System.currentTimeMillis(), new PunishmentState.Unmute(this.uniqueId, executor, reason));
-        RunnableManager.runAsync(this::write);
-    }
-
-    public void kick(UUID executor, String reason) {
-        this.currentState = new PunishmentState.Kick(this.uniqueId, executor, reason);
-        this.punishmentHistories.put(System.currentTimeMillis(), this.currentState);
-        RunnableManager.runAsync(this::write);
-    }
-
-    public void ban(UUID executor, String reason) {
-        this.currentState = new PunishmentState.Ban(this.uniqueId, executor, reason);
-        this.punishmentHistories.put(System.currentTimeMillis(), this.currentState);
-        RunnableManager.runAsync(this::write);
-    }
-
-    public void banTemp(UUID executor, String reason, long expiresIn) {
-        this.currentState = new PunishmentState.Ban.Temp(this.uniqueId, executor, reason, expiresIn);
-        this.punishmentHistories.put(System.currentTimeMillis(), this.currentState);
-        RunnableManager.runAsync(this::write);
-    }
-
-    public void unBan(UUID executor, String reason) {
-        this.currentState = PunishmentState.Default.getInstance();
-        this.punishmentHistories.put(System.currentTimeMillis(), new PunishmentState.Unban(this.uniqueId, executor, reason));
-        RunnableManager.runAsync(this::write);
-    }
-
+    @Override
     public void write() {
         this.data.set("current_state", null);
         writeStateToConfiguration(this.currentState, "current_state", this.data);
@@ -171,10 +117,9 @@ public class PlayerPunishmentData {
         });
 
         try {
-            this.data.save(this.source);
+            ConfigurationProvider.getProvider(YamlConfiguration.class).save(this.data, this.source);
         } catch (IOException e) {
             e.printStackTrace();
-
         }
     }
 }
