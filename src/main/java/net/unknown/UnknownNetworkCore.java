@@ -41,6 +41,7 @@ import net.unknown.core.gui.SignGui;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.PacketManager;
 import net.unknown.core.managers.TrashManager;
+import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.tab.TabListPingManager;
 import net.unknown.core.util.ObfuscationUtil;
 import org.bukkit.Bukkit;
@@ -48,8 +49,6 @@ import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
-
-import java.io.File;
 
 public class UnknownNetworkCore extends JavaPlugin {
     private static final JSONParser JSON_PARSER = new JSONParser();
@@ -116,6 +115,7 @@ public class UnknownNetworkCore extends JavaPlugin {
         ListenerManager.registerListener(new TabListPingManager());
         TPSBar.initialize();
         TabListPingManager.startTask();
+        PlayerPrefixes.loadAll();
         TrashManager.loadExists();
         ThirdPartyPluginPermissionsFixer.scheduleNextTick();
         getLogger().info("");
