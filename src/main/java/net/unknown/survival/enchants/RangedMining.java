@@ -32,13 +32,16 @@
 package net.unknown.survival.enchants;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.BlockUtil;
 import net.unknown.core.util.MinecraftAdapter;
@@ -129,7 +132,8 @@ public class RangedMining implements Listener {
         private static RangedMiningEnchantment INSTANCE;
 
         protected RangedMiningEnchantment() {
-            super(Rarity.RARE, EnchantmentCategory.DIGGER, new net.minecraft.world.entity.EquipmentSlot[] {net.minecraft.world.entity.EquipmentSlot.MAINHAND, net.minecraft.world.entity.EquipmentSlot.OFFHAND});
+            super(Rarity.RARE, EnchantmentCategory.DIGGER, new net.minecraft.world.entity.EquipmentSlot[] {net.minecraft.world.entity.EquipmentSlot.MAINHAND});
+            this.descriptionId = "範囲破壊";
         }
 
         public static RangedMiningEnchantment instance() {
@@ -155,6 +159,22 @@ public class RangedMining implements Listener {
         @Override
         public boolean canEnchant(net.minecraft.world.item.ItemStack stack) {
             return stack.getItem() instanceof PickaxeItem && super.canEnchant(stack);
+        }
+
+        @Override
+        public net.minecraft.network.chat.Component getFullname(int level) {
+            MutableComponent mutableComponent = net.minecraft.network.chat.Component.literal(this.getDescriptionId());
+            if (this.isCurse()) {
+                mutableComponent.withStyle(ChatFormatting.RED);
+            } else {
+                mutableComponent.withStyle(ChatFormatting.GRAY);
+            }
+
+            if (level != 1 || this.getMaxLevel() != 1) {
+                mutableComponent.append(" ").append(net.minecraft.network.chat.Component.translatable("enchantment.level." + level));
+            }
+
+            return mutableComponent;
         }
     }
 }
