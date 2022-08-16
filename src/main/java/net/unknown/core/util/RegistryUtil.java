@@ -41,6 +41,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Fluid;
@@ -84,6 +85,18 @@ public class RegistryUtil {
     public static <T> T forceRegister(Registry<T> registry, ResourceLocation id, T value) {
         unfreeze(registry);
         Registry.register(registry, id, value);
+        if(registry == Registry.ENCHANTMENT && value instanceof Enchantment enchant) {
+            try {
+                Field f = org.bukkit.enchantments.Enchantment.class.getDeclaredField("acceptingNew");
+                if (f.trySetAccessible()) {
+                    f.set(null, true);
+                    org.bukkit.enchantments.Enchantment.registerEnchantment(new org.bukkit.craftbukkit.v1_19_R1.enchantments.CraftEnchantment(enchant));
+                    f.set(null, false);
+                }
+            } catch(IllegalAccessException | NoSuchFieldException e) {
+                throw new RuntimeException(e);
+            }
+        }
         freeze(registry);
         return registry.get(id) != null ? value : null;
     }
