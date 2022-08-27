@@ -21,8 +21,8 @@ public class PrefixGui extends GuiBase {
         super(opener, 54, Component.text("接頭辞/接尾辞", DefinedTextColor.DARK_GREEN), false);
         this.parent = parent;
         this.opener = opener;
-        this.view = new PrefixesView(this, opener);
-        this.state = PrefixGuiState.AVAILABLE_PREFIXES;
+        this.setView(new PrefixesView(this, opener));
+        this.setState(PrefixGuiState.AVAILABLE_PREFIXES);
     }
 
     @Override
@@ -30,5 +30,13 @@ public class PrefixGui extends GuiBase {
         if (this.state != PrefixGuiState.WAITING_CALLBACK) {
             this.unRegisterAsListener();
         }
+    }
+
+    public void setView(View view) {
+        this.view = view;
+    }
+
+    public void setState(PrefixGuiState state) {
+        this.state = state;
     }
 }
