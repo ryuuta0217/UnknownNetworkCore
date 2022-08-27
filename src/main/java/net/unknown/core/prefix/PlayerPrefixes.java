@@ -89,7 +89,7 @@ public class PlayerPrefixes implements Listener {
                     if (config.isSet("available") && config.isList("available")) {
                         AVAILABLE_PREFIXES.put(uniqueId, config.getStringList("available").stream().map(GsonComponentSerializer.gson()::deserialize).collect(Collectors.toSet()));
                     } else {
-                        AVAILABLE_PREFIXES.put(uniqueId, new HashSet<>());
+                        AVAILABLE_PREFIXES.put(uniqueId, new LinkedHashSet<>());
                     }
                 }
             }
