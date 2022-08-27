@@ -1,11 +1,15 @@
 package net.unknown.survival.gui.prefix.view;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.builder.ItemStackBuilder;
+import net.unknown.core.gui.SignGui;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.gui.prefix.PrefixGui;
 import net.unknown.core.gui.view.PaginationView;
+import net.unknown.survival.gui.prefix.PrefixGuiState;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
@@ -21,7 +25,17 @@ public class PrefixesView extends PaginationView<Component> {
                             .append(prefix)
                             .append(Component.text(" に変更しました")));
                 },
-                (e) -> {
+                (event, instance) -> {
+            gui.setState(PrefixGuiState.WAITING_CALLBACK);
+            new SignGui()
+                    .withTarget(player)
+                    .withLines(Component.empty(), Component.text("^^^^^^^^^^^^^^^^^^^^"), Component.text("接頭辞を入力"), Component.empty())
+                    .onComplete(lines -> {
+                        String raw = PlainTextComponentSerializer.plainText().serialize(lines.get(0));
+                        Component colored = LegacyComponentSerializer.legacyAmpersand().deserialize(raw);
+                        PlayerPrefixes.addAvailablePrefix(player, colored);
+                        instance.setData(PlayerPrefixes.getAvailablePrefixes(player), true);
+                    }).open();
                 });
     }
 }
