@@ -50,7 +50,7 @@ import java.util.function.Function;
 public class PaginationView<T> implements View {
     private final GuiBase gui;
     //private final Set<T> data;
-    private final List<Set<T>> splitData;
+    private List<Set<T>> splitData;
     private final Function<T, ItemStack> processor;
     private final Map<Integer, T> slot2data = new HashMap<>();
     private final BiConsumer<InventoryClickEvent, T> onClick;
@@ -59,8 +59,7 @@ public class PaginationView<T> implements View {
 
     public PaginationView(GuiBase gui, Set<T> data, Function<T, ItemStack> processor, BiConsumer<InventoryClickEvent, T> onClick) {
         this.gui = gui;
-        //this.data = data;
-        this.splitData = ListUtil.splitListAsLinkedSet(data, 45);
+        this.setData(data, false);
         this.processor = processor;
         this.onClick = onClick;
     }
@@ -71,7 +70,15 @@ public class PaginationView<T> implements View {
         this.showPage(1);
     }
 
-    private void showPage(int newPage) {
+    private void setData(Set<T> data, boolean reload) {
+        this.clearInventory();
+        //this.data = data;
+        this.splitData = ListUtil.splitListAsLinkedSet(data, 45);
+        if (reload) this.showPage(Math.min(this.splitData.size(), this.currentPage));
+    }
+
+    public void showPage(int newPage) {
+        if (newPage < 1) throw new IllegalArgumentException("Page is greater than 1");
         if (this.splitData.size() >= newPage) throw new IllegalArgumentException("Maximum allowed page " + this.splitData.size() + " reached.");
         this.currentPage = newPage;
         this.clearInventory();
@@ -105,9 +112,23 @@ public class PaginationView<T> implements View {
 
     @Override
     public void onClick(InventoryClickEvent event) {
-        if (event.getSlot() == 52) this.showPage(this.currentPage - 1);
-        else if (event.getSlot() == 53) this.showPage(this.currentPage + 1);
-        else if (this.slot2data.containsKey(event.getSlot())) this.onClick.accept(event, this.slot2data.get(event.getSlot()));
+        switch (event.getSlot()) {
+            case 52 -> {
+                if ((this.currentPage - 1) > 0) {
+                    this.showPage(this.currentPage - 1);
+                }
+            }
+            case 53 -> {
+                if ((this.currentPage + 1) <= this.splitData.size()) {
+                    this.showPage(this.currentPage + 1);
+                }
+            }
+            default -> {
+                if (this.slot2data.containsKey(event.getSlot())) {
+                    this.onClick.accept(event, this.slot2data.get(event.getSlot()));
+                }
+            }
+        }
     }
 
     @Override
