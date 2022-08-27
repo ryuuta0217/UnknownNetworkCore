@@ -99,20 +99,20 @@ public class GuiBase implements Listener {
     }
 
     @EventHandler
-    public void onInventoryOpen(InventoryOpenEvent event) {
+    private void onInventoryOpen(InventoryOpenEvent event) {
         if (!event.getInventory().equals(this.inventory)) return;
         onOpen(event);
     }
 
     @EventHandler
-    public void onInventoryClose(InventoryCloseEvent event) {
+    private void onInventoryClose(InventoryCloseEvent event) {
         if (!event.getInventory().equals(this.inventory)) return;
         onClose(event);
         if (this.unRegisterOnClose) unRegisterAsListener();
     }
 
     @EventHandler
-    public void onInventoryClick(InventoryClickEvent event) {
+    private void onInventoryClick(InventoryClickEvent event) {
         if (!this.inventory.equals(event.getInventory())) return; // When opened Inventory is not Gui
         if (!this.inventory.equals(event.getClickedInventory())) { // When clicked inventory is not Gui
             if (event.getClick().isShiftClick()) { // When Shift Click
@@ -125,7 +125,7 @@ public class GuiBase implements Listener {
     }
 
     @EventHandler
-    public void onInventoryDrag(InventoryDragEvent event) {
+    private void onInventoryDrag(InventoryDragEvent event) {
         if (!this.inventory.equals(event.getInventory())) return; // When dragged Inventory is not Gui
         event.setCancelled(true);
     }
