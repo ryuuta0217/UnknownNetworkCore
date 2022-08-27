@@ -3,10 +3,11 @@ package net.unknown.survival.gui.prefix;
 import net.kyori.adventure.text.Component;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
-import net.unknown.core.gui.View;
+import net.unknown.core.gui.view.ChooseView;
+import net.unknown.core.gui.view.View;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.survival.gui.MainGui;
-import net.unknown.survival.gui.views.ChooseView;
+import net.unknown.survival.gui.prefix.view.PrefixesView;
 import org.bukkit.entity.Player;
 
 import javax.annotation.Nonnull;

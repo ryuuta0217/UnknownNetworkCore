@@ -29,7 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.gui;
+package net.unknown.core.gui.view;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
 

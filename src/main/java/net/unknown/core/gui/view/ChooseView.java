@@ -1,7 +1,6 @@
-package net.unknown.survival.gui.views;
+package net.unknown.core.gui.view;
 
 import net.unknown.core.gui.GuiBase;
-import net.unknown.core.gui.View;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 

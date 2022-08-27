@@ -36,7 +36,7 @@ import net.kyori.adventure.text.Component;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.define.DefinedTextColor;
-import net.unknown.core.gui.View;
+import net.unknown.core.gui.view.View;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.data.model.Warp;
 import net.unknown.survival.gui.warp.WarpGui;

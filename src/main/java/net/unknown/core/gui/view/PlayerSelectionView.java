@@ -29,7 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.gui.views;
+package net.unknown.core.gui.view;
 
 import com.ryuuta0217.util.ListUtil;
 import net.kyori.adventure.text.Component;
@@ -39,7 +39,6 @@ import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.gui.SignGui;
-import net.unknown.core.gui.View;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
