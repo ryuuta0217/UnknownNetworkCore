@@ -33,6 +33,7 @@ package net.unknown.survival.gui.views;
 
 import com.ryuuta0217.util.ListUtil;
 import net.kyori.adventure.text.Component;
+import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
@@ -45,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class PaginationView<T> implements View {
@@ -54,20 +56,25 @@ public class PaginationView<T> implements View {
     private final Function<T, ItemStack> processor;
     private final Map<Integer, T> slot2data = new HashMap<>();
     private final BiConsumer<InventoryClickEvent, T> onClick;
+    private Consumer<InventoryClickEvent> createNewAction;
 
     private int currentPage = 1;
 
-    public PaginationView(GuiBase gui, Set<T> data, Function<T, ItemStack> processor, BiConsumer<InventoryClickEvent, T> onClick) {
+    public PaginationView(GuiBase gui, Set<T> data, Function<T, ItemStack> processor, BiConsumer<InventoryClickEvent, T> onClick, Consumer<InventoryClickEvent> createNewAction) {
         this.gui = gui;
         this.setData(data, false);
         this.processor = processor;
         this.onClick = onClick;
+        this.createNewAction = createNewAction;
     }
 
     @Override
     public void initialize() {
         this.clearInventory();
         this.showPage(1);
+        if (this.createNewAction != null) this.gui.getInventory().setItem(49, DefinedItemStackBuilders.plus()
+                .displayName(Component.text("新規追加", DefinedTextColor.GREEN))
+                .build());
     }
 
     private void setData(Set<T> data, boolean reload) {
@@ -113,6 +120,9 @@ public class PaginationView<T> implements View {
     @Override
     public void onClick(InventoryClickEvent event) {
         switch (event.getSlot()) {
+            case 49 -> {
+                this.createNewAction.accept(event);
+            }
             case 52 -> {
                 if ((this.currentPage - 1) > 0) {
                     this.showPage(this.currentPage - 1);
