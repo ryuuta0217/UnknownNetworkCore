@@ -32,6 +32,9 @@
 package net.unknown.survival.gui.views;
 
 import com.ryuuta0217.util.ListUtil;
+import net.kyori.adventure.text.Component;
+import net.unknown.core.define.DefinedItemStackBuilders;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.gui.View;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -42,27 +45,29 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class PaginationView<T> implements View {
     private final GuiBase gui;
-    private final Set<T> data;
+    //private final Set<T> data;
     private final List<Set<T>> splitData;
     private final Function<T, ItemStack> processor;
     private final Map<Integer, T> slot2data = new HashMap<>();
+    private final BiConsumer<InventoryClickEvent, T> onClick;
 
     private int currentPage = 1;
 
     public PaginationView(GuiBase gui, Set<T> data, Function<T, ItemStack> processor, BiConsumer<InventoryClickEvent, T> onClick) {
         this.gui = gui;
-        this.data = data;
+        //this.data = data;
         this.splitData = ListUtil.splitListAsLinkedSet(data, 45);
         this.processor = processor;
+        this.onClick = onClick;
     }
 
     @Override
     public void initialize() {
+        this.clearInventory();
         this.showPage(1);
     }
 
@@ -81,16 +86,18 @@ public class PaginationView<T> implements View {
 
         if (this.splitData.size() > 1) {
             if (this.currentPage > 1) {
-                // Previous button
+                this.gui.getInventory().setItem(52, DefinedItemStackBuilders.leftArrow()
+                        .displayName(Component.text("前のページ", DefinedTextColor.YELLOW))
+                        .build());
             } else {
-                // Remove Previous button
                 this.gui.getInventory().clear(52);
             }
 
             if (this.currentPage <= this.splitData.size()) {
-                // Next button
+                this.gui.getInventory().setItem(53, DefinedItemStackBuilders.rightArrow()
+                        .displayName(Component.text("次のページ", DefinedTextColor.YELLOW))
+                        .build());
             } else {
-                // Remove Next button
                 this.gui.getInventory().clear(53);
             }
         }
@@ -98,11 +105,14 @@ public class PaginationView<T> implements View {
 
     @Override
     public void onClick(InventoryClickEvent event) {
-
+        if (event.getSlot() == 52) this.showPage(this.currentPage - 1);
+        else if (event.getSlot() == 53) this.showPage(this.currentPage + 1);
+        else if (this.slot2data.containsKey(event.getSlot())) this.onClick.accept(event, this.slot2data.get(event.getSlot()));
     }
 
     @Override
     public void clearInventory() {
         this.slot2data.keySet().forEach(slot -> this.gui.getInventory().clear(slot));
+        this.slot2data.clear();
     }
 }
