@@ -76,7 +76,7 @@ public class PaginationView<T> implements View {
                 .build());
     }
 
-    private void setData(Set<T> data, boolean reload) {
+    public void setData(Set<T> data, boolean reload) {
         this.clearInventory();
         //this.data = data;
         this.splitData = ListUtil.splitListAsLinkedSet(data, 45);
