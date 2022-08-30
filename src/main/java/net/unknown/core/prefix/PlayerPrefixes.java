@@ -136,7 +136,11 @@ public class PlayerPrefixes implements Listener {
     }
 
     public static void setPrefix(UUID uniqueId, Component newPrefix) {
+        if (ACTIVE_PREFIXES.containsKey(uniqueId) && !ACTIVE_PREFIXES.get(uniqueId).equals(Component.empty())) {
+            AVAILABLE_PREFIXES.get(uniqueId).add(ACTIVE_PREFIXES.get(uniqueId));
+        }
         ACTIVE_PREFIXES.put(uniqueId, newPrefix);
+        AVAILABLE_PREFIXES.get(uniqueId).remove(newPrefix);
         RunnableManager.runAsync(() -> save(uniqueId));
     }
 
