@@ -144,9 +144,9 @@ public class PlayerData extends Config {
 
             switch (version) {
                 case 1:
-                    MigrateToV2FromV1.migrate(tempUniqueId, this.getFile(), this.getConfig());
+                    Migrators.MigrateToV2FromV1.migrate(tempUniqueId, this.getFile(), this.getConfig());
                 case 2:
-                    MigrateToV3FromV2.migrate(tempUniqueId, this.getFile(), this.getConfig());
+                    Migrators.MigrateToV3FromV2.migrate(tempUniqueId, this.getFile(), this.getConfig());
             }
 
             if (this.getConfig().getInt("config-version") == VERSION) {
@@ -372,132 +372,134 @@ public class PlayerData extends Config {
         RunnableManager.runAsync(this::save);
     }
 
-    public static class MigrateToV2FromV1 {
-        public static void migrate(UUID uniqueId, File file, FileConfiguration config) {
-            if (config.isSet("config-version") && config.getInt("config-version") <= 1) {
-                String playerName = uniqueId.toString();
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
-                if (offlinePlayer != null) playerName = offlinePlayer.getName();
-                Logger LOGGER = Logger.getLogger("UNC/PlayerDataMigrator/V1 -> V2/" + uniqueId);
+    public static class Migrators {
+        public static class MigrateToV2FromV1 {
+            public static void migrate(UUID uniqueId, File file, FileConfiguration config) {
+                if (config.isSet("config-version") && config.getInt("config-version") <= 1) {
+                    String playerName = uniqueId.toString();
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
+                    if (offlinePlayer != null) playerName = offlinePlayer.getName();
+                    Logger LOGGER = Logger.getLogger("UNC/PlayerDataMigrator/V1 -> V2/" + uniqueId);
 
-                if (config.isSet("homes")) {
-                    LOGGER.info("Started migration for " + playerName + "'s homes");
-                    ConfigurationSection section = config.getConfigurationSection("homes");
-                    if (section != null) {
-                        /* LOAD OLD HOMES */
-                        Map<String, Home> oldHomeMap = new LinkedHashMap<>(); // 登録順が崩れないようにLinkedを使う
-                        section.getKeys(false).forEach(homeName -> {
-                            LOGGER.info("Migrating: homes." + homeName + " -> homes.uncategorized." + homeName);
-                            Location loc = ConfigurationSerializer.getLocationData(section, homeName);
-                            if (loc != null) {
-                                oldHomeMap.put(homeName, new Home(homeName, loc));
-                            } else LOGGER.warning("Home " + homeName + " was *removed* because world is null.");
-                        });
+                    if (config.isSet("homes")) {
+                        LOGGER.info("Started migration for " + playerName + "'s homes");
+                        ConfigurationSection section = config.getConfigurationSection("homes");
+                        if (section != null) {
+                            /* LOAD OLD HOMES */
+                            Map<String, Home> oldHomeMap = new LinkedHashMap<>(); // 登録順が崩れないようにLinkedを使う
+                            section.getKeys(false).forEach(homeName -> {
+                                LOGGER.info("Migrating: homes." + homeName + " -> homes.uncategorized." + homeName);
+                                Location loc = ConfigurationSerializer.getLocationData(section, homeName);
+                                if (loc != null) {
+                                    oldHomeMap.put(homeName, new Home(homeName, loc));
+                                } else LOGGER.warning("Home " + homeName + " was *removed* because world is null.");
+                            });
 
-                        /* CLEAR OLD HOMES */
-                        config.set("homes", null);
+                            /* CLEAR OLD HOMES */
+                            config.set("homes", null);
 
-                        /* PUT NEW HOMES */
-                        oldHomeMap.forEach((name, home) -> ConfigurationSerializer.setLocationData(config, "homes.uncategorized." + name, home.location()));
-                    }
-                } else {
-                    LOGGER.info("Migration for " + playerName + "'s homes skipped because no homes was found.");
-                }
-
-                /* CHANGE CONFIG VERSION */
-                config.set("config-version", 2);
-
-                try {
-                    config.save(file);
-                } catch (IOException e) {
-                    LOGGER.warning("Failed to save migrated configuration data.");
-                }
-            }
-        }
-    }
-
-    public static class MigrateToV3FromV2 {
-        public static void migrate(UUID uniqueId, File configFile, FileConfiguration config) {
-            if (config.isSet("config-version") && config.getInt("config-version") == 2) {
-                String playerName = uniqueId.toString();
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
-                if (offlinePlayer != null) playerName = offlinePlayer.getName();
-                Logger LOGGER = Logger.getLogger("UNC/PlayerDataMigrator/V2 -> V3/" + playerName);
-
-                Map<String, Material> category2Material = new HashMap<>();
-
-                if (config.isSet("homeCategoryItems")) {
-                    ConfigurationSection homeCategoryItemsSection = config.getConfigurationSection("homeCategoryItems");
-                    if (homeCategoryItemsSection == null) throw new IllegalStateException("Something wrong.");
-                    homeCategoryItemsSection.getKeys(false).forEach(categoryName -> {
-                        category2Material.put(categoryName, Material.valueOf(homeCategoryItemsSection.getString(categoryName)));
-                    });
-                }
-
-                Map<String, ConfigurationSection> uncategorizedHomes = new LinkedHashMap<>(); // 登録順が崩れないようにLinkedを使う
-
-                if (config.isSet("homes.uncategorized")) {
-                    ConfigurationSection uncategorizedHomeSection = config.getConfigurationSection("homes.uncategorized");
-                    if (uncategorizedHomeSection == null) throw new IllegalStateException("Something wrong.");
-
-                    uncategorizedHomeSection.getKeys(false).forEach(homeName -> {
-                        if (uncategorizedHomeSection.isSet(homeName)) {
-                            uncategorizedHomes.put(homeName, uncategorizedHomeSection.getConfigurationSection(homeName));
+                            /* PUT NEW HOMES */
+                            oldHomeMap.forEach((name, home) -> ConfigurationSerializer.setLocationData(config, "homes.uncategorized." + name, home.location()));
                         }
-                    });
-                }
+                    } else {
+                        LOGGER.info("Migration for " + playerName + "'s homes skipped because no homes was found.");
+                    }
 
-                config.set("homeCategoryItems", null);
+                    /* CHANGE CONFIG VERSION */
+                    config.set("config-version", 2);
 
-                category2Material.forEach((categoryName, material) -> {
-                    if (categoryName.equalsIgnoreCase("uncategorized")) categoryName = "default";
-                    config.set("homeGroupItems." + categoryName, material.name());
-                });
-
-                if (uncategorizedHomes.size() > 0) {
-                    LOGGER.info("Renaming Home Category \"uncategorized\" to Home Group \"default\"");
-                    config.set("homes.uncategorized", null);
-
-                    uncategorizedHomes.forEach((homeName, section) -> {
-                        config.set("homes.default." + homeName, section);
-                    });
-                }
-
-                config.set("config-version", 3);
-
-                try {
-                    config.save(configFile);
-                } catch (IOException e) {
-                    LOGGER.warning("Failed to save migrated configuration data.");
+                    try {
+                        config.save(file);
+                    } catch (IOException e) {
+                        LOGGER.warning("Failed to save migrated configuration data.");
+                    }
                 }
             }
         }
-    }
 
-    public static class MigrateToV4FromV3 {
-        public static void migrate(UUID uniqueId, File configFile, FileConfiguration config) {
-            if (config.isSet("config-version") && config.getInt("config-version") == 3) {
-                String playerName = uniqueId.toString();
-                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
-                if(offlinePlayer.getName() != null) playerName = offlinePlayer.getName();
-                Logger LOGGER = Logger.getLogger("UNC/PlayerDataMigrator/V3 -> V4/" + playerName);
+        public static class MigrateToV3FromV2 {
+            public static void migrate(UUID uniqueId, File configFile, FileConfiguration config) {
+                if (config.isSet("config-version") && config.getInt("config-version") == 2) {
+                    String playerName = uniqueId.toString();
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
+                    if (offlinePlayer != null) playerName = offlinePlayer.getName();
+                    Logger LOGGER = Logger.getLogger("UNC/PlayerDataMigrator/V2 -> V3/" + playerName);
 
-                Map<String, String> channelChatForcePrefixes = new HashMap<>();
+                    Map<String, Material> category2Material = new HashMap<>();
 
-                if(config.isSet("force-global-chat-prefix")) {
-                    channelChatForcePrefixes.put("global", config.getString("force-global-chat-prefix"));
+                    if (config.isSet("homeCategoryItems")) {
+                        ConfigurationSection homeCategoryItemsSection = config.getConfigurationSection("homeCategoryItems");
+                        if (homeCategoryItemsSection == null) throw new IllegalStateException("Something wrong.");
+                        homeCategoryItemsSection.getKeys(false).forEach(categoryName -> {
+                            category2Material.put(categoryName, Material.valueOf(homeCategoryItemsSection.getString(categoryName)));
+                        });
+                    }
+
+                    Map<String, ConfigurationSection> uncategorizedHomes = new LinkedHashMap<>(); // 登録順が崩れないようにLinkedを使う
+
+                    if (config.isSet("homes.uncategorized")) {
+                        ConfigurationSection uncategorizedHomeSection = config.getConfigurationSection("homes.uncategorized");
+                        if (uncategorizedHomeSection == null) throw new IllegalStateException("Something wrong.");
+
+                        uncategorizedHomeSection.getKeys(false).forEach(homeName -> {
+                            if (uncategorizedHomeSection.isSet(homeName)) {
+                                uncategorizedHomes.put(homeName, uncategorizedHomeSection.getConfigurationSection(homeName));
+                            }
+                        });
+                    }
+
+                    config.set("homeCategoryItems", null);
+
+                    category2Material.forEach((categoryName, material) -> {
+                        if (categoryName.equalsIgnoreCase("uncategorized")) categoryName = "default";
+                        config.set("homeGroupItems." + categoryName, material.name());
+                    });
+
+                    if (uncategorizedHomes.size() > 0) {
+                        LOGGER.info("Renaming Home Category \"uncategorized\" to Home Group \"default\"");
+                        config.set("homes.uncategorized", null);
+
+                        uncategorizedHomes.forEach((homeName, section) -> {
+                            config.set("homes.default." + homeName, section);
+                        });
+                    }
+
+                    config.set("config-version", 3);
+
+                    try {
+                        config.save(configFile);
+                    } catch (IOException e) {
+                        LOGGER.warning("Failed to save migrated configuration data.");
+                    }
                 }
+            }
+        }
 
-                config.set("force-global-chat-prefix", null);
+        public static class MigrateToV4FromV3 {
+            public static void migrate(UUID uniqueId, File configFile, FileConfiguration config) {
+                if (config.isSet("config-version") && config.getInt("config-version") == 3) {
+                    String playerName = uniqueId.toString();
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uniqueId);
+                    if(offlinePlayer.getName() != null) playerName = offlinePlayer.getName();
+                    Logger LOGGER = Logger.getLogger("UNC/PlayerDataMigrator/V3 -> V4/" + playerName);
 
-                config.createSection("force-channel-chat-prefixes", channelChatForcePrefixes);
+                    Map<String, String> channelChatForcePrefixes = new HashMap<>();
 
-                config.set("config-version", 4);
+                    if(config.isSet("force-global-chat-prefix")) {
+                        channelChatForcePrefixes.put("global", config.getString("force-global-chat-prefix"));
+                    }
 
-                try {
-                    config.save(configFile);
-                } catch (IOException e) {
-                    LOGGER.warning("Failed to save migrated configuration data.");
+                    config.set("force-global-chat-prefix", null);
+
+                    config.createSection("force-channel-chat-prefixes", channelChatForcePrefixes);
+
+                    config.set("config-version", 4);
+
+                    try {
+                        config.save(configFile);
+                    } catch (IOException e) {
+                        LOGGER.warning("Failed to save migrated configuration data.");
+                    }
                 }
             }
         }
