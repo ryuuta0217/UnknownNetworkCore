@@ -83,7 +83,7 @@ public class PaginationView<T> implements View {
 
     public void showPage(int newPage) {
         if (newPage < 1) throw new IllegalArgumentException("Page is greater than 1");
-        if (this.splitData.size() >= newPage) throw new IllegalArgumentException("Maximum allowed page " + this.splitData.size() + " reached.");
+        if (this.splitData.size() > newPage) throw new IllegalArgumentException("Maximum allowed page " + this.splitData.size() + " reached.");
         this.currentPage = newPage;
         this.clearInventory();
         this.splitData.get(this.currentPage - 1).forEach(data -> {
@@ -104,7 +104,7 @@ public class PaginationView<T> implements View {
                 this.gui.getInventory().clear(52);
             }
 
-            if (this.currentPage <= this.splitData.size()) {
+            if (this.currentPage < this.splitData.size()) {
                 this.gui.getInventory().setItem(53, DefinedItemStackBuilders.rightArrow()
                         .displayName(Component.text("次のページ", DefinedTextColor.YELLOW))
                         .build());
@@ -117,16 +117,14 @@ public class PaginationView<T> implements View {
     @Override
     public void onClick(InventoryClickEvent event) {
         switch (event.getSlot()) {
-            case 49 -> {
-                this.createNewAction.accept(event, this);
-            }
+            case 49 -> this.createNewAction.accept(event, this);
             case 52 -> {
                 if ((this.currentPage - 1) > 0) {
                     this.showPage(this.currentPage - 1);
                 }
             }
             case 53 -> {
-                if ((this.currentPage + 1) <= this.splitData.size()) {
+                if ((this.currentPage + 1) < this.splitData.size()) {
                     this.showPage(this.currentPage + 1);
                 }
             }
