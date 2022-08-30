@@ -38,6 +38,7 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.UnknownNetworkSurvival;
+import net.unknown.survival.gui.prefix.PrefixGui;
 import net.unknown.survival.gui.warp.WarpGui;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -76,6 +77,11 @@ public class MainGui extends GuiBase {
                                     Component.text("が行えます。", DefinedTextColor.GOLD))
                             .build());
 
+                    inv.setItem(15, new ItemStackBuilder(Material.NAME_TAG)
+                            .displayName(Component.text("接頭辞の設定", DefinedTextColor.YELLOW))
+                            .lore(Component.text("接頭辞の追加、変更はこちら", DefinedTextColor.GREEN))
+                            .build());
+
                     inv.setItem(18, new ItemStackBuilder(Material.PLAYER_HEAD)
                             .displayName(Component.text("頭に被る", TextColor.color(0x657CFF)))
                             .lore(Component.text("アイテムを持ってここを左クリックで頭に被ります", TextColor.color(0xFF76A6)))
@@ -97,6 +103,7 @@ public class MainGui extends GuiBase {
                 }
             }
             case 14 -> event.getWhoClicked().openInventory(new WarpGui(this, (Player) event.getWhoClicked()).getInventory());
+            case 15 -> event.getWhoClicked().openInventory(new PrefixGui(this, (Player) event.getWhoClicked()).getInventory());
             case 18 -> {
                 if (event.getCursor() == null || event.getCursor().getType() == Material.AIR) return;
                 if (event.getClick() != ClickType.LEFT) return;
