@@ -99,20 +99,20 @@ public class GuiBase implements Listener {
     }
 
     @EventHandler
-    private void onInventoryOpen(InventoryOpenEvent event) {
+    public void onInventoryOpen(InventoryOpenEvent event) {
         if (!event.getInventory().equals(this.inventory)) return;
         onOpen(event);
     }
 
     @EventHandler
-    private void onInventoryClose(InventoryCloseEvent event) {
+    public void onInventoryClose(InventoryCloseEvent event) {
         if (!event.getInventory().equals(this.inventory)) return;
         onClose(event);
         if (this.unRegisterOnClose) unRegisterAsListener();
     }
 
     @EventHandler
-    private void onInventoryClick(InventoryClickEvent event) {
+    public void onInventoryClick(InventoryClickEvent event) {
         if (!this.inventory.equals(event.getInventory())) return; // When opened Inventory is not Gui
         if (!this.inventory.equals(event.getClickedInventory())) { // When clicked inventory is not Gui
             if (event.getClick().isShiftClick()) { // When Shift Click
