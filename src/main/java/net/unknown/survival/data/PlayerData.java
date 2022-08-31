@@ -65,7 +65,7 @@ public class PlayerData extends Config {
     private Map<String, Material> group2Material;
     private int homeBaseCount;
     private int homeAdditionalCount;
-    private final SessionData sessionData = new SessionData();
+    private final SessionData sessionData = new SessionData(this);
     private ChatData chatData;
 
     public PlayerData(UUID uniqueId) {
@@ -336,7 +336,16 @@ public class PlayerData extends Config {
     }
 
     public static class SessionData {
+        private final PlayerData parent;
         private boolean isAfk = false;
+
+        public SessionData(PlayerData parent) {
+            this.parent = parent;
+        }
+
+        public PlayerData getPlayerData() {
+            return this.parent;
+        }
 
         public boolean isAfk() {
             return this.isAfk;
@@ -358,6 +367,10 @@ public class PlayerData extends Config {
             this.replyTarget = replyTargetStr != null ? UUID.fromString(replyTargetStr) : null;
             this.forceGlobalChatPrefix = forceGlobalChatPrefix;
             this.useKanaConvert = useKanaConvert;
+        }
+
+        public PlayerData getPlayerData() {
+            return this.parent;
         }
 
         public UUID getPrivateMessageReplyTarget() {
