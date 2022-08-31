@@ -65,10 +65,8 @@ public class PlayerData extends Config {
     private Map<String, Material> group2Material;
     private int homeBaseCount;
     private int homeAdditionalCount;
-    private UUID replyTarget;
     private boolean isAfk = false;
-    private String forceGlobalChatPrefix = "g.";
-    private boolean useKanaConvert = false;
+    private ChatData chatData;
 
     public PlayerData(UUID uniqueId) {
         super("players/" + uniqueId + ".yml", false, "UNC/PlayerData/" + Bukkit.getOfflinePlayer(uniqueId).getName());
@@ -188,12 +186,7 @@ public class PlayerData extends Config {
         this.homeBaseCount = this.getConfig().isSet("home-base-count") ? this.getConfig().getInt("home-base-count") : DEFAULT_MAX_HOME_COUNT;
         this.homeAdditionalCount = this.getConfig().isSet("home-additional-count") ? this.getConfig().getInt("home-additional-count") : 0;
 
-        if (this.getConfig().isSet("reply-target"))
-            this.replyTarget = UUID.fromString(this.getConfig().getString("reply-target"));
-        if (this.getConfig().isSet("force-global-chat-prefix"))
-            this.forceGlobalChatPrefix = this.getConfig().getString("force-global-chat-prefix");
-        if (this.getConfig().isSet("use-kana-convert"))
-            this.useKanaConvert = this.getConfig().getBoolean("use-kana-convert");
+        this.chatData = ChatData.load(this, this.getConfig());
     }
 
     @Override
@@ -214,10 +207,7 @@ public class PlayerData extends Config {
 
         this.getConfig().set("home-base-count", homeBaseCount);
         this.getConfig().set("home-additional-count", homeAdditionalCount);
-        if (this.replyTarget != null) this.getConfig().set("reply-target", this.replyTarget.toString());
-        if (this.forceGlobalChatPrefix != null)
-            this.getConfig().set("force-global-chat-prefix", this.forceGlobalChatPrefix);
-        this.getConfig().set("use-kana-convert", this.useKanaConvert);
+        this.chatData.save(this.getConfig());
         super.save();
     }
 
@@ -345,31 +335,62 @@ public class PlayerData extends Config {
         this.isAfk = afk;
     }
 
-    public UUID getPrivateMessageReplyTarget() {
-        return this.replyTarget;
+    public ChatData getChatData() {
+        return this.chatData;
     }
 
-    public void setPrivateMessageReplyTarget(UUID replyTarget) {
-        this.replyTarget = replyTarget;
-        RunnableManager.runAsync(this::save);
-    }
+    public static class ChatData {
+        private final PlayerData parent;
+        private UUID replyTarget;
+        private String forceGlobalChatPrefix = "g.";
+        private boolean useKanaConvert = false;
 
-    public String getForceGlobalChatPrefix() {
-        return this.forceGlobalChatPrefix;
-    }
+        public ChatData(PlayerData parent, String replyTargetStr, String forceGlobalChatPrefix, boolean useKanaConvert) {
+            this.parent = parent;
+            this.replyTarget = replyTargetStr != null ? UUID.fromString(replyTargetStr) : null;
+            this.forceGlobalChatPrefix = forceGlobalChatPrefix;
+            this.useKanaConvert = useKanaConvert;
+        }
 
-    public void setForceGlobalChatPrefix(String forceGlobalChatPrefix) {
-        this.forceGlobalChatPrefix = forceGlobalChatPrefix;
-        RunnableManager.runAsync(this::save);
-    }
+        public UUID getPrivateMessageReplyTarget() {
+            return this.replyTarget;
+        }
 
-    public boolean isUseKanaConvert() {
-        return this.useKanaConvert;
-    }
+        public void setPrivateMessageReplyTarget(UUID replyTarget) {
+            this.replyTarget = replyTarget;
+            RunnableManager.runAsync(this.parent::save);
+        }
 
-    public void setUseKanaConvert(boolean useKanaConvert) {
-        this.useKanaConvert = useKanaConvert;
-        RunnableManager.runAsync(this::save);
+        public String getForceGlobalChatPrefix() {
+            return this.forceGlobalChatPrefix;
+        }
+
+        public void setForceGlobalChatPrefix(String forceGlobalChatPrefix) {
+            this.forceGlobalChatPrefix = forceGlobalChatPrefix;
+            RunnableManager.runAsync(this.parent::save);
+        }
+
+        public boolean isUseKanaConvert() {
+            return this.useKanaConvert;
+        }
+
+        public void setUseKanaConvert(boolean useKanaConvert) {
+            this.useKanaConvert = useKanaConvert;
+            RunnableManager.runAsync(this.parent::save);
+        }
+
+        public static ChatData load(PlayerData parent, FileConfiguration config) {
+            return new ChatData(parent,
+                    config.getString("reply-target", null),
+                    config.getString("force-global-chat-prefix", "g."),
+                    config.getBoolean("use-kana-convert", false));
+        }
+
+        public void save(FileConfiguration config) {
+            if (this.replyTarget != null) config.set("reply-target", this.replyTarget.toString());
+            config.set("force-global-chat-prefix", this.forceGlobalChatPrefix);
+            config.set("use-kana-convert", this.useKanaConvert);
+        }
     }
 
     public static class Migrators {

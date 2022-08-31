@@ -92,6 +92,6 @@ public class PrivateChatChannel extends ChatChannel {
                 .stream()
                 .map(r -> ((CraftPlayer) r).getHandle())
                 .forEach(r -> r.sendSystemMessage(MsgCommand.receiverMessage(sender.getName(), message)));
-        PlayerData.of(receiver.getUUID()).setPrivateMessageReplyTarget(sender.getUUID());
+        PlayerData.of(receiver.getUUID()).getChatData().setPrivateMessageReplyTarget(sender.getUUID());
     }
 }

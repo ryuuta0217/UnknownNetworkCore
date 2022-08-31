@@ -138,9 +138,9 @@ public class MsgCommand {
                 .stream()
                 .map(p -> ((CraftPlayer) p).getHandle())
                 .forEach(receiver -> {
-                    PlayerData.of(receiver.getUUID()).setPrivateMessageReplyTarget(sender != null ? sender.getUUID() : SERVER_UUID);
+                    PlayerData.of(receiver.getUUID()).getChatData().setPrivateMessageReplyTarget(sender != null ? sender.getUUID() : SERVER_UUID);
                     if (sender != null)
-                        PlayerData.of(sender.getUUID()).setPrivateMessageReplyTarget(receiver.getUUID());
+                        PlayerData.of(sender.getUUID()).getChatData().setPrivateMessageReplyTarget(receiver.getUUID());
 
                     Component name = sender != null ? sender.getName() : ctx.getSource().getDisplayName();
                     UUID uniqueId = sender != null ? sender.getUUID() : SERVER_UUID;
@@ -155,8 +155,8 @@ public class MsgCommand {
     private static int executeShowReplyTarget(CommandContext<CommandSourceStack> ctx) {
         UUID executorUniqueId = ctx.getSource().getEntity() != null ? ctx.getSource().getEntity().getUUID() : SERVER_UUID;
         String replyTarget = "なし";
-        if (PlayerData.of(executorUniqueId).getPrivateMessageReplyTarget() != null) {
-            UUID replyTargetUniqueId = PlayerData.of(executorUniqueId).getPrivateMessageReplyTarget();
+        if (PlayerData.of(executorUniqueId).getChatData().getPrivateMessageReplyTarget() != null) {
+            UUID replyTargetUniqueId = PlayerData.of(executorUniqueId).getChatData().getPrivateMessageReplyTarget();
             if (replyTargetUniqueId.equals(SERVER_UUID)) {
                 replyTarget = "サーバー";
             } else if (Bukkit.getEntity(replyTargetUniqueId) != null && Bukkit.getEntity(replyTargetUniqueId).getType() != EntityType.PLAYER) {
@@ -176,7 +176,7 @@ public class MsgCommand {
 
         ServerPlayer sender = ctx.getSource().getPlayerOrException();
 
-        UUID replyTarget = PlayerData.of(sender).getPrivateMessageReplyTarget();
+        UUID replyTarget = PlayerData.of(sender).getChatData().getPrivateMessageReplyTarget();
 
         if (replyTarget == null) {
             MessageUtil.sendErrorMessage(ctx.getSource(), "返信先が見つかりません");
@@ -187,7 +187,7 @@ public class MsgCommand {
         boolean receiverIsServer = replyTarget.equals(Util.NIL_UUID);
 
         if (!receiverIsServer) {
-            if (!Bukkit.getOfflinePlayer(PlayerData.of(sender).getPrivateMessageReplyTarget()).isOnline()) {
+            if (!Bukkit.getOfflinePlayer(PlayerData.of(sender).getChatData().getPrivateMessageReplyTarget()).isOnline()) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "返信先のプレイヤーがオフラインです");
                 return 2;
             }
@@ -213,7 +213,7 @@ public class MsgCommand {
             Bukkit.getServer().sendMessage(MessageUtil.convertNMS2Adventure(receiverMessage(sender.getName(), message)));
         }
 
-        PlayerData.of(receiver).setPrivateMessageReplyTarget(sender.getUUID());
+        PlayerData.of(receiver).getChatData().setPrivateMessageReplyTarget(sender.getUUID());
         return 0;
     }
 

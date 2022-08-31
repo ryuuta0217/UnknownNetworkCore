@@ -187,7 +187,7 @@ public class ChatManager implements Listener {
                     });
         }));
 
-        if (PlayerData.of(event.getPlayer()).isUseKanaConvert()) {
+        if (PlayerData.of(event.getPlayer()).getChatData().isUseKanaConvert()) {
             ChatRenderer baseRenderer = event.renderer();
             event.renderer((source, displayName, message, viewer) -> {
                 String msgStr = PlainTextComponentSerializer.plainText().serialize(message);
@@ -203,9 +203,9 @@ public class ChatManager implements Listener {
             });
         }
 
-        if (PlainTextComponentSerializer.plainText().serialize(event.message()).startsWith(PlayerData.of(event.getPlayer()).getForceGlobalChatPrefix())) {
+        if (PlainTextComponentSerializer.plainText().serialize(event.message()).startsWith(PlayerData.of(event.getPlayer()).getChatData().getForceGlobalChatPrefix())) {
             event.message(event.message().replaceText((b) -> {
-                b.match(PlayerData.of(event.getPlayer()).getForceGlobalChatPrefix()).once().replacement(Component.empty());
+                b.match(PlayerData.of(event.getPlayer()).getChatData().getForceGlobalChatPrefix()).once().replacement(Component.empty());
             }));
             GlobalChannel.getInstance().processChat(event);
         } else {

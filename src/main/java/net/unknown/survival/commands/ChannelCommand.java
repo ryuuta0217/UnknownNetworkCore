@@ -678,14 +678,14 @@ public class ChannelCommand {
 
             @Override
             public Object getValue(UUID uniqueId) {
-                return PlayerData.of(uniqueId).getForceGlobalChatPrefix();
+                return PlayerData.of(uniqueId).getChatData().getForceGlobalChatPrefix();
             }
 
             @Override
             public void setValue(UUID uniqueId, Object newValue) {
                 if (!(newValue instanceof String))
                     throw new IllegalArgumentException("Required \"String\" but found \"" + newValue.getClass().getName() + "\"");
-                PlayerData.of(uniqueId).setForceGlobalChatPrefix((String) newValue);
+                PlayerData.of(uniqueId).getChatData().setForceGlobalChatPrefix((String) newValue);
             }
         },
         KANA_CONVERT("ローマ字かな変換") {
@@ -696,14 +696,14 @@ public class ChannelCommand {
 
             @Override
             public Object getValue(UUID uniqueId) {
-                return PlayerData.of(uniqueId).isUseKanaConvert();
+                return PlayerData.of(uniqueId).getChatData().isUseKanaConvert();
             }
 
             @Override
             public void setValue(UUID uniqueId, Object newValue) {
                 if (!(newValue instanceof Boolean))
                     throw new IllegalArgumentException("Requires \"Boolean\" but found \"" + newValue.getClass().getName() + "\"");
-                PlayerData.of(uniqueId).setUseKanaConvert((boolean) newValue);
+                PlayerData.of(uniqueId).getChatData().setUseKanaConvert((boolean) newValue);
             }
         };
 
