@@ -65,7 +65,7 @@ public class PlayerData extends Config {
     private Map<String, Material> group2Material;
     private int homeBaseCount;
     private int homeAdditionalCount;
-    private boolean isAfk = false;
+    private final SessionData sessionData = new SessionData();
     private ChatData chatData;
 
     public PlayerData(UUID uniqueId) {
@@ -327,16 +327,24 @@ public class PlayerData extends Config {
         return false;
     }
 
-    public boolean isAfk() {
-        return this.isAfk;
-    }
-
-    public void setAfk(boolean afk) {
-        this.isAfk = afk;
+    public SessionData getSessionData() {
+        return this.sessionData;
     }
 
     public ChatData getChatData() {
         return this.chatData;
+    }
+
+    public static class SessionData {
+        private boolean isAfk = false;
+
+        public boolean isAfk() {
+            return this.isAfk;
+        }
+
+        public void setAfk(boolean afk) {
+            this.isAfk = afk;
+        }
     }
 
     public static class ChatData {
