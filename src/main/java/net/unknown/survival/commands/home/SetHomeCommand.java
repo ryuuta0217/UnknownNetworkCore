@@ -40,8 +40,12 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.model.Home;
+import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.enums.Permissions;
+import org.bukkit.Location;
 
 // /minecraft:sethome - send usage
 // /minecraft:sethome <String: 新規ホーム名> [Boolean: 上書き]
@@ -64,11 +68,12 @@ public class SetHomeCommand {
     private static int setHome(CommandContext<CommandSourceStack> ctx, boolean overwrite) throws CommandSyntaxException {
         String newHomeName = StringArgumentType.getString(ctx, "新規ホーム名");
 
-        PlayerData data = PlayerData.of(ctx.getSource().getPlayerOrException().getUUID());
-        int homeCount = data.getHomeCount();
+        PlayerData.HomeData data = PlayerData.of(ctx.getSource().getPlayerOrException().getUUID()).getHomeData();
+        int homeCount = data.getDefaultGroup().getHomes().size(); // TODO グループごとにホームの数を決めるか、全体のホーム数にするか
         int maxHomeCount = data.getMaxHomeCount();
+        HomeGroup group = data.getDefaultGroup();
 
-        boolean isHomeExists = data.isHomeExists(data.getDefaultGroup(), newHomeName);
+        boolean isHomeExists = group.hasHome(newHomeName);
         if ((!overwrite || !isHomeExists) && maxHomeCount != -1) {
             /*if (maxHomeCount == REGULAR_MAXIMUM_HOME_COUNT && Permissions.REGULAR.check(ctx) && homeCount >= maxHomeCount) {
                 MessageUtil.sendErrorMessage(ctx.getSource(), "常連プレイヤーが設定できるホームは" + REGULAR_MAXIMUM_HOME_COUNT + "個までです。\n" +
@@ -92,7 +97,8 @@ public class SetHomeCommand {
         }
 
         if (!isHomeExists || overwrite) {
-            data.addHome(data.getDefaultGroup(), newHomeName, ctx.getSource().getBukkitLocation(), true);
+            Location loc = MinecraftAdapter.location(ctx.getSource().getLevel(), ctx.getSource().getPosition(), ctx.getSource().getRotation());;
+            group.addHome(new Home(newHomeName, loc));
             MessageUtil.sendMessage(ctx.getSource(), "グループ " + data.getDefaultGroup() + " にホーム " + newHomeName + " を設定しました");
         } else {
             MessageUtil.sendErrorMessage(ctx.getSource(), "ホーム " + newHomeName + " はグループ " + data.getDefaultGroup() + " に既に設定されています。\n" +

@@ -35,6 +35,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.BuiltInExceptions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -45,6 +46,7 @@ import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -69,19 +71,7 @@ public class FindHomeCommand {
     private static int execute(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         double distance = DoubleArgumentType.getDouble(ctx, "distance");
         Location loc = ctx.getSource().getBukkitLocation();
-
-        Map<UUID, Map<String, List<Home>>> allHomes = new HashMap<>();
-        PlayerData.getAll().forEach((uniqueId, data) -> {
-            data.getGroups().forEach(groupName -> {
-                Map<String, List<Home>> groupedHomes = allHomes.getOrDefault(uniqueId, new HashMap<>());
-                List<Home> homes = groupedHomes.getOrDefault(groupName, new ArrayList<>());
-                homes.addAll(data.getHomes(groupName).values());
-                groupedHomes.put(groupName, homes);
-                allHomes.put(uniqueId, groupedHomes);
-            });
-        });
-
-        MessageUtil.sendAdminMessage(ctx.getSource(), distance + "ブロックの範囲に設定されているホームを検索しています...");
+        if (loc == null) throw new IllegalStateException("CommandSourceStack#getBukkitLocation is null.");
 
         AtomicBoolean searchAll = new AtomicBoolean(true);
         AtomicReference<Collection<ServerPlayer>> targets = new AtomicReference<>(null);
@@ -90,22 +80,32 @@ public class FindHomeCommand {
             targets.set(EntityArgument.getPlayers(ctx, "players"));
         }
 
+        Map<UUID, Set<HomeGroup>> allHomes = new HashMap<>();
+        if (searchAll.get()) {
+            PlayerData.getAll().forEach((uniqueId, data) -> {
+                if (!allHomes.containsKey(uniqueId)) allHomes.put(uniqueId, new HashSet<>());
+                data.getHomeData().getGroups().forEach((groupName, group) -> allHomes.get(uniqueId).add(group));
+            });
+        }
+
+        MessageUtil.sendAdminMessage(ctx.getSource(), distance + "ブロックの範囲に設定されているホームを検索しています...");
+
         RunnableManager.runAsync(() -> {
-            Map<UUID, Map<String, List<Home>>> resultsRaw = new HashMap<>();
+            Map<UUID, Map<HomeGroup, Set<Home>>> resultsRaw = new HashMap<>();
 
             if (searchAll.get()) {
                 allHomes.forEach((uniqueId, groupedHomes) -> {
-                    groupedHomes.forEach((groupName, homes) -> {
-                        homes.forEach(home -> {
-                            searchHome(uniqueId, loc, distance, groupName, home, resultsRaw);
+                    groupedHomes.forEach((group) -> {
+                        group.getHomes().forEach((homeName, home) -> {
+                            searchHome(uniqueId, loc, distance, group, home, resultsRaw);
                         });
                     });
                 });
             } else {
                 targets.get().forEach(player -> {
-                    PlayerData.of(player).getGroupedHomes().forEach((groupName, homes) -> {
-                        homes.forEach((name, home) -> {
-                            searchHome(player.getUUID(), loc, distance, groupName, home, resultsRaw);
+                    PlayerData.of(player).getHomeData().getGroups().forEach((groupName, group) -> {
+                        group.getHomes().forEach((homeName, home) -> {
+                            searchHome(player.getUUID(), loc, distance, group, home, resultsRaw);
                         });
                     });
                 });
@@ -128,14 +128,14 @@ public class FindHomeCommand {
         return 0;
     }
 
-    private static void searchHome(UUID uniqueId, Location centerLoc, double distance, String groupName, Home home, Map<UUID, Map<String, List<Home>>> output) {
+    private static void searchHome(UUID uniqueId, Location centerLoc, double distance, HomeGroup group, Home home, Map<UUID, Map<HomeGroup, Set<Home>>> output) {
         if (home.location().getWorld().getUID().equals(centerLoc.getWorld().getUID())) {
             double d = home.location().distance(centerLoc);
             if (d != -1 && d <= distance) {
-                Map<String, List<Home>> groupedHomes = output.getOrDefault(uniqueId, new HashMap<>());
-                List<Home> homes = groupedHomes.getOrDefault(groupName, new ArrayList<>());
+                Map<HomeGroup, Set<Home>> groupedHomes = output.getOrDefault(uniqueId, new HashMap<>());
+                Set<Home> homes = groupedHomes.getOrDefault(group, new HashSet<>());
                 homes.add(home);
-                groupedHomes.put(groupName, homes);
+                groupedHomes.put(group, homes);
                 output.put(uniqueId, groupedHomes);
             }
         }

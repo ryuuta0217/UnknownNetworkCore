@@ -57,7 +57,7 @@ public class SetHomeCountCommand {
                                 .then(Commands.argument("ベース個数", IntegerArgumentType.integer(-1))
                                         .executes(ctx -> {
                                             ServerPlayer player = EntityArgument.getPlayer(ctx, "対象");
-                                            PlayerData data = PlayerData.of(player);
+                                            PlayerData.HomeData data = PlayerData.of(player).getHomeData();
                                             int newCount = IntegerArgumentType.getInteger(ctx, "ベース個数");
                                             data.setHomeBaseCount(newCount);
                                             MessageUtil.sendAdminMessage(ctx.getSource(), player.displayName + " のホーム設定上限値(Base)を " + newCount + " に設定しました");
@@ -67,7 +67,7 @@ public class SetHomeCountCommand {
                                 .then(Commands.argument("追加個数", IntegerArgumentType.integer(-1))
                                         .executes(ctx -> {
                                             ServerPlayer player = EntityArgument.getPlayer(ctx, "対象");
-                                            PlayerData data = PlayerData.of(player);
+                                            PlayerData.HomeData data = PlayerData.of(player).getHomeData();
                                             int newCount = IntegerArgumentType.getInteger(ctx, "追加個数");
                                             data.setHomeAdditionalCount(newCount);
                                             MessageUtil.sendAdminMessage(ctx.getSource(), player.displayName + " のホーム設定上限値(Additional)を " + newCount + " に設定しました");
@@ -79,7 +79,7 @@ public class SetHomeCountCommand {
 
     private static int sendCurrent(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         ServerPlayer player = BrigadierUtil.getArgumentOrDefault(ctx, ServerPlayer.class, "対象", ctx.getSource().getPlayerOrException());
-        PlayerData data = PlayerData.of(player);
+        PlayerData.HomeData data = PlayerData.of(player).getHomeData();
         MessageUtil.sendAdminMessage(ctx.getSource(), player.displayName + " のホーム設定上限値は " + data.getHomeBaseCount() + "(base) + " + data.getHomeAdditionalCount() + "(additional) = " + data.getMaxHomeCount() + "個 です", false);
         return 1;
     }

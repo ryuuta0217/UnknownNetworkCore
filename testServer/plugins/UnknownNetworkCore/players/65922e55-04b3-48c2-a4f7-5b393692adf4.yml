@@ -1,7 +1,186 @@
 config-version: 3
 home-base-count: 5
-home-additional-count: 0
-homes:
-  default: {}
+home-additional-count: 128
+force-global-chat-prefix: g.
+use-kana-convert: false
 homeGroupItems:
-  default: ROTTEN_FLESH
+  default: WHITE_WOOL
+  test: WHITE_WOOL
+homes:
+  default:
+    test:
+      world: world
+      x: 44.197328864986524
+      y: 8.0
+      z: 18.809215845276817
+      yaw: 20.680578
+      pitch: 1.5622655
+    test2:
+      world: world
+      x: 43.89027358227601
+      y: 8.0
+      z: 29.91653797799488
+      yaw: 20.680578
+      pitch: 1.5622655
+    test6:
+      world: world
+      x: 43.60697963943018
+      y: 8.0
+      z: 41.54087462720756
+      yaw: 20.680578
+      pitch: 1.5622655
+    test7:
+      world: world
+      x: 41.89404881686744
+      y: 8.0
+      z: 43.413623655733275
+      yaw: 20.680578
+      pitch: 1.5622655
+    test9:
+      world: world
+      x: 35.23196002721924
+      y: 8.0
+      z: 12.816719729502314
+      yaw: 21.580566
+      pitch: 106.71336
+    test1564:
+      world: world
+      x: 24.00561071138243
+      y: 4.0
+      z: 7.669421049928633
+      yaw: 21.580566
+      pitch: 106.71336
+    test15663:
+      world: world
+      x: 20.86079239696514
+      y: 4.0
+      z: 6.729428834270323
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwa3:
+      world: world
+      x: 18.98298795517236
+      y: 4.0
+      z: 6.16867369412182
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwadawd:
+      world: world
+      x: 17.689396049137887
+      y: 4.0
+      z: 5.7839751446469885
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwadawddwa:
+      world: world
+      x: 14.976628196797746
+      y: 4.0
+      z: 5.300000011920929
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwadawddwdawdawda:
+      world: world
+      x: 10.231610693936764
+      y: 4.0
+      z: 3.2977414149785007
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwadawddwdawdawdd:
+      world: world
+      x: 7.167923540359726
+      y: 4.0
+      z: 2.3776761979208825
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwadawddwdawdawddd:
+      world: world
+      x: 5.56655156271408
+      y: 4.0
+      z: 1.9050860063520967
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwadawddwdawdawdddd:
+      world: world
+      x: 3.739238064397888
+      y: 4.0
+      z: 1.356319924652666
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwadawddwdawdawddddd:
+      world: world
+      x: 2.5379897313816766
+      y: 4.0
+      z: 0.7643337316689067
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwadawddwdawdawdddddd:
+      world: world
+      x: -1.1240854272137277
+      y: 4.0
+      z: -0.3264276873072094
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwadawddwdawdawddddddd:
+      world: world
+      x: -2.5466698585323693
+      y: 4.0
+      z: -0.7491972634348588
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwadawddwdawdawdddddddd:
+      world: world
+      x: -4.197299728251881
+      y: 4.0
+      z: -1.2449029465465378
+      yaw: 21.580566
+      pitch: 106.71336
+    test1566dwadawddwdawdawddddddddd:
+      world: world
+      x: -5.981835728518146
+      y: 4.0
+      z: -1.771486260968628
+      yaw: 21.580566
+      pitch: 106.71336
+    dwa:
+      world: world
+      x: -12.077545441692111
+      y: 4.0
+      z: 0.8165152553037086
+      yaw: -23.699945
+      pitch: 67.030556
+    yaW:
+      world: world
+      x: 41.105760072441356
+      y: 4.0
+      z: 1.9897316814119288
+      yaw: 0.0
+      pitch: 0.0
+    yaW_:
+      world: world
+      x: 41.105760072441356
+      y: 4.0
+      z: 1.9897316814119288
+      yaw: 90.0
+      pitch: 0.0
+    aaaaaaaa:
+      world: world
+      x: 41.105760072441356
+      y: 4.0
+      z: 1.9897316814119288
+      yaw: 90.0
+      pitch: 0.0
+    yaw_test:
+      world: world
+      x: 38.25230864174724
+      y: 4.0
+      z: 40.072685313815754
+      yaw: 39.449997
+      pitch: -39.000267
+    pitch_test:
+      world: world
+      x: 40.58066559761533
+      y: 4.0
+      z: 41.988379943563594
+      yaw: 66.60002
+      pitch: 33.449986
+  test: {}

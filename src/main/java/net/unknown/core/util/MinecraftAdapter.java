@@ -35,6 +35,9 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -74,6 +77,18 @@ public class MinecraftAdapter {
             case EAST -> Direction.EAST;
             default -> null;
         };
+    }
+
+    public static Vec3 vec3(Location bukkit) {
+        return new Vec3(bukkit.getX(), bukkit.getY(), bukkit.getZ());
+    }
+
+    public static Vec2 vec2(Location bukkit) {
+        return new Vec2(bukkit.getPitch(), bukkit.getYaw());
+    }
+
+    public static Location location(Level level, Vec3 coordinates, Vec2 rotation) {
+        return new Location(level.getWorld(), coordinates.x(), coordinates.y(), coordinates.z(), rotation.y, rotation.x);
     }
 
     @Nullable

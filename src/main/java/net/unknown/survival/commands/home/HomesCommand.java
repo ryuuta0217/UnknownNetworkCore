@@ -43,21 +43,32 @@ import net.kyori.adventure.text.format.TextColor;
 import net.md_5.bungee.api.ChatColor;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.unknown.core.define.DefinedComponents;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 // /minecraft:homes [optional: int<page>] - send homes list
 public class HomesCommand {
+    private static final Component PREFIX = Component.empty()
+            .append(Component.text("-", DefinedTextColor.LIGHT_PURPLE))
+            .append(Component.text("=", DefinedTextColor.GOLD))
+            .append(Component.text("-", DefinedTextColor.LIGHT_PURPLE));
+
+    private static final Component DELIMITER = Component.text(", ");
+
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("homes");
         builder.requires(Permissions.COMMAND_HOMES::checkAndIsPlayer);
@@ -69,13 +80,20 @@ public class HomesCommand {
     public static int sendHomeList(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         CraftPlayer player = (CraftPlayer) ctx.getSource().getBukkitEntity();
         PlayerData data = PlayerData.of(player);
+        PlayerData.HomeData homeData = data.getHomeData();
+        HomeGroup homeGroup = homeData.getDefaultGroup();
 
-        StringBuilder sb = new StringBuilder(MessageUtil.getMessagePrefix() + "§d-§6=§d- §aグループ" + data.getDefaultGroup() + " のホーム一覧(" + data.getHomes(data.getDefaultGroup()).size() + getMaxCountStr(player.getUniqueId()) + ") §d-§6=§d-");
+        Component header = Component.empty()
+                .append(PREFIX)
+                .append(DefinedComponents.SPACE)
+                .append(Component.text("グループ " + homeGroup.getName() + " のホーム一覧(" + homeGroup.getHomes().size() + "/" + homeData.getMaxHomeCount(), DefinedTextColor.GREEN))
+                .append(DefinedComponents.SPACE)
+                .append(PREFIX);
 
         int page = BrigadierUtil.getArgumentOrDefault(ctx, Integer.class, "ページ", 1);
         int internalPage = page - 1;
 
-        List<Set<Home>> pagination = ListUtil.splitListAsSet(data.getHomes(data.getDefaultGroup()).values(), 10);
+        List<Set<Home>> pagination = ListUtil.splitListAsSet(homeGroup.getHomes().values(), 10);
 
         int maxPage = pagination.size();
         if (page > maxPage) {
@@ -83,32 +101,66 @@ public class HomesCommand {
             return 1;
         }
 
-        Set<Home> homes = pagination.get(internalPage);
+        Set<Home> toShowHomes = pagination.get(internalPage);
+        List<Component> contents = new ArrayList<>();
 
-        homes.forEach((home) -> {
+        toShowHomes.forEach((home) -> {
             Location loc = home.location();
-            sb.append("\n").append(MessageUtil.getMessagePrefix()).append(String.format("§b%s §6-§r §e%s§6, §a%s§6, §a%s§6, §a%s§6, §d%s§6, §d%s§r", home.name(), MessageUtil.getWorldNameDisplay(loc.getWorld()), loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), loc.getYaw(), loc.getPitch()));
+            Component element = Component.empty()
+                    .append(Component.text(home.name(), DefinedTextColor.AQUA))
+                    .append(DefinedComponents.SPACE)
+                    .append(Component.text("-", DefinedTextColor.GOLD))
+                    .append(DefinedComponents.SPACE)
+                    .append(Component.text(MessageUtil.getWorldNameDisplay(loc.getWorld())))
+                    .append(DELIMITER)
+                    .append(Component.text(loc.getBlockX(), DefinedTextColor.GREEN))
+                    .append(DELIMITER)
+                    .append(Component.text(loc.getBlockY(), DefinedTextColor.GREEN))
+                    .append(DELIMITER)
+                    .append(Component.text(loc.getBlockZ(), DefinedTextColor.GREEN))
+                    .append(DELIMITER)
+                    .append(Component.text(loc.getYaw(), DefinedTextColor.LIGHT_PURPLE))
+                    .append(DELIMITER)
+                    .append(Component.text(loc.getPitch(), DefinedTextColor.LIGHT_PURPLE));
+            contents.add(element);
         });
 
-        Component c = Component.text(sb.toString())
-                .append(Component.text("\n" + MessageUtil.getMessagePrefix() + "                        "));
+        Component toShowMessage = Component.empty()
+                .append(MessageUtil.getMessagePrefixComponent())
+                .append(DefinedComponents.SPACE)
+                .append(header);
 
-        c = c.append(Component.text("⇦", TextColor.color(ChatColor.RED.getColor().getRGB()))
-                        .clickEvent(page > 1 ? ClickEvent.runCommand("/homes " + (page - 1)) : null))
-                .append(Component.text(" [" + page + "/" + maxPage + "] ", DefinedTextColor.AQUA));
+        for (Component content : contents) {
+            toShowMessage = toShowMessage.append(DefinedComponents.NEW_LINE)
+                    .append(MessageUtil.getMessagePrefixComponent())
+                    .append(DefinedComponents.SPACE)
+                    .append(content);
+        }
+
+        Component footer = Component.empty()
+                .append(Component.text("                 "));
+
+        if (page > 1) {
+            footer = footer.append(Component.text("⇦", DefinedTextColor.GREEN)
+                    .clickEvent(ClickEvent.runCommand("/homes " + (page - 1))));
+        } else {
+            footer = footer.append(Component.text(" "));
+        }
+
+        footer = footer.append(DefinedComponents.SPACE)
+                .append(Component.text("[" + page + "/" + maxPage + "]", DefinedTextColor.AQUA))
+                .append(DefinedComponents.SPACE);
 
         if (page < maxPage) {
-            c = c.append(Component.text("⇨", TextColor.color(ChatColor.GREEN.getColor().getRGB()))
+            footer = footer.append(Component.text("⇨", DefinedTextColor.GREEN)
                     .clickEvent(ClickEvent.runCommand("/homes " + (page + 1))));
         }
 
-        ctx.getSource().getPlayerOrException().getBukkitEntity().sendMessage(c);
-        return 1;
-    }
+        toShowMessage = toShowMessage.append(DefinedComponents.NEW_LINE)
+                .append(footer);
 
-    public static String getMaxCountStr(UUID uniqueId) {
-        int maxHomeCount = PlayerData.of(uniqueId).getMaxHomeCount();
-        if (maxHomeCount == -1) return "";
-        return "/" + maxHomeCount;
+        NewMessageUtil.sendMessage(ctx.getSource(), toShowMessage);
+        //ctx.getSource().getPlayerOrException().getBukkitEntity().sendMessage(toShowMessage);
+        return homeGroup.getHomes().size();
     }
 }

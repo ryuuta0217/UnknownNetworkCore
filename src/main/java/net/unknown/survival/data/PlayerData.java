@@ -31,19 +31,30 @@
 
 package net.unknown.survival.data;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.world.level.Level;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.configurations.Config;
 import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.RunnableManager;
+import net.unknown.core.util.MinecraftAdapter;
+import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.survival.data.model.Home;
+import net.unknown.survival.data.model.HomeGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.MemoryConfiguration;
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
 import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -60,11 +71,7 @@ public class PlayerData extends Config {
     private static final Map<UUID, PlayerData> PLAYER_DATA_MAP = new HashMap<>();
     private static final int DEFAULT_MAX_HOME_COUNT = 5;
     private final UUID uniqueId;
-    private Map<String, Map<String, Home>> homes;
-    private String defaultGroup;
-    private Map<String, Material> group2Material;
-    private int homeBaseCount;
-    private int homeAdditionalCount;
+    private HomeData homeData;
     private final SessionData sessionData = new SessionData(this);
     private ChatData chatData;
 
@@ -152,61 +159,13 @@ public class PlayerData extends Config {
             }
         }
 
-        if (this.homes == null) this.homes = new LinkedHashMap<>();
-        else if (!this.homes.isEmpty()) this.homes.clear();
-        ConfigurationSection homeGroups = this.getConfig().getConfigurationSection("homes");
-        if (homeGroups != null) {
-            long start = System.nanoTime();
-            homeGroups.getKeys(false).forEach(groupName -> {
-                ConfigurationSection groupedHomes = homeGroups.getConfigurationSection(groupName);
-                if (groupedHomes != null) {
-                    Map<String, Home> homes = new LinkedHashMap<>();
-                    groupedHomes.getKeys(false).forEach(homeName -> {
-                        Location loc = ConfigurationSerializer.getLocationData(groupedHomes, homeName);
-                        if (loc != null) homes.put(homeName, new Home(homeName, loc));
-                    });
-                    this.homes.put(groupName, homes);
-                }
-            });
-            long end = System.nanoTime();
-            long durationNS = end - start;
-            this.getLogger().info("Home load completed with " + durationNS + "ns (" + TimeUnit.NANOSECONDS.toMillis(durationNS) + "ms)");
-        } else if (!this.getConfig().isSet("homes")) {
-            this.addGroup("default");
-            this.getLogger().info("Home isn't set, created default group.");
-        }
-
-        if (this.group2Material == null) this.group2Material = new HashMap<>();
-        else if (!this.group2Material.isEmpty()) this.group2Material.clear();
-        ConfigurationSection homeGroupItems = this.getConfig().getConfigurationSection("homeGroupItems");
-        if (homeGroupItems != null) {
-            homeGroupItems.getKeys(false).forEach(groupName -> this.group2Material.put(groupName, Material.valueOf(homeGroupItems.getString(groupName))));
-        }
-
-        this.homeBaseCount = this.getConfig().isSet("home-base-count") ? this.getConfig().getInt("home-base-count") : DEFAULT_MAX_HOME_COUNT;
-        this.homeAdditionalCount = this.getConfig().isSet("home-additional-count") ? this.getConfig().getInt("home-additional-count") : 0;
-
-        this.chatData = ChatData.load(this, this.getConfig());
+        this.homeData = HomeData.load(this);
+        this.chatData = ChatData.load(this);
     }
 
     @Override
     public synchronized void save() {
-        this.getConfig().set("homes", null);
-        this.homes.forEach((groupName, categorizedHomes) -> {
-            if (categorizedHomes.size() > 0) {
-                categorizedHomes.forEach((homeName, home) -> {
-                    ConfigurationSerializer.setLocationData(this.getConfig(), "homes." + groupName + "." + homeName, home.location());
-                });
-            } else {
-                this.getConfig().createSection("homes." + groupName);
-            }
-        });
-
-        this.getConfig().set("homeGroupItems", null);
-        this.group2Material.forEach((groupName, material) -> this.getConfig().set("homeGroupItems." + groupName, material.name()));
-
-        this.getConfig().set("home-base-count", homeBaseCount);
-        this.getConfig().set("home-additional-count", homeAdditionalCount);
+        this.homeData.save(this.getConfig());
         this.chatData.save(this.getConfig());
         super.save();
     }
@@ -220,111 +179,8 @@ public class PlayerData extends Config {
         return Bukkit.getPlayer(this.uniqueId);
     }
 
-    public Map<String, Map<String, Home>> getGroupedHomes() {
-        return this.homes;
-    }
-
-    public Set<String> getGroups() {
-        return this.homes.keySet();
-    }
-
-    public String getDefaultGroup() {
-        if (this.defaultGroup == null) this.defaultGroup = new ArrayList<>(this.getGroups()).get(0);
-        return this.defaultGroup;
-    }
-
-    public boolean isGroupExists(String groupName) {
-        return this.homes.containsKey(groupName);
-    }
-
-    public void addGroup(String newGroupName) {
-        if (this.isGroupExists(newGroupName)) return;
-        this.homes.put(newGroupName, new LinkedHashMap<>());
-        RunnableManager.runAsync(this::save);
-    }
-
-    public Material getGroupMaterial(String groupName) {
-        return this.group2Material.getOrDefault(groupName, Material.WHITE_WOOL);
-    }
-
-    public void setGroupMaterial(String groupName, Material newMaterial) {
-        this.group2Material.put(groupName, newMaterial);
-        RunnableManager.runAsync(this::save);
-    }
-
-    @Nullable
-    public Map<String, Home> getHomes(String groupName) {
-        return this.homes.getOrDefault(groupName, null);
-    }
-
-    @Nullable
-    public Map<String, Home> getDefaultHomes() {
-        return this.homes.getOrDefault(getDefaultGroup(), null);
-    }
-
-    public Set<String> getHomeNames(String groupName) {
-        return this.homes.getOrDefault(groupName, new HashMap<>()).keySet();
-    }
-
-    public Set<String> getDefaultHomeNames() {
-        return this.homes.getOrDefault(getDefaultGroup(), new HashMap<>()).keySet();
-    }
-
-    public boolean isHomeExists(String groupName, String name) {
-        return this.getHomeNames(groupName).contains(name);
-    }
-
-    @Nullable
-    public Home getHome(String groupName, String name) {
-        return this.homes.getOrDefault(groupName, new HashMap<>()).getOrDefault(name, null);
-    }
-
-    public int getHomeCount() {
-        AtomicInteger count = new AtomicInteger();
-        this.homes.forEach((a, b) -> count.addAndGet(b.size()));
-        return count.get();
-    }
-
-    public int getHomeBaseCount() {
-        return this.homeBaseCount;
-    }
-
-    public void setHomeBaseCount(int newBaseCount) {
-        this.homeBaseCount = newBaseCount;
-        RunnableManager.runAsync(this::save);
-    }
-
-    public int getHomeAdditionalCount() {
-        return this.homeAdditionalCount;
-    }
-
-    public void setHomeAdditionalCount(int newAdditionalCount) {
-        this.homeAdditionalCount = newAdditionalCount;
-        RunnableManager.runAsync(this::save);
-    }
-
-    public int getMaxHomeCount() {
-        return this.getHomeBaseCount() + this.getHomeAdditionalCount();
-    }
-
-    public Home addHome(String groupName, String name, Location loc, boolean overwrite) {
-        if (name.contains(".")) return null;
-        if (!overwrite && this.homes.getOrDefault(groupName, new HashMap<>()).containsKey(name)) return null;
-        Map<String, Home> categorizedHomes = this.homes.getOrDefault(groupName, new HashMap<>());
-        categorizedHomes.put(name, new Home(name, loc));
-        this.homes.put(groupName, categorizedHomes);
-        RunnableManager.runAsync(this::save);
-        return this.homes.get(groupName).get(name);
-    }
-
-    public boolean removeHome(String groupName, String name) {
-        if (this.homes.containsKey(groupName)) {
-            if (this.homes.get(groupName).containsKey(name)) {
-                this.homes.get(groupName).remove(name);
-                return true;
-            }
-        }
-        return false;
+    public HomeData getHomeData() {
+        return this.homeData;
     }
 
     public SessionData getSessionData() {
@@ -333,6 +189,131 @@ public class PlayerData extends Config {
 
     public ChatData getChatData() {
         return this.chatData;
+    }
+
+    public static class HomeData {
+        private final PlayerData parent;
+        private LinkedHashMap<String, HomeGroup> homeGroups;
+        private String defaultGroup;
+        private int homeBaseCount;
+        private int homeAdditionalCount;
+
+        public HomeData(PlayerData parent, String defaultGroup, int homeBaseCount, int homeAdditionalCount) {
+            this.parent = parent;
+            this.defaultGroup = defaultGroup;
+            this.homeBaseCount = homeBaseCount;
+            this.homeAdditionalCount = homeAdditionalCount;
+        }
+
+        private void setGroups(LinkedHashMap<String, HomeGroup> homeGroups) {
+            this.homeGroups = homeGroups;
+        }
+
+        public PlayerData getPlayerData() {
+            return this.parent;
+        }
+
+        public Map<String, HomeGroup> getGroups() {
+            return this.homeGroups;
+        }
+
+        public HomeGroup getGroup(String groupName) {
+            if (groupName == null) {
+                return this.homeGroups.getOrDefault(this.defaultGroup, null);
+            }
+            return this.homeGroups.getOrDefault(groupName, null);
+        }
+
+        public HomeGroup createGroup(String groupName, Material icon) throws IllegalArgumentException {
+            if (isGroupExists(groupName)) throw new IllegalArgumentException("ホームグループ " + groupName + " は既に存在します");
+            HomeGroup group = new HomeGroup(this, groupName, icon, new LinkedHashMap<>());
+            this.homeGroups.put(groupName, group);
+            this.saveAsync();
+            return this.getGroup(groupName);
+        }
+
+        public HomeGroup getDefaultGroup() throws IllegalStateException {
+            if (this.defaultGroup != null && !this.homeGroups.containsKey(this.defaultGroup)) {
+                throw new IllegalStateException("デフォルトに設定されているホームグループ " + this.defaultGroup + " は存在しません。");
+            }
+            return this.defaultGroup != null ? this.homeGroups.get(this.defaultGroup) : this.homeGroups.get("default");
+        }
+
+        public void setDefaultGroup(HomeGroup group) {
+            if (group == null) {
+                this.defaultGroup = null;
+                this.saveAsync();
+            } else if (this.homeGroups.containsKey(group.getName()) && this.homeGroups.containsValue(group)) {
+                if (!this.defaultGroup.equals(group.getName())) {
+                    this.defaultGroup = group.getName();
+                    this.saveAsync();
+                }
+            }
+        }
+
+        public boolean isGroupExists(String groupName) {
+            return this.homeGroups.containsKey(groupName);
+        }
+
+        public int getHomeBaseCount() {
+            return this.homeBaseCount;
+        }
+
+        public void setHomeBaseCount(int newBaseCount) {
+            this.homeBaseCount = newBaseCount;
+        }
+
+        public int getHomeAdditionalCount() {
+            return this.homeAdditionalCount;
+        }
+
+        public void setHomeAdditionalCount(int newAdditionalCount) {
+            this.homeAdditionalCount = newAdditionalCount;
+        }
+
+        public int getMaxHomeCount() {
+            return this.homeBaseCount + this.homeAdditionalCount;
+        }
+
+        public static HomeData load(PlayerData data) {
+            String defaultGroup = data.getConfig().getString("home-default-group", null);
+            int homeBaseCount = data.getConfig().getInt("home-base-count");
+            int homeAdditionalCount = data.getConfig().getInt("home-additional-count");
+            HomeData homeData = new HomeData(data, defaultGroup, homeBaseCount, homeAdditionalCount);
+            LinkedHashMap<String, HomeGroup> groups = new LinkedHashMap<>();
+
+            ConfigurationSection groupItemsSection = data.getConfig().getConfigurationSection("homeGroupItems");
+
+            data.getConfig().getConfigurationSection("homes").getKeys(false).forEach(groupName -> {
+                ConfigurationSection groupSection = data.getConfig().getConfigurationSection("homes." + groupName);
+                HomeGroup group = HomeGroup.load(homeData, groupName, groupSection, groupItemsSection);
+                groups.put(group.getName(), group);
+            });
+
+            homeData.setGroups(groups);
+
+            return homeData;
+        }
+
+        public void save(FileConfiguration config) {
+            config.set("homes", null);
+            config.set("homeGroupItems", null); // TODO in migrate v4, change to "home-group-items"
+
+            ConfigurationSection groupItemsSection = config.createSection("homeGroupItems");
+            this.homeGroups.forEach((groupName, group) -> {
+                group.save(config.createSection("homes." + groupName), groupItemsSection);
+            });
+
+            if (this.defaultGroup != null) config.set("home-default-group", this.defaultGroup);
+            config.set("home-base-count", this.homeBaseCount);
+            config.set("home-additional-count", this.homeAdditionalCount);
+        }
+
+        private void saveAsync() {
+            if (this.getPlayerData().getHomeData().equals(this)) {
+                RunnableManager.runAsync(() -> this.getPlayerData().save());
+            }
+        }
     }
 
     public static class SessionData {
@@ -400,11 +381,11 @@ public class PlayerData extends Config {
             RunnableManager.runAsync(this.parent::save);
         }
 
-        public static ChatData load(PlayerData parent, FileConfiguration config) {
+        public static ChatData load(PlayerData parent) {
             return new ChatData(parent,
-                    config.getString("reply-target", null),
-                    config.getString("force-global-chat-prefix", "g."),
-                    config.getBoolean("use-kana-convert", false));
+                    parent.getConfig().getString("reply-target", null),
+                    parent.getConfig().getString("force-global-chat-prefix", "g."),
+                    parent.getConfig().getBoolean("use-kana-convert", false));
         }
 
         public void save(FileConfiguration config) {

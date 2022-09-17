@@ -209,6 +209,10 @@ public class MessageUtil {
         return PREFIX;
     }
 
+    public static Component getMessagePrefixComponent() {
+        return PREFIX_ADVENTURE_COMPONENT;
+    }
+
     public static String convertMillisToDateFormat(long millis, String format) {
         if (format == null) format = "MM/dd HH:mm:ss";
         SimpleDateFormat sdf = new SimpleDateFormat(format);

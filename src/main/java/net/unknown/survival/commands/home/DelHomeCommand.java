@@ -39,6 +39,7 @@ import net.minecraft.commands.Commands;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.commands.Suggestions;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 
@@ -53,9 +54,10 @@ public class DelHomeCommand {
                     if (ctx.getSource().getBukkitEntity() instanceof CraftPlayer) {
                         String homeName = StringArgumentType.getString(ctx, "ホーム名");
                         CraftPlayer player = (CraftPlayer) ctx.getSource().getBukkitEntity();
-                        PlayerData data = PlayerData.of(player);
-                        if (data.isHomeExists(data.getDefaultGroup(), homeName)) {
-                            data.removeHome(data.getDefaultGroup(), homeName);
+                        PlayerData.HomeData data = PlayerData.of(player).getHomeData();
+                        HomeGroup defaultGroup = data.getDefaultGroup();
+                        if (defaultGroup.hasHome(homeName)) {
+                            defaultGroup.removeHome(homeName);
                             MessageUtil.sendMessage(ctx.getSource(), "ホーム " + homeName + " を§c§l削除§rしました");
                         } else {
                             MessageUtil.sendErrorMessage(ctx.getSource(), "ホーム " + homeName + " は存在しません");

@@ -47,6 +47,8 @@ import net.unknown.core.commands.Suggestions;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.model.Home;
+import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -89,6 +91,8 @@ public class AddHomeCommand {
         String name = StringArgumentType.getString(ctx, "name");
         UUID targetUniqueId = Bukkit.getPlayerUniqueId(targetName);
         PlayerData targetData = PlayerData.of(targetUniqueId);
+        PlayerData.HomeData targetHomeData = targetData.getHomeData();
+        HomeGroup defaultGroup = targetHomeData.getDefaultGroup();
 
         if (targetUniqueId == null) {
             MessageUtil.sendAdminErrorMessage(ctx.getSource(), "プレイヤー " + targetName + " は見つかりませんでした");
@@ -97,8 +101,8 @@ public class AddHomeCommand {
 
         boolean overwrite = BrigadierUtil.isArgumentKeyExists(ctx, "overwrite") && BoolArgumentType.getBool(ctx, "overwrite");
 
-        if (!overwrite && targetData.isHomeExists(targetData.getDefaultGroup(), name)) {
-            MessageUtil.sendAdminErrorMessage(ctx.getSource(), "プレイヤー " + targetName + " はグループ " + targetData.getDefaultGroup() + " にホーム " + name + " を既に設定しています");
+        if (defaultGroup.hasHome(name) && !overwrite) {
+            MessageUtil.sendAdminErrorMessage(ctx.getSource(), "プレイヤー " + targetName + " はグループ " + defaultGroup.getName() + " にホーム " + name + " を既に設定しています");
             return 2;
         }
 
@@ -113,8 +117,8 @@ public class AddHomeCommand {
         }
 
         Location loc = new Location(world, location.x(), location.y(), location.z(), rotation.x, rotation.y);
-        targetData.addHome(targetData.getDefaultGroup(), name, loc, overwrite);
-        MessageUtil.sendAdminMessage(ctx.getSource(), "プレイヤー " + targetName + " のグループ " + targetData.getDefaultGroup() + " にホーム " + name + " を設定しました");
+        defaultGroup.addHome(new Home(name, loc), overwrite);
+        MessageUtil.sendAdminMessage(ctx.getSource(), "プレイヤー " + targetName + " のグループ " + defaultGroup.getName() + " にホーム " + name + " を設定しました");
         return 0;
     }
 }

@@ -39,11 +39,13 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedItemStackBuilders;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.model.HomeGroup;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -56,13 +58,13 @@ import java.util.stream.IntStream;
 
 public class HomeGui extends GuiBase {
     private final Player target;
-    private final PlayerData data;
-    private final Map<Integer, String> slot2CategoryMap = new HashMap<>();
+    private final PlayerData.HomeData homeData;
+    private final Map<Integer, HomeGroup> slot2CategoryMap = new HashMap<>();
     private final Map<Integer, Home> slot2HomeMap = new HashMap<>();
     private State guiState;
-    private String selectedCategory = null;
-    private List<Set<String>> splitCategories;
-    private Map<String, List<Set<Home>>> splitHomes = new HashMap<>();
+    private HomeGroup selectedGroup = null;
+    private List<Set<HomeGroup>> splitGroups;
+    private List<Set<Home>> splitHomes;
     private int currentPage = 1;
 
     public HomeGui(Player player) {
@@ -70,13 +72,13 @@ public class HomeGui extends GuiBase {
         this.guiState = State.CATEGORIES;
 
         this.target = player;
-        this.data = PlayerData.of(this.target);
+        this.homeData = PlayerData.of(this.target).getHomeData();
 
         this.inventory.setItem(45, DefinedItemStackBuilders.leftArrow().displayName(Component.text("戻る", TextColor.color(5635925))).build());
 
         this.loadData();
 
-        this.setCategories(this.currentPage);
+        this.setGroups(this.currentPage);
     }
 
     private static Material dimension2Material(Location loc) {
@@ -120,17 +122,18 @@ public class HomeGui extends GuiBase {
             case CATEGORIES -> {
                 if (this.slot2CategoryMap.containsKey(event.getSlot())) {
                     if (event.getClick() == ClickType.LEFT) {
-                        this.selectedCategory = this.slot2CategoryMap.get(event.getSlot());
+                        this.selectedGroup = this.slot2CategoryMap.get(event.getSlot());
+                        this.splitHomes = ListUtil.splitListAsLinkedSet(this.selectedGroup.getHomes().values(), 45);
                         this.clearCategories();
                         this.guiState = State.HOMES;
                         this.currentPage = 1;
                         this.setHomes(this.currentPage);
                     } else if (event.getClick() == ClickType.RIGHT && event.getCursor() != null) {
                         if (event.getCursor().getType() != Material.AIR) {
-                            PlayerData.of(event.getWhoClicked().getUniqueId()).setGroupMaterial(this.slot2CategoryMap.get(event.getSlot()), event.getCursor().getType());
+                            this.slot2CategoryMap.get(event.getSlot()).setIcon(event.getCursor().getType());
                             this.loadData();
                             this.clearCategories();
-                            this.setCategories(this.currentPage);
+                            this.setGroups(this.currentPage);
                         }
                     }
                 } else if (event.getSlot() == 45) {
@@ -147,22 +150,22 @@ public class HomeGui extends GuiBase {
                                 String newCategoryName = PlainTextComponentSerializer.plainText().serialize(lines.get(0))
                                         .replace(".", "・")
                                         .replace(":", "："); // ぐるーぷ名をConfigのkeyにするので、使えない文字対策
-                                PlayerData.of(this.target).addGroup(newCategoryName);
+                                PlayerData.of(this.target).getHomeData().createGroup(newCategoryName, null);
                                 this.guiState = State.CATEGORIES;
                                 this.target.openInventory(this.getInventory());
                                 this.clearCategories();
                                 this.loadData();
-                                this.setCategories(this.splitCategories.size());
+                                this.setGroups(this.splitGroups.size());
                             }).open();
                 } else if (event.getSlot() == 52) {
-                    if (this.splitCategories.size() > 1 && this.currentPage > 1) {
+                    if (this.splitGroups.size() > 1 && this.currentPage > 1) {
                         this.clearCategories();
-                        this.setCategories(this.currentPage - 1);
+                        this.setGroups(this.currentPage - 1);
                     }
                 } else if (event.getSlot() == 53) {
-                    if (this.splitCategories.size() > 1 && this.currentPage < this.splitCategories.size()) {
+                    if (this.splitGroups.size() > 1 && this.currentPage < this.splitGroups.size()) {
                         this.clearCategories();
-                        this.setCategories(this.currentPage + 1);
+                        this.setGroups(this.currentPage + 1);
                     }
                 }
             }
@@ -174,26 +177,26 @@ public class HomeGui extends GuiBase {
                         event.getWhoClicked().closeInventory();
                         MessageUtil.sendMessage((Player) event.getWhoClicked(), "ホーム " + home.name() + " にテレポートしました (GUI)");
                     } else if (event.getClick() == ClickType.SHIFT_RIGHT) {
-                        PlayerData.of(event.getWhoClicked().getUniqueId()).removeHome(this.selectedCategory, this.slot2HomeMap.get(event.getSlot()).name());
+                        this.selectedGroup.removeHome(this.slot2HomeMap.get(event.getSlot()));
                         this.loadData();
                         this.clearHomes();
                         this.setHomes(this.currentPage);
                     }
                 } else if (event.getSlot() == 45) {
                     this.guiState = State.CATEGORIES;
-                    this.selectedCategory = null;
+                    this.selectedGroup = null;
                     this.currentPage = 1;
                     this.clearHomes();
                     this.loadData();
-                    this.setCategories(this.currentPage);
+                    this.setGroups(this.currentPage);
                 } else if (event.getSlot() == 52) {
-                    if (this.currentPage > 1 && this.splitHomes.get(this.selectedCategory).size() > 1) {
+                    if (this.currentPage > 1 && this.splitHomes.size() > 1) {
                         this.clearHomes();
                         this.setHomes(this.currentPage - 1);
                     }
                 } else if (event.getSlot() == 53) {
-                    if (this.splitHomes.get(this.selectedCategory).size() > 1) { // 2 pages found
-                        if (this.currentPage < this.splitHomes.get(this.selectedCategory).size()) {
+                    if (this.splitHomes.size() > 1) { // 2 pages found
+                        if (this.currentPage < this.splitHomes.size()) {
                             this.clearHomes();
                             this.setHomes(this.currentPage + 1);
                         }
@@ -211,13 +214,10 @@ public class HomeGui extends GuiBase {
     }
 
     private void loadData() {
-        this.splitCategories = null;
-        this.splitHomes = new LinkedHashMap<>();
+        this.splitGroups = null;
+        this.splitHomes = null;
 
-        this.splitCategories = ListUtil.splitListAsLinkedSet(data.getGroups(), 45);
-        this.splitCategories.forEach(categories -> categories.forEach(category -> {
-            this.splitHomes.put(category, ListUtil.splitListAsLinkedSet(data.getHomes(category).values(), 45));
-        }));
+        this.splitGroups = ListUtil.splitListAsLinkedSet(homeData.getGroups().values(), 45);
     }
 
     private void clearCategories() {
@@ -229,39 +229,40 @@ public class HomeGui extends GuiBase {
     private void clearHomes() {
         this.slot2HomeMap.clear();
         IntStream.rangeClosed(0, 44).forEach(this.inventory::clear);
+        this.splitHomes = null;
     }
 
-    private void setCategories(int page) {
+    private void setGroups(int page) {
         this.currentPage = page;
 
-        this.splitCategories.get(page - 1).forEach(category -> {
-            this.slot2CategoryMap.put(this.inventory.firstEmpty(), category);
-            this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(data.getGroupMaterial(category))
-                    .displayName(Component.text(category, Style.style(TextColor.color(5635925), TextDecoration.ITALIC.withState(false))))
-                    .lore(Component.text("登録ホーム数: " + data.getHomes(category).size(), Style.style(TextColor.color(5635935), TextDecoration.ITALIC.withState(false))),
+        this.splitGroups.get(page - 1).forEach(group -> {
+            this.slot2CategoryMap.put(this.inventory.firstEmpty(), group);
+            this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(group.getIcon())
+                    .displayName(Component.text(group.getName(), DefinedTextColor.GREEN))
+                    .lore(Component.text("登録ホーム数: " + group.getHomes().size(), DefinedTextColor.GREEN),
                             Component.text(""),
-                            Component.text("持ち物からアイテムを掴んで右クリックで", Style.style(TextColor.color(5636095), TextDecoration.ITALIC.withState(false))),
-                            Component.text("          表示アイテムを変更できます", Style.style(TextColor.color(5636095), TextDecoration.ITALIC.withState(false))))
+                            Component.text("持ち物からアイテムを掴んで右クリックで", DefinedTextColor.AQUA),
+                            Component.text("          表示アイテムを変更できます", DefinedTextColor.AQUA))
                     .build());
         });
 
-        if (this.splitCategories.size() == this.currentPage) {
+        if (this.splitGroups.size() == this.currentPage) {
             this.inventory.setItem(49, DefinedItemStackBuilders.plus()
-                    .displayName(Component.text("新規グループ作成", TextColor.color(5635925)))
+                    .displayName(Component.text("新規グループ作成", DefinedTextColor.GREEN))
                     .build());
         }
 
         // NEXT BUTTON
-        if (this.splitCategories.size() > 1 && this.splitCategories.size() > this.currentPage) {
-            this.inventory.setItem(53, DefinedItemStackBuilders.rightArrow().displayName(Component.text("次のページ", TextColor.color(5635925))).build());
-        } else if (this.splitCategories.size() >= this.currentPage) {
+        if (this.splitGroups.size() > 1 && this.splitGroups.size() > this.currentPage) {
+            this.inventory.setItem(53, DefinedItemStackBuilders.rightArrow().displayName(Component.text("次のページ", DefinedTextColor.GREEN)).build());
+        } else if (this.splitGroups.size() >= this.currentPage) {
             this.inventory.setItem(53, null);
         }
 
         // BACK BUTTON
-        if (this.splitCategories.size() > 1 && this.currentPage > 1) {
-            this.inventory.setItem(52, DefinedItemStackBuilders.leftArrow().displayName(Component.text("前のページ", TextColor.color(5635925))).build());
-        } else if (this.splitCategories.size() <= 1) {
+        if (this.splitGroups.size() > 1 && this.currentPage > 1) {
+            this.inventory.setItem(52, DefinedItemStackBuilders.leftArrow().displayName(Component.text("前のページ", DefinedTextColor.GREEN)).build());
+        } else if (this.splitGroups.size() <= 1) {
             this.inventory.setItem(52, null);
         }
     }
@@ -269,7 +270,7 @@ public class HomeGui extends GuiBase {
     private void setHomes(int page) {
         this.currentPage = page;
 
-        this.splitHomes.get(this.selectedCategory).get(page - 1).forEach(home -> {
+        this.splitHomes.get(page - 1).forEach(home -> {
             this.slot2HomeMap.put(this.inventory.firstEmpty(), home);
             this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(dimension2Material(home.location()))
                     .displayName(Component.text(home.name(), Style.style(dimension2TextColor(home.location()), TextDecoration.ITALIC.withState(false))))
@@ -283,14 +284,14 @@ public class HomeGui extends GuiBase {
         });
 
         // NEXT BUTTON
-        if (this.splitHomes.get(this.selectedCategory).size() > 1 && this.splitHomes.get(this.selectedCategory).size() > this.currentPage) {
+        if (this.splitHomes.size() > 1 && this.splitHomes.size() > this.currentPage) {
             this.inventory.setItem(53, DefinedItemStackBuilders.rightArrow().displayName(Component.text("次のページ", TextColor.color(5635925))).build());
-        } else if (this.splitHomes.get(this.selectedCategory).size() == this.currentPage) {
+        } else if (this.splitHomes.size() == this.currentPage) {
             this.inventory.setItem(53, null);
         }
 
         // BACK BUTTON
-        if (this.splitHomes.get(this.selectedCategory).size() > 1 && this.currentPage > 1) {
+        if (this.splitHomes.size() > 1 && this.currentPage > 1) {
             this.inventory.setItem(52, DefinedItemStackBuilders.leftArrow().displayName(Component.text("前のページ", TextColor.color(5635925))).build());
         } else if (this.currentPage <= 1) {
             this.inventory.setItem(52, null);

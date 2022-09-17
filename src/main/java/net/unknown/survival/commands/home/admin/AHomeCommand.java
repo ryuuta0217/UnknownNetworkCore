@@ -42,6 +42,7 @@ import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.commands.Suggestions;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -76,15 +77,19 @@ public class AHomeCommand {
         }
 
         OfflinePlayer homeOwner = Bukkit.getOfflinePlayer(homeOwnerUniqueId);
-        PlayerData homeOwnerData = PlayerData.of(homeOwner);
+        PlayerData.HomeData homeOwnerData = PlayerData.of(homeOwner).getHomeData();
+        HomeGroup defaultGroup = homeOwnerData.getDefaultGroup();
 
-        if (homeOwnerData.isHomeExists(homeOwnerData.getDefaultGroup(), homeName)) {
-            Home home = homeOwnerData.getHome(homeOwnerData.getDefaultGroup(), homeName);
-            home.teleportPlayer(executor);
-            MessageUtil.sendAdminMessage(ctx.getSource(), homeOwner.getName() + " のグループ " + homeOwnerData.getDefaultGroup() + " のホーム " + homeName + " にテレポートしました");
-        } else {
-            MessageUtil.sendAdminErrorMessage(ctx.getSource(), homeOwner.getName() + " のグループ " + homeOwnerData.getDefaultGroup() + " のホーム " + homeName + " は存在しません。");
+        if (defaultGroup.hasHome(homeName)) {
+            Home home = defaultGroup.getHome(homeName);
+            if (home != null) {
+                home.teleportPlayer(executor);
+                MessageUtil.sendAdminMessage(ctx.getSource(), homeOwner.getName() + " のグループ " + homeOwnerData.getDefaultGroup() + " のホーム " + homeName + " にテレポートしました");
+                return 0;
+            }
         }
-        return 0;
+
+        MessageUtil.sendAdminErrorMessage(ctx.getSource(), homeOwner.getName() + " のグループ " + homeOwnerData.getDefaultGroup() + " のホーム " + homeName + " は存在しません。");
+        return 1;
     }
 }

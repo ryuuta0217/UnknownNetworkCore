@@ -40,6 +40,7 @@ import net.minecraft.commands.Commands;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.commands.Suggestions;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -65,7 +66,8 @@ public class ADelHomeCommand {
         String homeName = StringArgumentType.getString(ctx, "ホーム名");
         String inputPlayerId = StringArgumentType.getString(ctx, "対象");
         UUID homeOwnerUniqueId = Bukkit.getPlayerUniqueId(inputPlayerId);
-        PlayerData homeOwnerData = PlayerData.of(homeOwnerUniqueId);
+        PlayerData.HomeData homeOwnerData = PlayerData.of(homeOwnerUniqueId).getHomeData();
+        HomeGroup defaultGroup = homeOwnerData.getDefaultGroup();
 
         if (homeOwnerUniqueId == null) {
             MessageUtil.sendAdminErrorMessage(ctx.getSource(), "プレイヤー " + inputPlayerId + " は存在しません");
@@ -74,9 +76,9 @@ public class ADelHomeCommand {
 
         OfflinePlayer homeOwner = Bukkit.getOfflinePlayer(homeOwnerUniqueId);
 
-        if (homeOwnerData.isHomeExists(homeOwnerData.getDefaultGroup(), homeName)) {
-            homeOwnerData.removeHome(homeOwnerData.getDefaultGroup(), homeName);
-            if (!homeOwnerData.isHomeExists(homeOwnerData.getDefaultGroup(), homeName)) {
+        if (defaultGroup.hasHome(homeName)) {
+            defaultGroup.removeHome(homeName);
+            if (!defaultGroup.hasHome(homeName)) {
                 MessageUtil.sendAdminMessage(ctx.getSource(), homeOwner.getName() + " のホーム " + homeName + " を§c§l削除§rしました");
             } else {
                 MessageUtil.sendAdminErrorMessage(ctx.getSource(), homeOwner.getName() + " のホーム " + homeName + " を削除できませんでした");

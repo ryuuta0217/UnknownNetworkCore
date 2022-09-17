@@ -41,6 +41,7 @@ import net.unknown.core.util.BrigadierUtil;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.chat.channels.ChatChannel;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.model.HomeGroup;
 import org.bukkit.Bukkit;
 
 import java.util.Collections;
@@ -48,17 +49,25 @@ import java.util.UUID;
 
 public class Suggestions {
     public static final SuggestionProvider<CommandSourceStack> HOME_SUGGEST = (ctx, builder) -> {
-        ServerPlayer p = BrigadierUtil.getArgumentOrDefault(ctx, ServerPlayer.class, "対象", ctx.getSource().getPlayerOrException());
-        PlayerData data = PlayerData.of(p.getBukkitEntity());
-        return SharedSuggestionProvider.suggest(data.getHomeNames(data.getDefaultGroup()).toArray(new String[0]), builder);
+        ServerPlayer target = BrigadierUtil.getArgumentOrDefault(ctx, ServerPlayer.class, "対象", ctx.getSource().getPlayerOrException());
+        PlayerData.HomeData data = PlayerData.of(target.getBukkitEntity()).getHomeData();
+        HomeGroup group = BrigadierUtil.isArgumentKeyExists(ctx, "グループ") ? data.getGroup(StringArgumentType.getString(ctx, "グループ")) : data.getDefaultGroup();
+
+        if (group == null) return SharedSuggestionProvider.suggest(new String[0], builder);
+        else return SharedSuggestionProvider.suggest(group.getHomes().keySet().toArray(new String[0]), builder);
+    };
+    public static final SuggestionProvider<CommandSourceStack> HOME_GROUP_SUGGEST = (ctx, builder) -> {
+        ServerPlayer target = BrigadierUtil.getArgumentOrDefault(ctx, ServerPlayer.class, "対象", ctx.getSource().getPlayerOrException());
+        PlayerData.HomeData data = PlayerData.of(target).getHomeData();
+        return SharedSuggestionProvider.suggest(data.getGroups().keySet().toArray(new String[0]), builder);
     };
     public static final SuggestionProvider<CommandSourceStack> OFFLINE_HOME_SUGGEST = (ctx, builder) -> {
         try {
             String playerId = StringArgumentType.getString(ctx, "対象");
             UUID uniqueId = Bukkit.getPlayerUniqueId(playerId);
             if (uniqueId != null) {
-                PlayerData data = PlayerData.of(uniqueId);
-                return SharedSuggestionProvider.suggest(data.getHomeNames(data.getDefaultGroup()).toArray(new String[0]), builder);
+                PlayerData.HomeData data = PlayerData.of(uniqueId).getHomeData();
+                return SharedSuggestionProvider.suggest(data.getDefaultGroup().getHomes().keySet().toArray(new String[0]), builder);
             }
         } catch (IllegalArgumentException ignored) {
         }

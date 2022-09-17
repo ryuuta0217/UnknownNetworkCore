@@ -41,6 +41,7 @@ import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.commands.Suggestions;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 
@@ -62,14 +63,18 @@ public class HomeCommand {
     private static int teleport(CommandContext<CommandSourceStack> ctx) {
         String homeName = StringArgumentType.getString(ctx, "ホーム名");
         CraftPlayer player = (CraftPlayer) ctx.getSource().getBukkitSender();
-        PlayerData data = PlayerData.of(player);
-        if (data.isHomeExists(data.getDefaultGroup(), homeName)) {
-            Home home = data.getHome(data.getDefaultGroup(), homeName);
-            home.teleportPlayer(player);
-            MessageUtil.sendMessage(ctx.getSource(), "グループ " + data.getDefaultGroup() + " のホーム " + homeName + " にテレポートしました");
-        } else {
-            MessageUtil.sendErrorMessage(ctx.getSource(), "ホーム " + homeName + " はグループ " + data.getDefaultGroup() + " には存在しません。");
+        PlayerData.HomeData data = PlayerData.of(player).getHomeData();
+        HomeGroup group = data.getDefaultGroup();
+        if (group.hasHome(homeName)) {
+            Home home = group.getHome(homeName);
+            if (home != null) {
+                home.teleportPlayer(player);
+                MessageUtil.sendMessage(ctx.getSource(), "グループ " + group.getName() + " のホーム " + homeName + " にテレポートしました");
+                return 0;
+            }
         }
+
+        MessageUtil.sendErrorMessage(ctx.getSource(), "ホーム " + homeName + " はグループ " + group.getName() + " には存在しません。");
         return 1;
     }
 }
