@@ -206,7 +206,7 @@ public class NewMessageUtil {
     /* END - Plain Texts*/
     /* ERROR MESSAGES END */
 
-    //public static void broadcast(Component component, UUID sender, ChatType type, String permission) {
+    //public static void broadcast(Component message, UUID sender, ChatType type, String permission) {
     //CraftServer bukkit = (CraftServer) Bukkit.getServer();
     //bukkit.getServer().getPlayerList().broadcastMessage();
     //}
