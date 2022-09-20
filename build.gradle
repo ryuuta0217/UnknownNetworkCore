@@ -200,7 +200,7 @@ publishing {
 
     repositories {
         maven {
-            url 'https://repo.ryuuta0217.com/repository/unknown-network/'
+            url 'https://repo.yncrypt.net/repository/unknown-network/'
             credentials {
                 username = System.getenv("NEXUS_USERNAME")
                 password = System.getenv("NEXUS_PASSWORD")
