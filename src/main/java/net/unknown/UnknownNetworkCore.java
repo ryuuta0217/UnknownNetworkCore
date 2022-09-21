@@ -75,6 +75,10 @@ public class UnknownNetworkCore extends JavaPlugin {
         return JSON_PARSER;
     }
 
+    public static Environment getEnvironment() {
+        return ENV;
+    }
+
     @Override
     public void onLoad() {
         long start = System.nanoTime();
