@@ -29,22 +29,35 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared.util;
+package net.unknown.lobby.feature;
 
+import net.unknown.UnknownNetworkCore;
+import net.unknown.shared.util.TickUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 
-public class TickUtil {
-    public static long realTime2TickTime(LocalDateTime now) {
-        java.time.LocalDateTime base = (now.getHour() < 6 ? now.minusDays(1) : now).with(java.time.LocalTime.of(6, 0));
-        long diffSeconds = java.time.Duration.between(base, now).toSeconds();
-        System.out.println(diffSeconds);
-        return java.lang.Math.round(diffSeconds * 0.2777777777777778);
+public class RealTimeSynchronizer extends BukkitRunnable {
+    private static RealTimeSynchronizer INSTANCE;
+
+    public static void start() {
+        if (INSTANCE != null && !INSTANCE.isCancelled()) throw new IllegalStateException("Synchronize task is already running!");
+        INSTANCE = new RealTimeSynchronizer();
+        INSTANCE.runTaskTimer(UnknownNetworkCore.getInstance(), 0, 20);
     }
 
-    public static LocalTime tickTime2RealTime(long tick) {
-        if (tick < 0 || tick > 24000) throw new IllegalArgumentException("0 - 24000");
-        double seconds = tick / 0.2777777777777778;
-        return LocalTime.of(6, 0).plusSeconds(Math.round(seconds));
+    public static void stop() {
+        if (INSTANCE == null || INSTANCE.isCancelled()) throw new IllegalStateException("Synchronize task is not running.");
+        INSTANCE.cancel();
+    }
+
+    @Override
+    public void run() {
+        long tick = TickUtil.realTime2TickTime(LocalDateTime.now(ZoneId.of("Asia/Tokyo")));
+        Bukkit.getWorlds().forEach(world -> world.setTime(tick));
     }
 }

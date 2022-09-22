@@ -29,22 +29,23 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared.util;
+package net.unknown.lobby.listeners;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import org.bukkit.GameMode;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
 
-public class TickUtil {
-    public static long realTime2TickTime(LocalDateTime now) {
-        java.time.LocalDateTime base = (now.getHour() < 6 ? now.minusDays(1) : now).with(java.time.LocalTime.of(6, 0));
-        long diffSeconds = java.time.Duration.between(base, now).toSeconds();
-        System.out.println(diffSeconds);
-        return java.lang.Math.round(diffSeconds * 0.2777777777777778);
+public class Blocker implements Listener {
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event) {
+        if (event.getPlayer().getGameMode() == GameMode.ADVENTURE) event.setCancelled(true);
     }
 
-    public static LocalTime tickTime2RealTime(long tick) {
-        if (tick < 0 || tick > 24000) throw new IllegalArgumentException("0 - 24000");
-        double seconds = tick / 0.2777777777777778;
-        return LocalTime.of(6, 0).plusSeconds(Math.round(seconds));
+    @EventHandler
+    public void onChangeBlock(EntityChangeBlockEvent event) {
+        if (event.getEntity() instanceof Player player && player.getGameMode() == GameMode.ADVENTURE) event.setCancelled(true);
     }
 }

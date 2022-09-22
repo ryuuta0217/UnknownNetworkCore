@@ -31,6 +31,7 @@
 
 package net.unknown.lobby.listeners;
 
+import net.unknown.lobby.UnknownNetworkLobby;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -51,5 +52,8 @@ public class PlayerJoinListener implements Listener {
         //アイデア書いたらコードができてくのすげえ!!w
         // キレそう
         //w
+        if (!event.getPlayer().getInventory().contains(UnknownNetworkLobby.getServerSelectorCompass())) {
+            event.getPlayer().getInventory().addItem(UnknownNetworkLobby.getServerSelectorCompass());
+        }
     }
 }

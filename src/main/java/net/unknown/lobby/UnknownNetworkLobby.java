@@ -31,16 +31,42 @@
 
 package net.unknown.lobby;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.unknown.UnknownNetworkCore;
+import net.unknown.core.builder.ItemStackBuilder;
+import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.managers.ListenerManager;
+import net.unknown.lobby.feature.RealTimeSynchronizer;
+import net.unknown.lobby.listeners.Blocker;
+import net.unknown.lobby.listeners.PlayerJoinListener;
+import net.unknown.lobby.listeners.ServerSelector;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+
 public class UnknownNetworkLobby {
     public static void onLoad() {
 
     }
 
     public static void onEnable() {
-
+        Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");
+        ListenerManager.registerListener(new Blocker());
+        ListenerManager.registerListener(new PlayerJoinListener());
+        ListenerManager.registerListener(new ServerSelector());
+        RealTimeSynchronizer.start();
     }
 
     public static void onDisable() {
 
+    }
+
+    public static ItemStack getServerSelectorCompass() {
+        return new ItemStackBuilder(Material.COMPASS)
+                .displayName(Component.text("サーバーをえらぶ", Style.style(DefinedTextColor.AQUA, TextDecoration.BOLD.withState(true))))
+                .lore(Component.text("右クリックでサーバー選択画面を開きます", DefinedTextColor.GOLD))
+                .build();
     }
 }
