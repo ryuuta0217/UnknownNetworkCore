@@ -38,7 +38,6 @@ public class TickUtil {
     public static long realTime2TickTime(LocalDateTime now) {
         java.time.LocalDateTime base = (now.getHour() < 6 ? now.minusDays(1) : now).with(java.time.LocalTime.of(6, 0));
         long diffSeconds = java.time.Duration.between(base, now).toSeconds();
-        System.out.println(diffSeconds);
         return java.lang.Math.round(diffSeconds * 0.2777777777777778);
     }
 
