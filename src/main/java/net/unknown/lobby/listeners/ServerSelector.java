@@ -61,7 +61,7 @@ public class ServerSelector implements Listener {
                         inv.setItem(12, new ItemStackBuilder(Material.APPLE)
                                 .displayName(Component.text("ミニゲーム", DefinedTextColor.GREEN))
                                 .build());
-                        inv.setItem(13, new ItemStackBuilder(Material.GRASS)
+                        inv.setItem(13, new ItemStackBuilder(Material.GRASS_BLOCK)
                                 .displayName(Component.text("生活鯖", DefinedTextColor.GOLD))
                                 .build());
                         inv.setItem(14, new ItemStackBuilder(Material.STRUCTURE_BLOCK)
