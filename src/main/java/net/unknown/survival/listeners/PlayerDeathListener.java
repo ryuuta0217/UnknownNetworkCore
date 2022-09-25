@@ -48,20 +48,24 @@ import net.unknown.UnknownNetworkCore;
 import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.UnknownNetworkSurvival;
 import net.unknown.survival.dependency.HolographicDisplays;
 import org.bukkit.*;
-import org.bukkit.block.Skull;
+import org.bukkit.block.Chest;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_19_R1.CraftWorld;
 import org.bukkit.craftbukkit.v1_19_R1.inventory.CraftItemStack;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
+import org.bukkit.event.entity.EntityChangeBlockEvent;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.io.File;
@@ -97,6 +101,9 @@ public class PlayerDeathListener implements Listener {
                 NewMessageUtil.sendMessage(Bukkit.getPlayer(uniqueId), MutableComponent.create(new LiteralContents(""))
                         .append(getGraveyardComponent(location))
                         .append(" は自然に還りました。アイテムは回収できません。"));
+            }
+            if (UnknownNetworkSurvival.isHolographicDisplaysEnabled()) {
+                HOLOGRAMS.remove(location).delete();
             }
         }, delay);
     }
@@ -169,6 +176,8 @@ public class PlayerDeathListener implements Listener {
                                 Map<Location, BukkitTask> removalTasksMap = new HashMap<>();
                                 removalTasksMap.put(loc, getTask(uniqueId, loc, millisToTicks(toRemovalMillis - System.currentTimeMillis())));
                                 REMOVAL_TASKS.put(uniqueId, removalTasksMap);
+
+                                // TODO ホログラム
                             }
                         });
                     });
@@ -216,15 +225,15 @@ public class PlayerDeathListener implements Listener {
 
         Location playerPos = event.getPlayer().getLocation().toBlockLocation();
         Location blockPos = new Location(playerPos.getWorld(), playerPos.getX(), playerPos.getY(), playerPos.getZ()); // for Block Event Location Normalize
-        if (blockPos.getBlock().getType() != Material.AIR && blockPos.getBlock().getType() != Material.WATER && blockPos.getBlock().getType() == Material.LAVA) {
+        if (blockPos.getBlock().getType() != Material.AIR && blockPos.getBlock().getType() != Material.WATER) {
             Set<Location> airs = new HashSet<>();
 
-            for (int x = -3; x <= 3; x++) {
-                for (int y = -3; y <= 3; y++) {
-                    for (int z = -3; z <= 3; z++) {
+            for (int x = -5; x <= 5; x++) {
+                for (int y = -5; y <= 5; y++) {
+                    for (int z = -5; z <= 5; z++) {
                         Location l = event.getPlayer().getLocation().toBlockLocation().add(x, y, z);
                         Material type = l.getBlock().getType();
-                        if (type == Material.AIR || type == Material.WATER || type == Material.LAVA) {
+                        if (type == Material.AIR || type == Material.WATER) {
                             airs.add(l);
                         }
                     }
@@ -241,10 +250,10 @@ public class PlayerDeathListener implements Listener {
             }
         }
 
-        blockPos.getBlock().setType(Material.PLAYER_HEAD);
-        Skull skull = ((Skull) blockPos.getBlock().getState());
-        skull.setOwningPlayer(event.getPlayer());
-        skull.update();
+        blockPos.getBlock().setType(Material.CHEST);
+        Chest chest = ((Chest) blockPos.getBlock().getState());
+        chest.setLock(event.getPlayer().getUniqueId().toString());
+        chest.update();
 
         List<String> itemJsonSet = items.stream().map(is -> {
             return is.save(new CompoundTag()).getAsString(); // for load, use ItemStack.of(TagParser.parse(...))
@@ -253,7 +262,7 @@ public class PlayerDeathListener implements Listener {
         event.getDrops().clear();
 
         if (!DEATH_ITEMS.containsKey(event.getPlayer().getUniqueId()))
-            DEATH_ITEMS.put(event.getPlayer().getUniqueId(), new HashMap<Location, List<String>>());
+            DEATH_ITEMS.put(event.getPlayer().getUniqueId(), new HashMap<>());
         DEATH_ITEMS.get(event.getPlayer().getUniqueId()).put(blockPos, itemJsonSet);
 
         if (!REMOVAL_TIMES.containsKey(event.getPlayer().getUniqueId()))
@@ -264,14 +273,14 @@ public class PlayerDeathListener implements Listener {
             REMOVAL_TASKS.put(event.getPlayer().getUniqueId(), new HashMap<>());
         REMOVAL_TASKS.get(event.getPlayer().getUniqueId()).put(blockPos, getTask(event.getPlayer().getUniqueId(), blockPos, millisToTicks(TimeUnit.MINUTES.toMillis(30))));
 
-        NewMessageUtil.sendMessage(event.getPlayer(), MutableComponent.create(new LiteralContents(""))
+        NewMessageUtil.sendMessage(event.getPlayer(), Component.literal("")
                 .append("死亡地点に ")
                 .append(getGraveyardComponent(blockPos))
                 .append(" が生成されました。\n" +
                         millisToFormatted(REMOVAL_TIMES.get(event.getPlayer().getUniqueId()).get(blockPos)) + " に自然に還ります。"));
 
         if (UnknownNetworkSurvival.isHolographicDisplaysEnabled()) {
-            Hologram holo = HolographicDisplays.get().createHologram(blockPos.clone().add(0.5, 1, 0.5));
+            Hologram holo = HolographicDisplays.get().createHologram(blockPos.clone().add(0.5, 1.5, 0.5));
             HOLOGRAMS.put(blockPos, holo);
             holo.getLines().appendText(ChatColor.RED + "" + event.getPlayer().getName() + " の墓");
         }
@@ -279,6 +288,71 @@ public class PlayerDeathListener implements Listener {
     }
 
     @EventHandler
+    public void onInteractBlock(PlayerInteractEvent event) {
+        if (event.getHand() == EquipmentSlot.HAND && event.hasBlock() && event.getClickedBlock().getType() == Material.CHEST) {
+            Location blockPos = event.getClickedBlock().getLocation();
+            Map<Location, List<String>> deathBoxes = DEATH_ITEMS.get(event.getPlayer().getUniqueId());
+            if (deathBoxes.containsKey(blockPos)) {
+                event.setCancelled(true);
+                ServerLevel level = MinecraftAdapter.level(event.getClickedBlock().getWorld());
+                deathBoxes.get(blockPos)
+                        .stream()
+                        .map(json -> {
+                            try {
+                                return ItemStack.of(TagParser.parseTag(json));
+                            } catch (CommandSyntaxException e) {
+                                e.printStackTrace();
+                                LOGGER.severe("Failed to parse Item from JSON");
+                            }
+                            return ItemStack.EMPTY;
+                        })
+                        .map(is -> {
+                            if (is.getItem() != null) {
+                                Location loc = event.getPlayer().getLocation();
+                                return new ItemEntity(level, loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), is, 0, 0, 0);
+                            }
+                            return null;
+                        }).forEach(entity -> {
+                            if (entity != null) {
+                                level.addFreshEntity(entity, CreatureSpawnEvent.SpawnReason.DEFAULT);
+                            }
+                        });
+
+                REMOVAL_TASKS.get(event.getPlayer().getUniqueId()).get(blockPos).cancel();
+                REMOVAL_TASKS.get(event.getPlayer().getUniqueId()).remove(blockPos);
+                REMOVAL_TIMES.get(event.getPlayer().getUniqueId()).remove(blockPos);
+                DEATH_ITEMS.get(event.getPlayer().getUniqueId()).remove(blockPos);
+                event.getClickedBlock().setType(Material.AIR);
+                if (UnknownNetworkSurvival.isHolographicDisplaysEnabled()) {
+                    HOLOGRAMS.get(blockPos).delete();
+                    HOLOGRAMS.remove(blockPos);
+                }
+                RunnableManager.runAsync(PlayerDeathListener::save);
+            } else {
+                if (DEATH_ITEMS.entrySet().stream().anyMatch(e -> e.getValue().containsKey(event.getClickedBlock().getLocation()))) {
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    @EventHandler
+    public void onBlockBreak(BlockBreakEvent event) {
+        if (DEATH_ITEMS.entrySet().stream().anyMatch(e -> e.getValue().containsKey(event.getBlock().getLocation()))) {
+            event.setCancelled(true);
+        }
+    }
+
+    @EventHandler // クリーパーとかの爆破で壊れないようにする
+    public void onEntityExplode(EntityExplodeEvent event) {
+        Set<Location> deathBoxes = new HashSet<>();
+        DEATH_ITEMS.forEach((uuid, deathBoxMap) -> deathBoxes.addAll(deathBoxMap.keySet()));
+        event.blockList().removeIf(block -> deathBoxes.contains(block.getLocation()));
+    }
+
+    // TODO あらゆるブロック破壊のキャンセル
+
+    /*@EventHandler
     public void onBlockBreak(BlockBreakEvent event) {
         if (event.getBlock().getType() == Material.PLAYER_HEAD) {
             if (event.getBlock().getState() instanceof Skull skull) {
@@ -332,5 +406,5 @@ public class PlayerDeathListener implements Listener {
                 }
             }
         }
-    }
+    }*/
 }
