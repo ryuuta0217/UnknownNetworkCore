@@ -323,11 +323,11 @@ public class PlayerDeathListener implements Listener {
                 REMOVAL_TIMES.get(event.getPlayer().getUniqueId()).remove(blockPos);
                 DEATH_ITEMS.get(event.getPlayer().getUniqueId()).remove(blockPos);
                 event.getClickedBlock().setType(Material.AIR);
+                RunnableManager.runAsync(PlayerDeathListener::save);
                 if (UnknownNetworkSurvival.isHolographicDisplaysEnabled()) {
                     HOLOGRAMS.get(blockPos).delete();
                     HOLOGRAMS.remove(blockPos);
                 }
-                RunnableManager.runAsync(PlayerDeathListener::save);
             } else {
                 if (DEATH_ITEMS.entrySet().stream().anyMatch(e -> e.getValue().containsKey(event.getClickedBlock().getLocation()))) {
                     event.setCancelled(true);
