@@ -318,6 +318,7 @@ public class PlayerData extends Config {
 
     public static class SessionData {
         private final PlayerData parent;
+        private long lastActionTime = 0L;
         private boolean isAfk = false;
 
         public SessionData(PlayerData parent) {
@@ -334,6 +335,19 @@ public class PlayerData extends Config {
 
         public void setAfk(boolean afk) {
             this.isAfk = afk;
+        }
+
+        public long getLastActionTime() {
+            return this.lastActionTime;
+        }
+
+        public void setLastActionTime(long time) {
+            this.lastActionTime = time;
+        }
+
+        public void initialize() {
+            this.isAfk = false;
+            this.lastActionTime = 0L;
         }
     }
 
