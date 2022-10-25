@@ -31,9 +31,10 @@
 
 package net.unknown.core.events.interfaces;
 
+import net.minecraft.network.protocol.Packet;
 import net.unknown.core.events.PacketReceivedEvent;
 
-public abstract class PacketListener {
+public abstract class PacketListener<P extends Packet<?>> {
     private final boolean ignoreCancelled;
 
     public PacketListener() {
@@ -48,5 +49,5 @@ public abstract class PacketListener {
         return this.ignoreCancelled;
     }
 
-    public abstract void onPacketReceived(PacketReceivedEvent event);
+    public abstract void onPacketReceived(PacketReceivedEvent<P> event);
 }

@@ -133,24 +133,22 @@ public class SignGui {
                 .toArray(net.minecraft.network.chat.Component[]::new);
     }
 
-    public static class Listener extends PacketListener implements org.bukkit.event.Listener {
+    public static class Listener extends PacketListener<ServerboundSignUpdatePacket> implements org.bukkit.event.Listener {
         public Listener() {
             PacketManager.getInstance().registerListener(ServerboundSignUpdatePacket.class, this);
         }
 
         @Override
-        public void onPacketReceived(PacketReceivedEvent event) {
-            if (event.getPacket() instanceof ServerboundSignUpdatePacket packet) {
-                if (SignGui.SIGN_GUI_OPENED.containsKey(event.getPlayer().getUniqueId())) {
-                    SignGui gui = SignGui.SIGN_GUI_OPENED.get(event.getPlayer().getUniqueId());
-                    if (gui.isOpened) {
-                        gui.isOpened = false;
-                        SignGui.SIGN_GUI_OPENED.remove(event.getPlayer().getUniqueId());
-                        if (gui.completeHandler != null) {
-                            RunnableManager.runDelayed(() -> {
-                                gui.completeHandler.accept(Arrays.stream(packet.getLines()).map(line -> (Component) Component.text(line)).toList());
-                            }, 1L);
-                        }
+        public void onPacketReceived(PacketReceivedEvent<ServerboundSignUpdatePacket> event) {
+            if (SignGui.SIGN_GUI_OPENED.containsKey(event.getPlayer().getUniqueId())) {
+                SignGui gui = SignGui.SIGN_GUI_OPENED.get(event.getPlayer().getUniqueId());
+                if (gui.isOpened) {
+                    gui.isOpened = false;
+                    SignGui.SIGN_GUI_OPENED.remove(event.getPlayer().getUniqueId());
+                    if (gui.completeHandler != null) {
+                        RunnableManager.runDelayed(() -> {
+                            gui.completeHandler.accept(Arrays.stream(event.getPacket().getLines()).map(line -> (Component) Component.text(line)).toList());
+                        }, 1L);
                     }
                 }
             }

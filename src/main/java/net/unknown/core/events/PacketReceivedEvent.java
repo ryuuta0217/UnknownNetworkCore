@@ -36,14 +36,14 @@ import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 
-public class PacketReceivedEvent implements Cancellable {
+public class PacketReceivedEvent<P extends Packet<?>> implements Cancellable {
 
     private final ServerPlayer sender;
-    private final Packet<?> packet;
+    private final P packet;
 
     private boolean cancelled = false;
 
-    public PacketReceivedEvent(ServerPlayer sender, Packet<?> receivedPacket) {
+    public PacketReceivedEvent(ServerPlayer sender, P receivedPacket) {
         this.sender = sender;
         this.packet = receivedPacket;
     }
@@ -56,7 +56,7 @@ public class PacketReceivedEvent implements Cancellable {
         return sender.getBukkitEntity();
     }
 
-    public Packet<?> getPacket() {
+    public P getPacket() {
         return this.packet;
     }
 

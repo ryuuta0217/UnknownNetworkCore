@@ -55,7 +55,7 @@ import java.util.Set;
 public class PacketManager implements Listener {
     private static final Logger LOGGER = LoggerFactory.getLogger("UNC/PacketManager");
     private static final PacketManager INSTANCE = new PacketManager();
-    private final Map<String, Set<PacketListener>> REGISTERED_LISTENERS = new HashMap<>();
+    private final Map<String, Set<PacketListener<?>>> REGISTERED_LISTENERS = new HashMap<>();
 
     protected PacketManager() {
     }
@@ -64,7 +64,7 @@ public class PacketManager implements Listener {
         return INSTANCE;
     }
 
-    public void registerListener(Class<? extends Packet<?>> packetClass, PacketListener listener) {
+    public <P extends Packet<?>> void registerListener(Class<P> packetClass, PacketListener<P> listener) {
         if (!REGISTERED_LISTENERS.containsKey(packetClass.getName())) {
             REGISTERED_LISTENERS.put(packetClass.getName(), new HashSet<>());
         }
@@ -72,9 +72,9 @@ public class PacketManager implements Listener {
         REGISTERED_LISTENERS.get(packetClass.getName()).add(listener);
     }
 
-    public boolean unregisterListener(Class<? extends Packet<?>> packetClass, PacketListener listener) {
+    public <P extends Packet<?>> boolean unregisterListener(Class<P> packetClass, PacketListener<P> listener) {
         if (REGISTERED_LISTENERS.containsKey(packetClass.getName())) {
-            Set<PacketListener> listeners = REGISTERED_LISTENERS.get(packetClass.getName());
+            Set<PacketListener<?>> listeners = REGISTERED_LISTENERS.get(packetClass.getName());
             if (listeners.contains(listener)) {
                 listeners.remove(listener);
                 return true;
