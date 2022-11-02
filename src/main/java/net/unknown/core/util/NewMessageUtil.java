@@ -40,6 +40,7 @@ import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
+import org.bukkit.craftbukkit.v1_19_R1.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
 import org.spigotmc.SpigotConfig;
 
@@ -70,6 +71,14 @@ public class NewMessageUtil {
     public static void sendMessage(org.bukkit.entity.Player player, Component component) {
         sendMessage(player, component, true);
     }
+
+    public static void sendMessage(org.bukkit.entity.HumanEntity human, Component component, boolean broadcastToOps) {
+        sendMessage(((CraftHumanEntity) human).getHandle(), component, broadcastToOps);
+    }
+
+    public static void sendMessage(org.bukkit.entity.HumanEntity human, Component component) {
+        sendMessage(human, component, true);
+    }
     /* END - Minecraft Components */
 
     /* START - Adventure Components */
@@ -96,6 +105,14 @@ public class NewMessageUtil {
     public static void sendMessage(org.bukkit.entity.Player player, net.kyori.adventure.text.Component component) {
         sendMessage(player, component, true);
     }
+
+    public static void sendMessage(org.bukkit.entity.HumanEntity human, net.kyori.adventure.text.Component component, boolean broadcastToOps) {
+        sendMessage(((CraftHumanEntity) human).getHandle(), component, broadcastToOps);
+    }
+
+    public static void sendMessage(org.bukkit.entity.HumanEntity human, net.kyori.adventure.text.Component component) {
+        sendMessage(human, component, true);
+    }
     /* END - Adventure Components */
 
     /* START - Plain Texts */
@@ -121,6 +138,14 @@ public class NewMessageUtil {
 
     public static void sendMessage(org.bukkit.entity.Player player, String message) {
         sendMessage(player, message, true);
+    }
+
+    public static void sendMessage(org.bukkit.entity.HumanEntity human, String message, boolean broadcastToOps) {
+        sendMessage(((CraftHumanEntity) human).getHandle(), message, broadcastToOps);
+    }
+
+    public static void sendMessage(org.bukkit.entity.HumanEntity human, String message) {
+        sendMessage(human, message, true);
     }
     /* END - Plain Texts*/
     /* NORMAL MESSAGES END */
@@ -151,6 +176,14 @@ public class NewMessageUtil {
     public static void sendErrorMessage(org.bukkit.entity.Player player, Component component) {
         sendErrorMessage(player, component, false);
     }
+
+    public static void sendErrorMessage(org.bukkit.entity.HumanEntity human, Component component, boolean broadcastToOps) {
+        sendErrorMessage(((CraftHumanEntity) human).getHandle(), component, broadcastToOps);
+    }
+
+    public static void sendErrorMessage(org.bukkit.entity.HumanEntity human, Component component) {
+        sendErrorMessage(human, component, false);
+    }
     /* END - Minecraft Components */
 
     /* START - Adventure Components */
@@ -177,6 +210,14 @@ public class NewMessageUtil {
     public static void sendErrorMessage(org.bukkit.entity.Player player, net.kyori.adventure.text.Component component) {
         sendErrorMessage(player, component, false);
     }
+
+    public static void sendErrorMessage(org.bukkit.entity.HumanEntity human, net.kyori.adventure.text.Component component, boolean broadcastToOps) {
+        sendErrorMessage(human, convertAdventure2Minecraft(component), broadcastToOps);
+    }
+
+    public static void sendErrorMessage(org.bukkit.entity.HumanEntity human, net.kyori.adventure.text.Component component) {
+        sendErrorMessage(human, component, false);
+    }
     /* END - Adventure Components */
 
     /* START - Plain Texts */
@@ -202,6 +243,14 @@ public class NewMessageUtil {
 
     public static void sendErrorMessage(org.bukkit.entity.Player player, String message) {
         sendErrorMessage(player, message, false);
+    }
+
+    public static void sendErrorMessage(org.bukkit.entity.HumanEntity human, String message, boolean broadcastToOps) {
+        sendErrorMessage(((CraftHumanEntity) human).getHandle(), message, broadcastToOps);
+    }
+
+    public static void sendErrorMessage(org.bukkit.entity.HumanEntity human, String message) {
+        sendErrorMessage(human, message, false);
     }
     /* END - Plain Texts*/
     /* ERROR MESSAGES END */
