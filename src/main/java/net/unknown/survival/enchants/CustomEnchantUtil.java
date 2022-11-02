@@ -31,7 +31,15 @@
 
 package net.unknown.survival.enchants;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.PickaxeItem;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CustomEnchantUtil {
@@ -80,5 +88,24 @@ public class CustomEnchantUtil {
         }
 
         return -1;
+    }
+
+    public static String getEnchantmentLine(String loreLine, ItemStack itemStack) {
+        List<Component> lore = itemStack.lore();
+        if (lore != null) {
+            return lore.stream()
+                    .map(LegacyComponentSerializer.legacySection()::serialize)
+                    .filter(line -> line.startsWith(loreLine))
+                    .findFirst()
+                    .orElse(null);
+        }
+
+        return null;
+    }
+
+    public static boolean hasEnchantment(String loreLine, ItemStack selectedItem) {
+        if (selectedItem.lore() == null) return false;
+        List<String> lore = selectedItem.lore().stream().map(LegacyComponentSerializer.legacySection()::serialize).toList();
+        return lore.stream().anyMatch(s -> s.startsWith(loreLine));
     }
 }
