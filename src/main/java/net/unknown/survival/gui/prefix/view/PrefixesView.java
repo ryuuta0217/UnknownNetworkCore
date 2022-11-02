@@ -32,9 +32,12 @@
 package net.unknown.survival.gui.prefix.view;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.builder.ItemStackBuilder;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.prefix.Prefix;
@@ -44,18 +47,33 @@ import net.unknown.core.gui.view.PaginationView;
 import net.unknown.survival.gui.prefix.PrefixGuiState;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 
 public class PrefixesView extends PaginationView<Prefix> {
     public PrefixesView(PrefixGui gui, Player player) {
         super(gui, PlayerPrefixes.getPrefixesSorted(player),
-                (prefix) -> new ItemStackBuilder(Material.NAME_TAG).displayName(prefix.getPrefix()).build(),
+                (prefix) -> new ItemStackBuilder(Material.NAME_TAG)
+                        .displayName(prefix.getPrefix())
+                        .lore(Component.empty(), Component.text("クリックで接頭辞を適用", Style.style(DefinedTextColor.GREEN, TextDecoration.BOLD)), Component.text("Shiftを押しながら右クリックで削除", Style.style(DefinedTextColor.RED, TextDecoration.BOLD)))
+                        .build(),
                 (event, prefix) -> {
-                    PlayerPrefixes.setPrefix(event.getWhoClicked().getUniqueId(), prefix);
-                    event.getWhoClicked().closeInventory();
-                    NewMessageUtil.sendMessage(((Player) event.getWhoClicked()), Component.empty()
-                            .append(Component.text("接頭辞を "))
-                            .append(prefix.getPrefix())
-                            .append(Component.text(" に変更しました")));
+                    if (event.getClick() == ClickType.SHIFT_RIGHT) {
+                        PlayerPrefixes.removePrefix(event.getWhoClicked().getUniqueId(), prefix);
+                        event.getWhoClicked().closeInventory();
+                        NewMessageUtil.sendMessage(event.getWhoClicked(), Component.empty()
+                                .append(Component.text("接頭辞 "))
+                                .append(prefix.getPrefix())
+                                .append(Component.text(" を"))
+                                .append(Component.text("削除", DefinedTextColor.RED))
+                                .append(Component.text("しました")));
+                    } else {
+                        PlayerPrefixes.setPrefix(event.getWhoClicked().getUniqueId(), prefix);
+                        event.getWhoClicked().closeInventory();
+                        NewMessageUtil.sendMessage(event.getWhoClicked(), Component.empty()
+                                .append(Component.text("接頭辞を "))
+                                .append(prefix.getPrefix())
+                                .append(Component.text(" に変更しました")));
+                    }
                 },
                 (event, view) -> {
                     gui.setState(PrefixGuiState.WAITING_CALLBACK);
@@ -66,16 +84,13 @@ public class PrefixesView extends PaginationView<Prefix> {
                                     Component.text("接頭辞を入力"),
                                     Component.text("\"&r\"が最後ﾆ挿入ｻﾚﾏｽ"))
                             .onComplete(lines -> {
-                                String raw = PlainTextComponentSerializer.plainText().serialize(lines.get(0));
-                                if (!raw.isEmpty()) {
-                                    raw += "&r";
-                                    Component colored = LegacyComponentSerializer.legacyAmpersand().deserialize(raw);
-                                    Prefix prefix = PlayerPrefixes.addPrefix(player, colored);
-                                    NewMessageUtil.sendMessage(((Player) event.getWhoClicked()), Component.empty()
-                                            .append(Component.text("接頭辞 "))
-                                            .append(prefix.getPrefix())
-                                            .append(Component.text(" を追加しました"))); // "&r " が挿入されているはずなので、スペースは無し TODO: (ChatManagerのほうでスペースを挿入するか？)
-                                }
+                                String raw = "&7[&r" + PlainTextComponentSerializer.plainText().serialize(lines.get(0)) + "&7]&r";
+                                Component colored = LegacyComponentSerializer.legacyAmpersand().deserialize(raw);
+                                Prefix prefix = PlayerPrefixes.addPrefix(player, colored);
+                                NewMessageUtil.sendMessage(event.getWhoClicked(), Component.empty()
+                                        .append(Component.text("接頭辞 "))
+                                        .append(prefix.getPrefix())
+                                        .append(Component.text(" を追加しました"))); // "&r " が挿入されているはずなので、スペースは無し TODO: (ChatManagerのほうでスペースを挿入するか？)
                                 player.openInventory(gui.getInventory());
                                 gui.setState(PrefixGuiState.AVAILABLE_PREFIXES);
                                 view.setData(PlayerPrefixes.getPrefixesSorted(player), true);
