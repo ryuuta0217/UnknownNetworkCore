@@ -39,10 +39,7 @@ import net.unknown.core.gui.GuiBase;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
@@ -57,7 +54,7 @@ public class PaginationView<T> implements View {
 
     private int currentPage = 1;
 
-    public PaginationView(GuiBase gui, Set<T> data, Function<T, ItemStack> processor, BiConsumer<InventoryClickEvent, T> onClick, BiConsumer<InventoryClickEvent, PaginationView<T>> createNewAction) {
+    public PaginationView(GuiBase gui, Collection<T> data, Function<T, ItemStack> processor, BiConsumer<InventoryClickEvent, T> onClick, BiConsumer<InventoryClickEvent, PaginationView<T>> createNewAction) {
         this.gui = gui;
         this.setData(data, false);
         this.processor = processor;
@@ -74,7 +71,7 @@ public class PaginationView<T> implements View {
                 .build());
     }
 
-    public void setData(Set<T> data, boolean reload) {
+    public void setData(Collection<T> data, boolean reload) {
         this.clearInventory();
         //this.data = data;
         this.splitData = ListUtil.splitListAsLinkedSet(data, 45);
