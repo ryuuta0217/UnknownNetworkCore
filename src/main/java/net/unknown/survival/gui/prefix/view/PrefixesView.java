@@ -37,6 +37,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.prefix.PlayerPrefixes;
+import net.unknown.core.prefix.Prefix;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.gui.prefix.PrefixGui;
 import net.unknown.core.gui.view.PaginationView;
@@ -44,16 +45,16 @@ import net.unknown.survival.gui.prefix.PrefixGuiState;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 
-public class PrefixesView extends PaginationView<Component> {
+public class PrefixesView extends PaginationView<Prefix> {
     public PrefixesView(PrefixGui gui, Player player) {
-        super(gui, PlayerPrefixes.getAvailablePrefixes(player),
-                (prefix) -> new ItemStackBuilder(Material.NAME_TAG).displayName(prefix).build(),
+        super(gui, PlayerPrefixes.getPrefixesSorted(player),
+                (prefix) -> new ItemStackBuilder(Material.NAME_TAG).displayName(prefix.getPrefix()).build(),
                 (event, prefix) -> {
                     PlayerPrefixes.setPrefix(event.getWhoClicked().getUniqueId(), prefix);
                     event.getWhoClicked().closeInventory();
                     NewMessageUtil.sendMessage(((Player) event.getWhoClicked()), Component.empty()
                             .append(Component.text("接頭辞を "))
-                            .append(prefix)
+                            .append(prefix.getPrefix())
                             .append(Component.text(" に変更しました")));
                 },
                 (event, view) -> {
@@ -63,21 +64,21 @@ public class PrefixesView extends PaginationView<Component> {
                             .withLines(Component.empty(),
                                     Component.text("^^^^^^^^^^^^^^^^^^^^"),
                                     Component.text("接頭辞を入力"),
-                                    Component.text("\"&r \"が最後ﾆ挿入ｻﾚﾏｽ"))
+                                    Component.text("\"&r\"が最後ﾆ挿入ｻﾚﾏｽ"))
                             .onComplete(lines -> {
                                 String raw = PlainTextComponentSerializer.plainText().serialize(lines.get(0));
                                 if (!raw.isEmpty()) {
-                                    raw += "&r ";
+                                    raw += "&r";
                                     Component colored = LegacyComponentSerializer.legacyAmpersand().deserialize(raw);
-                                    PlayerPrefixes.addAvailablePrefix(player, colored);
+                                    Prefix prefix = PlayerPrefixes.addPrefix(player, colored);
                                     NewMessageUtil.sendMessage(((Player) event.getWhoClicked()), Component.empty()
                                             .append(Component.text("接頭辞 "))
-                                            .append(colored)
-                                            .append(Component.text("を追加しました"))); // "&r " が挿入されているはずなので、スペースは無し TODO: (ChatManagerのほうでスペースを挿入するか？)
+                                            .append(prefix.getPrefix())
+                                            .append(Component.text(" を追加しました"))); // "&r " が挿入されているはずなので、スペースは無し TODO: (ChatManagerのほうでスペースを挿入するか？)
                                 }
                                 player.openInventory(gui.getInventory());
                                 gui.setState(PrefixGuiState.AVAILABLE_PREFIXES);
-                                view.setData(PlayerPrefixes.getAvailablePrefixes(player), true);
+                                view.setData(PlayerPrefixes.getPrefixesSorted(player), true);
                             }).open();
                 });
         this.initialize();

@@ -33,148 +33,150 @@ package net.unknown.core.prefix;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.shared.SharedConstants;
-import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-public class PlayerPrefixes implements Listener {
-    private static final File FOLDER = new File(SharedConstants.DATA_FOLDER, "prefixes");
-    private static final Logger LOGGER = Logger.getLogger("UNC/PlayerPrefixes");
-    private static final Map<UUID, Component> ACTIVE_PREFIXES = new HashMap<>();
-    private static final Map<UUID, Set<Component>> AVAILABLE_PREFIXES = new HashMap<>();
+public class PlayerPrefixes {
+    public static final File DATA_FOLDER = new File(SharedConstants.DATA_FOLDER, "prefixes");
+    private static final Logger LOGGER = Logger.getLogger("UNC/Prefixes");
+    private static final Map<UUID, Set<Prefix>> PREFIXES = new HashMap<>();
 
     public static void loadAll() {
-        File[] files = FOLDER.listFiles((file) -> file.isFile() && file.getName().endsWith(".yml"));
-        if(files == null) return;
-
-        Stream.of(files)
-                .filter(file -> MessageUtil.isUUID(file.getName().replace(".yml", "")))
-                .map(file -> UUID.fromString(file.getName().replace(".yml", "")))
-                .forEach(PlayerPrefixes::load);
-    }
-
-    public static void load(Player player) {
-        load(player.getUniqueId());
+        if (DATA_FOLDER.exists() || DATA_FOLDER.mkdirs()) {
+            File[] searchResult = DATA_FOLDER.listFiles((file) -> file.getName().endsWith(".yml"));
+            if (searchResult != null) {
+                for (File file : searchResult) {
+                    String fileName = file.getName().replace(".yml", "");
+                    if (MessageUtil.isUUID(fileName)) {
+                        UUID uniqueId = UUID.fromString(fileName);
+                        PlayerPrefixes.load(uniqueId);
+                    }
+                }
+            }
+        }
     }
 
     public static void load(UUID uniqueId) {
-        if (Bukkit.getOfflinePlayer(uniqueId).getName() == null) throw new IllegalArgumentException("Illegal UUID provided, player not found.");
-
-        File configFile = new File(FOLDER, uniqueId + ".yml");
+        long start = System.nanoTime();
         try {
-            if (configFile.getParentFile().exists() || configFile.getParentFile().mkdirs()) {
-                if (configFile.exists() || configFile.createNewFile()) {
-                    YamlConfiguration config = YamlConfiguration.loadConfiguration(configFile);
-
-                    if (config.isSet("current") && config.isString("current")) {
-                        ACTIVE_PREFIXES.put(uniqueId, GsonComponentSerializer.gson().deserialize(config.getString("current")));
-                    } else {
-                        ACTIVE_PREFIXES.put(uniqueId, Component.empty());
-                    }
-
-                    if (config.isSet("available") && config.isList("available")) {
-                        AVAILABLE_PREFIXES.put(uniqueId, config.getStringList("available").stream().map(GsonComponentSerializer.gson()::deserialize).collect(Collectors.toSet()));
-                    } else {
-                        AVAILABLE_PREFIXES.put(uniqueId, new LinkedHashSet<>());
-                    }
-                }
+            PREFIXES.remove(uniqueId);
+            PREFIXES.put(uniqueId, new HashSet<>());
+            File configFile = new File(DATA_FOLDER, uniqueId + ".yml");
+            if (configFile.exists() || configFile.createNewFile()) {
+                FileConfiguration config = YamlConfiguration.loadConfiguration(configFile);
+                config.getKeys(false).forEach(createdAtStr -> {
+                    long createdAt = Long.parseLong(createdAtStr);
+                    String prefixJson = config.getConfigurationSection(createdAtStr).getString("prefix");
+                    Component prefix = GsonComponentSerializer.gson().deserialize(prefixJson);
+                    boolean active = config.getConfigurationSection(createdAtStr).getBoolean("active");
+                    boolean temporary = config.getConfigurationSection(createdAtStr).getBoolean("temporary");
+                    Prefix prefixContainer = new Prefix(prefix, createdAt, temporary, active);
+                    PREFIXES.get(uniqueId).add(prefixContainer);
+                });
             }
         } catch(IOException e) {
-            ACTIVE_PREFIXES.put(uniqueId, Component.empty());
-            LOGGER.warning("Failed to load prefixes, player " + Bukkit.getOfflinePlayer(uniqueId).getName() + "'s prefixes is now default.");
+            LOGGER.warning("Failed to load prefixes for player " + uniqueId);
             e.printStackTrace();
+            return;
         }
+        long end = System.nanoTime();
+        long elapsedNano = end - start;
+        LOGGER.info("Player " + uniqueId + " prefix loaded with " + elapsedNano + "ns (" + elapsedNano/1000000 + "ms)");
     }
 
-    public static Component getCurrentPrefix(Player player) {
-        return getCurrentPrefix(player.getUniqueId());
-    }
+    public static void save(UUID uniqueId) {
+        FileConfiguration config = new YamlConfiguration();
 
-    public static Component getCurrentPrefix(UUID uniqueId) {
-        return ACTIVE_PREFIXES.getOrDefault(uniqueId, Component.empty());
-    }
+        Set<Prefix> prefixes = PREFIXES.get(uniqueId);
+        if (prefixes != null) {
+            prefixes.forEach(prefix -> {
+                ConfigurationSection section = config.createSection(String.valueOf(prefix.getCreatedAt()));
+                section.set("prefix", GsonComponentSerializer.gson().serialize(prefix.getPrefix()));
+                section.set("active", prefix.isActive());
+                section.set("temporary", prefix.isTemporary());
+            });
 
-    public static Set<Component> getAvailablePrefixes(Player player) {
-        return getAvailablePrefixes(player.getUniqueId());
-    }
-
-    public static Set<Component> getAvailablePrefixes(UUID uniqueId) {
-        return Set.copyOf(AVAILABLE_PREFIXES.getOrDefault(uniqueId, new HashSet<>()));
-    }
-
-    public static void addAvailablePrefix(Player player, Component prefix) {
-        addAvailablePrefix(player.getUniqueId(), prefix);
-    }
-
-    public static void addAvailablePrefix(UUID uniqueId, Component prefix) {
-        if (!AVAILABLE_PREFIXES.containsKey(uniqueId)) AVAILABLE_PREFIXES.put(uniqueId, new HashSet<>());
-
-        if(AVAILABLE_PREFIXES.get(uniqueId).contains(prefix)) {
-            throw new IllegalArgumentException("Prefix " + PlainTextComponentSerializer.plainText().serialize(prefix) + " is already found.");
-        }
-
-        AVAILABLE_PREFIXES.get(uniqueId).add(prefix);
-        RunnableManager.runAsync(() -> save(uniqueId));
-    }
-
-    public static void setPrefix(Player player, Component newPrefix) {
-        setPrefix(player.getUniqueId(), newPrefix);
-    }
-
-    public static void setPrefix(UUID uniqueId, Component newPrefix) {
-        if (ACTIVE_PREFIXES.containsKey(uniqueId) && !ACTIVE_PREFIXES.get(uniqueId).equals(Component.empty())) {
-            AVAILABLE_PREFIXES.get(uniqueId).add(ACTIVE_PREFIXES.get(uniqueId));
-        }
-        ACTIVE_PREFIXES.put(uniqueId, newPrefix);
-        AVAILABLE_PREFIXES.get(uniqueId).remove(newPrefix);
-        RunnableManager.runAsync(() -> save(uniqueId));
-    }
-
-    private static void save(Player player) {
-        save(player.getUniqueId());
-    }
-
-    private static void save(UUID uniqueId) {
-        File configFile = new File(FOLDER, uniqueId + ".yml");
-        try {
-            if(configFile.getParentFile().exists() || configFile.getParentFile().mkdirs()) {
-                if(configFile.exists() || configFile.createNewFile()) {
-                    YamlConfiguration config = new YamlConfiguration();
-                    config.set("current", GsonComponentSerializer.gson().serialize(ACTIVE_PREFIXES.getOrDefault(uniqueId, Component.empty())));
-                    config.set("available", AVAILABLE_PREFIXES.getOrDefault(uniqueId, new HashSet<>()).stream().map(GsonComponentSerializer.gson()::serialize).toList());
-
-                    try {
-                        config.save(configFile);
-                    } catch (IOException e) {
-                        LOGGER.warning("Failed to save prefixes.");
-                        e.printStackTrace();
-                    }
-                }
+            try {
+                config.save(new File(DATA_FOLDER, uniqueId + ".yml"));
+            } catch (IOException e) {
+                LOGGER.warning("Failed to save prefixes for player " + uniqueId);
+                e.printStackTrace();
             }
-        } catch(IOException e) {
-            LOGGER.warning("Failed to create file or folder.");
-            e.printStackTrace();
         }
     }
 
-    public static class Listener implements org.bukkit.event.Listener {
-        @EventHandler
-        public void onPlayerJoin(PlayerJoinEvent event) {
-            load(event.getPlayer());
-        }
+    public static boolean setPrefix(UUID uniqueId, Component prefix, boolean temporary) {
+        if (!PREFIXES.containsKey(uniqueId)) load(uniqueId);
+        PREFIXES.get(uniqueId).removeIf((prefixContainer) -> {
+            if (prefixContainer.isActive()) {
+                if (prefixContainer.isTemporary()) return true;
+                prefixContainer.setActive(false);
+            }
+            return false;
+        });
+        Prefix prefixContainer = new Prefix(prefix, System.currentTimeMillis(), temporary);
+        PREFIXES.get(uniqueId).add(prefixContainer);
+        prefixContainer.setActive(true);
+        RunnableManager.runAsync(() -> save(uniqueId));
+        return prefixContainer.equals(getActivePrefix(uniqueId));
+    }
+
+    public static boolean setPrefix(UUID uniqueId, Prefix prefix) {
+        if (!PREFIXES.containsKey(uniqueId)) load(uniqueId);
+        if (!PREFIXES.get(uniqueId).contains(prefix)) return false;
+        PREFIXES.get(uniqueId).removeIf((prefixContainer) -> { // イテレータ
+            if (prefixContainer.isActive()) { // 現在有効な接頭辞の場合
+                if (prefixContainer.isTemporary()) return true; // 一時的な接頭辞の場合はtrueを返して削除する
+                prefixContainer.setActive(false); // 一時的でない場合二のみ到達する, 現在有効な接頭辞を無効にする
+            }
+            return false; // デフォルトではfalseを返して削除しない
+        });
+        prefix.setActive(true);
+        RunnableManager.runAsync(() -> save(uniqueId));
+        return prefix.equals(getActivePrefix(uniqueId));
+    }
+
+    public static Prefix addPrefix(Player player, Component prefix) {
+        return addPrefix(player.getUniqueId(), prefix);
+    }
+
+    public static Prefix addPrefix(UUID uniqueId, Component prefix) {
+        Prefix prefixContainer = new Prefix(prefix, System.currentTimeMillis(), false);
+        if (!PREFIXES.containsKey(uniqueId)) load(uniqueId);
+        PREFIXES.get(uniqueId).add(prefixContainer);
+        RunnableManager.runAsync(() -> save(uniqueId));
+        return prefixContainer;
+    }
+
+    @Nullable
+    public static Prefix getActivePrefix(UUID uniqueId) {
+        return getPrefixes(uniqueId).stream().filter(Prefix::isActive).findAny().orElse(null);
+    }
+
+    public static Set<Prefix> getPrefixes(UUID uniqueId) {
+        return Set.copyOf(PREFIXES.getOrDefault(uniqueId, new HashSet<>()));
+    }
+
+    public static List<Prefix> getPrefixesSorted(Player player) {
+        return getPrefixesSorted(player.getUniqueId());
+    }
+
+    public static List<Prefix> getPrefixesSorted(UUID uniqueId) {
+        return getPrefixes(uniqueId)
+                .stream()
+                .sorted(Comparator.comparingLong(Prefix::getCreatedAt))
+                .toList();
     }
 }

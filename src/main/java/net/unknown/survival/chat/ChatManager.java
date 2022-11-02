@@ -96,7 +96,7 @@ public class ChatManager implements Listener {
     public void onChat(AsyncChatEvent event) {
         event.renderer((source, sourceDisplayName, message, viewer) -> {
             Component base = Component.empty();
-            Component prefix = PlayerPrefixes.getCurrentPrefix(source);
+            Component prefix = PlayerPrefixes.getActivePrefix(source.getUniqueId()).getPrefix();
             Component suffix = Component.empty();
             if (UnknownNetworkSurvival.isLuckPermsEnabled()) {
                 suffix = LuckPerms.getSuffixAsComponent(source.getUniqueId());
