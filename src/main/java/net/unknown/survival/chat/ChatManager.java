@@ -54,6 +54,7 @@ import net.minecraft.world.level.block.Block;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.prefix.PlayerPrefixes;
+import net.unknown.core.prefix.Prefix;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.core.util.YukiKanaConverter;
 import net.unknown.survival.UnknownNetworkSurvival;
@@ -96,12 +97,16 @@ public class ChatManager implements Listener {
     public void onChat(AsyncChatEvent event) {
         event.renderer((source, sourceDisplayName, message, viewer) -> {
             Component base = Component.empty();
-            Component prefix = PlayerPrefixes.getActivePrefix(source.getUniqueId()).getPrefix();
+
+            Prefix activePrefix = PlayerPrefixes.getActivePrefix(source.getUniqueId());
+            Component prefixWrapper = Component.empty();
+            prefixWrapper = activePrefix != null ? prefixWrapper.append(activePrefix.getPrefix()).append(Component.space()) : prefixWrapper;
+
             Component suffix = Component.empty();
             if (UnknownNetworkSurvival.isLuckPermsEnabled()) {
                 suffix = LuckPerms.getSuffixAsComponent(source.getUniqueId());
             }
-            return base.append(prefix).append(sourceDisplayName).append(suffix).append(Component.text(": ")).append(message);
+            return base.append(prefixWrapper).append(sourceDisplayName).append(suffix).append(Component.text(": ")).append(message);
         });
 
         // ColorCode Support
