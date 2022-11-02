@@ -160,6 +160,18 @@ public class PlayerPrefixes {
         return prefixContainer;
     }
 
+    public static boolean removePrefix(Player player, Prefix prefix) {
+        return removePrefix(player.getUniqueId(), prefix);
+    }
+
+    public static boolean removePrefix(UUID uniqueId, Prefix prefix) {
+        if (PREFIXES.get(uniqueId).contains(prefix) && PREFIXES.get(uniqueId).remove(prefix)) {
+            RunnableManager.runAsync(() -> save(uniqueId));
+            return true;
+        }
+        return false;
+    }
+
     @Nullable
     public static Prefix getActivePrefix(UUID uniqueId) {
         return getPrefixes(uniqueId).stream().filter(Prefix::isActive).findAny().orElse(null);
