@@ -32,10 +32,12 @@
 package net.unknown.survival.enchants;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -108,9 +110,8 @@ public class RangedMining implements Listener {
         if (!FACING.containsKey(player.getUniqueId())) return;
 
         ItemStack handItem = MinecraftAdapter.ItemStack.itemStack(player.getInventory().getItemInMainHand());
-        if (!(handItem.getItem() instanceof PickaxeItem)) return;
-        int level = EnchantmentHelper.getItemEnchantmentLevel(CustomEnchantments.RANGED_MINING, handItem);
-        if (!handItem.isEnchanted() && level == 0) return;
+        if (!CustomEnchantUtil.hasEnchantment("§7範囲破壊", player.getInventory().getItemInMainHand())) return;
+        int level = CustomEnchantUtil.getEnchantmentLevel(CustomEnchantUtil.getEnchantmentLine("§7範囲破壊", player.getInventory().getItemInMainHand()));
 
         Direction direction = MinecraftAdapter.direction(FACING.getOrDefault(player.getUniqueId(), player.getFacing()));
         FACING.remove(player.getUniqueId());
