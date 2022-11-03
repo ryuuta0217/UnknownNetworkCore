@@ -51,6 +51,7 @@ import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
@@ -58,7 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AutoSmelting implements Listener {
-    @EventHandler
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockBreak(BlockBreakEvent event) {
         ServerPlayer player = MinecraftAdapter.player(event.getPlayer());
         if (player == null) return;
