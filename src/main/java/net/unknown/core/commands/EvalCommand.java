@@ -34,6 +34,7 @@ package net.unknown.core.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -44,9 +45,16 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
+import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.MinecraftAdapter;
+import net.unknown.core.util.NewMessageUtil;
+import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.mozilla.javascript.*;
 
@@ -62,7 +70,18 @@ public class EvalCommand {
     static {
         ScriptableObject.putProperty(GLOBAL_SCOPE, "Bukkit", Bukkit.getServer());
         ScriptableObject.putProperty(GLOBAL_SCOPE, "plugin", UnknownNetworkCore.getInstance());
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "RunnableManager", new NativeJavaClass(GLOBAL_SCOPE, RunnableManager.class));
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "NewMessageUtil", new NativeJavaClass(GLOBAL_SCOPE, NewMessageUtil.class));
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "PlayerData", new NativeJavaClass(GLOBAL_SCOPE, PlayerData.class));
         ScriptableObject.putProperty(GLOBAL_SCOPE, "Storage", GLOBAL_STORAGE);
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "Material", new NativeJavaClass(GLOBAL_SCOPE, org.bukkit.Material.class));
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "MinecraftAdapter", new NativeJavaClass(GLOBAL_SCOPE, MinecraftAdapter.class));
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "EntityType", new NativeJavaClass(GLOBAL_SCOPE, EntityType.class));
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "ChatColor", new NativeJavaClass(GLOBAL_SCOPE, ChatColor.class));
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "Component", new NativeJavaClass(GLOBAL_SCOPE, Component.class));
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "TextDecoration", new NativeJavaClass(GLOBAL_SCOPE, TextDecoration.class));
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "DefinedTextColor", new NativeJavaClass(GLOBAL_SCOPE, DefinedTextColor.class));
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "Style", new NativeJavaClass(GLOBAL_SCOPE, net.kyori.adventure.text.format.Style.class));
     }
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
