@@ -51,7 +51,7 @@ import java.util.stream.IntStream;
 public class WarpsView implements View {
     private final WarpGui parent;
     private List<Set<Warp>> pages;
-    private Map<Integer, Warp> slot2warp = new HashMap<>();
+    private final Map<Integer, Warp> slot2warp = new HashMap<>();
     private int page = 1;
 
     public WarpsView(WarpGui parent) {
@@ -101,6 +101,9 @@ public class WarpsView implements View {
     @Override
     public void onClick(InventoryClickEvent event) {
         switch (event.getSlot()) {
+            case 49 -> {
+                // New
+            }
             case 52 -> {
                 if((this.page - 1) > 0) {
                     this.showPage(this.page - 1);
