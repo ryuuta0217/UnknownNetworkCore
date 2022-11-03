@@ -78,7 +78,7 @@ public class EvalCommand {
         ScriptableObject.putProperty(GLOBAL_SCOPE, "MinecraftAdapter", new NativeJavaClass(GLOBAL_SCOPE, MinecraftAdapter.class));
         ScriptableObject.putProperty(GLOBAL_SCOPE, "EntityType", new NativeJavaClass(GLOBAL_SCOPE, EntityType.class));
         ScriptableObject.putProperty(GLOBAL_SCOPE, "ChatColor", new NativeJavaClass(GLOBAL_SCOPE, ChatColor.class));
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "Component", new NativeJavaClass(GLOBAL_SCOPE, Component.class));
+        ScriptableObject.putProperty(GLOBAL_SCOPE, "Component", new NativeJavaClass(GLOBAL_SCOPE, net.kyori.adventure.text.Component.class));
         ScriptableObject.putProperty(GLOBAL_SCOPE, "TextDecoration", new NativeJavaClass(GLOBAL_SCOPE, TextDecoration.class));
         ScriptableObject.putProperty(GLOBAL_SCOPE, "DefinedTextColor", new NativeJavaClass(GLOBAL_SCOPE, DefinedTextColor.class));
         ScriptableObject.putProperty(GLOBAL_SCOPE, "Style", new NativeJavaClass(GLOBAL_SCOPE, net.kyori.adventure.text.format.Style.class));
