@@ -59,7 +59,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AutoSmelting implements Listener {
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockBreak(BlockBreakEvent event) {
         ServerPlayer player = MinecraftAdapter.player(event.getPlayer());
         if (player == null) return;
