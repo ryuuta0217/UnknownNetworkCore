@@ -1,0 +1,29 @@
+SURVIVAL:
+  291c32e2-5305-447d-8e5c-495b2b20822d:
+    name: test
+    display_name: '{"text":"test"}'
+    start:
+      world: world
+      x: 22.74519492791552
+      y: 4.0
+      z: 37.81990410595851
+      yaw: 101.85257
+      pitch: 21.899727
+    end:
+      world: world
+      x: 22.74519492791552
+      y: 4.0
+      z: 37.81990410595851
+      yaw: 101.85257
+      pitch: 21.899727
+    checkpoints:
+      af4aebae-4512-4ece-a36e-b0f4e2c2e10b:
+        name: cp-1
+        display_name: '{"text":"cp-1"}'
+        location:
+          world: world
+          x: 11.00560894945761
+          y: 4.5
+          z: 29.723346489338496
+          yaw: 143.25397
+          pitch: 6.4497256
