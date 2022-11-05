@@ -292,7 +292,7 @@ public class PlayerDeathListener implements Listener {
         if (event.getHand() == EquipmentSlot.HAND && event.hasBlock() && event.getClickedBlock().getType() == Material.CHEST) {
             Location blockPos = event.getClickedBlock().getLocation();
             Map<Location, List<String>> deathBoxes = DEATH_ITEMS.get(event.getPlayer().getUniqueId());
-            if (deathBoxes.containsKey(blockPos)) {
+            if (deathBoxes != null && deathBoxes.containsKey(blockPos)) {
                 event.setCancelled(true);
                 ServerLevel level = MinecraftAdapter.level(event.getClickedBlock().getWorld());
                 deathBoxes.get(blockPos)
