@@ -31,37 +31,25 @@
 
 package net.unknown.survival.data;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BlockTags;
-import net.minecraft.world.level.Level;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.configurations.Config;
 import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.core.util.MinecraftAdapter;
-import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.model.HomeGroup;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.block.BlockFace;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.MemoryConfiguration;
-import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.craftbukkit.v1_19_R1.block.CraftBlock;
 import org.bukkit.entity.Player;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -194,13 +182,13 @@ public class PlayerData extends Config {
     public static class HomeData {
         private final PlayerData parent;
         private LinkedHashMap<String, HomeGroup> homeGroups;
-        private String defaultGroup;
+        private String defaultGroupName;
         private int homeBaseCount;
         private int homeAdditionalCount;
 
-        public HomeData(PlayerData parent, String defaultGroup, int homeBaseCount, int homeAdditionalCount) {
+        public HomeData(PlayerData parent, String defaultGroupName, int homeBaseCount, int homeAdditionalCount) {
             this.parent = parent;
-            this.defaultGroup = defaultGroup;
+            this.defaultGroupName = defaultGroupName;
             this.homeBaseCount = homeBaseCount;
             this.homeAdditionalCount = homeAdditionalCount;
         }
@@ -219,7 +207,7 @@ public class PlayerData extends Config {
 
         public HomeGroup getGroup(String groupName) {
             if (groupName == null) {
-                return this.homeGroups.getOrDefault(this.defaultGroup, null);
+                return this.homeGroups.getOrDefault(this.defaultGroupName, null);
             }
             return this.homeGroups.getOrDefault(groupName, null);
         }
@@ -232,20 +220,31 @@ public class PlayerData extends Config {
             return this.getGroup(groupName);
         }
 
+        public void removeGroup(String groupName) {
+            if (!isGroupExists(groupName)) throw new IllegalArgumentException("ホームグループ " + groupName + " は存在しません。");
+            if (this.defaultGroupName.equals(groupName)) throw new IllegalArgumentException("ホームグループ " + groupName + " はデフォルトに設定されています。先にデフォルト設定を解除してください。");
+            this.homeGroups.remove(groupName);
+            this.saveAsync();
+        }
+
+        public void removeGroup(HomeGroup group) {
+            this.removeGroup(group.getName());
+        }
+
         public HomeGroup getDefaultGroup() throws IllegalStateException {
-            if (this.defaultGroup != null && !this.homeGroups.containsKey(this.defaultGroup)) {
-                throw new IllegalStateException("デフォルトに設定されているホームグループ " + this.defaultGroup + " は存在しません。");
+            if (this.defaultGroupName != null && !this.homeGroups.containsKey(this.defaultGroupName)) {
+                throw new IllegalStateException("デフォルトに設定されているホームグループ " + this.defaultGroupName + " は存在しません。");
             }
-            return this.defaultGroup != null ? this.homeGroups.get(this.defaultGroup) : this.homeGroups.get("default");
+            return this.defaultGroupName != null ? this.homeGroups.get(this.defaultGroupName) : this.homeGroups.get("default");
         }
 
         public void setDefaultGroup(HomeGroup group) {
             if (group == null) {
-                this.defaultGroup = null;
+                this.defaultGroupName = null;
                 this.saveAsync();
             } else if (this.homeGroups.containsKey(group.getName()) && this.homeGroups.containsValue(group)) {
-                if (!this.defaultGroup.equals(group.getName())) {
-                    this.defaultGroup = group.getName();
+                if (!this.defaultGroupName.equals(group.getName())) {
+                    this.defaultGroupName = group.getName();
                     this.saveAsync();
                 }
             }
@@ -304,7 +303,7 @@ public class PlayerData extends Config {
                 group.save(config.createSection("homes." + groupName), groupItemsSection);
             });
 
-            if (this.defaultGroup != null) config.set("home-default-group", this.defaultGroup);
+            if (this.defaultGroupName != null) config.set("home-default-group", this.defaultGroupName);
             config.set("home-base-count", this.homeBaseCount);
             config.set("home-additional-count", this.homeAdditionalCount);
         }
