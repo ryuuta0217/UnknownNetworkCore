@@ -95,7 +95,7 @@ public class PrefixesView extends PaginationView<Prefix> {
                                 NewMessageUtil.sendMessage(event.getWhoClicked(), Component.empty()
                                         .append(Component.text("接頭辞 "))
                                         .append(prefix.getPrefix())
-                                        .append(Component.text(" を追加しました"))); // "&r " が挿入されているはずなので、スペースは無し TODO: (ChatManagerのほうでスペースを挿入するか？)
+                                        .append(Component.text(" を追加しました")));
                                 player.openInventory(gui.getInventory());
                                 gui.setState(PrefixGuiState.AVAILABLE_PREFIXES);
                                 view.setData(PlayerPrefixes.getPrefixesSorted(player), true);
@@ -123,6 +123,7 @@ public class PrefixesView extends PaginationView<Prefix> {
     public void onClick(InventoryClickEvent event) {
         if (event.getSlot() == 50) {
             PlayerPrefixes.setPrefix(event.getWhoClicked().getUniqueId(), null);
+            NewMessageUtil.sendMessage(event.getWhoClicked(), Component.text("接頭辞を解除しました"));
         } else {
             super.onClick(event);
         }
