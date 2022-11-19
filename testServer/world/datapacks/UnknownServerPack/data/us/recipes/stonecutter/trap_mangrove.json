@@ -1,0 +1,9 @@
+{
+    "type": "minecraft:stonecutting",
+    "ingredient": {
+        "item": "minecraft:mangrove_planks"
+    },
+    "result": "minecraft:mangrove_trapdoor",
+    "group": "stonecutter",
+    "count": 1
+}
