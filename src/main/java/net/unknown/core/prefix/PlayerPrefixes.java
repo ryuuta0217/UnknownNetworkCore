@@ -117,35 +117,43 @@ public class PlayerPrefixes {
         }
     }
 
-    public static boolean setPrefix(UUID uniqueId, Component prefix, boolean temporary) {
-        if (!PREFIXES.containsKey(uniqueId)) load(uniqueId);
-        PREFIXES.get(uniqueId).removeIf((prefixContainer) -> {
-            if (prefixContainer.isActive()) {
-                if (prefixContainer.isTemporary()) return true;
-                prefixContainer.setActive(false);
-            }
-            return false;
-        });
-        Prefix prefixContainer = new Prefix(prefix, System.currentTimeMillis(), temporary);
-        PREFIXES.get(uniqueId).add(prefixContainer);
-        prefixContainer.setActive(true);
-        RunnableManager.runAsync(() -> save(uniqueId));
-        return prefixContainer.equals(getActivePrefix(uniqueId));
+    public static boolean setPrefixTemporary(UUID uniqueId, Component prefix) {
+        Prefix prefixContainer = new Prefix(prefix, System.currentTimeMillis(), true);
+        return setPrefix(uniqueId, prefixContainer);
     }
 
-    public static boolean setPrefix(UUID uniqueId, Prefix prefix) {
-        if (!PREFIXES.containsKey(uniqueId)) load(uniqueId);
-        if (!PREFIXES.get(uniqueId).contains(prefix)) return false;
-        PREFIXES.get(uniqueId).removeIf((prefixContainer) -> { // イテレータ
-            if (prefixContainer.isActive()) { // 現在有効な接頭辞の場合
-                if (prefixContainer.isTemporary()) return true; // 一時的な接頭辞の場合はtrueを返して削除する
-                prefixContainer.setActive(false); // 一時的でない場合二のみ到達する, 現在有効な接頭辞を無効にする
+    public static boolean setPrefix(UUID uniqueId, @Nullable Prefix prefix) {
+        if (prefix == null) {
+            // Prefixを解除する
+            PREFIXES.get(uniqueId).removeIf((prefixContainer) -> {
+                if (prefixContainer.isActive()) { // 現在有効な接頭辞に限定する
+                    if (prefixContainer.isTemporary()) return true; // 一時的な接頭辞の場合はtrueを返して削除する、削除するとgetActivePrefixでnullが返るのでこれでOK
+                    prefixContainer.setActive(false); // 一時的でない場合にのみ到達する, 現在有効な接頭辞を無効にする
+                }
+                return false; // デフォルトではfalseを返して削除しない
+            });
+        } else {
+            // PREFIXES にUUIDが存在しない場合はロードする
+            if (!PREFIXES.containsKey(uniqueId)) load(uniqueId);
+            // 与えられた Prefix が PREFIXES に存在せず、かつ一時的なPrefixでない場合は false を返して処理終了。
+            if (!PREFIXES.get(uniqueId).contains(prefix) && !prefix.isTemporary()) return false;
+
+            PREFIXES.get(uniqueId).removeIf((prefixContainer) -> {
+                if (prefixContainer.isActive()) { // 現在有効な接頭辞の場合
+                    if (prefixContainer.isTemporary()) return true; // 一時的な接頭辞の場合はtrueを返して削除する
+                    prefixContainer.setActive(false); // 一時的でない場合にのみ到達する, 現在有効な接頭辞を無効にする
+                }
+                return false; // デフォルトではfalseを返して削除しない
+            });
+
+            if (prefix.isTemporary()) { // 一時的なPrefixの場合
+                PREFIXES.get(uniqueId).add(prefix); // 一時的なPrefixを PREFIXES に追加する
             }
-            return false; // デフォルトではfalseを返して削除しない
-        });
-        prefix.setActive(true);
+
+            prefix.setActive(true); // Prefixを有効にする
+        }
         RunnableManager.runAsync(() -> save(uniqueId));
-        return prefix.equals(getActivePrefix(uniqueId));
+        return Objects.equals(getActivePrefix(uniqueId), prefix);
     }
 
     public static Prefix addPrefix(Player player, Component prefix) {
