@@ -49,9 +49,11 @@ import net.unknown.survival.gui.prefix.PrefixGuiState;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
 public class PrefixesView extends PaginationView<Prefix> {
+    private Player player;
     public PrefixesView(PrefixGui gui, Player player) {
         super(gui, PlayerPrefixes.getPrefixesSorted(player),
                 (prefix) -> new ItemStackBuilder(Material.NAME_TAG)
@@ -69,6 +71,7 @@ public class PrefixesView extends PaginationView<Prefix> {
                                 .append(Component.text("削除", DefinedTextColor.RED))
                                 .append(Component.text("しました")));
                     } else {
+                        // TODO Prefix#isTemporary が true の場合は、確認メッセージを出す
                         PlayerPrefixes.setPrefix(event.getWhoClicked().getUniqueId(), prefix);
                         event.getWhoClicked().closeInventory();
                         NewMessageUtil.sendMessage(event.getWhoClicked(), Component.empty()
@@ -102,6 +105,26 @@ public class PrefixesView extends PaginationView<Prefix> {
                     event.getWhoClicked().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
                     MainGui.getGui().open(event.getWhoClicked());
                 });
+        this.player = player;
         this.initialize();
+    }
+
+    @Override
+    public void initialize() {
+        super.initialize();
+        if (PlayerPrefixes.getActivePrefix(player.getUniqueId()) != null) {
+            this.getGui().getInventory().setItem(50, new ItemStackBuilder(Material.BARRIER)
+                    .displayName(Component.text("接頭辞の設定を解除", DefinedTextColor.RED))
+                    .build());
+        }
+    }
+
+    @Override
+    public void onClick(InventoryClickEvent event) {
+        if (event.getSlot() == 50) {
+            PlayerPrefixes.setPrefix(event.getWhoClicked().getUniqueId(), null);
+        } else {
+            super.onClick(event);
+        }
     }
 }
