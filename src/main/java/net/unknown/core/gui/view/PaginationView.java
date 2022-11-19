@@ -51,15 +51,17 @@ public class PaginationView<T> implements View {
     private final Map<Integer, T> slot2data = new HashMap<>();
     private final BiConsumer<InventoryClickEvent, T> onClick;
     private BiConsumer<InventoryClickEvent, PaginationView<T>> createNewAction;
+    private BiConsumer<InventoryClickEvent, PaginationView<T>> previousAction;
 
     private int currentPage = 1;
 
-    public PaginationView(GuiBase gui, Collection<T> data, Function<T, ItemStack> processor, BiConsumer<InventoryClickEvent, T> onClick, BiConsumer<InventoryClickEvent, PaginationView<T>> createNewAction) {
+    public PaginationView(GuiBase gui, Collection<T> data, Function<T, ItemStack> processor, BiConsumer<InventoryClickEvent, T> onClick, BiConsumer<InventoryClickEvent, PaginationView<T>> createNewAction, BiConsumer<InventoryClickEvent, PaginationView<T>> previousAction) {
         this.gui = gui;
         this.setData(data, false);
         this.processor = processor;
         this.onClick = onClick;
         this.createNewAction = createNewAction;
+        this.previousAction = previousAction;
     }
 
     @Override
@@ -68,6 +70,10 @@ public class PaginationView<T> implements View {
         this.showPage(1);
         if (this.createNewAction != null) this.gui.getInventory().setItem(49, DefinedItemStackBuilders.plus()
                 .displayName(Component.text("新規追加", DefinedTextColor.GREEN))
+                .build());
+
+        if (this.previousAction != null) this.gui.getInventory().setItem(45, DefinedItemStackBuilders.leftArrow()
+                .displayName(Component.text("戻る", DefinedTextColor.GREEN))
                 .build());
     }
 
@@ -114,7 +120,16 @@ public class PaginationView<T> implements View {
     @Override
     public void onClick(InventoryClickEvent event) {
         switch (event.getSlot()) {
-            case 49 -> this.createNewAction.accept(event, this);
+            case 45 -> {
+                if (this.previousAction != null) {
+                    this.previousAction.accept(event, this);
+                }
+            }
+            case 49 -> {
+                if (this.createNewAction != null) {
+                    this.createNewAction.accept(event, this);
+                }
+            }
             case 52 -> {
                 if ((this.currentPage - 1) > 0) {
                     this.showPage(this.currentPage - 1);
@@ -137,5 +152,9 @@ public class PaginationView<T> implements View {
     public void clearInventory() {
         this.slot2data.keySet().forEach(slot -> this.gui.getInventory().clear(slot));
         this.slot2data.clear();
+    }
+
+    protected GuiBase getGui() {
+        return this.gui;
     }
 }

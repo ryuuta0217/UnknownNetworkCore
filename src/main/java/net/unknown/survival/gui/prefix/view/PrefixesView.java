@@ -42,12 +42,14 @@ import net.unknown.core.gui.SignGui;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.prefix.Prefix;
 import net.unknown.core.util.NewMessageUtil;
+import net.unknown.survival.gui.MainGui;
 import net.unknown.survival.gui.prefix.PrefixGui;
 import net.unknown.core.gui.view.PaginationView;
 import net.unknown.survival.gui.prefix.PrefixGuiState;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 
 public class PrefixesView extends PaginationView<Prefix> {
     public PrefixesView(PrefixGui gui, Player player) {
@@ -95,6 +97,10 @@ public class PrefixesView extends PaginationView<Prefix> {
                                 gui.setState(PrefixGuiState.AVAILABLE_PREFIXES);
                                 view.setData(PlayerPrefixes.getPrefixesSorted(player), true);
                             }).open();
+                },
+                (event, view) -> {
+                    event.getWhoClicked().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+                    MainGui.getGui().open(event.getWhoClicked());
                 });
         this.initialize();
     }
