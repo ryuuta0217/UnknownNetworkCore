@@ -33,9 +33,12 @@ package net.unknown.core.prefix;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.unknown.core.events.PrefixChangedEvent;
+import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.shared.SharedConstants;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -123,6 +126,9 @@ public class PlayerPrefixes {
     }
 
     public static boolean setPrefix(UUID uniqueId, @Nullable Prefix prefix) {
+        Prefix oldPrefix = getActivePrefix(uniqueId);
+        if (oldPrefix != null) oldPrefix = oldPrefix.clone();
+
         if (prefix == null) {
             // Prefixを解除する
             PREFIXES.get(uniqueId).removeIf((prefixContainer) -> {
@@ -153,7 +159,9 @@ public class PlayerPrefixes {
             prefix.setActive(true); // Prefixを有効にする
         }
         RunnableManager.runAsync(() -> save(uniqueId));
-        return Objects.equals(getActivePrefix(uniqueId), prefix);
+        boolean result = Objects.equals(getActivePrefix(uniqueId), prefix);
+        if (result) Bukkit.getPluginManager().callEvent(new PrefixChangedEvent(uniqueId, oldPrefix, prefix));
+        return result;
     }
 
     public static Prefix addPrefix(Player player, Component prefix) {
