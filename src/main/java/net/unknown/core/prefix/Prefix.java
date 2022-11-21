@@ -72,4 +72,9 @@ public class Prefix {
     void setActive(boolean active) {
         this.active = active;
     }
+
+    @Override
+    public Prefix clone() {
+        return new Prefix(this.prefix, this.createdAt, this.temporary, this.active);
+    }
 }
