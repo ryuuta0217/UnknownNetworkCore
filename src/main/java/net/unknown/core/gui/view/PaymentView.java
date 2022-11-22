@@ -37,11 +37,13 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import java.util.function.Consumer;
 
 public class PaymentView implements View {
+    private final boolean compact;
     private final GuiBase gui;
     private final double price;
     private final Consumer<InventoryClickEvent> onPurchased;
 
-    public PaymentView(GuiBase gui, double price, Consumer<InventoryClickEvent> onPurchased) {
+    public PaymentView(boolean compact, GuiBase gui, double price, Consumer<InventoryClickEvent> onPurchased) {
+        this.compact = compact;
         this.gui = gui;
         this.price = price;
         this.onPurchased = onPurchased;
@@ -49,7 +51,15 @@ public class PaymentView implements View {
 
     @Override
     public void initialize() {
-
+        if (compact) {
+            // 9*3 = 27 slots (single chest)
+            // Slot 12: Yes
+            // Slot 14: No
+        } else {
+            // 9*6 = 54 slots (double chest)
+            // Slot 21: Yes
+            // Slot 23: No
+        }
     }
 
     @Override
