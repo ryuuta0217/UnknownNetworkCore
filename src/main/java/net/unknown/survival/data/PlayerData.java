@@ -57,7 +57,6 @@ import java.util.regex.Pattern;
 public class PlayerData extends Config {
     private static final int VERSION = 3;
     private static final Map<UUID, PlayerData> PLAYER_DATA_MAP = new HashMap<>();
-    private static final int DEFAULT_MAX_HOME_COUNT = 5;
     private final UUID uniqueId;
     private HomeData homeData;
     private final SessionData sessionData = new SessionData(this);
@@ -180,6 +179,8 @@ public class PlayerData extends Config {
     }
 
     public static class HomeData {
+        public static final int DEFAULT_MAX_HOME_COUNT = 5;
+
         private final PlayerData parent;
         private LinkedHashMap<String, HomeGroup> homeGroups;
         private String defaultGroupName;
@@ -275,19 +276,25 @@ public class PlayerData extends Config {
         }
 
         public static HomeData load(PlayerData data) {
-            String defaultGroup = data.getConfig().getString("home-default-group", null);
-            int homeBaseCount = data.getConfig().getInt("home-base-count");
-            int homeAdditionalCount = data.getConfig().getInt("home-additional-count");
+            String defaultGroup = data.getConfig().getString("home-default-group", "default");
+            int homeBaseCount = data.getConfig().getInt("home-base-count", DEFAULT_MAX_HOME_COUNT);
+            int homeAdditionalCount = data.getConfig().getInt("home-additional-count", 0);
             HomeData homeData = new HomeData(data, defaultGroup, homeBaseCount, homeAdditionalCount);
             LinkedHashMap<String, HomeGroup> groups = new LinkedHashMap<>();
 
             ConfigurationSection groupItemsSection = data.getConfig().getConfigurationSection("homeGroupItems");
+            ConfigurationSection homeGroupsSection = data.getConfig().getConfigurationSection("home");
 
-            data.getConfig().getConfigurationSection("homes").getKeys(false).forEach(groupName -> {
-                ConfigurationSection groupSection = data.getConfig().getConfigurationSection("homes." + groupName);
-                HomeGroup group = HomeGroup.load(homeData, groupName, groupSection, groupItemsSection);
+            if (homeGroupsSection != null) {
+                homeGroupsSection.getKeys(false).forEach(groupName -> {
+                    ConfigurationSection groupSection = data.getConfig().getConfigurationSection("homes." + groupName);
+                    HomeGroup group = HomeGroup.load(homeData, groupName, groupSection, groupItemsSection);
+                    groups.put(group.getName(), group);
+                });
+            } else { // when not found any home groups, Create new.
+                HomeGroup group = new HomeGroup(homeData, "default", null, new LinkedHashMap<>());
                 groups.put(group.getName(), group);
-            });
+            }
 
             homeData.setGroups(groups);
 
