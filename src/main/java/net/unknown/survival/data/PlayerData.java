@@ -283,11 +283,11 @@ public class PlayerData extends Config {
             LinkedHashMap<String, HomeGroup> groups = new LinkedHashMap<>();
 
             ConfigurationSection groupItemsSection = data.getConfig().getConfigurationSection("homeGroupItems");
-            ConfigurationSection homeGroupsSection = data.getConfig().getConfigurationSection("home");
+            ConfigurationSection homeGroupsSection = data.getConfig().getConfigurationSection("homes");
 
             if (homeGroupsSection != null) {
                 homeGroupsSection.getKeys(false).forEach(groupName -> {
-                    ConfigurationSection groupSection = data.getConfig().getConfigurationSection("homes." + groupName);
+                    ConfigurationSection groupSection = homeGroupsSection.getConfigurationSection(groupName);
                     HomeGroup group = HomeGroup.load(homeData, groupName, groupSection, groupItemsSection);
                     groups.put(group.getName(), group);
                 });
