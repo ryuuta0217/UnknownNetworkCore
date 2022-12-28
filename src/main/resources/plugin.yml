@@ -2,11 +2,13 @@ name: UnknownNetworkCore
 version: "@version@"
 api-version: 1.19
 main: net.unknown.UnknownNetworkCore
-softdepend: ["WorldGuard", "Multiverse-Core", "HolographicDisplays", "Vault", "Jecon"]
+softdepend: ["WorldGuard", "Multiverse-Core", "HolographicDisplays", "Vault", "Jecon", "BlueMap"]
 permissions:
   unknown.core.default:
     default: true
-    children: {}
+    children:
+      minecraft.command.skull: true
+      unknown.core.command.skull: true
   unknown.core.admin:
     default: op
     children:
