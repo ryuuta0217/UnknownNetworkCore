@@ -35,6 +35,7 @@ import net.milkbowl.vault.economy.Economy;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.antivillagerlag.AntiVillagerLag;
+import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
@@ -94,6 +95,7 @@ public class UnknownNetworkSurvival {
         PlayerDeathListener.load();
 
         GNArms.initialize();
+        BlueMapBar.initialize();
         DebugStickEntityEditor.Listener.register();
 
         ListenerManager.registerListener(new MainGuiOpenListener());

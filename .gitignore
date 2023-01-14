@@ -1,6 +1,7 @@
 build/
 libs/*
 !libs/HolographicDisplays.jar
+!libs/BlueMap*.jar
 !libs/gradle/
 .idea/
 .gradle/
