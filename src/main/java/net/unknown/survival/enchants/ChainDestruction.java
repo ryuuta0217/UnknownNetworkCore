@@ -82,6 +82,8 @@ public class ChainDestruction implements Listener {
 
         add(Blocks.NETHER_QUARTZ_ORE);
 
+        add(Blocks.GLOWSTONE);
+
         add(Blocks.OAK_LOG);
         add(Blocks.BIRCH_LOG);
         add(Blocks.SPRUCE_LOG);
