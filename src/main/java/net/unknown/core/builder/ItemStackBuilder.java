@@ -65,7 +65,7 @@ public class ItemStackBuilder {
     }
 
     public ItemStackBuilder addEnchantment(Enchantment enchant, int level) {
-        this.original.addEnchantment(enchant, level);
+        this.original.addUnsafeEnchantment(enchant, level);
         return this;
     }
 
