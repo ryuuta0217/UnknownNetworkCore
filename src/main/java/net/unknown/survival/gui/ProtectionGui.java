@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Unknown Network Developers and contributors.
+ * Copyright (c) 2023 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -35,6 +35,7 @@ import com.ryuuta0217.util.ListUtil;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
 import com.sk89q.worldguard.domains.DefaultDomain;
@@ -55,6 +56,7 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.gui.view.View;
+import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.NewMessageUtil;
@@ -63,6 +65,7 @@ import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.core.gui.view.PlayerSelectionView;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
@@ -351,6 +354,8 @@ public class ProtectionGui extends GuiBase {
                         this.min = result.min();
                         this.max = result.max();
 
+                        WorldEdit.getRegionSelector(this.gui.player, result.world()).clear(); // Clear selection to remove visualizer
+
                         this.gui.guiState = State.NEW_REGION;
                         this.initialize();
                         this.gui.player.openInventory(this.gui.inventory);
@@ -446,6 +451,10 @@ public class ProtectionGui extends GuiBase {
                         .addItemFlag(ItemFlag.HIDE_ATTRIBUTES)
                         .build());
 
+                this.gui.inventory.setItem(51, new ItemStackBuilder(Material.SPYGLASS)
+                        .displayName(Component.text("保護領域の範囲を表示", Style.style(DefinedTextColor.AQUA, TextDecoration.BOLD)))
+                        .build());
+
                 this.gui.inventory.setItem(52, new ItemStackBuilder(Material.OAK_FENCE)
                         .displayName(Component.text("保護範囲を変更", Style.style(DefinedTextColor.GREEN, TextDecoration.BOLD)))
                         .build());
@@ -530,11 +539,25 @@ public class ProtectionGui extends GuiBase {
                         this.regionsView.showRegions(this.regionsView.currentPage);
                     }
 
+                    // 保護範囲表示
+                    case 51 -> {
+                        if (this.region.region() instanceof ProtectedCuboidRegion region) {
+                            this.gui.guiState = State.WAITING_CALLBACK;
+                            this.gui.player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+
+                            Util.startSelectionViewMode(this.gui.player, this.region, () -> {
+                                WorldEdit.getRegionSelector(this.gui.player, this.region.world()).clear();
+                                this.gui.guiState = State.REGION_INFORMATION;
+                                this.gui.player.openInventory(this.gui.getInventory());
+                            });
+                        }
+                    }
+
                     // 範囲再設定
                     case 52 -> {
                         if (this.region.region() instanceof ProtectedCuboidRegion region) {
                             this.gui.guiState = State.WAITING_CALLBACK;
-                            this.gui.player.closeInventory();
+                            this.gui.player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
 
                             Util.startSelectionMode(this.gui.player, (result) -> {
                                 World world = result.world();
@@ -913,10 +936,10 @@ public class ProtectionGui extends GuiBase {
                     .append(Component.text("を押して、範囲選択用の金の斧を投げると範囲選択を終了します。")), false);
 
             BukkitTask task = RunnableManager.runAsyncRepeating(() -> {
-                player.sendActionBar(Component.text("≪範囲選択モードが有効です≫").style(Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD.withState(true))));
+                player.sendActionBar(Component.text("≪範囲選択モードが有効です≫").style(Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD)));
             }, 0L, 3L);
 
-            Bukkit.getPluginManager().registerEvent(PlayerInteractEvent.class, createListener(listeners), EventPriority.MONITOR, (l, ev) -> {
+            ListenerManager.registerEventListener(PlayerInteractEvent.class, createListener(listeners), EventPriority.MONITOR, false, (l, ev) -> {
                 if (ev instanceof PlayerInteractEvent e) {
                     if (!e.getPlayer().equals(player)) return;
                     if (e.getHand() != EquipmentSlot.HAND) return;
@@ -967,9 +990,9 @@ public class ProtectionGui extends GuiBase {
                         selector.selectSecondary(result.max(), null);
                     }
                 }
-            }, UnknownNetworkCore.getInstance(), false);
+            });
 
-            Bukkit.getPluginManager().registerEvent(PlayerDropItemEvent.class, createListener(listeners), EventPriority.MONITOR, (l, ev) -> {
+            ListenerManager.registerEventListener(PlayerDropItemEvent.class, createListener(listeners), EventPriority.MONITOR, false, (l, ev) -> {
                 if (ev instanceof PlayerDropItemEvent e) {
                     if (!e.getPlayer().equals(player)) return;
                     if (e.getItemDrop().getItemStack().getType() != Material.GOLDEN_AXE) return;
@@ -982,9 +1005,9 @@ public class ProtectionGui extends GuiBase {
                     e.getItemDrop().remove();
                     onComplete.accept(result);
                 }
-            }, UnknownNetworkCore.getInstance(), false);
+            });
 
-            Bukkit.getPluginManager().registerEvent(PlayerQuitEvent.class, createListener(listeners), EventPriority.MONITOR, (l, ev) -> {
+            ListenerManager.registerEventListener(PlayerQuitEvent.class, createListener(listeners), EventPriority.MONITOR, false, (l, ev) -> {
                 if (ev instanceof PlayerQuitEvent e) {
                     if (e.getPlayer().equals(player)) {
                         player.getInventory().setItem(player.getInventory().getHeldItemSlot(), currentHand);
@@ -992,14 +1015,67 @@ public class ProtectionGui extends GuiBase {
                         if (!task.isCancelled()) task.cancel();
                     }
                 }
-            }, UnknownNetworkCore.getInstance(), false);
-            Bukkit.getPluginManager().registerEvent(PlayerSwapHandItemsEvent.class, createListener(listeners), EventPriority.LOWEST, (l, ev) -> {
+            });
+
+            ListenerManager.registerEventListener(PlayerSwapHandItemsEvent.class, createListener(listeners), EventPriority.LOWEST, false, (l, ev) -> {
                 if (ev instanceof PlayerSwapHandItemsEvent e) {
                     if (e.getPlayer().equals(player)) {
                         e.setCancelled(true);
                     }
                 }
-            }, UnknownNetworkCore.getInstance(), false);
+            });
+        }
+
+        public static void startSelectionViewMode(Player player, WorldGuard.WrappedProtectedRegion region, Runnable onEnd) {
+            Set<Listener> listeners = new HashSet<>();
+
+            ItemStack currentHand = player.getInventory().getItemInMainHand();
+            ItemStack newHand = new ItemStackBuilder(Material.SPYGLASS)
+                    .addEnchantment(Enchantment.PROTECTION_PROJECTILE, 1)
+                    .custom(is -> is.addItemFlags(ItemFlag.HIDE_ENCHANTS))
+                    .build();
+
+            if (region.region() instanceof ProtectedCuboidRegion cuboid) {
+                WorldEdit.getSession(player).setRegionSelector(BukkitAdapter.adapt(player.getWorld()), new CuboidRegionSelector(BukkitAdapter.adapt(region.world()), cuboid.getMinimumPoint(), cuboid.getMaximumPoint()));
+            } else {
+                NewMessageUtil.sendErrorMessage(player, Component.empty().append(Component.text("この形の保護領域には対応していません。正常に表示されない可能性があります。")));
+            }
+
+            player.getInventory().setItem(player.getInventory().getHeldItemSlot(), newHand);
+
+            NewMessageUtil.sendMessage(player, Component.empty()
+                    .append(Component.keybind("key.drop"))
+                    .append(Component.text(" を押して、 "))
+                    .append(Component.translatable(Material.SPYGLASS))
+                    .append(Component.text(" を投げると保護範囲確認モードを終了します。")), false);
+
+            BukkitTask task = RunnableManager.runAsyncRepeating(() -> {
+                player.sendActionBar(Component.text("≪範囲確認モードが有効です≫").style(Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD)));
+            }, 0L, 3L);
+
+            ListenerManager.registerEventListener(PlayerDropItemEvent.class, createListener(listeners), EventPriority.MONITOR, false, (l, ev) -> {
+                if (ev instanceof PlayerDropItemEvent e) {
+                    /* Pre-tests */
+                    if (!e.getPlayer().equals(player)) return;
+
+                    Item toDropItemEntity = e.getItemDrop();
+                    ItemStack toDropItem = toDropItemEntity.getItemStack();
+                    if (toDropItem.getType() != Material.SPYGLASS) return;
+
+                    Map<Enchantment, Integer> toDropItemEnchants = toDropItem.getEnchantments();
+                    if (!toDropItemEnchants.containsKey(Enchantment.PROTECTION_PROJECTILE)) return;
+                    if (toDropItemEnchants.get(Enchantment.PROTECTION_PROJECTILE) != 1) return;
+                    /* End of Pre-tests */
+
+                    // TODO: インベントリからアイテムを捨てられると、HeldItemSlotの場所に対象のアイテムがあるとは限らないので、別途処理
+                    // TODO: getHeldItemSlot() のスロットに指定したアイテム以外がある場合は、firstEmpty()のスロットに入れるようにすると良さそう
+                    e.getPlayer().getInventory().setItem(e.getPlayer().getInventory().getHeldItemSlot(), currentHand);
+                    unregisterAllListeners(listeners);
+                    if (!task.isCancelled()) task.cancel();
+                    e.getItemDrop().remove();
+                    onEnd.run();
+                }
+            });
         }
 
         public static Listener createListener(Set<Listener> listeners) {

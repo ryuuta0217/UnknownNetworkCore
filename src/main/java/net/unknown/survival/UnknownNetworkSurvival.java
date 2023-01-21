@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Unknown Network Developers and contributors.
+ * Copyright (c) 2023 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -45,6 +45,7 @@ import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.enchants.*;
 import net.unknown.survival.enchants.nms.DamageEnchant;
 import net.unknown.survival.feature.DebugStickEntityEditor;
+import net.unknown.survival.feature.ProtectedAreaTestStick;
 import net.unknown.survival.feature.gnarms.GNArms;
 import net.unknown.survival.fml.FMLConnectionListener;
 import net.unknown.survival.fml.ModdedPlayerManager;
@@ -111,6 +112,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new ChainDestruction());
         ListenerManager.registerListener(new AutoSmelting());
         ListenerManager.registerListener(new ServerRestartListener());
+        ListenerManager.registerListener(new ProtectedAreaTestStick());
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             //ListenerManager.registerListener(new BlockDisassembler());

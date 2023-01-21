@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Unknown Network Developers and contributors.
+ * Copyright (c) 2023 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *
@@ -72,12 +72,17 @@ public class ChainDestruction implements Listener {
 
         add(Blocks.GOLD_ORE);
         add(Blocks.DEEPSLATE_GOLD_ORE);
+        add(Blocks.NETHER_GOLD_ORE);
 
         add(Blocks.DIAMOND_ORE);
         add(Blocks.DEEPSLATE_DIAMOND_ORE);
 
         add(Blocks.EMERALD_ORE);
         add(Blocks.DEEPSLATE_EMERALD_ORE);
+
+        add(Blocks.NETHER_QUARTZ_ORE);
+
+        add(Blocks.GLOWSTONE);
 
         add(Blocks.OAK_LOG);
         add(Blocks.BIRCH_LOG);
