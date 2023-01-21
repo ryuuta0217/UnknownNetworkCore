@@ -257,6 +257,12 @@
     },
     "done": true
   },
+  "minecraft:recipes/misc/gold_nugget_from_blasting": {
+    "criteria": {
+      "has_golden_axe": "2023-01-19 18:00:37 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/combat/wooden_sword": {
     "criteria": {
       "has_stick": "2022-07-11 05:11:28 +0900"
@@ -895,6 +901,12 @@
       "minecraft:warped_forest": "2022-08-30 17:56:07 +0900"
     },
     "done": false
+  },
+  "minecraft:recipes/misc/gold_nugget_from_smelting": {
+    "criteria": {
+      "has_golden_axe": "2023-01-19 18:00:37 +0900"
+    },
+    "done": true
   },
   "minecraft:recipes/combat/diamond_boots": {
     "criteria": {
