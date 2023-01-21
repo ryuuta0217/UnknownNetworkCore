@@ -85,7 +85,7 @@ public class BlueMapBar implements Listener {
             return baseComponent.append("Rendering is not running.");
         } else {
             int otherRenderingTaskCount = renderingTasks.size() - 1;
-            return baseComponent.append(Component.literal(currentTask.getDescription()))
+            return baseComponent.append(Component.literal(currentTask.getDetail().orElse(currentTask.getDescription())))
                     .append((otherRenderingTaskCount > 0 ? Component.literal(" | Remaining " + otherRenderingTaskCount + " task" + (otherRenderingTaskCount > 1 ? "s": "")) : Component.empty()));
         }
     }
