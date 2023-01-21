@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Unknown Network Developers and contributors.
+ * Copyright (c) 2023 Unknown Network Developers and contributors.
  *
  * All rights reserved.
  *

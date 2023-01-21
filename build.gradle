@@ -40,7 +40,7 @@ license {
     include '**/*.java'
     properties {
         organization = 'Unknown Network'
-        year = 2022
+        year = 2023
     }
     newLine = true
 }
