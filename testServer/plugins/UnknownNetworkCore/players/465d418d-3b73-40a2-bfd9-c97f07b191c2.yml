@@ -1,7 +1,13 @@
 home-base-count: 1000
 home-additional-count: 0
 config-version: 3
-reply-target: 1a2ccd14-5204-4fa4-9987-6c8df82f5136
+reply-target: 65922e55-04b3-48c2-a4f7-5b393692adf4
+force-global-chat-prefix: g.
+use-kana-convert: false
+home-default-group: default
+homeGroupItems:
+  default: ENDER_EYE
+  dwadwadaw: WHITE_WOOL
 homes:
   default:
     a:
@@ -327,7 +333,3 @@ homes:
       yaw: 91.83923
       pitch: 2.8164847
   dwadwadaw: {}
-homeGroupItems:
-  default: ENDER_EYE
-force-global-chat-prefix: g.
-use-kana-convert: false
