@@ -61,7 +61,7 @@ import net.unknown.survival.chat.channels.ranged.TitleChatChannel;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;

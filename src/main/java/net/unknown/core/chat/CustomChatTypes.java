@@ -29,23 +29,43 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.chat.channels.ranged;
+package net.unknown.core.chat;
 
-import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.title.Title;
-import net.unknown.survival.chat.channels.ChannelType;
-import org.bukkit.entity.Player;
+import net.minecraft.core.*;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.network.chat.ChatTypeDecoration;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.unknown.core.util.RegistryUtil;
 
-import java.util.Collection;
+import java.util.List;
 
-public class TitleChatChannel extends RangedChatChannel {
-    public TitleChatChannel(double range) {
-        super("タイトル", ChannelType.TITLE, range);
+public class CustomChatTypes {
+    public static final ResourceKey<ChatType> PRIVATE_MESSAGE = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("private_message"));
+
+    public static void bootstrap() {
+        register(Registries.CHAT_TYPE, PRIVATE_MESSAGE, new ChatType(
+                new ChatTypeDecoration( // for chat view
+                        "[PM] [%s]: %s",
+                        List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT),
+                        Style.EMPTY),
+                new ChatTypeDecoration( // for narration
+                        "%s があなたに %s と言いました",
+                        List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT),
+                        Style.EMPTY)));
     }
 
-    @Override
-    public void processRangedChat(AsyncChatEvent event, Collection<? extends Player> receivers) {
-        event.setCancelled(true);
-        receivers.forEach(receiver -> receiver.showTitle(Title.title(event.message(), event.getPlayer().displayName())));
+    @SuppressWarnings("unchecked")
+    private static ResourceKey<ChatType> register(ResourceKey<Registry<ChatType>> registry, ResourceKey<ChatType> key, ChatType type) {
+        Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().registry(Registries.CHAT_TYPE).orElse(null);
+        if (chatTypes != null) {
+            RegistryUtil.forceRegister(chatTypes, key.location(), type);
+            return key;
+        }
+
+        return null;
     }
 }

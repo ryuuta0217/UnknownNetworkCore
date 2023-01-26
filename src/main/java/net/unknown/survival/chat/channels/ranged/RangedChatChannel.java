@@ -63,7 +63,6 @@ public abstract class RangedChatChannel extends ChatChannel {
 
     @Override
     public void processChat(AsyncChatEvent event) {
-        event.setCancelled(true);
         try {
             if (this.range > 0) {
                 processRangedChat(event, Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> {

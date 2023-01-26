@@ -32,6 +32,7 @@
 package net.unknown.survival.enchants.nms;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -46,7 +47,7 @@ public class EnchantExample extends Enchantment {
     }
 
     public static void register() {
-        Registry.register(Registry.ENCHANTMENT, "example", new EnchantExample(Rarity.COMMON, EquipmentSlot.MAINHAND));
+        Registry.register(BuiltInRegistries.ENCHANTMENT, "example", new EnchantExample(Rarity.COMMON, EquipmentSlot.MAINHAND));
     }
 
     @Override
