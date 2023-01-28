@@ -45,6 +45,7 @@ public class TitleChatChannel extends RangedChatChannel {
 
     @Override
     public void processRangedChat(AsyncChatEvent event, Collection<? extends Player> receivers) {
+        event.setCancelled(true);
         receivers.forEach(receiver -> receiver.showTitle(Title.title(event.message(), event.getPlayer().displayName())));
     }
 }

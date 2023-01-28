@@ -38,10 +38,13 @@ import net.unknown.UnknownNetworkCore;
 import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.events.PrivateMessageEvent;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.MinecraftAdapter;
+import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 
 import java.util.Collections;
 import java.util.UUID;
@@ -65,10 +68,11 @@ public class PrivateChatChannel extends ChatChannel {
 
     @Override
     public void processChat(AsyncChatEvent event) {
-        event.setCancelled(true);
+        //event.setCancelled(true);
         OfflinePlayer player = Bukkit.getOfflinePlayer(this.target);
         if (!player.isOnline()) {
             MessageUtil.sendErrorMessage(event.getPlayer(), player.getName() + " はオフラインです。");
+            event.setCancelled(true);
             return;
         }
 
@@ -83,15 +87,28 @@ public class PrivateChatChannel extends ChatChannel {
             }).get();
         } catch (InterruptedException | ExecutionException ignored) {
         }
-        if (pEvent.isCancelled()) return;
+        if (pEvent.isCancelled()) {
+            event.setCancelled(true);
+            return;
+        }
 
-        Component message = MessageUtil.convertAdventure2NMS(pEvent.message());
+        //Component message = MessageUtil.convertAdventure2NMS(pEvent.message());
+        event.message(pEvent.message());
 
-        sender.sendSystemMessage(MsgCommand.senderMessage(receiver.getDisplayName(), message));
-        pEvent.getReceivers()
-                .stream()
-                .map(r -> ((CraftPlayer) r).getHandle())
-                .forEach(r -> r.sendSystemMessage(MsgCommand.receiverMessage(sender.getName(), message)));
+        event.viewers().removeIf(audience -> !audience.equals(sender.getBukkitEntity()) && !audience.equals(receiver.getBukkitEntity()) && !(audience instanceof ConsoleCommandSender));
+
+        event.renderer(((source, sourceDisplayName, message1, viewer) -> {
+            if (viewer.equals(receiver.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(MsgCommand.receiverMessage(NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName), NewMessageUtil.convertAdventure2Minecraft(message1)));
+            else if (viewer.equals(sender.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(MsgCommand.senderMessage(receiver.getName(), NewMessageUtil.convertAdventure2Minecraft(message1)));
+            else if (viewer instanceof ConsoleCommandSender) return NewMessageUtil.convertMinecraft2Adventure(MsgCommand.spyMessage(NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName), receiver.getName(), NewMessageUtil.convertAdventure2Minecraft(message1)));
+            return net.kyori.adventure.text.Component.empty();
+        }));
+
+        //sender.sendSystemMessage(MsgCommand.senderMessage(receiver.getDisplayName(), message));
+        //pEvent.getReceivers()
+        //        .stream()
+        //        .map(r -> ((CraftPlayer) r).getHandle())
+        //        .forEach(r -> r.sendSystemMessage(MsgCommand.receiverMessage(sender.getName(), message)));
         PlayerData.of(receiver.getUUID()).getChatData().setPrivateMessageReplyTarget(sender.getUUID());
     }
 }

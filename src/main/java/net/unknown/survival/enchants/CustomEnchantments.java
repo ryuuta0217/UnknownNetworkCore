@@ -33,12 +33,13 @@ package net.unknown.survival.enchants;
 
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.unknown.core.util.RegistryUtil;
 
 public class CustomEnchantments {
-    public static Enchantment RANGED_MINING = RegistryUtil.forceRegister(Registry.ENCHANTMENT, ResourceLocation.of("minecraft:ranged_mining", ':'), RangedMining.RangedMiningEnchantment.instance());
+    public static Enchantment RANGED_MINING = RegistryUtil.forceRegister(BuiltInRegistries.ENCHANTMENT, ResourceLocation.of("minecraft:ranged_mining", ':'), RangedMining.RangedMiningEnchantment.instance());
 
     public static void initialize() {
         // for clinit callen

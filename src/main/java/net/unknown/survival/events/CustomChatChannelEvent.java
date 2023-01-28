@@ -47,12 +47,12 @@ public class CustomChatChannelEvent extends Event implements Cancellable {
     private final Set<Player> receivers;
     private final CustomChannel channel;
     private boolean cancelled = false;
-    private Component renderedMessage;
+    private Component message;
 
-    public CustomChatChannelEvent(boolean async, Player sender, Component renderedMessage, Set<Player> receivers, CustomChannel channel) {
+    public CustomChatChannelEvent(boolean async, Player sender, Component message, Set<Player> receivers, CustomChannel channel) {
         super(async);
         this.sender = sender;
-        this.renderedMessage = renderedMessage;
+        this.message = message;
         this.receivers = receivers;
         this.channel = channel;
     }
@@ -66,12 +66,12 @@ public class CustomChatChannelEvent extends Event implements Cancellable {
         return sender;
     }
 
-    public Component getRenderedMessage() {
-        return renderedMessage;
+    public Component getMessage() {
+        return message;
     }
 
-    public void setRenderedMessage(Component renderedMessage) {
-        this.renderedMessage = renderedMessage;
+    public void setMessage(Component message) {
+        this.message = message;
     }
 
     public Set<Player> getReceivers() {

@@ -36,6 +36,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.unknown.core.athletic.Athletics;
 import net.unknown.core.bossbar.TPSBar;
+import net.unknown.core.chat.CustomChatTypes;
 import net.unknown.core.commands.Commands;
 import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
@@ -46,7 +47,7 @@ import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.tab.TabListPingManager;
 import net.unknown.core.util.ObfuscationUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_19_R1.CraftServer;
+import org.bukkit.craftbukkit.v1_19_R2.CraftServer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
@@ -106,6 +107,7 @@ public class UnknownNetworkCore extends JavaPlugin {
                 t.printStackTrace();
             }
         });*/
+        CustomChatTypes.bootstrap();
         Commands.init();
         ENV.onLoad();
         long end = System.nanoTime();

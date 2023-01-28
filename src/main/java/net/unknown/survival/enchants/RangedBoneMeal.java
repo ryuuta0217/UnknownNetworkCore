@@ -32,6 +32,7 @@
 package net.unknown.survival.enchants;
 
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -44,7 +45,7 @@ public class RangedBoneMeal {
 
         protected RangedBoneMealEnchantment() {
             super(Rarity.COMMON, EnchantmentCategory.WEAPON, new EquipmentSlot[0]);
-            Registry.register(Registry.ENCHANTMENT, "ranged_bone_meal", this);
+            Registry.register(BuiltInRegistries.ENCHANTMENT, "ranged_bone_meal", this);
         }
 
         public static RangedBoneMealEnchantment instance() {

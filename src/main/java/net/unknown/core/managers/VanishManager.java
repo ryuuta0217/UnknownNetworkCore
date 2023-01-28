@@ -31,7 +31,8 @@
 
 package net.unknown.core.managers;
 
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCore;
@@ -39,9 +40,12 @@ import net.unknown.core.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class VanishManager {
     private static final Set<UUID> VANISHED_PLAYERS = new HashSet<>();
@@ -70,7 +74,7 @@ public class VanishManager {
         if (sendTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode()))
             return;
         if (sendTarget.getUUID().equals(removeTarget.getUUID())) return;
-        sendTarget.connection.send(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, removeTarget));
+        sendTarget.connection.send(new ClientboundPlayerInfoRemovePacket(Stream.of(removeTarget).map(ServerPlayer::getUUID).collect(Collectors.toList())));
     }
 
     private static void addToTabList(ServerPlayer addTarget) {
@@ -79,7 +83,7 @@ public class VanishManager {
 
     private static void addToTabList(ServerPlayer addTarget, ServerPlayer sendTarget) {
         if (sendTarget.getUUID().equals(addTarget.getUUID())) return;
-        sendTarget.connection.send(new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, addTarget));
+        sendTarget.connection.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, addTarget));
     }
 
     private static void setHidden(ServerPlayer hideTarget) {

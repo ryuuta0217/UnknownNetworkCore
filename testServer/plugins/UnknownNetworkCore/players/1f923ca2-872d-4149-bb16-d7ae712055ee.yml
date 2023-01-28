@@ -1,0 +1,11 @@
+config-version: 3
+home-default-group: default
+home-base-count: 5
+home-additional-count: 0
+reply-target: 65922e55-04b3-48c2-a4f7-5b393692adf4
+force-global-chat-prefix: g.
+use-kana-convert: false
+homeGroupItems:
+  default: WHITE_WOOL
+homes:
+  default: {}

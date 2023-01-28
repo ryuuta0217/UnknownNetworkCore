@@ -33,6 +33,7 @@ package net.unknown.survival.chat.channels;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.pointer.Pointer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -44,6 +45,7 @@ import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.events.CustomChatChannelEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -82,7 +84,7 @@ public class CustomChannel extends ChatChannel {
         //source.setDisplayName("うんち"); // @author Yu_212
         //source.banPlayerIP("うんちしたので"); // @author Yu_212
         return Component.empty()
-                .append(this.getChannelPrefix(false))
+                .append(this.getChannelPrefix(false)) // TODO: [Prefix] じゃなくて <Prefix> にする
                 .append(Component.text(" "))
                 .append(source.displayName()) // プレイヤー名
                 .append(Component.text(": "))
@@ -91,9 +93,45 @@ public class CustomChannel extends ChatChannel {
 
     @Override
     public void processChat(AsyncChatEvent event) {
-        event.setCancelled(true);
+        //event.setCancelled(true);
 
-        this.sendMessage(event.getPlayer(), this.getRenderedMessage(event.getPlayer(), event.message()));
+        //this.sendMessage(event.getPlayer(), this.getRenderedMessage(event.getPlayer(), event.message()));
+        CustomChatChannelEvent customEvent = new CustomChatChannelEvent(!Bukkit.isPrimaryThread(), event.getPlayer(), event.message(), this.players.stream()
+                .map(Bukkit::getOfflinePlayer)
+                .filter(OfflinePlayer::isOnline)
+                .map(off -> (Player) off)
+                .collect(Collectors.toSet()), this);
+        Bukkit.getPluginManager().callEvent(customEvent);
+        if (customEvent.isCancelled()) {
+            event.setCancelled(true);
+            return;
+        }
+
+        //Bukkit.getServer().getConsoleSender().sendMessage(event.getPlayer().identity(), message); TODO: 多分viewersにConsoleSenderも入ってるのでこれはいらない
+        event.viewers().removeIf(viewer -> {
+            if (viewer instanceof Player player) {
+                return viewer.equals(event.getPlayer()) || customEvent.isReceiver(player);
+            }
+
+            if (viewer instanceof ConsoleCommandSender) { // TODO: 多分入ってるけど、要検証 | もし入ってるなら他のChannelでも対応が必要
+                return false;
+            }
+
+            return true;
+        });
+
+        event.renderer((source, sourceDisplayName, message, viewer) -> {
+            if (!(viewer instanceof Player player) || (!this.players.contains(player.getUniqueId())) && !(viewer instanceof ConsoleCommandSender)) return Component.empty();
+            return Component.empty()
+                    .append(getChannelPrefix(false))
+                    .append(Component.text(" "))
+                    .append(sourceDisplayName)
+                    .append(Component.text(": "))
+                    .append(message);
+        });
+
+        //customEvent.getReceivers().forEach(receiver -> receiver.sendMessage((customEvent.getSender() == null ? Identity.nil() : customEvent.getSender().identity()), customEvent.getRenderedMessage()));
+
     }
 
     public Component getDisplayName() {
@@ -137,7 +175,7 @@ public class CustomChannel extends ChatChannel {
                 .append(message));
     }
 
-    public void sendMessage(Player player, Component message) {
+    public void sendMessage(Player player, Component message) { // TODO: renderedMessage -> message, まだ改修してません
         CustomChatChannelEvent event = new CustomChatChannelEvent(!Bukkit.isPrimaryThread(), player, message, this.players.stream()
                 .map(Bukkit::getOfflinePlayer)
                 .filter(OfflinePlayer::isOnline)
@@ -146,6 +184,6 @@ public class CustomChannel extends ChatChannel {
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return;
         Bukkit.getServer().getConsoleSender().sendMessage(player == null ? Identity.nil() : player.identity(), message);
-        event.getReceivers().forEach(receiver -> receiver.sendMessage((event.getSender() == null ? Identity.nil() : event.getSender().identity()), event.getRenderedMessage()));
+        event.getReceivers().forEach(receiver -> receiver.sendMessage((event.getSender() == null ? Identity.nil() : event.getSender().identity()), event.getMessage()));
     }
 }

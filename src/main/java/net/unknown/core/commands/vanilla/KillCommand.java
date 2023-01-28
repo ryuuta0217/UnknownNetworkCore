@@ -69,13 +69,10 @@ public class KillCommand {
         put("generic", DamageSource.GENERIC);
         put("magic", DamageSource.MAGIC);
         put("wither", DamageSource.WITHER);
-        put("anvil", DamageSource.ANVIL);
-        put("fallingBlock", DamageSource.FALLING_BLOCK);
         put("dragonBreath", DamageSource.DRAGON_BREATH);
         put("dryout", DamageSource.DRY_OUT);
         put("sweetBerryBush", DamageSource.SWEET_BERRY_BUSH);
         put("freeze", DamageSource.FREEZE);
-        put("fallingStalactite", DamageSource.FALLING_STALACTITE);
         put("stalagmite", DamageSource.STALAGMITE);
     }};
 

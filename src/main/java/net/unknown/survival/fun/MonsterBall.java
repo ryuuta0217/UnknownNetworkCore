@@ -33,24 +33,33 @@ package net.unknown.survival.fun;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ThrownEgg;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class MonsterBall implements Listener {
+    private static final Set<EntityType<?>> RESTRICTED_ENTITY_TYPES = new HashSet<>() {{
+        add(EntityType.ENDER_DRAGON);
+        add(EntityType.WITHER);
+    }};
+
     @EventHandler
     public void onEggHit(ProjectileHitEvent event) {
         if (((CraftEntity) event.getEntity()).getHandle() instanceof ThrownEgg egg) {
             if (event.getHitEntity() != null) {
                 if (((CraftEntity) event.getHitEntity()).getHandle() instanceof Mob mob) {
-                    if (SpawnEggItem.BY_ID.containsKey(mob.getType())) {
+                    if (SpawnEggItem.byId(mob.getType()) != null && !RESTRICTED_ENTITY_TYPES.contains(mob.getType())) {
                         CompoundTag entityTag = new CompoundTag();
                         mob.save(entityTag);
                         mob.remove(Entity.RemovalReason.DISCARDED);
@@ -58,7 +67,7 @@ public class MonsterBall implements Listener {
                         entityTag.remove("Motion");
                         entityTag.remove("Rotation");
 
-                        ItemStack spawnEgg = new ItemStack(SpawnEggItem.BY_ID.get(mob.getType()));
+                        ItemStack spawnEgg = new ItemStack(SpawnEggItem.byId(mob.getType()));
                         CompoundTag spawnEggTag = new CompoundTag();
                         spawnEggTag.put("EntityTag", entityTag);
                         spawnEgg.setTag(spawnEggTag);
