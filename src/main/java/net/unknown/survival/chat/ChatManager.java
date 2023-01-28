@@ -35,27 +35,14 @@ import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
-import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.minecraft.advancements.Advancement;
-import net.minecraft.core.Registry;
-import net.minecraft.data.BuiltinRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.effect.MobEffect;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.Block;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.prefix.Prefix;
-import net.unknown.core.util.NewMessageUtil;
 import net.unknown.core.util.YukiKanaConverter;
 import net.unknown.survival.UnknownNetworkSurvival;
 import net.unknown.survival.chat.channels.ChannelType;
@@ -117,79 +104,6 @@ public class ChatManager implements Listener {
         // URL to Clickable-Link
         event.message(event.message().replaceText((b) -> {
             b.match(Pattern.compile("https?://\\S+")).replacement((r, b2) -> Component.text(b2.content(), Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl(b2.content())));
-        }));
-
-        // Items, Advancements Support
-        event.message(event.message().replaceText((b) -> {
-            b.match(Pattern.compile("minecraft:[a-z0-9_/.-]+"))
-                    .replacement((r, b2) -> {
-                        ResourceLocation rl = ResourceLocation.of(b2.content(), ':');
-                        Optional<Item> item = Registry.ITEM.getOptional(rl);
-                        Optional<EntityType<?>> entity = Registry.ENTITY_TYPE.getOptional(rl);
-                        Optional<MobEffect> effect = Registry.MOB_EFFECT.getOptional(rl);
-                        Optional<Enchantment> enchantment = Registry.ENCHANTMENT.getOptional(rl);
-                        Optional<Block> block = Registry.BLOCK.getOptional(rl);
-                        Optional<Advancement> advancement = Optional.ofNullable(MinecraftServer.getServer().getAdvancements().getAdvancement(rl));
-                        Optional<Biome> biome = BuiltinRegistries.BIOME.getOptional(rl);
-
-                        //HoverEvent<Component> hoverEvent = HoverEvent.showText(Component.text("不明", DefinedTextColor.RED));
-                        //b2.hoverEvent(hoverEvent);
-
-                        List<Component> hoverTexts = new ArrayList<>();
-
-                        if (item.isPresent()) {
-                            hoverTexts.add(Component.empty()
-                                    .append(Component.text("アイテム: "))
-                                    .append(Component.translatable("item." + rl.getNamespace() + "." + rl.getPath())));
-                        }
-
-                        if (block.isPresent()) {
-                            hoverTexts.add(Component.empty()
-                                    .append(Component.text("ブロック: "))
-                                    .append(Component.translatable("block." + rl.getNamespace() + "." + rl.getPath())));
-                        }
-
-                        if (entity.isPresent()) {
-                            hoverTexts.add(Component.empty()
-                                    .append(Component.text("エンティティ: "))
-                                    .append(Component.translatable("entity." + rl.getNamespace() + "." + rl.getPath())));
-                        }
-
-                        advancement.ifPresent(value -> hoverTexts.add(Component.empty()
-                                .append(Component.text("進捗: "))
-                                .append(NewMessageUtil.convertMinecraft2Adventure(value.getDisplay().getTitle()))));
-
-                        if (biome.isPresent()) {
-                            hoverTexts.add(Component.empty()
-                                    .append(Component.text("バイオーム: "))
-                                    .append(Component.translatable("biome." + rl.getNamespace() + "." + rl.getPath())));
-                        }
-
-                        if (effect.isPresent()) {
-                            hoverTexts.add(Component.empty()
-                                    .append(Component.text("ポーション効果: "))
-                                    .append(Component.translatable("effect." + rl.getNamespace() + "." + rl.getPath())));
-                        }
-
-                        if (enchantment.isPresent()) {
-                            hoverTexts.add(Component.empty()
-                                    .append(Component.text("エンチャント: "))
-                                    .append(Component.translatable("enchantment." + rl.getNamespace() + "." + rl.getPath())));
-                        }
-
-                        Component newLine = Component.text("\n");
-                        Component hoverText = Component.empty();
-                        for (int i = 0; i < hoverTexts.size(); i++) {
-                            boolean isFinal = i == (hoverTexts.size() - 1);
-                            Component text = hoverTexts.get(i);
-                            hoverText = hoverText.append(text);
-                            if (!isFinal) {
-                                hoverText = hoverText.append(newLine);
-                            }
-                        }
-
-                        return Component.text(b2.content(), DefinedTextColor.GOLD).hoverEvent(HoverEvent.showText(hoverText));
-                    });
         }));
 
         if (PlayerData.of(event.getPlayer()).getChatData().isUseKanaConvert()) {

@@ -32,6 +32,10 @@
 package net.unknown.survival.chat.channels;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kyori.adventure.chat.ChatType;
+import net.kyori.adventure.chat.SignedMessage;
+import net.minecraft.network.chat.SignedMessageBody;
+import org.bukkit.Bukkit;
 
 public class GlobalChannel extends ChatChannel {
     private static final GlobalChannel INSTANCE = new GlobalChannel();
@@ -47,5 +51,6 @@ public class GlobalChannel extends ChatChannel {
     @Override
     public void processChat(AsyncChatEvent event) {
 
+        //event.viewers().removeIf(audience -> audience.equals(Bukkit.getPlayer("Yncryption")));
     }
 }

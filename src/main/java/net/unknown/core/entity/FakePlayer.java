@@ -32,13 +32,14 @@
 package net.unknown.core.entity;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;
 
 public class FakePlayer extends ServerPlayer {
-    public FakePlayer(ServerLevel world, GameProfile profile) {
-        super(world.getServer(), world, profile, null);
+    public FakePlayer(MinecraftServer server, ServerLevel world, GameProfile profile) {
+        super(server, world, profile);
     }
 
     @Override

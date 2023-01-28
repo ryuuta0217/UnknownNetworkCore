@@ -36,7 +36,8 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -49,6 +50,8 @@ import org.bukkit.Bukkit;
 
 import java.util.HashSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SkinCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -88,8 +91,8 @@ public class SkinCommand {
     }
 
     public static void sendSelfUpdatePackets(ServerPlayer player) {
-        ClientboundPlayerInfoPacket toRemove = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER, player);
-        ClientboundPlayerInfoPacket toAdd = new ClientboundPlayerInfoPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER, player);
+        ClientboundPlayerInfoRemovePacket toRemove = new ClientboundPlayerInfoRemovePacket(Stream.of(player).map(ServerPlayer::getUUID).collect(Collectors.toList()));
+        ClientboundPlayerInfoUpdatePacket toAdd = new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, player);
         //this.connection.send(new ClientboundRespawnPacket(
         // worldserver.dimensionTypeId(),
         // worldserver.dimension(),
@@ -105,7 +108,7 @@ public class SkinCommand {
                 player.gameMode.getPreviousGameModeForPlayer(),
                 player.getLevel().isDebug(),
                 player.getLevel().isFlat(),
-                true,
+                (byte) 3,
                 player.getLastDeathLocation());
         ClientboundPlayerPositionPacket teleport = new ClientboundPlayerPositionPacket(
                 player.position().x(),

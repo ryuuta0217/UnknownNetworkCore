@@ -42,6 +42,7 @@ import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -56,7 +57,7 @@ import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_19_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 
 import java.util.Collection;
@@ -81,7 +82,7 @@ public class MsgCommand {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("msg");
         builder.requires(Permissions.COMMAND_MSG::check);
         builder.then(Commands.argument("対象", EntityArgument.players())
-                .then(Commands.argument("メッセージ", StringArgumentType.greedyString())
+                .then(Commands.argument("メッセージ", MessageArgument.message())
                         .executes(MsgCommand::executeMsg)));
         LiteralCommandNode<CommandSourceStack> msgNode = dispatcher.register(builder); // msg 登録
 
@@ -239,6 +240,15 @@ public class MsgCommand {
                 .append(MutableComponent.create(new LiteralContents("[PM]")).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
                 .append(" ")
                 .append(MutableComponent.create(new LiteralContents("[")).append(senderName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)))
+                .append(" ")
+                .append(message);
+    }
+
+    public static Component spyMessage(Component senderName, Component receiverName, Component message) {
+        return MutableComponent.create(new LiteralContents(""))
+                .append(MutableComponent.create(new LiteralContents("[PM]")).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
+                .append(" ")
+                .append(MutableComponent.create(new LiteralContents("[")).append(senderName).append(" -> ").append(receiverName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)))
                 .append(" ")
                 .append(message);
     }

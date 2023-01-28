@@ -38,6 +38,7 @@ import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -46,9 +47,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Fluid;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_19_R1.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_19_R1.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.v1_19_R1.util.CraftNamespacedKey;
+import org.bukkit.craftbukkit.v1_19_R2.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_19_R2.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_19_R2.util.CraftNamespacedKey;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -85,12 +86,12 @@ public class RegistryUtil {
     public static <T> T forceRegister(Registry<T> registry, ResourceLocation id, T value) {
         unfreeze(registry);
         Registry.register(registry, id, value);
-        if(registry == Registry.ENCHANTMENT && value instanceof Enchantment enchant) {
+        if(registry == BuiltInRegistries.ENCHANTMENT && value instanceof Enchantment enchant) {
             try {
                 Field f = org.bukkit.enchantments.Enchantment.class.getDeclaredField("acceptingNew");
                 if (f.trySetAccessible()) {
                     f.set(null, true);
-                    org.bukkit.enchantments.Enchantment.registerEnchantment(new org.bukkit.craftbukkit.v1_19_R1.enchantments.CraftEnchantment(enchant));
+                    org.bukkit.enchantments.Enchantment.registerEnchantment(new org.bukkit.craftbukkit.v1_19_R2.enchantments.CraftEnchantment(enchant));
                     f.set(null, false);
                 }
             } catch(IllegalAccessException | NoSuchFieldException e) {
@@ -110,7 +111,7 @@ public class RegistryUtil {
                 if (key != null) {
                     int rawId = mappedRegistry.getId(objectFrom);
                     unfreeze(registry);
-                    mappedRegistry.registerOrOverride(OptionalInt.of(rawId), key, objectTo, lifecycle);
+                    mappedRegistry.register(key, objectTo, lifecycle);
                     freeze(registry);
 
                     T result = registry.get(id);
@@ -162,18 +163,18 @@ public class RegistryUtil {
                 if (BLOCK_MATERIAL == null || ITEM_MATERIAL == null || FLUID_MATERIAL == null) return false;
 
                 BLOCK_MATERIAL.clear();
-                for (Block block : net.minecraft.core.Registry.BLOCK) {
-                    BLOCK_MATERIAL.put(block, Material.getMaterial(net.minecraft.core.Registry.BLOCK.getKey(block).getPath().toUpperCase(Locale.ROOT)));
+                for (Block block : BuiltInRegistries.BLOCK) {
+                    BLOCK_MATERIAL.put(block, Material.getMaterial(BuiltInRegistries.BLOCK.getKey(block).getPath().toUpperCase(Locale.ROOT)));
                 }
 
                 ITEM_MATERIAL.clear();
-                for (Item item : net.minecraft.core.Registry.ITEM) {
-                    ITEM_MATERIAL.put(item, Material.getMaterial(net.minecraft.core.Registry.ITEM.getKey(item).getPath().toUpperCase(Locale.ROOT)));
+                for (Item item : BuiltInRegistries.ITEM) {
+                    ITEM_MATERIAL.put(item, Material.getMaterial(BuiltInRegistries.ITEM.getKey(item).getPath().toUpperCase(Locale.ROOT)));
                 }
 
                 FLUID_MATERIAL.clear();
-                for (net.minecraft.world.level.material.Fluid fluid : net.minecraft.core.Registry.FLUID) {
-                    FLUID_MATERIAL.put(fluid, org.bukkit.Registry.FLUID.get(CraftNamespacedKey.fromMinecraft(net.minecraft.core.Registry.FLUID.getKey(fluid))));
+                for (net.minecraft.world.level.material.Fluid fluid : BuiltInRegistries.FLUID) {
+                    FLUID_MATERIAL.put(fluid, org.bukkit.Registry.FLUID.get(CraftNamespacedKey.fromMinecraft(BuiltInRegistries.FLUID.getKey(fluid))));
                 }
 
                 Map<Material, Item> MATERIAL_ITEM = (Map<Material, Item>) getObject(CraftMagicNumbers.class.getDeclaredField("MATERIAL_ITEM"), null);
@@ -190,13 +191,13 @@ public class RegistryUtil {
                     }
 
                     ResourceLocation key = CraftMagicNumbers.key(material);
-                    net.minecraft.core.Registry.ITEM.getOptional(key).ifPresent((item) -> {
+                    BuiltInRegistries.ITEM.getOptional(key).ifPresent((item) -> {
                         MATERIAL_ITEM.put(material, item);
                     });
-                    net.minecraft.core.Registry.BLOCK.getOptional(key).ifPresent((block) -> {
+                    BuiltInRegistries.BLOCK.getOptional(key).ifPresent((block) -> {
                         MATERIAL_BLOCK.put(material, block);
                     });
-                    net.minecraft.core.Registry.FLUID.getOptional(key).ifPresent((fluid) -> {
+                    BuiltInRegistries.FLUID.getOptional(key).ifPresent((fluid) -> {
                         MATERIAL_FLUID.put(material, fluid);
                     });
                 }
