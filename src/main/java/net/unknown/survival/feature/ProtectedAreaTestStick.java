@@ -72,7 +72,7 @@ public class ProtectedAreaTestStick implements Listener {
 
             case RIGHT_CLICK_BLOCK -> {
                 // TODO: Notification clicked block is protected area
-                sendRegionsInformation(event.getPlayer(), event.getInteractionPoint());
+                sendRegionsInformation(event.getPlayer(), event.getClickedBlock().getLocation());
             }
         }
     }
