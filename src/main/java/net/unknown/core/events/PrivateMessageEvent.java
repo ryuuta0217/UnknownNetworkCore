@@ -32,6 +32,18 @@
 package net.unknown.core.events;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.md_5.bungee.protocol.packet.PlayerChat;
+import net.minecraft.Util;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.FilterMask;
+import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.network.chat.SignedMessageBody;
+import net.minecraft.network.chat.SignedMessageLink;
+import net.minecraft.server.level.ServerPlayer;
+import net.unknown.core.util.NewMessageUtil;
+import org.bukkit.craftbukkit.v1_19_R2.command.VanillaCommandWrapper;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -39,18 +51,31 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class PrivateMessageEvent extends Event implements Cancellable {
     private static final HandlerList handlers = new HandlerList();
-    private final Entity sender;
-    private final Set<Player> receivers;
+    private final CommandSourceStack source;
+    private final Set<ServerPlayer> receivers;
     private boolean cancelled = false;
-    private Component message;
+    private PlayerChatMessage message;
 
-    public PrivateMessageEvent(Entity sender, Set<Player> receivers, Component message) {
-        this.sender = sender;
+    public PrivateMessageEvent(Entity sender, Collection<Player> receivers, Component message) {
+        this.source = VanillaCommandWrapper.getListener(sender);
+        this.receivers = receivers.stream().map(player -> (CraftPlayer) player).map(CraftPlayer::getHandle).collect(Collectors.toSet());
+        this.message = new PlayerChatMessage(
+                SignedMessageLink.unsigned(this.source.getEntity() == null ? Util.NIL_UUID : this.source.getEntity().getUUID()),
+                null,
+                SignedMessageBody.unsigned(PlainTextComponentSerializer.plainText().serialize(message)),
+                NewMessageUtil.convertAdventure2Minecraft(message),
+                FilterMask.PASS_THROUGH);
+    }
+
+    public PrivateMessageEvent(CommandSourceStack source, Collection<ServerPlayer> receivers, PlayerChatMessage message) {
+        this.source = source;
         this.receivers = new HashSet<>(receivers);
         this.message = message;
     }
@@ -60,19 +85,28 @@ public class PrivateMessageEvent extends Event implements Cancellable {
         return handlers;
     }
 
-    public Entity getSender() {
-        return this.sender;
+    public CommandSourceStack getSource() {
+        return this.source;
     }
 
     public Set<Player> getReceivers() {
-        return this.receivers;
+        return this.receivers.stream().map(ServerPlayer::getBukkitEntity).collect(Collectors.toSet());
     }
 
     public Component message() {
-        return message;
+        return NewMessageUtil.convertMinecraft2Adventure(this.message.unsignedContent());
     }
 
     public void message(Component message) {
+        this.message = new PlayerChatMessage(
+                SignedMessageLink.unsigned(this.source.getEntity() == null ? Util.NIL_UUID : this.source.getEntity().getUUID()),
+                null,
+                SignedMessageBody.unsigned(PlainTextComponentSerializer.plainText().serialize(message)),
+                NewMessageUtil.convertAdventure2Minecraft(message),
+                FilterMask.PASS_THROUGH);
+    }
+
+    public void message(PlayerChatMessage message) {
         this.message = message;
     }
 

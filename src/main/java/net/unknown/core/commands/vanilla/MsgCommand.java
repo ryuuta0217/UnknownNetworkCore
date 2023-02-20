@@ -39,21 +39,24 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MessageArgument;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.entity.Entity;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.chat.CustomChatTypes;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.events.PrivateMessageEvent;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.MinecraftAdapter;
+import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -63,7 +66,6 @@ import org.bukkit.entity.EntityType;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -104,7 +106,7 @@ public class MsgCommand {
         LiteralArgumentBuilder<CommandSourceStack> replyBuilder = LiteralArgumentBuilder.literal("reply");
         replyBuilder.requires(Permissions.COMMAND_REPLY::checkAndIsPlayer);
         replyBuilder.executes(MsgCommand::executeShowReplyTarget)
-                .then(Commands.argument("メッセージ", StringArgumentType.greedyString())
+                .then(Commands.argument("メッセージ", MessageArgument.message())
                         .executes(MsgCommand::executeReply));
         LiteralCommandNode<CommandSourceStack> replyNode = dispatcher.register(replyBuilder); // reply 登録
 
@@ -116,40 +118,31 @@ public class MsgCommand {
     }
 
     private static int executeMsg(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        Entity sender = ctx.getSource().getEntity();
+        CommandSourceStack source = ctx.getSource();
         Collection<ServerPlayer> receivers = EntityArgument.getPlayers(ctx, "対象");
-        AtomicReference<String> msg = new AtomicReference<>(StringArgumentType.getString(ctx, "メッセージ"));
-        PrivateMessageEvent pEvent = new PrivateMessageEvent((sender == null ? null : sender.getBukkitEntity()), receivers.stream().map(ServerPlayer::getBukkitEntity).collect(Collectors.toSet()), MessageUtil.convertNMS2Adventure(MutableComponent.create(new LiteralContents(msg.get()))));
-        Bukkit.getPluginManager().callEvent(pEvent);
-        if (pEvent.isCancelled()) return 1;
 
-        Consumer<ServerPlayer> outgoing;
+        MessageArgument.resolveChatMessage(ctx, "メッセージ", (message) -> {
+            ChatType.Bound incomingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_INCOMING, ctx.getSource());
+            OutgoingChatMessage outMessage = OutgoingChatMessage.create(message);
 
-        if (sender instanceof ServerPlayer p) {
-            outgoing = (receiver) -> {
-                p.sendSystemMessage(senderMessage(receiver.getName(), msg.get()));
-            };
-        } else {
-            outgoing = (receiver) -> {
-                ctx.getSource().sendSuccess(senderMessage(receiver.getName(), msg.get()), false);
-            };
-        }
+            PrivateMessageEvent pEvent = new PrivateMessageEvent(ctx.getSource(), receivers, message);
+            Bukkit.getPluginManager().callEvent(pEvent);
+            if (pEvent.isCancelled()) return;
 
-        pEvent.getReceivers()
-                .stream()
-                .map(p -> ((CraftPlayer) p).getHandle())
-                .forEach(receiver -> {
-                    PlayerData.of(receiver.getUUID()).getChatData().setPrivateMessageReplyTarget(sender != null ? sender.getUUID() : SERVER_UUID);
-                    if (sender != null)
-                        PlayerData.of(sender.getUUID()).getChatData().setPrivateMessageReplyTarget(receiver.getUUID());
+            boolean filtered = false;
 
-                    Component name = sender != null ? sender.getName() : ctx.getSource().getDisplayName();
-                    UUID uniqueId = sender != null ? sender.getUUID() : SERVER_UUID;
+            for (ServerPlayer receiver : receivers) {
+                ChatType.Bound outgoingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, receiver).withTargetName(receiver.getDisplayName());
+                source.sendChatMessage(outMessage, false, outgoingBound);
+                boolean filterMask = source.shouldFilterMessageTo(receiver);
+                receiver.sendChatMessage(outMessage, filterMask, incomingBound);
+                filtered |= filterMask && message.isFullyFiltered();
+            }
 
-                    outgoing.accept(receiver);
-                    receiver.sendSystemMessage(receiverMessage(name, msg.get()));
-                });
-
+            if (filtered) {
+                source.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
+            }
+        });
         return 0;
     }
 
@@ -173,75 +166,46 @@ public class MsgCommand {
     }
 
     private static int executeReply(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        String msg = StringArgumentType.getString(ctx, "メッセージ");
+        CommandSourceStack source = ctx.getSource();
 
-        ServerPlayer sender = ctx.getSource().getPlayerOrException();
-
-        UUID replyTarget = PlayerData.of(sender).getChatData().getPrivateMessageReplyTarget();
+        UUID replyTarget = PlayerData.of(source.getPlayerOrException()).getChatData().getPrivateMessageReplyTarget();
 
         if (replyTarget == null) {
-            MessageUtil.sendErrorMessage(ctx.getSource(), "返信先が見つかりません");
+            NewMessageUtil.sendErrorMessage(source, "返信先が見つかりません");
             return 1;
         }
 
-        //boolean senderIsPlayer = sender instanceof ServerPlayer;
-        boolean receiverIsServer = replyTarget.equals(Util.NIL_UUID);
+        boolean replyTargetIsServer = replyTarget.equals(Util.NIL_UUID);
 
-        if (!receiverIsServer) {
-            if (!Bukkit.getOfflinePlayer(PlayerData.of(sender).getChatData().getPrivateMessageReplyTarget()).isOnline()) {
-                MessageUtil.sendErrorMessage(ctx.getSource(), "返信先のプレイヤーがオフラインです");
-                return 2;
-            }
-        }
-
-        ServerPlayer receiver = UnknownNetworkCore.getDedicatedServer().getPlayerList().getPlayer(replyTarget);
-        if (receiver == null) {
-            MessageUtil.sendErrorMessage(ctx.getSource(), "プレイヤーが見つかりません");
+        if (!replyTargetIsServer && !Bukkit.getOfflinePlayer(replyTarget).isOnline()) {
+            NewMessageUtil.sendErrorMessage(source, "返信先のプレイヤーがオフラインです");
             return 2;
         }
 
-        PrivateMessageEvent pEvent = new PrivateMessageEvent(sender.getBukkitEntity(), (receiverIsServer ? Collections.emptySet() : Collections.singleton(receiver.getBukkitEntity())), MessageUtil.convertNMS2Adventure(MutableComponent.create(new LiteralContents(msg))));
-        Bukkit.getPluginManager().callEvent(pEvent);
-        if (pEvent.isCancelled()) return 1;
+        ServerPlayer receiver = MinecraftAdapter.player(Bukkit.getPlayer(replyTarget));
 
-        Component message = MessageUtil.convertAdventure2NMS(pEvent.message());
+        MessageArgument.resolveChatMessage(ctx, "メッセージ", (message) -> {
+            ChatType.Bound incomingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_INCOMING, ctx.getSource());
+            OutgoingChatMessage outMessage = OutgoingChatMessage.create(message);
 
-        sender.sendSystemMessage(senderMessage(receiver.getName(), message));
+            PrivateMessageEvent pEvent = new PrivateMessageEvent(ctx.getSource(), Collections.singleton(receiver), message);
+            Bukkit.getPluginManager().callEvent(pEvent);
+            if (pEvent.isCancelled()) return;
 
-        if (!receiverIsServer) {
-            receiver.sendSystemMessage(receiverMessage(sender.getName(), message));
-        } else {
-            Bukkit.getServer().sendMessage(MessageUtil.convertNMS2Adventure(receiverMessage(sender.getName(), message)));
-        }
+            boolean filtered;
 
-        PlayerData.of(receiver).getChatData().setPrivateMessageReplyTarget(sender.getUUID());
+            ChatType.Bound outgoingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, receiver).withTargetName(receiver.getDisplayName());
+            source.sendChatMessage(outMessage, false, outgoingBound);
+            boolean filterMask = source.shouldFilterMessageTo(receiver);
+            receiver.sendChatMessage(outMessage, filterMask, incomingBound);
+            filtered = filterMask && message.isFullyFiltered();
+
+            if (filtered) {
+                source.sendSystemMessage(PlayerList.CHAT_FILTERED_FULL);
+            }
+        });
+
         return 0;
-    }
-
-    public static Component senderMessage(Component receiverName, String message) {
-        return senderMessage(receiverName, MutableComponent.create(new LiteralContents(message)));
-    }
-
-    public static Component senderMessage(Component receiverName, Component message) {
-        return MutableComponent.create(new LiteralContents(""))
-                .append(MutableComponent.create(new LiteralContents("[PM]")).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
-                .append(" ")
-                .append(MutableComponent.create(new LiteralContents("[→ ")).append(receiverName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)))
-                .append(" ")
-                .append(message);
-    }
-
-    public static Component receiverMessage(Component senderName, String message) {
-        return receiverMessage(senderName, MutableComponent.create(new LiteralContents(message)));
-    }
-
-    public static Component receiverMessage(Component senderName, Component message) {
-        return MutableComponent.create(new LiteralContents(""))
-                .append(MutableComponent.create(new LiteralContents("[PM]")).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
-                .append(" ")
-                .append(MutableComponent.create(new LiteralContents("[")).append(senderName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)))
-                .append(" ")
-                .append(message);
     }
 
     public static Component spyMessage(Component senderName, Component receiverName, Component message) {

@@ -61,8 +61,8 @@ dependencies {
     compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '+'
     compileOnly group: 'com.github.MilkBowl', name: 'VaultAPI', version: '+'
     compileOnly group: 'net.luckperms', name: 'api', version: '+'
-    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'latest.release'
-    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'latest.release', classifier: 'spigot'
+    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'e083fbd6'
+    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'e083fbd6', classifier: 'spigot'
     implementation group: 'org.mozilla', name: 'rhino', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
@@ -106,8 +106,7 @@ runServer {
 
 task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
     classpath(configurations.launchwrapper)
-    println layout.buildDirectory.file("libs/UnknownNetworkCore.jar").get().asFile.getAbsolutePath()
-    args("nogui", "-add-plugin=..\\build\\libs\\UnknownNetworkCore.jar")
+    args("--nogui", "--add-plugin=../build/libs/UnknownNetworkCore.jar")
     workingDir(project.file("testServer"))
 }
 

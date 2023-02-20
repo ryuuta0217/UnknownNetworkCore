@@ -32,9 +32,11 @@
 package net.unknown.core.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.kyori.adventure.chat.SignedMessage;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -160,6 +162,14 @@ public class MinecraftAdapter {
         public static org.bukkit.inventory.ItemStack itemStack(net.minecraft.world.item.ItemStack minecraft, boolean mirror) {
             if (mirror) return CraftItemStack.asCraftMirror(minecraft);
             else return CraftItemStack.asBukkitCopy(minecraft);
+        }
+    }
+
+    @ParametersAreNonnullByDefault
+    public static class Adventure {
+        public static net.minecraft.network.chat.PlayerChatMessage playerChatMessage(SignedMessage adventure) {
+            PlayerChatMessage.AdventureView minecraft = (PlayerChatMessage.AdventureView) adventure;
+            return minecraft.playerChatMessage();
         }
     }
 }

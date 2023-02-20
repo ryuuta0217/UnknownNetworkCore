@@ -31,13 +31,34 @@
 
 package net.unknown.survival.data.model;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import java.lang.ref.Reference;
+import java.lang.reflect.Field;
+
 public record Home(String name, Location location) {
     public World getWorld() {
-        return location().getWorld();
+        if (this.location().isWorldLoaded()) return this.location().getWorld();
+        try {
+            Field worldField = Location.class.getDeclaredField("world");
+            if (worldField.trySetAccessible()) {
+                Reference<World> oldWorldRef = (Reference<World>) worldField.get(this.location());
+                if (oldWorldRef.get() != null) {
+                    World oldWorld = oldWorldRef.get();
+                    World newWorld = Bukkit.getWorld(oldWorld.getName());
+                    worldField.set(this.location(), newWorld);
+                    return this.location().getWorld();
+                } else {
+                    throw new IllegalStateException("Object is already garbage collected.");
+                }
+            }
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new IllegalStateException("World is unloaded.", e);
+        }
+        throw new IllegalStateException("An internal error occurred when gathering World object.");
     }
 
     public void teleportPlayer(Player player) {
