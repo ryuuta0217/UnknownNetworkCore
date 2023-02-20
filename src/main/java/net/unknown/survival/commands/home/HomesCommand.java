@@ -159,7 +159,7 @@ public class HomesCommand {
         toShowMessage = toShowMessage.append(DefinedComponents.NEW_LINE)
                 .append(footer);
 
-        NewMessageUtil.sendMessage(ctx.getSource(), toShowMessage);
+        NewMessageUtil.sendMessage(ctx.getSource(), toShowMessage, false);
         //ctx.getSource().getPlayerOrException().getBukkitEntity().sendMessage(toShowMessage);
         return homeGroup.getHomes().size();
     }
