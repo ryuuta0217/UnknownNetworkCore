@@ -31,10 +31,14 @@
 
 package net.unknown.survival.chat.channels;
 
+import io.papermc.paper.adventure.PaperAdventure;
 import io.papermc.paper.event.player.AsyncChatEvent;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.chat.CustomChatTypes;
 import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.events.PrivateMessageEvent;
 import net.unknown.core.util.MessageUtil;
@@ -97,9 +101,16 @@ public class PrivateChatChannel extends ChatChannel {
 
         event.viewers().removeIf(audience -> !audience.equals(sender.getBukkitEntity()) && !audience.equals(receiver.getBukkitEntity()) && !(audience instanceof ConsoleCommandSender));
 
+        // TODO 最終手段
+        //ServerPlayer minecraft = MinecraftAdapter.player(Bukkit.getPlayer("Yncryption")); // メッセージの送信先
+        //minecraft.sendChatMessage(OutgoingChatMessage.create(MinecraftAdapter.Adventure.playerChatMessage(event.signedMessage())), false, ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, minecraft));
+        //event.setCancelled(true); TODO 本来のチャットの処理を止める必要があるので注意する
+
         event.renderer(((source, sourceDisplayName, message1, viewer) -> {
-            if (viewer.equals(receiver.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(MsgCommand.receiverMessage(NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName), NewMessageUtil.convertAdventure2Minecraft(message1)));
-            else if (viewer.equals(sender.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(MsgCommand.senderMessage(receiver.getName(), NewMessageUtil.convertAdventure2Minecraft(message1)));
+            ChatType.Bound incomingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_INCOMING, MinecraftAdapter.player(source));
+            ChatType.Bound outgoingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, receiver).withTargetName(receiver.getDisplayName());
+            if (viewer.equals(receiver.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(incomingBound.decorate(NewMessageUtil.convertAdventure2Minecraft(message1)));
+            else if (viewer.equals(sender.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(outgoingBound.decorate(NewMessageUtil.convertAdventure2Minecraft(message1)));
             else if (viewer instanceof ConsoleCommandSender) return NewMessageUtil.convertMinecraft2Adventure(MsgCommand.spyMessage(NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName), receiver.getName(), NewMessageUtil.convertAdventure2Minecraft(message1)));
             return net.kyori.adventure.text.Component.empty();
         }));
