@@ -35,6 +35,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.unknown.core.athletic.Athletics;
+import net.unknown.core.block.MultiPageChest;
 import net.unknown.core.bossbar.TPSBar;
 import net.unknown.core.chat.CustomChatTypes;
 import net.unknown.core.commands.Commands;
@@ -121,6 +122,7 @@ public class UnknownNetworkCore extends JavaPlugin {
         ListenerManager.registerListener(new SignGui.Listener());
         ListenerManager.registerListener(new TabListPingManager());
         ListenerManager.registerListener(new Athletics.Listener());
+        ListenerManager.registerListener(new MultiPageChest.Listener());
         TPSBar.initialize();
         TabListPingManager.startTask();
         PlayerPrefixes.loadAll();
