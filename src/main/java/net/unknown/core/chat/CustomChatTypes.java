@@ -44,16 +44,27 @@ import net.unknown.core.util.RegistryUtil;
 import java.util.List;
 
 public class CustomChatTypes {
-    public static final ResourceKey<ChatType> PRIVATE_MESSAGE = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("private_message"));
+    public static final ResourceKey<ChatType> PRIVATE_MESSAGE_INCOMING = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("private_message_incoming"));
+    public static final ResourceKey<ChatType> PRIVATE_MESSAGE_OUTGOING = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("private_message_outgoing"));
 
     public static void bootstrap() {
-        register(Registries.CHAT_TYPE, PRIVATE_MESSAGE, new ChatType(
+        register(Registries.CHAT_TYPE, PRIVATE_MESSAGE_INCOMING, new ChatType(
                 new ChatTypeDecoration( // for chat view
-                        "[PM] [%s]: %s",
+                        "§b[PM]§r [%s] %s",
                         List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT),
                         Style.EMPTY),
                 new ChatTypeDecoration( // for narration
                         "%s があなたに %s と言いました",
+                        List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT),
+                        Style.EMPTY)));
+
+        register(Registries.CHAT_TYPE, PRIVATE_MESSAGE_OUTGOING, new ChatType(
+                new ChatTypeDecoration( // for chat view
+                        "§b[PM]§r [→ %s] %s",
+                        List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT),
+                        Style.EMPTY),
+                new ChatTypeDecoration( // for narration
+                        "あなたが %s に %s と言いました",
                         List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT),
                         Style.EMPTY)));
     }
