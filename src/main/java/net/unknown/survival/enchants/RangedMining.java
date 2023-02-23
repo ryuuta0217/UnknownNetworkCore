@@ -89,6 +89,7 @@ public class RangedMining implements Listener {
         if (event.getAction() == Action.LEFT_CLICK_BLOCK && event.getHand() == EquipmentSlot.HAND) {
             if (event.getItem() != null && event.getItem().getType().name().contains("_PICKAXE")) {
                 FACING.put(event.getPlayer().getUniqueId(), event.getBlockFace());
+                // TODO: use Bukkit API #setMetadata
             }
         }
     }
