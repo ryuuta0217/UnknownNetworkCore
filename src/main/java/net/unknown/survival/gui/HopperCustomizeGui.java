@@ -31,24 +31,15 @@
 
 package net.unknown.survival.gui;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextReplacementConfig;
-import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.minecraft.world.level.block.HopperBlock;
+import net.kyori.adventure.text.Component;;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
-import net.minecraft.world.phys.AABB;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.gui.view.View;
-import net.unknown.core.util.NewMessageUtil;
 import net.unknown.launchwrapper.hopper.FilterType;
 import net.unknown.launchwrapper.hopper.IMixinHopperBlockEntity;
-import net.unknown.launchwrapper.mixins.MixinHopperBlockEntity;
 import org.bukkit.Material;
-import org.bukkit.block.Sign;
-import org.bukkit.craftbukkit.v1_19_R2.block.CraftBlockState;
 import org.bukkit.craftbukkit.v1_19_R2.block.CraftHopper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -57,10 +48,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.function.Consumer;
-import java.util.regex.Pattern;
 
 public class HopperCustomizeGui extends GuiBase {
     private final HopperBlockEntity hopper;

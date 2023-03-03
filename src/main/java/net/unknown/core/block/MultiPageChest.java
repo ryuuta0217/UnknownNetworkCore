@@ -97,7 +97,7 @@ public class MultiPageChest {
                     }
                 }
             }
-            UnknownNetworkCore.getInstance().getLogger().info("ClickType: " + event.getClick() + " | Slot: " + event.getSlot() + " | Container: " + event.getClickedInventory());
+            //UnknownNetworkCore.getInstance().getLogger().info("ClickType: " + event.getClick() + " | Slot: " + event.getSlot() + " | Container: " + event.getClickedInventory());
         }
     }
 

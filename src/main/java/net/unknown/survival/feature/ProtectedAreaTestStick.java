@@ -86,14 +86,14 @@ public class ProtectedAreaTestStick implements Listener {
 
         if (regions.size() > 0) {
             if (regions.size() == 1) {
-                NewMessageUtil.sendMessage(player, Component.text(String.format("%s, %s, %s は保護されています。", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())));
+                NewMessageUtil.sendMessage(player, Component.text(String.format("%s, %s, %s は保護されています。", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())), false);
             } else {
-                NewMessageUtil.sendMessage(player, Component.text(String.format("%s, %s, %s には %s 個の保護が存在します。", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), regions.size())));
+                NewMessageUtil.sendMessage(player, Component.text(String.format("%s, %s, %s には %s 個の保護が存在します。", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ(), regions.size())), false);
             }
 
             regions.forEach(region -> sendRegionInformation(player, region));
         } else {
-            NewMessageUtil.sendMessage(player, Component.text(String.format("%s, %s, %s は保護されていません。", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())));
+            NewMessageUtil.sendMessage(player, Component.text(String.format("%s, %s, %s は保護されていません。", loc.getBlockX(), loc.getBlockY(), loc.getBlockZ())), false);
         }
     }
 
@@ -101,6 +101,6 @@ public class ProtectedAreaTestStick implements Listener {
         Matcher idMatcher = WorldGuard.ID_PATTERN.matcher(region.getId());
         UUID createdBy = idMatcher.matches() ? UUID.fromString(region.getId().split(WorldGuard.SPLITTER, 2)[0]) : null;
         String regionName = idMatcher.matches() ? region.getId().split(WorldGuard.SPLITTER, 2)[1] : region.getId();
-        NewMessageUtil.sendMessage(player, Component.text("保護領域 " + regionName + " | 作成者: " + (createdBy != null ? Bukkit.getOfflinePlayer(createdBy).getName() : "?")));
+        NewMessageUtil.sendMessage(player, Component.text("保護領域 " + regionName + " | 作成者: " + (createdBy != null ? Bukkit.getOfflinePlayer(createdBy).getName() : "?")), false);
     }
 }
