@@ -45,6 +45,7 @@ import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.enchants.*;
 import net.unknown.survival.enchants.nms.DamageEnchant;
 import net.unknown.survival.feature.DebugStickEntityEditor;
+import net.unknown.survival.feature.HarvestRightClick;
 import net.unknown.survival.feature.ProtectedAreaTestStick;
 import net.unknown.survival.feature.gnarms.GNArms;
 import net.unknown.survival.fml.FMLConnectionListener;
@@ -114,6 +115,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new AutoSmelting());
         ListenerManager.registerListener(new ServerRestartListener());
         ListenerManager.registerListener(new ProtectedAreaTestStick());
+        ListenerManager.registerListener(new HarvestRightClick());
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");
