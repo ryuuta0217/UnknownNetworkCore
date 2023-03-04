@@ -55,12 +55,12 @@ public class HarvestRightClick implements Listener {
         add(Material.POTATOES);
     }};
 
-    @EventHandler
+    @EventHandler // TODO: エンチャントとして実装時は、右クリックで収穫ではなくBlockBreakEventで処理した上で、モード切り替えをShift+ホットバー切り替えで実装する
     public void onInteractBlock(PlayerInteractEvent event) {
         if (event.getHand() != EquipmentSlot.HAND) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) return;
         if (!SUPPORTED_CROPS.contains(event.getClickedBlock().getType())) return;
-        if (!(event.getClickedBlock() instanceof Ageable ageable) || ageable.getAge() != ageable.getMaximumAge()) return;
+        if (!(event.getClickedBlock().getBlockData() instanceof Ageable ageable) || ageable.getAge() != ageable.getMaximumAge()) return;
         event.setCancelled(true);
         Block clickedBlock = event.getClickedBlock();
 
