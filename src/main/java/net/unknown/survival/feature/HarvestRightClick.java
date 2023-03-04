@@ -31,7 +31,6 @@
 
 package net.unknown.survival.feature;
 
-import net.minecraft.server.commands.SetBlockCommand;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -40,20 +39,53 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class HarvestRightClick implements Listener {
+    private static final Set<Material> SUPPORTED_CROPS = new HashSet<>() {{
+        add(Material.WHEAT);
+        add(Material.BEETROOTS);
+        add(Material.CARROTS);
+        add(Material.POTATOES);
+    }};
+
     @EventHandler
     public void onInteractBlock(PlayerInteractEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK || event.getClickedBlock() == null) return;
-        if (!(event.getClickedBlock().getBlockData() instanceof Ageable ageable)) return;
-        if (ageable.getAge() != ageable.getMaximumAge()) return;
+        if (!SUPPORTED_CROPS.contains(event.getClickedBlock().getType())) return;
+        if (!(event.getClickedBlock() instanceof Ageable ageable) || ageable.getAge() != ageable.getMaximumAge()) return;
         event.setCancelled(true);
         Block clickedBlock = event.getClickedBlock();
-        Collection<ItemStack> drops = clickedBlock.getDrops();
+
+        AtomicReference<Material> replantBlock = new AtomicReference<>();
+
+        Collection<ItemStack> drops = clickedBlock.getDrops(event.getItem(), event.getPlayer());
+
+        drops.forEach(item -> {
+            if (clickedBlock.getType() == Material.WHEAT) {
+                if (item.getType() == Material.WHEAT_SEEDS) {
+                    item.setAmount(item.getAmount() - 1);
+                    replantBlock.set(Material.WHEAT);
+                }
+            } else if (clickedBlock.getType() == Material.BEETROOTS) {
+                if (item.getType() == Material.BEETROOT_SEEDS) {
+                    item.setAmount(item.getAmount() - 1);
+                    replantBlock.set(Material.BEETROOTS);
+                }
+            } else {
+                item.setAmount(item.getAmount() - 1);
+                replantBlock.set(clickedBlock.getType());
+            }
+        });
         MinecraftAdapter.level(clickedBlock.getWorld()).destroyBlock(MinecraftAdapter.blockPos(clickedBlock.getLocation()), false, MinecraftAdapter.player(event.getPlayer()));
+        MinecraftAdapter.level(clickedBlock.getWorld()).setBlock(MinecraftAdapter.blockPos(clickedBlock.getLocation()), MinecraftAdapter.block(replantBlock.get()).defaultBlockState(), net.minecraft.world.level.block.Block.UPDATE_ALL);
         event.getPlayer().getInventory().addItem(drops.toArray(new ItemStack[0])).forEach((index, item) -> {
             event.getPlayer().getWorld().dropItem(event.getPlayer().getLocation(), item);
         });
