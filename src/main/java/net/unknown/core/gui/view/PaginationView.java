@@ -152,6 +152,10 @@ public class PaginationView<T> implements View {
     public void clearInventory() {
         this.slot2data.keySet().forEach(slot -> this.gui.getInventory().clear(slot));
         this.slot2data.clear();
+        this.gui.getInventory().clear(45);
+        this.gui.getInventory().clear(49);
+        this.gui.getInventory().clear(52);
+        this.gui.getInventory().clear(53);
     }
 
     protected GuiBase getGui() {
