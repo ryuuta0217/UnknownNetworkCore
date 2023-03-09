@@ -31,14 +31,17 @@
 
 package net.unknown.survival.gui;
 
-import net.kyori.adventure.text.Component;;
+import net.kyori.adventure.text.Component;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
+import net.unknown.core.gui.view.PaginationView;
 import net.unknown.core.gui.view.View;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.launchwrapper.hopper.FilterType;
 import net.unknown.launchwrapper.hopper.IMixinHopperBlockEntity;
+import net.unknown.launchwrapper.hopper.ItemFilter;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_19_R2.block.CraftHopper;
 import org.bukkit.entity.Player;
@@ -55,7 +58,7 @@ public class HopperCustomizeGui extends GuiBase {
     private View currentView;
 
     public HopperCustomizeGui(Player opener, HopperBlockEntity hopper, IMixinHopperBlockEntity mixinHopper) {
-        super(opener, InventoryType.CHEST, Component.text("ホッパーの設定", DefinedTextColor.BLUE), true);
+        super(opener, 54, Component.text("ホッパーの設定", DefinedTextColor.BLUE), true);
         this.hopper = hopper;
         this.mixinHopper = mixinHopper;
         this.currentView = new MainView();
@@ -97,7 +100,7 @@ public class HopperCustomizeGui extends GuiBase {
                 }
 
                 case 14 -> {
-                    new ConfigureFilterItemView();
+                    new ConfigureFilterView();
                 }
             }
         }
@@ -134,20 +137,64 @@ public class HopperCustomizeGui extends GuiBase {
             }
         }
 
-        public class ConfigureFilterItemView extends MainView {
+        public class ConfigureFilterView extends MainView {
             @Override
             public void initialize() {
-
+                boolean isFilterEnabled = HopperCustomizeGui.this.mixinHopper.isFilterEnabled();
+                HopperCustomizeGui.this.inventory.setItem(12, new ItemStackBuilder(isFilterEnabled ? Material.LIME_WOOL : Material.RED_WOOL)
+                        .displayName(isFilterEnabled ? Component.text("フィルター: 有効", DefinedTextColor.GREEN) : Component.text("フィルター: 無効", DefinedTextColor.RED))
+                                .lore(Component.text("FilterType: " + HopperCustomizeGui.this.mixinHopper.getFilterMode()))
+                        .build());
+                HopperCustomizeGui.this.inventory.setItem(14, new ItemStackBuilder(Material.COMPARATOR)
+                        .displayName(Component.text("フィルターの管理", DefinedTextColor.GREEN))
+                        .build());
             }
 
             @Override
             public void onClick(InventoryClickEvent event) {
+                switch (event.getSlot()) {
+                    case 12 -> {
+                        int nextMode = ((HopperCustomizeGui.this.mixinHopper.getFilterMode().ordinal() + 1) % 3); // Thanks for @Azote07
+                        HopperCustomizeGui.this.mixinHopper.setFilterMode(FilterType.values()[nextMode]);
+                        this.clearInventory();
+                        this.initialize();
+                    }
 
+                    case 14 -> {
+                        if (HopperCustomizeGui.this.currentView != null) HopperCustomizeGui.this.currentView.clearInventory();
+                        HopperCustomizeGui.this.currentView = new FilterManageView();
+                        HopperCustomizeGui.this.currentView.initialize();
+                    }
+                }
             }
 
             @Override
             public void clearInventory() {
+                HopperCustomizeGui.this.inventory.setItem(12, null);
+                HopperCustomizeGui.this.inventory.setItem(14, null);
+            }
 
+            public class FilterManageView extends PaginationView<ItemFilter> {
+                public FilterManageView() {
+                    super(HopperCustomizeGui.this, HopperCustomizeGui.this.mixinHopper.getFilters(), (filter) -> {
+                        net.minecraft.world.item.ItemStack viewItem = new net.minecraft.world.item.ItemStack(filter.item());
+                        if (filter.tag() != null) viewItem.setTag(filter.tag());
+                        return MinecraftAdapter.ItemStack.itemStack(viewItem);
+                    }, (event, filter) -> { // クリックイベント
+                        event.getWhoClicked().sendMessage(Component.text("そこには何もないよ"));
+                    }, (event, view) -> { // 新しくフィルターを設定するやつ
+                        event.getWhoClicked().sendMessage(Component.text("まだなんもできねーよカス"));
+                    }, (event, view) -> { // 前の画面に戻るやつ
+                        HopperCustomizeGui.this.currentView.clearInventory();
+                        HopperCustomizeGui.this.currentView = ConfigureFilterView.this;
+                        HopperCustomizeGui.this.currentView.initialize();
+                    });
+                }
+
+                @Override
+                public void clearInventory() {
+                    super.clearInventory();
+                }
             }
         }
     }
