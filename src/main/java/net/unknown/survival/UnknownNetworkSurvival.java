@@ -44,6 +44,7 @@ import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.enchants.*;
 import net.unknown.survival.enchants.nms.DamageEnchant;
+import net.unknown.survival.events.ModifiableBlockBreakEvent;
 import net.unknown.survival.feature.DebugStickEntityEditor;
 import net.unknown.survival.feature.HarvestRightClick;
 import net.unknown.survival.feature.ProtectedAreaTestStick;
@@ -100,6 +101,8 @@ public class UnknownNetworkSurvival {
         GNArms.initialize();
         BlueMapBar.initialize();
         DebugStickEntityEditor.Listener.register();
+
+        Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
 
         ListenerManager.registerListener(new MainGuiOpenListener());
         ListenerManager.registerListener(new ChatManager());
