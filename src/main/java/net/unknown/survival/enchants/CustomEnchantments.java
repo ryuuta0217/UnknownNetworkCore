@@ -31,17 +31,23 @@
 
 package net.unknown.survival.enchants;
 
-import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.enchantment.Enchantment;
-import net.unknown.core.util.RegistryUtil;
+import net.unknown.UnknownNetworkCore;
+import net.unknown.core.managers.ListenerManager;
 
 public class CustomEnchantments {
-    public static Enchantment RANGED_MINING = RegistryUtil.forceRegister(BuiltInRegistries.ENCHANTMENT, ResourceLocation.of("minecraft:ranged_mining", ':'), RangedMining.RangedMiningEnchantment.instance());
+    public static final HatakeWatari HATAKE_WATARI = new HatakeWatari();
+    public static final RangedMining RANGED_MINING = new RangedMining();
+    public static final ChainDestruction CHAIN_DESTRUCTION = new ChainDestruction();
+    public static final AutoSmelting AUTO_SMELTING = new AutoSmelting();
+    public static final AutoReplant AUTO_REPLANT = new AutoReplant();
 
     public static void initialize() {
-        // for clinit callen
+        if (UnknownNetworkCore.getInstance().isEnabled()) {
+            ListenerManager.registerListener(HATAKE_WATARI);
+            ListenerManager.registerListener(RANGED_MINING);
+            ListenerManager.registerListener(CHAIN_DESTRUCTION);
+            ListenerManager.registerListener(AUTO_SMELTING);
+            ListenerManager.registerListener(AUTO_REPLANT);
+        }
     }
 }

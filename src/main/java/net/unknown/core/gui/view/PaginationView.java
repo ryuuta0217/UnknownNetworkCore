@@ -52,11 +52,13 @@ public class PaginationView<T> implements View {
     private final BiConsumer<InventoryClickEvent, T> onClick;
     private BiConsumer<InventoryClickEvent, PaginationView<T>> createNewAction;
     private BiConsumer<InventoryClickEvent, PaginationView<T>> previousAction;
+    private boolean compact = false; // TODO: Support compact mode
 
     private int currentPage = 1;
 
     public PaginationView(GuiBase gui, Collection<T> data, Function<T, ItemStack> processor, BiConsumer<InventoryClickEvent, T> onClick, BiConsumer<InventoryClickEvent, PaginationView<T>> createNewAction, BiConsumer<InventoryClickEvent, PaginationView<T>> previousAction) {
         this.gui = gui;
+        this.compact = this.gui.getInventory().getSize() == 27;
         this.setData(data, false);
         this.processor = processor;
         this.onClick = onClick;

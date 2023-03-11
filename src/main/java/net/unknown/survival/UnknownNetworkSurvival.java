@@ -44,6 +44,7 @@ import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.enchants.*;
 import net.unknown.survival.enchants.nms.DamageEnchant;
+import net.unknown.survival.events.ModifiableBlockBreakEvent;
 import net.unknown.survival.feature.DebugStickEntityEditor;
 import net.unknown.survival.feature.HarvestRightClick;
 import net.unknown.survival.feature.ProtectedAreaTestStick;
@@ -74,7 +75,6 @@ public class UnknownNetworkSurvival {
     private static boolean LUCKPERMS_ENABLED = false;
 
     public static void onLoad() {
-        CustomEnchantments.initialize();
         Commands.init();
         DamageEnchant.register();
         try {
@@ -97,9 +97,12 @@ public class UnknownNetworkSurvival {
         AntiVillagerLag.startLoopTask();
         PlayerDeathListener.load();
 
+        CustomEnchantments.initialize();
         GNArms.initialize();
         BlueMapBar.initialize();
         DebugStickEntityEditor.Listener.register();
+
+        Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
 
         ListenerManager.registerListener(new MainGuiOpenListener());
         ListenerManager.registerListener(new ChatManager());
@@ -107,12 +110,8 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new ModdedPlayerManager());
         ListenerManager.registerListener(new PathfinderGrapple());
         ListenerManager.registerListener(new DemolitionGun());
-        ListenerManager.registerListener(new HatakeWatari());
-        ListenerManager.registerListener(new RangedMining());
         ListenerManager.registerListener(new MonsterBall());
         ListenerManager.registerListener(new PlayerDeathListener());
-        ListenerManager.registerListener(new ChainDestruction());
-        ListenerManager.registerListener(new AutoSmelting());
         ListenerManager.registerListener(new ServerRestartListener());
         ListenerManager.registerListener(new ProtectedAreaTestStick());
         ListenerManager.registerListener(new HarvestRightClick());
