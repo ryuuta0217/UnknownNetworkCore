@@ -110,12 +110,8 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new ModdedPlayerManager());
         ListenerManager.registerListener(new PathfinderGrapple());
         ListenerManager.registerListener(new DemolitionGun());
-        ListenerManager.registerListener(new HatakeWatari());
-        ListenerManager.registerListener(new RangedMining());
         ListenerManager.registerListener(new MonsterBall());
         ListenerManager.registerListener(new PlayerDeathListener());
-        ListenerManager.registerListener(new ChainDestruction());
-        ListenerManager.registerListener(new AutoSmelting());
         ListenerManager.registerListener(new ServerRestartListener());
         ListenerManager.registerListener(new ProtectedAreaTestStick());
         ListenerManager.registerListener(new HarvestRightClick());
