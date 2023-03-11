@@ -106,6 +106,6 @@ public class CustomEnchantUtil {
     public static boolean hasEnchantment(String loreLine, ItemStack selectedItem) {
         if (selectedItem.lore() == null) return false;
         List<String> lore = selectedItem.lore().stream().map(LegacyComponentSerializer.legacySection()::serialize).toList();
-        return lore.stream().anyMatch(s -> s.startsWith(loreLine));
+        return lore.stream().anyMatch(s -> s.startsWith("§7" + loreLine));
     }
 }
