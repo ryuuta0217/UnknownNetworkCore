@@ -75,7 +75,6 @@ public class UnknownNetworkSurvival {
     private static boolean LUCKPERMS_ENABLED = false;
 
     public static void onLoad() {
-        CustomEnchantments.initialize();
         Commands.init();
         DamageEnchant.register();
         try {
@@ -98,6 +97,7 @@ public class UnknownNetworkSurvival {
         AntiVillagerLag.startLoopTask();
         PlayerDeathListener.load();
 
+        CustomEnchantments.initialize();
         GNArms.initialize();
         BlueMapBar.initialize();
         DebugStickEntityEditor.Listener.register();
