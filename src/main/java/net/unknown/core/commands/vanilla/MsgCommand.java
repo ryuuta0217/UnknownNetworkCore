@@ -199,6 +199,7 @@ public class MsgCommand {
             source.sendChatMessage(outMessage, false, outgoingBound);
             boolean filterMask = source.shouldFilterMessageTo(receiver);
             receiver.sendChatMessage(outMessage, filterMask, incomingBound);
+            PlayerData.of(receiver).getChatData().setPrivateMessageReplyTarget(source.getEntity() != null ? source.getEntity().getUUID() : SERVER_UUID);
             filtered = filterMask && message.isFullyFiltered();
 
             if (filtered) {
