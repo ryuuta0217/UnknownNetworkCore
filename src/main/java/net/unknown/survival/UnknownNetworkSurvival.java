@@ -54,7 +54,7 @@ import net.unknown.survival.fml.ModdedPlayerManager;
 import net.unknown.survival.fun.DemolitionGun;
 import net.unknown.survival.fun.MonsterBall;
 import net.unknown.survival.fun.PathfinderGrapple;
-import net.unknown.survival.gui.HopperCustomizeGui;
+import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import net.unknown.survival.listeners.ColorCodeListener;
 import net.unknown.survival.listeners.MainGuiOpenListener;
 import net.unknown.survival.listeners.PlayerDeathListener;
@@ -119,7 +119,7 @@ public class UnknownNetworkSurvival {
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");
             //ListenerManager.registerListener(new BlockDisassembler());
-            ListenerManager.registerListener(new HopperCustomizeGui.Listener());
+            ListenerManager.registerListener(new ConfigureHopperGui.Listener());
         }
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");
