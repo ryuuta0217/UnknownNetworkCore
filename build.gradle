@@ -64,6 +64,7 @@ dependencies {
     compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'e083fbd6'
     launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'e083fbd6', classifier: 'spigot'
     implementation group: 'org.mozilla', name: 'rhino', version: '+'
+    implementation group: 'com.github.NuVotifier', name: 'NuVotifier', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
 }
