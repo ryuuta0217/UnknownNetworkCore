@@ -33,6 +33,7 @@ package net.unknown.survival.feature;
 
 import com.vexsoftware.votifier.model.VotifierEvent;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.unknown.core.define.DefinedTextColor;
@@ -45,6 +46,9 @@ public class VoteListener implements Listener {
         Bukkit.broadcast(Component.empty()
                 .append(Component.text("[Unknown System]", Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD)))
                 .append(Component.space())
-                .append(Component.text(event.getVote().getUsername() + " さんが投票しました。ありがとう！", DefinedTextColor.GREEN)));
+                .append(Component.text(event.getVote().getUsername() + " さんが " + event.getVote().getServiceName() + " で投票しました。ありがとう！", DefinedTextColor.GREEN)));
+        Bukkit.broadcast(Component.text("あなたも投票してみませんか？ ", DefinedTextColor.GREEN)
+                .append(Component.text("投票するにはここをクリック!", Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED))
+                        .clickEvent(ClickEvent.openUrl("https://monocraft.net/servers/hWvNPIBskVkZ743kWt8S"))));
     }
 }
