@@ -48,6 +48,7 @@ import net.unknown.survival.events.ModifiableBlockBreakEvent;
 import net.unknown.survival.feature.DebugStickEntityEditor;
 import net.unknown.survival.feature.HarvestRightClick;
 import net.unknown.survival.feature.ProtectedAreaTestStick;
+import net.unknown.survival.feature.VoteListener;
 import net.unknown.survival.feature.gnarms.GNArms;
 import net.unknown.survival.fml.FMLConnectionListener;
 import net.unknown.survival.fml.ModdedPlayerManager;
@@ -73,6 +74,7 @@ public class UnknownNetworkSurvival {
     private static boolean VAULT_ENABLED = false;
     private static boolean JECON_ENABLED = false;
     private static boolean LUCKPERMS_ENABLED = false;
+    private static boolean VOTIFIER_ENABLED = false;
 
     public static void onLoad() {
         Commands.init();
@@ -90,6 +92,7 @@ public class UnknownNetworkSurvival {
         VAULT_ENABLED = Bukkit.getPluginManager().getPlugin("Vault") != null && Bukkit.getPluginManager().isPluginEnabled("Vault");
         JECON_ENABLED = Bukkit.getPluginManager().getPlugin("Jecon") != null && Bukkit.getPluginManager().isPluginEnabled("Jecon");
         LUCKPERMS_ENABLED = Bukkit.getPluginManager().getPlugin("LuckPerms") != null && Bukkit.getPluginManager().isPluginEnabled("LuckPerms");
+        VOTIFIER_ENABLED = Bukkit.getPluginManager().getPlugin("Votifier") != null && Bukkit.getPluginManager().isPluginEnabled("Votifier");
 
         Warps.load();
         PlayerData.loadExists();
@@ -135,6 +138,10 @@ public class UnknownNetworkSurvival {
         if (isWorldGuardEnabled()) {
             WorldGuard.PermissionsResolver.inject();
         }
+
+        if (isVotifierEnbaled()) {
+            ListenerManager.registerListener(new VoteListener());
+        }
         LOGGER.info("Plugin enabled - Running as Survival mode.");
     }
 
@@ -168,5 +175,9 @@ public class UnknownNetworkSurvival {
 
     public static boolean isLuckPermsEnabled() {
         return LUCKPERMS_ENABLED;
+    }
+
+    public static boolean isVotifierEnbaled() {
+        return VOTIFIER_ENABLED;
     }
 }
