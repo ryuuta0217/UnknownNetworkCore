@@ -110,15 +110,19 @@ public class CustomChannel extends ChatChannel {
         //Bukkit.getServer().getConsoleSender().sendMessage(event.getPlayer().identity(), message); TODO: 多分viewersにConsoleSenderも入ってるのでこれはいらない
         event.viewers().removeIf(viewer -> {
             if (viewer instanceof Player player) {
-                return viewer.equals(event.getPlayer()) || customEvent.isReceiver(player);
+                // メッセージを送信したプレイヤーでも、受信するプレイヤーでもない時はviewersから削除する (return true)
+                return !viewer.equals(event.getPlayer()) && !customEvent.isReceiver(player);
             }
 
             if (viewer instanceof ConsoleCommandSender) { // TODO: 多分入ってるけど、要検証 | もし入ってるなら他のChannelでも対応が必要
-                return false;
+                return false; // 削除しない
             }
 
             return true;
         });
+
+        final Component originalMessageCopy = event.message();
+        event.message(Component.empty());
 
         event.renderer((source, sourceDisplayName, message, viewer) -> {
             if (!(viewer instanceof Player player) || (!this.players.contains(player.getUniqueId())) && !(viewer instanceof ConsoleCommandSender)) return Component.empty();
@@ -127,7 +131,7 @@ public class CustomChannel extends ChatChannel {
                     .append(Component.text(" "))
                     .append(sourceDisplayName)
                     .append(Component.text(": "))
-                    .append(message);
+                    .append(originalMessageCopy);
         });
 
         //customEvent.getReceivers().forEach(receiver -> receiver.sendMessage((customEvent.getSender() == null ? Identity.nil() : customEvent.getSender().identity()), customEvent.getRenderedMessage()));

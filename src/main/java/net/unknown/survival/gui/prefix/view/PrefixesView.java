@@ -52,7 +52,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
-public class PrefixesView extends PaginationView<Prefix> {
+public class PrefixesView extends PaginationView<Prefix, PrefixGui> {
     private Player player;
     public PrefixesView(PrefixGui gui, Player player) {
         super(gui, PlayerPrefixes.getPrefixesSorted(player),

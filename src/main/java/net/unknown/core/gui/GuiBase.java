@@ -136,7 +136,6 @@ public class GuiBase implements Listener {
     }
 
     public void open(HumanEntity target) {
-        this.registerAsListener();
         target.openInventory(this.inventory);
     }
 
