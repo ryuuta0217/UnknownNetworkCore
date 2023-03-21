@@ -46,13 +46,13 @@ public class ConfigureHopperView extends ConfigureHopperViewBase {
 
     @Override
     public void initialize() {
-        this.getGui().getInventory().setItem(12, new ItemStackBuilder(Material.HOPPER)
+        this.getGui().getInventory().setItem(21, new ItemStackBuilder(Material.HOPPER)
                 .displayName(Component.text("アイテムの吸取設定", DefinedTextColor.YELLOW))
                 .lore(Component.text("ホッパーがアイテムを吸い取るかどうかや、吸取範囲を変更できます。", DefinedTextColor.GREEN),
                         Component.text("ホッパーのアイテム吸取: ", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().isEnabledFindItem() ? Component.text("有効", DefinedTextColor.GREEN) : Component.text("無効", DefinedTextColor.RED)))
                 .build());
 
-        this.getGui().getInventory().setItem(14, new ItemStackBuilder(Material.COMPARATOR)
+        this.getGui().getInventory().setItem(23, new ItemStackBuilder(Material.COMPARATOR)
                 .displayName(Component.text("アイテムフィルター設定", DefinedTextColor.GREEN))
                 .lore(Component.text("ホッパーが吸い取るアイテムにフィルターを設定します。", DefinedTextColor.GREEN),
                         Component.text("アイテムフィルター: ", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().isFilterEnabled() ? Component.text("有効", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().getFilterMode() == FilterType.WHITELIST ? Component.text(" (ホワイトリスト)", DefinedTextColor.AQUA) : Component.text(" (ブラックリスト)", DefinedTextColor.YELLOW)) : Component.text("無効", DefinedTextColor.RED)),
@@ -63,11 +63,11 @@ public class ConfigureHopperView extends ConfigureHopperViewBase {
     @Override
     public void onClick(InventoryClickEvent event) {
         switch (event.getSlot()) {
-            case 12 -> {
+            case 21 -> {
                 this.getGui().setView(new ConfigureHopperPullView(this));
             }
 
-            case 14 -> {
+            case 23 -> {
                 this.getGui().setView(new ConfigureHopperFilterView(this));
             }
         }
