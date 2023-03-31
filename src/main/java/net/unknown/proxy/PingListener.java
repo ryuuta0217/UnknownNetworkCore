@@ -31,16 +31,34 @@
 
 package net.unknown.proxy;
 
+import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ServerPing;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class PingListener implements Listener {
+    private static final int BASE_SUPPORTED_PROTOCOL_NUMBER = 761;
+    private static final Set<Integer> SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>() {{
+        add(762);
+    }};
+
     @EventHandler
     public void onPing(ProxyPingEvent event) {
         ServerPing sp = event.getResponse();
-        sp.setVersion(new ServerPing.Protocol("Unknown Network", event.getConnection().getVersion()));
+
+        int playerProtocolVersion = event.getConnection().getVersion();
+        int protocolVersion = BASE_SUPPORTED_PROTOCOL_NUMBER;
+        if (SUPPORTED_PROTOCOL_NUMBERS.contains(playerProtocolVersion)) {
+            protocolVersion = playerProtocolVersion;
+        }
+        sp.setVersion(new ServerPing.Protocol("1.19.3 - 1.19.4", protocolVersion));
+
         event.setResponse(sp);
     }
 }

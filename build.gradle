@@ -116,7 +116,7 @@ task downloadWaterfall(type: Task) {
 
     if (!wf.exists()) {
         download {
-            src "https://api.papermc.io/v2/projects/waterfall/versions/1.19/builds/496/downloads/waterfall-1.19-496.jar"
+            src "https://api.papermc.io/v2/projects/waterfall/versions/1.19/builds/519/downloads/waterfall-1.19-519.jar"
             dest 'libs/standalone/waterfall.jar'
         }
 
@@ -154,8 +154,7 @@ task reCompressWaterfall(type: Zip, dependsOn: downloadWaterfall) {
 }
 
 task copyArtifactToProxy(type: Copy) {
-    from project.file("build/libs/UnknownNetworkCore-${version}.jar")
-    rename("UnknownNetworkCore-${version}.jar", "UNC.jar")
+    from project.file("build/libs/UnknownNetworkCore.jar")
     into project.file("testProxy/plugins")
 }
 

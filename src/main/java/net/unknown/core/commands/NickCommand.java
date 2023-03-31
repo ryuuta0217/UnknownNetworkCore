@@ -35,6 +35,7 @@ import com.destroystokyo.paper.profile.CraftPlayerProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.server.level.ServerPlayer;
@@ -50,20 +51,19 @@ public class NickCommand {
         builder.then(Commands.argument("nickName", StringArgumentType.greedyString())
                 .executes(ctx -> {
                     String nickName = StringArgumentType.getString(ctx, "nickName");
-                    if (nickName.length() > 16) {
-                        MessageUtil.sendErrorMessage(ctx.getSource(), "16文字以下で...");
-                        return 1;
-                    }
                     String coloredNickName = ChatColor.translateAlternateColorCodes('&', nickName);
                     ServerPlayer player = ctx.getSource().getPlayerOrException();
 
-                    CraftPlayerProfile profile = (CraftPlayerProfile) player.getBukkitEntity().getPlayerProfile();
-                    profile.setName(coloredNickName);
-                    player.getBukkitEntity().setPlayerProfile(profile);
-                    player.getBukkitEntity().setDisplayName(coloredNickName);
-                    player.getBukkitEntity().setPlayerProfile(profile);
+                    if (nickName.length() <= 16) {
+                        CraftPlayerProfile profile = (CraftPlayerProfile) player.getBukkitEntity().getPlayerProfile();
+                        profile.setName(coloredNickName);
+                        player.getBukkitEntity().setPlayerProfile(profile);
+                    }
 
-                    MessageUtil.sendMessage(ctx.getSource(), "ニックネームを変更しました");
+                    player.getBukkitEntity().setPlayerListName(coloredNickName);
+                    player.getBukkitEntity().setDisplayName(coloredNickName);
+
+                    MessageUtil.sendMessage(ctx.getSource(), "ニックネームを変更しました" + (nickName.length() > 16 ? " (Profileは変更されませんでした)" : ""));
                     return 0;
                 }));
         dispatcher.register(builder);

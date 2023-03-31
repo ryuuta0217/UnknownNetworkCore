@@ -52,6 +52,14 @@ public class ConfigureHopperGui extends GuiBase {
     private final IMixinHopperBlockEntity mixinHopper;
     private View view = new ConfigureHopperView(this);
 
+    /*
+     *  0  1  2  3  4  5  6  7  8
+     *  9 10 11 12 13 14 15 16 17
+     * 18 19 20 21 22 23 24 25 26
+     * 27 28 29 30 31 32 33 34 35
+     * 36 37 38 39 40 41 42 43 44
+     * 45 46 47 48 49 50 51 52 53
+     */
     public ConfigureHopperGui(Player opener, HopperBlockEntity hopper, IMixinHopperBlockEntity mixinHopper) {
         super(opener, 54, Component.text("ホッパーの設定", DefinedTextColor.BLUE), true);
         this.hopper = hopper;
@@ -92,6 +100,7 @@ public class ConfigureHopperGui extends GuiBase {
             if (event.getHand() != EquipmentSlot.HAND || event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
             if (event.getClickedBlock() == null) return;
             if (event.getClickedBlock().getType() != org.bukkit.Material.HOPPER) return;
+            if (event.getItem() != null) return;
             if (!event.getPlayer().isSneaking()) return;
             event.setCancelled(true);
             HopperBlockEntity hopper = ((CraftHopper) event.getClickedBlock().getState()).getTileEntity();

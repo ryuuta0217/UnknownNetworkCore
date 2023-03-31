@@ -349,7 +349,7 @@ public class ProtectionGui extends GuiBase {
                 } else if (event.getSlot() == 32) {
                     this.gui.guiState = State.WAITING_CALLBACK;
                     this.gui.player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
-                    Util.startSelectionMode(this.gui.player, (result) -> {
+                    Util.startSelectionMode(this.gui.player, null, null, null, (result) -> {
                         this.world = result.world();
                         this.min = result.min();
                         this.max = result.max();
@@ -467,6 +467,7 @@ public class ProtectionGui extends GuiBase {
             @Override
             public void clearInventory() {
                 super.clearInventory();
+                this.gui.inventory.clear(51);
                 this.gui.inventory.clear(52);
                 this.gui.inventory.clear(53);
             }
@@ -559,7 +560,9 @@ public class ProtectionGui extends GuiBase {
                             this.gui.guiState = State.WAITING_CALLBACK;
                             this.gui.player.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
 
-                            Util.startSelectionMode(this.gui.player, (result) -> {
+                            // TODO 既存の選択範囲を引き継ぎながら、変更可能にする
+                            //WorldEdit.getSession((Player) event.getWhoClicked()).setRegionSelector(BukkitAdapter.adapt(event.getWhoClicked().getWorld()), new CuboidRegionSelector(BukkitAdapter.adapt(this.region.world()), region.getMinimumPoint(), region.getMaximumPoint()));
+                            Util.startSelectionMode(this.gui.player, null, null, null, (result) -> {
                                 World world = result.world();
                                 BlockVector3 min = result.min();
                                 BlockVector3 max = result.max();
@@ -917,10 +920,10 @@ public class ProtectionGui extends GuiBase {
                     }).open();
         }
 
-        public static void startSelectionMode(Player player, Consumer<SelectionResult> onComplete) {
+        public static void startSelectionMode(Player player, World initialWorld, BlockVector3 initialMin, BlockVector3 initialMax, Consumer<SelectionResult> onComplete) {
             Set<Listener> listeners = new HashSet<>();
 
-            SelectionResult result = new SelectionResult();
+            SelectionResult result = new SelectionResult(initialWorld, initialMin, initialMax);
 
             ItemStack currentHand = player.getInventory().getItemInMainHand();
             ItemStack newHand = new ItemStackBuilder(Material.GOLDEN_AXE)
@@ -1136,6 +1139,14 @@ public class ProtectionGui extends GuiBase {
             private World world = null;
             private BlockVector3 min = null;
             private BlockVector3 max = null;
+
+            public SelectionResult() {}
+
+            public SelectionResult(World world, BlockVector3 initialMin, BlockVector3 initialMax) {
+                this.world = world;
+                this.min = initialMin;
+                this.max = initialMax;
+            }
 
             public World world() {
                 return this.world;
