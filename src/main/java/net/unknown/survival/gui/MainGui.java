@@ -86,6 +86,11 @@ public class MainGui extends GuiBase {
                             .displayName(Component.text("頭に被る", TextColor.color(0x657CFF)))
                             .lore(Component.text("アイテムを持ってここを左クリックで頭に被ります", TextColor.color(0xFF76A6)))
                             .build());
+
+                    inv.setItem(26, new ItemStackBuilder(Material.BUCKET)
+                            .displayName(Component.text("ゴミ箱", DefinedTextColor.RED))
+                            .lore(Component.text("クリックするとゴミ箱を開きます", DefinedTextColor.LIGHT_PURPLE))
+                            .build());
                 }, false);
     }
 
@@ -112,6 +117,13 @@ public class MainGui extends GuiBase {
                 event.getWhoClicked().getInventory().setHelmet(newHead);
                 event.getView().setCursor(oldHead);
                 MessageUtil.sendMessage((Player) event.getWhoClicked(), "アイテムを頭に被りました");
+            }
+            case 26 -> {
+                if (event.getWhoClicked() instanceof Player player) {
+                    player.closeInventory();
+                    TrashGui trash = new TrashGui(player);
+                    trash.open(player);
+                }
             }
         }
     }
