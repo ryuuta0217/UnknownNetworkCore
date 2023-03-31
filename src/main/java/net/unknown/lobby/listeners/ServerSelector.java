@@ -58,23 +58,23 @@ public class ServerSelector implements Listener {
         private Gui() {
             super(null, 27, Component.text("サーバー選択", DefinedTextColor.DARK_BLUE),
                     (inv) -> {
-                        inv.setItem(12, new ItemStackBuilder(Material.APPLE)
+                        /*inv.setItem(12, new ItemStackBuilder(Material.APPLE)
                                 .displayName(Component.text("ミニゲーム", DefinedTextColor.GREEN))
-                                .build());
+                                .build());*/
                         inv.setItem(13, new ItemStackBuilder(Material.GRASS_BLOCK)
                                 .displayName(Component.text("生活鯖", DefinedTextColor.GOLD))
                                 .build());
-                        inv.setItem(14, new ItemStackBuilder(Material.STRUCTURE_BLOCK)
+                        /*inv.setItem(14, new ItemStackBuilder(Material.STRUCTURE_BLOCK)
                                 .displayName(Component.text("デバッグ", DefinedTextColor.GRAY))
-                                .build());
+                                .build());*/
                     }, false);
             this.onClick = (slot, event) -> {
-                if (slot == 12) {
+                /*if (slot == 12) {
                     ByteArrayDataOutput out = ByteStreams.newDataOutput();
                     out.writeUTF("Connect");
                     out.writeUTF("minigame");
                     ((Player) event.getWhoClicked()).sendPluginMessage(UnknownNetworkCore.getInstance(), "BungeeCord", out.toByteArray());
-                }
+                }*/
 
                 if (slot == 13) {
                     ByteArrayDataOutput out = ByteStreams.newDataOutput();
