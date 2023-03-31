@@ -37,6 +37,8 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.*;
 
@@ -46,9 +48,11 @@ public class VoteListener implements Listener {
         Bukkit.broadcast(Component.empty()
                 .append(Component.text("[Unknown System]", Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD)))
                 .append(Component.space())
-                .append(Component.text(event.getVote().getUsername() + " さんが " + event.getVote().getServiceName() + " で投票しました。ありがとう！", DefinedTextColor.GREEN)));
+                .append(Component.text(event.getVote().getUsername() + " さんが投票しました。ありがとう！", DefinedTextColor.GREEN)));
         Bukkit.broadcast(Component.text("あなたも投票してみませんか？ ", DefinedTextColor.GREEN)
-                .append(Component.text("投票するにはここをクリック!", Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED))
-                        .clickEvent(ClickEvent.openUrl("https://monocraft.net/servers/hWvNPIBskVkZ743kWt8S"))));
+                .append(Component.text("投票する: ", DefinedTextColor.AQUA)
+                        .append(Component.text("monocraft", Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl("https://monocraft.net/servers/hWvNPIBskVkZ743kWt8S/vote")))
+                        .append(Component.space())
+                        .append(Component.text("JMS", Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl("https://minecraft.jp/servers/play.mc-unknown.net/vote")))));
     }
 }
