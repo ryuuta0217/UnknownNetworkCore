@@ -31,6 +31,9 @@
 
 package net.unknown.lobby.listeners;
 
+import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
+import net.minecraft.world.InteractionHand;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.lobby.UnknownNetworkLobby;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -54,6 +57,16 @@ public class PlayerJoinListener implements Listener {
         //w
         if (!event.getPlayer().getInventory().contains(UnknownNetworkLobby.getServerSelectorCompass())) {
             event.getPlayer().getInventory().addItem(UnknownNetworkLobby.getServerSelectorCompass());
+        }
+
+        if (!event.getPlayer().getInventory().contains(UnknownNetworkLobby.getBook())) {
+            event.getPlayer().getInventory().addItem(UnknownNetworkLobby.getBook());
+        }
+
+        if (!event.getPlayer().hasPlayedBefore()) {
+            event.getPlayer().getInventory().setHeldItemSlot(event.getPlayer().getInventory().first(UnknownNetworkLobby.getBook()));
+            ClientboundOpenBookPacket openBookPacket = new ClientboundOpenBookPacket(InteractionHand.MAIN_HAND);
+            MinecraftAdapter.player(event.getPlayer()).connection.send(openBookPacket);
         }
     }
 }
