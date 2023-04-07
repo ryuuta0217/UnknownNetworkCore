@@ -55,7 +55,7 @@ public class FMLConnectionListener implements org.bukkit.plugin.messaging.Plugin
 
             UUID uniqueId = MinecraftPacketReader.readUUID(buf);
             if (!uniqueId.equals(player.getUniqueId())) {
-                LOGGER.warning("Player " + player.getName() + " sended \"unknown:forge\" message is not valid: UUID mismatch");
+                LOGGER.warning("Player " + player.getName() + " sent \"unknown:forge\" message is not valid: UUID mismatch");
                 return;
             }
 
