@@ -84,12 +84,12 @@ public class AHomeCommand {
             Home home = defaultGroup.getHome(homeName);
             if (home != null) {
                 home.teleportPlayer(executor);
-                MessageUtil.sendAdminMessage(ctx.getSource(), homeOwner.getName() + " のグループ " + homeOwnerData.getDefaultGroup() + " のホーム " + homeName + " にテレポートしました");
+                MessageUtil.sendAdminMessage(ctx.getSource(), homeOwner.getName() + " のグループ " + homeOwnerData.getDefaultGroup().getName() + " のホーム " + homeName + " にテレポートしました");
                 return 0;
             }
         }
 
-        MessageUtil.sendAdminErrorMessage(ctx.getSource(), homeOwner.getName() + " のグループ " + homeOwnerData.getDefaultGroup() + " のホーム " + homeName + " は存在しません。");
+        MessageUtil.sendAdminErrorMessage(ctx.getSource(), homeOwner.getName() + " のグループ " + homeOwnerData.getDefaultGroup().getName() + " のホーム " + homeName + " は存在しません。");
         return 1;
     }
 }
