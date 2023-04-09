@@ -46,7 +46,6 @@ import net.unknown.survival.enchants.*;
 import net.unknown.survival.enchants.nms.DamageEnchant;
 import net.unknown.survival.events.ModifiableBlockBreakEvent;
 import net.unknown.survival.feature.DebugStickEntityEditor;
-import net.unknown.survival.feature.HarvestRightClick;
 import net.unknown.survival.feature.ProtectedAreaTestStick;
 import net.unknown.survival.feature.VoteListener;
 import net.unknown.survival.feature.gnarms.GNArms;
@@ -117,7 +116,6 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new PlayerDeathListener());
         ListenerManager.registerListener(new ServerRestartListener());
         ListenerManager.registerListener(new ProtectedAreaTestStick());
-        ListenerManager.registerListener(new HarvestRightClick());
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");

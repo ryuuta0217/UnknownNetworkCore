@@ -29,44 +29,40 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.fml;
+package com.ryuuta0217.util;
 
-import com.ryuuta0217.packets.C2SModListReply;
-import com.ryuuta0217.util.MinecraftPacketReader;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import net.kyori.adventure.text.Component;
-import net.unknown.survival.enums.ConnectionEnvironment;
-import net.unknown.survival.enums.Permissions;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
+import java.util.Map;
 import java.util.UUID;
-import java.util.logging.Logger;
 
-public class FMLConnectionListener implements org.bukkit.plugin.messaging.PluginMessageListener {
-    private static final Logger LOGGER = Logger.getLogger("UNC/ModDetector");
-
-    @Override
-    public void onPluginMessageReceived(@NotNull String s, @NotNull Player player, byte[] bytes) {
-        if (s.equals("unknown:forge")) {
-            ByteBuf buf = Unpooled.wrappedBuffer(bytes);
-
-            UUID uniqueId = MinecraftPacketReader.readUUID(buf);
-            if (!uniqueId.equals(player.getUniqueId())) {
-                LOGGER.warning("Player " + player.getName() + " sent \"unknown:forge\" message is not valid: UUID mismatch");
-                return;
-            }
-
-            C2SModListReply reply = C2SModListReply.decode(buf);
-
-            ModdedClientPlayer mcp = new ModdedClientPlayer(ConnectionEnvironment.FML2, reply.getMods(), reply.getChannels(), reply.getRegistries());
-            ModdedPlayerManager.addPlayer(player, mcp);
-
-            Bukkit.broadcast(Component.text("").append(player.displayName()).append(Component.text(" の導入Mod: " + mcp.getModNames())), Permissions.NOTIFY_MODDED_PLAYER.getPermissionNode());
-
-            //Bukkit.broadcast(Component.text(player.getName() + " is using mods! Installed: " + mcp.getModNames()));
+// See: https://wiki.vg/Mojang_API
+public class MojangApi {
+    // GET https://sessionserver.mojang.com/session/minecraft/profile/<uuid>
+    // response json: {"id":"<profile identifier>","name":"<player name>","properties":[{"name":"textures","value":"<base64 string>","signature":"<base64 string; signed data using Yggdrasil's private key>"}]}
+    public static String getName(UUID uniqueId) {
+        HTTPUtil request = new HTTPUtil("GET", "https://sessionserver.mojang.com/session/minecraft/profile/" + uniqueId.toString());
+        String responseRaw = request.request();
+        JSONObject response = null;
+        try {
+            response = (JSONObject) new JSONParser().parse(responseRaw);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         }
+        return (String) response.get("name");
+    }
+
+    public static UUID getUUID(String name) {
+        HTTPUtil request = new HTTPUtil("GET", "https://api.mojang.com/users/profiles/minecraft/" + name);
+        String responseRaw = request.request();
+        JSONObject response = null;
+        try {
+            response = (JSONObject) new JSONParser().parse(responseRaw);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
+        return UUID.fromString((String) response.get("id"));
     }
 }

@@ -42,7 +42,7 @@ public class TickUtil {
     }
 
     public static LocalTime tickTime2RealTime(long tick) {
-        if (tick < 0 || tick > 24000) throw new IllegalArgumentException("0 - 24000");
+        if (tick <= 0 || tick >= 24000) throw new IllegalArgumentException("0 - 24000");
         double seconds = tick / 0.2777777777777778;
         return LocalTime.of(6, 0).plusSeconds(Math.round(seconds));
     }
