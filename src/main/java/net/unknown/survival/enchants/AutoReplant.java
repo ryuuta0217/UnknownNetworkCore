@@ -89,19 +89,22 @@ public class AutoReplant implements Listener {
         event.getOriginal().setDropItems(false); // Disable original drops
 
         List<org.bukkit.inventory.ItemStack> drops = event.getOriginalDrops();
-        drops.forEach(bukkitStack -> {
-            if (event.getOriginal().getBlock().getType() == Material.WHEAT) {
-                if (bukkitStack.getType() == Material.WHEAT_SEEDS) {
-                    bukkitStack.setAmount(bukkitStack.getAmount() - 1);
-                }
-            } else if (event.getOriginal().getBlock().getType() == Material.BEETROOTS) {
-                if (bukkitStack.getType() == Material.BEETROOT_SEEDS) {
-                    bukkitStack.setAmount(bukkitStack.getAmount() - 1);
-                }
-            } else {
-                bukkitStack.setAmount(bukkitStack.getAmount() - 1);
+        if (drops.size() == 0) return;
+
+        org.bukkit.inventory.ItemStack firstDropItem = drops.get(0);
+
+        if (event.getOriginal().getBlock().getType() == Material.WHEAT) {
+            if (firstDropItem.getType() == Material.WHEAT_SEEDS) {
+                firstDropItem.setAmount(firstDropItem.getAmount() - 1);
             }
-        });
+        } else if (event.getOriginal().getBlock().getType() == Material.BEETROOTS) {
+            if (firstDropItem.getType() == Material.BEETROOT_SEEDS) {
+                firstDropItem.setAmount(firstDropItem.getAmount() - 1);
+            }
+        } else {
+            firstDropItem.setAmount(firstDropItem.getAmount() - 1);
+        }
+        drops.removeIf(bukkitStack -> bukkitStack.getType() == Material.AIR);
         event.getOriginal().getPlayer().getInventory().addItem(drops.toArray(new org.bukkit.inventory.ItemStack[0])).forEach((slot, stack) -> {
             event.getOriginal().getPlayer().getWorld().dropItem(event.getOriginal().getBlock().getLocation(), stack);
         });
