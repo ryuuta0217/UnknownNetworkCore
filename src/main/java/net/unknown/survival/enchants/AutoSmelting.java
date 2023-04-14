@@ -79,17 +79,23 @@ public class AutoSmelting implements Listener {
         if (!player.hasCorrectToolForDrops(blockState)) return;
 
         FurnaceBlockEntity dummyFurnace = new FurnaceBlockEntity(BlockPos.ZERO, Blocks.FURNACE.defaultBlockState());
-        dummyFurnace.setItem(1, new ItemStack(Items.COAL, 1));
+        dummyFurnace.setLevel(level);
+        dummyFurnace.setItem(1, new ItemStack(Items.LAVA_BUCKET, 1));
         List<ItemStack> drops = Block.getDrops(blockState, level, blockPos, blockEntity, player, player.getMainHandItem());
         List<ItemStack> newDrops = new ArrayList<>();
         if (drops.size() > 0) {
             drops.forEach(drop -> {
                 dummyFurnace.setItem(0, drop);
                 List<SmeltingRecipe> recipes = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, dummyFurnace, level);
-                ItemStack result = recipes.get(0).getResultItem();
-                result.setCount(drop.getCount());
-                newDrops.add(result);
+                if (recipes.size() > 0) {
+                    ItemStack result = recipes.get(0).getResultItem();
+                    result.setCount(drop.getCount());
+                    newDrops.add(result);
+                } else {
+                    newDrops.add(drop);
+                }
             });
+            player.openMenu(dummyFurnace);
         }
         if (level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && event.isDropItems() && newDrops.size() > 0) {
             newDrops.forEach(drop -> {

@@ -972,6 +972,7 @@ public class ProtectionGui extends GuiBase {
                                 .append(coordinates2Str(result.min()))
                                 .append(Component.text(" "))
                                 .append(Component.text(" に設定しました")));
+
                     } else {
                         // #2
                         result.max(clickedLocConv);
@@ -991,6 +992,8 @@ public class ProtectionGui extends GuiBase {
                         }
                         selector.selectPrimary(result.min(), null);
                         selector.selectSecondary(result.max(), null);
+                    } else {
+                        NewMessageUtil.sendMessage(player, Component.text("地点を片方しか選択していません。保護を完了するには、両地点の選択を完了してください。"), false);
                     }
                 }
             });

@@ -125,6 +125,12 @@
     },
     "done": true
   },
+  "minecraft:recipes/misc/diamond_from_blasting_diamond_ore": {
+    "criteria": {
+      "has_diamond_ore": "2023-04-10 12:52:18 +0900"
+    },
+    "done": true
+  },
   "minecraft:nether/find_fortress": {
     "criteria": {
       "fortress": "2022-08-30 17:59:17 +0900"
@@ -313,7 +319,8 @@
   },
   "minecraft:husbandry/balanced_diet": {
     "criteria": {
-      "enchanted_golden_apple": "2022-03-13 18:54:40 +0900"
+      "enchanted_golden_apple": "2022-03-13 18:54:40 +0900",
+      "carrot": "2023-04-11 02:54:02 +0900"
     },
     "done": false
   },
@@ -731,6 +738,12 @@
     },
     "done": true
   },
+  "minecraft:recipes/misc/diamond_from_smelting_diamond_ore": {
+    "criteria": {
+      "has_diamond_ore": "2023-04-10 12:52:18 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/building_blocks/polished_basalt_from_basalt_stonecutting": {
     "criteria": {
       "has_basalt": "2022-08-30 17:46:48 +0900"
@@ -806,6 +819,12 @@
   "minecraft:recipes/decorations/glow_item_frame": {
     "criteria": {
       "has_glow_ink_sac": "2022-03-13 19:01:16 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/carrot_on_a_stick": {
+    "criteria": {
+      "has_carrot": "2023-04-10 12:56:36 +0900"
     },
     "done": true
   },

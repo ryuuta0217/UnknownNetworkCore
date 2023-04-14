@@ -55,10 +55,7 @@ import net.unknown.survival.fun.DemolitionGun;
 import net.unknown.survival.fun.MonsterBall;
 import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
-import net.unknown.survival.listeners.ColorCodeListener;
-import net.unknown.survival.listeners.MainGuiOpenListener;
-import net.unknown.survival.listeners.PlayerDeathListener;
-import net.unknown.survival.listeners.ServerRestartListener;
+import net.unknown.survival.listeners.*;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.ServicePriority;
@@ -116,6 +113,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new PlayerDeathListener());
         ListenerManager.registerListener(new ServerRestartListener());
         ListenerManager.registerListener(new ProtectedAreaTestStick());
+        ListenerManager.registerListener(new PlayerJoinListener());
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");

@@ -31,7 +31,10 @@
 
 package net.unknown.survival.events;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
@@ -78,15 +81,19 @@ public class ModifiableBlockBreakEvent extends Event {
     }
 
     public List<ItemStack> getOriginalDrops() {
-        return Block.getDrops(MinecraftAdapter.blockState(this.getOriginal().getBlock()),
+        ServerLevel level = MinecraftAdapter.level(this.getOriginal().getBlock().getWorld());
+        BlockPos blockPos = MinecraftAdapter.blockPos(this.getOriginal().getBlock().getLocation());
+        BlockState blockState = MinecraftAdapter.blockState(this.getOriginal().getBlock());
+        List<ItemStack> originalDrops = Block.getDrops(blockState,
                         MinecraftAdapter.level(this.getOriginal().getBlock().getWorld()),
                         MinecraftAdapter.blockPos(this.getOriginal().getBlock().getLocation()),
-                        null,
+                        blockState.hasBlockEntity() ? level.getBlockEntity(blockPos) : null,
                         MinecraftAdapter.player(this.getOriginal().getPlayer()),
                         MinecraftAdapter.ItemStack.itemStack(this.getOriginal().getPlayer().getInventory().getItemInMainHand()))
                 .stream()
                 .map(MinecraftAdapter.ItemStack::itemStack)
                 .collect(Collectors.toList());
+        return originalDrops;
     }
 
     @Override
