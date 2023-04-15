@@ -56,7 +56,7 @@ public class TabListPingManager implements Listener {
     public static final long UPDATE_INTERVAL = 20 * 3; // 3 seconds (60 ticks)
 
     public static final String PING_OBJECTIVE_NAME = "un_ping";
-    public static final Component OBJECTIVE_DISPLAYNAME = MutableComponent.create(new LiteralContents("応答速度"));
+    public static final Component OBJECTIVE_DISPLAYNAME = Component.literal("応答速度");
     public static final Objective OBJECTIVE = new Objective(
             null,
             PING_OBJECTIVE_NAME,
