@@ -82,8 +82,7 @@ public class PrivateChatChannel extends ChatChannel {
 
         ServerPlayer sender = ((CraftPlayer) event.getPlayer()).getHandle();
         ServerPlayer receiver = ((CraftPlayer) player).getHandle();
-
-        PrivateMessageEvent pEvent = new PrivateMessageEvent(sender.getBukkitEntity(), Collections.singleton(receiver.getBukkitEntity()), event.message());
+        PrivateMessageEvent pEvent = new PrivateMessageEvent(sender.getBukkitEntity(), Collections.singleton(receiver.getBukkitEntity()), event.signedMessage());
         try {
             Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> {
                 Bukkit.getPluginManager().callEvent(pEvent);
@@ -97,21 +96,22 @@ public class PrivateChatChannel extends ChatChannel {
         }
 
         //Component message = MessageUtil.convertAdventure2NMS(pEvent.message());
-        event.message(pEvent.message());
+        if (pEvent.isDirty()) event.message(pEvent.message());
 
-        event.viewers().removeIf(audience -> !audience.equals(sender.getBukkitEntity()) && !audience.equals(receiver.getBukkitEntity()) && !(audience instanceof ConsoleCommandSender));
+        event.viewers().removeIf(viewer -> !viewer.equals(sender.getBukkitEntity()) && !viewer.equals(receiver.getBukkitEntity()) && !(viewer instanceof ConsoleCommandSender));
 
         // TODO 最終手段
         //ServerPlayer minecraft = MinecraftAdapter.player(Bukkit.getPlayer("Yncryption")); // メッセージの送信先
         //minecraft.sendChatMessage(OutgoingChatMessage.create(MinecraftAdapter.Adventure.playerChatMessage(event.signedMessage())), false, ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, minecraft));
-        //event.setCancelled(true); TODO 本来のチャットの処理を止める必要があるので注意する
+        //event.setCancelled(true); // TODO 本来のチャットの処理を止める必要があるので注意する
 
-        event.renderer(((source, sourceDisplayName, message1, viewer) -> {
+        // TODO event.message(Component.empty()) して、rendererにはコピーのメッセージを直接渡す (ref: CustomChannel#processChat), DiscordSRV対策
+        event.renderer(((source, sourceDisplayName, message, viewer) -> {
             ChatType.Bound incomingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_INCOMING, MinecraftAdapter.player(source));
             ChatType.Bound outgoingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, receiver).withTargetName(receiver.getDisplayName());
-            if (viewer.equals(receiver.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(incomingBound.decorate(NewMessageUtil.convertAdventure2Minecraft(message1)));
-            else if (viewer.equals(sender.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(outgoingBound.decorate(NewMessageUtil.convertAdventure2Minecraft(message1)));
-            else if (viewer instanceof ConsoleCommandSender) return NewMessageUtil.convertMinecraft2Adventure(MsgCommand.spyMessage(NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName), receiver.getName(), NewMessageUtil.convertAdventure2Minecraft(message1)));
+            if (viewer.equals(receiver.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(incomingBound.decorate(NewMessageUtil.convertAdventure2Minecraft(message)));
+            else if (viewer.equals(sender.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(outgoingBound.decorate(NewMessageUtil.convertAdventure2Minecraft(message)));
+            else if (viewer instanceof ConsoleCommandSender) return NewMessageUtil.convertMinecraft2Adventure(MsgCommand.spyMessage(NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName), receiver.getName(), NewMessageUtil.convertAdventure2Minecraft(message)));
             return net.kyori.adventure.text.Component.empty();
         }));
 
