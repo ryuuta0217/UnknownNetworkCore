@@ -70,6 +70,7 @@ public class PlayerJoinListener implements Listener {
                 event.joinMessage(Component.text(event.getPlayer().getName() + " が" + getFormattedTime(diff) + "ぶりにログインしました", DefinedTextColor.YELLOW));
             }
         }
+        LAST_SEEN.remove(event.getPlayer().getUniqueId());
     }
 
     private static String getFormattedTime(long time) {
