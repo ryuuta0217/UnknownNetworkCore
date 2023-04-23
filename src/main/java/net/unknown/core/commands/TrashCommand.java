@@ -41,6 +41,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.enums.Permissions;
 import net.unknown.core.managers.TrashManager;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
@@ -60,6 +61,7 @@ public class TrashCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("trash");
+        builder.requires(Permissions.COMMAND_TRASH::checkAndIsPlayer);
         builder.executes(ctx -> {
             if (ctx.getSource().getBukkitEntity() instanceof Player player) {
                 Inventory bukkitInventory = Bukkit.createInventory(player, 54, INVENTORY_TITLE);

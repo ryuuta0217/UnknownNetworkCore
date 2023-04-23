@@ -33,6 +33,7 @@ package net.unknown.core.enums;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
 import net.unknown.core.commands.*;
 import net.unknown.core.commands.vanilla.GamemodeCommand;
@@ -40,9 +41,9 @@ import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.commands.vanilla.TimeCommand;
 
 public enum Permissions {
-    COMMAND_CRASH("unknown.command.crash", 4, CrashCommand.class),
-    COMMAND_EVAL("unknown.command.eval", 4, EvalCommand.class),
-    COMMAND_PACKET("unknown.command.packet", 2, PacketCommand.class),
+    COMMAND_CRASH("unknown.command.crash", "minecraft.command.crash", 4, CrashCommand.class),
+    COMMAND_EVAL("unknown.command.eval", "minecraft.command.eval", 4, EvalCommand.class),
+    COMMAND_PACKET("unknown.command.packet", "minecraft.command.packet", 2, PacketCommand.class),
     COMMAND_SKIN("unknown.command.skin", 2, SkinCommand.class),
     COMMAND_NICK("unknown.command.nick", 2, NickCommand.class),
 
@@ -51,20 +52,33 @@ public enum Permissions {
     COMMAND_TIME("minecraft.command.time", 2, TimeCommand.class),
     COMMAND_REPLY("unknown.command.reply", 0, MsgCommand.class),
     COMMAND_TELEPORTWORLD("unknown.command.teleportworld", 2, TeleportWorldCommand.class),
+    COMMAND_TRASH("unknown.command.trash", "minecraft.command.trash", 0, TrashCommand.class),
 
     FEATURE_USE_COLOR_CODE("unknown.feature.use_color_code", 2, null),
     FEATURE_SEE_VANISHED_PLAYERS("unknown.feature.see_vanished_players", 2, null);
 
     private final int opLevel;
-    private final String permissionNode;
+    private final String[] permissionNodes;
+    private final Class<?> commandClass;
 
     Permissions(String permissionNode, int opLevel, Class<?> commandClass) {
         this.opLevel = opLevel;
-        this.permissionNode = permissionNode;
+        this.permissionNodes = new String[]{ permissionNode };
+        this.commandClass = commandClass;
+    }
+
+    Permissions(String permissionNode, String commandPermissionNode, int opLevel, Class<?> commandClass) {
+        this.opLevel = opLevel;
+        this.permissionNodes = new String[]{ permissionNode, commandPermissionNode };
+        this.commandClass = commandClass;
     }
 
     public String getPermissionNode() {
-        return permissionNode;
+        return this.permissionNodes[0];
+    }
+
+    public String[] getPermissionNodes() {
+        return this.permissionNodes;
     }
 
     public boolean check(CommandContext<CommandSourceStack> context) {
@@ -72,11 +86,20 @@ public enum Permissions {
     }
 
     public boolean check(CommandSourceStack commandSourceStack) {
-        if (opLevel <= 4 && opLevel >= 0) {
-            return commandSourceStack.hasPermission(opLevel) || commandSourceStack.getBukkitSender().hasPermission(permissionNode);
-        } else {
-            return commandSourceStack.getBukkitSender().hasPermission(permissionNode);
-        }
+        return testOpLevel(commandSourceStack) || (testPermissionNode(commandSourceStack) && testCommandPermissionNode(commandSourceStack));
+    }
+
+    private boolean testOpLevel(CommandSourceStack commandSourceStack) {
+        return commandSourceStack.hasPermission(Mth.clamp(this.opLevel, 0, 4));
+    }
+
+    private boolean testPermissionNode(CommandSourceStack commandSourceStack) {
+        return commandSourceStack.getBukkitSender().hasPermission(this.permissionNodes[0]);
+    }
+
+    private boolean testCommandPermissionNode(CommandSourceStack commandSourceStack) {
+        if (this.commandClass == null || this.permissionNodes.length == 1) return true; // When not command permission, always return true.
+        return commandSourceStack.getBukkitSender().hasPermission(this.permissionNodes[1]);
     }
 
     public boolean checkAndIsPlayer(CommandSourceStack clw) {
