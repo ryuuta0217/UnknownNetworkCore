@@ -43,6 +43,7 @@ import net.minecraft.world.BossEvent;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -51,9 +52,14 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 public class TPSBar implements Listener {
     private static final TPSBar INSTANCE = new TPSBar();
+    private static final Set<UUID> SELECTED_HIDE_PLAYERS = new HashSet<>();
 
     public static final CustomBossEvent BAR = new CustomBossEvent(
             ResourceLocation.of("unknown-network:tps", ':'), buildDisplayName(0, 0));
@@ -91,16 +97,32 @@ public class TPSBar implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        BAR.addPlayer(MinecraftAdapter.player(event.getPlayer()));
+        if (!SELECTED_HIDE_PLAYERS.contains(event.getPlayer().getUniqueId())) showTPSBar(event.getPlayer());
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        BAR.removePlayer(MinecraftAdapter.player(event.getPlayer()));
+        hideTPSBar(event.getPlayer());
     }
 
     @EventHandler
     public void onTickEnd(ServerTickEndEvent event) {
         LAST_MSPT = event.getTickDuration();
+    }
+
+    public static void showTPSBar(Player player) {
+        BAR.addPlayer(MinecraftAdapter.player(player));
+    }
+
+    public static void hideTPSBar(Player player) {
+        BAR.removePlayer(MinecraftAdapter.player(player));
+    }
+
+    public static void setAlwaysHidden(Player target) {
+        SELECTED_HIDE_PLAYERS.add(target.getUniqueId());
+    }
+
+    public static void setAlwaysShow(Player player) {
+        SELECTED_HIDE_PLAYERS.remove(player.getUniqueId());
     }
 }
