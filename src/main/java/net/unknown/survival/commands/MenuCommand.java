@@ -31,40 +31,23 @@
 
 package net.unknown.survival.commands;
 
-import net.unknown.UnknownNetworkCore;
-import net.unknown.survival.commands.admin.LastTpCommand;
-import net.unknown.survival.commands.home.DelHomeCommand;
-import net.unknown.survival.commands.home.HomeCommand;
-import net.unknown.survival.commands.home.HomesCommand;
-import net.unknown.survival.commands.home.SetHomeCommand;
-import net.unknown.survival.commands.home.admin.*;
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.unknown.survival.gui.MainGui;
+import org.bukkit.entity.Player;
 
-public class Commands {
-    public static void init() {
-        /* HOMES */
-        DelHomeCommand.register(UnknownNetworkCore.getBrigadier());
-        HomeCommand.register(UnknownNetworkCore.getBrigadier());
-        HomesCommand.register(UnknownNetworkCore.getBrigadier());
-        SetHomeCommand.register(UnknownNetworkCore.getBrigadier());
-        /* HOMES end*/
-
-        /* HOMES / for op */
-        AddHomeCommand.register(UnknownNetworkCore.getBrigadier());
-        ADelHomeCommand.register(UnknownNetworkCore.getBrigadier());
-        AHomeCommand.register(UnknownNetworkCore.getBrigadier());
-        AHomesCommand.register(UnknownNetworkCore.getBrigadier());
-        FindHomeCommand.register(UnknownNetworkCore.getBrigadier());
-        SetHomeCountCommand.register(UnknownNetworkCore.getBrigadier());
-        /* HOMES / for op end */
-
-        TeleportPetCommand.register(UnknownNetworkCore.getBrigadier());
-
-        ChannelCommand.register(UnknownNetworkCore.getBrigadier());
-
-        SpawnCommand.register(UnknownNetworkCore.getBrigadier());
-        LastTpCommand.register(UnknownNetworkCore.getBrigadier());
-        FlyCommand.register(UnknownNetworkCore.getBrigadier());
-
-        MenuCommand.register(UnknownNetworkCore.getBrigadier());
+public class MenuCommand {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("menu");
+        builder.requires(ctx -> ctx.getEntity() != null && ctx.getEntity() instanceof ServerPlayer);
+        builder.executes(ctx -> {
+            ((Player) ctx.getSource().getBukkitEntity()).openInventory(MainGui.getGui().getInventory());
+            return 0;
+        });
+        LiteralArgumentBuilder<CommandSourceStack> aliasBuilder = LiteralArgumentBuilder.literal("m");
+        aliasBuilder.redirect(dispatcher.register(builder));
+        dispatcher.register(aliasBuilder);
     }
 }
