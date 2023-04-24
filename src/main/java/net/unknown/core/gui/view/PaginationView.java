@@ -93,7 +93,7 @@ public class PaginationView<T, G extends GuiBase> implements View {
                 .build());
 
         if (this.previousAction != null) this.gui.getInventory().setItem(this.compact ? 18 : 45, DefinedItemStackBuilders.leftArrow()
-                .displayName(Component.text("戻る", DefinedTextColor.GREEN))
+                .displayName(Component.text("戻る", DefinedTextColor.YELLOW))
                 .build());
     }
 
