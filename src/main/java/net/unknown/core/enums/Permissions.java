@@ -46,6 +46,7 @@ public enum Permissions {
     COMMAND_PACKET("unknown.command.packet", "minecraft.command.packet", 2, PacketCommand.class),
     COMMAND_SKIN("unknown.command.skin", 2, SkinCommand.class),
     COMMAND_NICK("unknown.command.nick", 2, NickCommand.class),
+    COMMAND_SKULL("unknown.command.skull", "minecraft.command.skull", 0, SkullCommand.class),
 
     COMMAND_MSG("minecraft.command.msg", 0, MsgCommand.class),
     COMMAND_GAMEMODE("minecraft.command.gamemode", 2, GamemodeCommand.class),

@@ -41,6 +41,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.unknown.core.builder.ItemStackBuilder;
+import net.unknown.core.enums.Permissions;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Bukkit;
@@ -55,6 +56,7 @@ import java.util.UUID;
 public class SkullCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("skull");
+        builder.requires(Permissions.COMMAND_SKULL::checkAndIsPlayer);
         builder.then(Commands.argument("名前", StringArgumentType.word())
                 .suggests(Suggestions.ALL_PLAYER_SUGGEST)
                 .executes(SkullCommand::execute)
