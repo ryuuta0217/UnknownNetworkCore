@@ -113,7 +113,7 @@ public class CustomChannels {
         CustomChannel channel = getChannel(channelName);
         if (channel == null) throw new IllegalArgumentException("Channel not found!");
         channel.sendSystemMessage(Component.text("チャンネルが削除されました"));
-        channel.getPlayers().forEach(uuid -> {
+        channel.getPlayers().stream().filter(uuid -> ChatManager.getCurrentChannel(uuid).equals(channel)).forEach(uuid -> {
             ChatManager.setChannel(uuid, GlobalChannel.getInstance());
             if (Bukkit.getOfflinePlayer(uuid).isOnline()) {
                 MessageUtil.sendMessage(Bukkit.getPlayer(uuid), "デフォルトの発言先を " + ChatManager.getCurrentChannel(uuid).getChannelName() + " に変更しました");
