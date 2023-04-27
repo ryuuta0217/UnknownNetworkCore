@@ -76,7 +76,7 @@ public class ConfigureHopperPullView extends ConfigureHopperViewBase {
 
     @Override
     public void clearInventory() {
-        this.getGui().getInventory().clear(12);
+        this.getGui().getInventory().clear(22);
         this.getGui().getInventory().clear(45);
     }
 }

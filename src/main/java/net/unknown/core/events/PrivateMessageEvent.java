@@ -31,6 +31,7 @@
 
 package net.unknown.core.events;
 
+import net.kyori.adventure.chat.SignedMessage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.Util;
@@ -40,6 +41,7 @@ import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.network.chat.SignedMessageBody;
 import net.minecraft.network.chat.SignedMessageLink;
 import net.minecraft.server.level.ServerPlayer;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.craftbukkit.v1_19_R2.command.VanillaCommandWrapper;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
@@ -61,6 +63,7 @@ public class PrivateMessageEvent extends Event implements Cancellable {
     private final Set<ServerPlayer> receivers;
     private boolean cancelled = false;
     private PlayerChatMessage message;
+    private boolean isDirty = false;
 
     public PrivateMessageEvent(Entity sender, Collection<Player> receivers, Component message) {
         this.source = VanillaCommandWrapper.getListener(sender);
@@ -71,6 +74,12 @@ public class PrivateMessageEvent extends Event implements Cancellable {
                 SignedMessageBody.unsigned(PlainTextComponentSerializer.plainText().serialize(message)),
                 NewMessageUtil.convertAdventure2Minecraft(message),
                 FilterMask.PASS_THROUGH);
+    }
+
+    public PrivateMessageEvent(Entity sender, Collection<Player> receivers, SignedMessage adventureSignedMessage) {
+        this.source = VanillaCommandWrapper.getListener(sender);
+        this.receivers = receivers.stream().map(player -> (CraftPlayer) player).map(CraftPlayer::getHandle).collect(Collectors.toSet());
+        this.message = MinecraftAdapter.Adventure.playerChatMessage(adventureSignedMessage);
     }
 
     public PrivateMessageEvent(CommandSourceStack source, Collection<ServerPlayer> receivers, PlayerChatMessage message) {
@@ -103,10 +112,15 @@ public class PrivateMessageEvent extends Event implements Cancellable {
                 SignedMessageBody.unsigned(PlainTextComponentSerializer.plainText().serialize(message)),
                 NewMessageUtil.convertAdventure2Minecraft(message),
                 FilterMask.PASS_THROUGH);
+        this.isDirty = true;
     }
 
     public void message(PlayerChatMessage message) {
         this.message = message;
+    }
+
+    public boolean isDirty() {
+        return this.isDirty;
     }
 
     @NotNull

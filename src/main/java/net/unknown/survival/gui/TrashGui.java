@@ -36,11 +36,15 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.enums.Permissions;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.managers.TrashManager;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R2.util.CraftMagicNumbers;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -75,7 +79,9 @@ public class TrashGui extends GuiBase {
         if (this.opener == null && target instanceof Player targetPlayer) {
             this.opener = targetPlayer;
         }
-        if (this.opener != null) super.open(this.opener);
+        if (this.opener != null && Permissions.COMMAND_TRASH.checkAndIsPlayer(((CraftPlayer) this.opener).getHandle().createCommandSourceStack())) {
+            super.open(this.opener);
+        }
     }
 
     @Override

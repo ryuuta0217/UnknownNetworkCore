@@ -89,7 +89,8 @@ public class ConfigureHopperFilterView extends ConfigureHopperViewBase {
 
     @Override
     public void clearInventory() {
-        this.getGui().getInventory().clear(12);
-        this.getGui().getInventory().clear(14);
+        this.getGui().getInventory().clear(21);
+        this.getGui().getInventory().clear(23);
+        this.getGui().getInventory().clear(45);
     }
 }

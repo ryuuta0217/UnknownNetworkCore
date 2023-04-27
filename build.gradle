@@ -174,11 +174,15 @@ publishing {
             version = version
             artifact "build/libs/UnknownNetworkCore.jar"
 
+            artifact("build/libs/UnknownNetworkCore-mojang.jar") {
+                classifier "mojang"
+            }
+
             pom {
                 name = project.name
                 description = "Unknown Network Core plugin"
-                url = "https://www.unknownnet.jp"
-                inceptionYear = "2022"
+                url = "https://www.mc-unknown.net/"
+                inceptionYear = "2023"
 
                 licenses {
                     license {

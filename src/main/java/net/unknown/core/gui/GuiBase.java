@@ -126,7 +126,7 @@ public class GuiBase implements Listener {
     }
 
     @EventHandler
-    private void onInventoryDrag(InventoryDragEvent event) {
+    public void onInventoryDrag(InventoryDragEvent event) {
         if (!this.inventory.equals(event.getInventory())) return; // When dragged Inventory is not Gui
         event.setCancelled(true);
     }

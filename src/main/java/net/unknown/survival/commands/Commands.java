@@ -64,5 +64,7 @@ public class Commands {
         SpawnCommand.register(UnknownNetworkCore.getBrigadier());
         LastTpCommand.register(UnknownNetworkCore.getBrigadier());
         FlyCommand.register(UnknownNetworkCore.getBrigadier());
+
+        MenuCommand.register(UnknownNetworkCore.getBrigadier());
     }
 }
