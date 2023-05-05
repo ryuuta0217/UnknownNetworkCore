@@ -70,7 +70,7 @@ public class CustomChatTypes {
     }
 
     @SuppressWarnings("unchecked")
-    private static ResourceKey<ChatType> register(ResourceKey<Registry<ChatType>> registry, ResourceKey<ChatType> key, ChatType type) {
+    public static ResourceKey<ChatType> register(ResourceKey<Registry<ChatType>> registry, ResourceKey<ChatType> key, ChatType type) {
         Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().registry(Registries.CHAT_TYPE).orElse(null);
         if (chatTypes != null) {
             RegistryUtil.forceRegister(chatTypes, key.location(), type);
