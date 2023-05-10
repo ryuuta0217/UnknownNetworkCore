@@ -33,6 +33,7 @@ package net.unknown.survival.enums;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.entity.player.Player;
 import net.unknown.survival.commands.FlyCommand;
 import net.unknown.survival.commands.SpawnCommand;
 import net.unknown.survival.commands.TeleportPetCommand;
@@ -69,15 +70,27 @@ public enum Permissions {
     OPEN_GUI("unknown.survival.open_gui", 0, null);
 
     private final int opLevel;
-    private final String permissionNode;
+    private final String[] permissionNodes;
+    private final Class<?> commandClass;
 
     Permissions(String permissionNode, int opLevel, Class<?> commandClass) {
         this.opLevel = opLevel;
-        this.permissionNode = permissionNode;
+        this.permissionNodes = new String[]{ permissionNode };
+        this.commandClass = commandClass;
+    }
+
+    Permissions(String permissionNode, String commandPermissionNode, int opLevel, Class<?> commandClass) {
+        this.opLevel = opLevel;
+        this.permissionNodes = new String[]{ permissionNode, commandPermissionNode };
+        this.commandClass = commandClass;
     }
 
     public String getPermissionNode() {
-        return permissionNode;
+        return this.permissionNodes[0];
+    }
+
+    public String[] getPermissionNodes() {
+        return this.permissionNodes;
     }
 
     public boolean check(CommandContext<CommandSourceStack> context) {
@@ -85,16 +98,25 @@ public enum Permissions {
     }
 
     public boolean check(CommandSourceStack commandSourceStack) {
-        if (opLevel <= 4 && opLevel >= 0) {
-            return commandSourceStack.hasPermission(opLevel) || commandSourceStack.getBukkitSender().hasPermission(permissionNode);
-        } else {
-            return commandSourceStack.getBukkitSender().hasPermission(permissionNode);
-        }
+        return (testPermissionNode(commandSourceStack) && testCommandPermissionNode(commandSourceStack)) && testOpLevel(commandSourceStack);
     }
 
-    public boolean checkAndIsPlayer(CommandSourceStack source) {
-        if (!(source.getBukkitEntity() instanceof CraftPlayer)) return false;
-        return check(source);
+    private boolean testOpLevel(CommandSourceStack commandSourceStack) {
+        return (this.opLevel <= 4 && this.opLevel >= 0 ? commandSourceStack.hasPermission(this.opLevel) : true);
+    }
+
+    private boolean testPermissionNode(CommandSourceStack commandSourceStack) {
+        return commandSourceStack.getBukkitSender().hasPermission(this.permissionNodes[0]);
+    }
+
+    private boolean testCommandPermissionNode(CommandSourceStack commandSourceStack) {
+        if (this.commandClass == null || this.permissionNodes.length == 1) return true; // When not command permission, always return true.
+        return commandSourceStack.getBukkitSender().hasPermission(this.permissionNodes[1]);
+    }
+
+    public boolean checkAndIsPlayer(CommandSourceStack clw) {
+        if (!(clw.source instanceof Player)) return false;
+        return check(clw);
     }
 
     public boolean checkAndIsLivingEntity(CommandSourceStack source) {
