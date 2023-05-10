@@ -35,6 +35,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.configurations.Config;
 import net.unknown.core.configurations.ConfigurationSerializer;
+import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.model.HomeGroup;
@@ -45,6 +46,10 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -323,6 +328,10 @@ public class PlayerData extends Config {
     }
 
     public static class SessionData {
+        static {
+            ListenerManager.registerListener(new SessionListener());
+        }
+
         private final PlayerData parent;
         private long lastActionTime = 0L;
         private boolean isAfk = false;
@@ -354,6 +363,18 @@ public class PlayerData extends Config {
         public void initialize() {
             this.isAfk = false;
             this.lastActionTime = 0L;
+        }
+
+        public static class SessionListener implements Listener {
+            @EventHandler
+            public void onPlayerJoin(PlayerJoinEvent event) {
+                PlayerData.of(event.getPlayer()).getSessionData().initialize();
+            }
+
+            @EventHandler
+            public void onPlayerQuit(PlayerQuitEvent event) {
+                PlayerData.of(event.getPlayer()).getSessionData().initialize();
+            }
         }
     }
 
