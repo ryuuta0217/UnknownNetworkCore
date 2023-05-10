@@ -38,14 +38,18 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.unknown.core.util.BrigadierUtil;
+import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.chat.channels.ChatChannel;
+import net.unknown.survival.chat.channels.CustomChannel;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.data.model.HomeGroup;
 import org.bukkit.Bukkit;
 
 import java.util.Collections;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class Suggestions {
     public static final SuggestionProvider<CommandSourceStack> HOME_SUGGEST = (ctx, builder) -> {
@@ -76,11 +80,14 @@ public class Suggestions {
     };
     public static final SuggestionProvider<CommandSourceStack> JOINED_CHANNELS_SUGGEST = (ctx, builder) -> {
         if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
-            return SharedSuggestionProvider.suggest(CustomChannels.getChannels()
-                    .values()
-                    .stream()
-                    .filter(channel -> channel.getPlayers().contains(player.getUUID()))
-                    .map(ChatChannel::getChannelName), builder);
+            return SharedSuggestionProvider.suggest(
+                    CustomChannels.getChannels()
+                            .values()
+                            .stream()
+                            .filter(channel -> channel.getPlayers().contains(player.getUUID()))
+                            .collect(Collectors.toUnmodifiableSet()),
+                    builder,
+                    ChatChannel::getChannelName, channel -> MessageUtil.convertAdventure2NMS(channel.getDisplayName()));
         }
 
         return SharedSuggestionProvider.suggest(Collections.emptyList(), builder);
@@ -88,11 +95,13 @@ public class Suggestions {
 
     public static final SuggestionProvider<CommandSourceStack> OWNED_CHANNELS_SUGGEST = (ctx, builder) -> {
         if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
-            return SharedSuggestionProvider.suggest(CustomChannels.getChannels()
-                    .values()
-                    .stream()
-                    .filter(channel -> channel.getOwner().equals(player.getUUID()))
-                    .map(ChatChannel::getChannelName), builder);
+            return SharedSuggestionProvider.suggest(
+                    CustomChannels.getChannels()
+                            .values()
+                            .stream()
+                            .filter(channel -> channel.getOwner().equals(player.getUUID()))
+                            .collect(Collectors.toUnmodifiableSet()),
+                    builder, CustomChannel::getChannelName, channel -> MessageUtil.convertAdventure2NMS(channel.getDisplayName()));
         }
 
         return SharedSuggestionProvider.suggest(Collections.emptyList(), builder);

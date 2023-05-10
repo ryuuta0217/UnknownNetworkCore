@@ -94,7 +94,7 @@ public class CustomChannels {
     }
 
     public static boolean isChannelFound(String channelName) {
-        return getChannelNames().contains(channelName);
+        return getChannelNames().contains(channelName) || RESERVED_NAMES.contains(channelName);
     }
 
     public static CustomChannel createChannel(String channelName, UUID owner, Component displayName) throws IllegalArgumentException {

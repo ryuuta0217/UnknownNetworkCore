@@ -41,6 +41,7 @@ permissions:
       unknown.survival.command.delhome: true
       unknown.survival.command.tppet: true
       unknown.survival.command.fly: true
+      unknown.survival.open_gui: true
   unknown.survival.admin:
     default: op
     children:

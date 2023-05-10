@@ -31,6 +31,7 @@
 
 package net.unknown.survival.listeners;
 
+import net.unknown.survival.enums.Permissions;
 import net.unknown.survival.gui.MainGui;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -42,7 +43,7 @@ import org.jetbrains.annotations.NotNull;
 public class MainGuiOpenListener implements Listener, PluginMessageListener {
     @EventHandler
     public void onSwapHand(PlayerSwapHandItemsEvent event) {
-        if (event.getPlayer().isSneaking()) {
+        if (event.getPlayer().isSneaking() && event.getPlayer().hasPermission(Permissions.OPEN_GUI.getPermissionNode())) {
             event.setCancelled(true);
             event.getPlayer().openInventory(MainGui.getGui().getInventory());
         }
