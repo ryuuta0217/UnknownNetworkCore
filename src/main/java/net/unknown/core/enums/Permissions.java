@@ -91,7 +91,7 @@ public enum Permissions {
     }
 
     private boolean testOpLevel(CommandSourceStack commandSourceStack) {
-        return commandSourceStack.hasPermission(Mth.clamp(this.opLevel, 0, 4));
+        return (this.opLevel <= 4 && this.opLevel >= 0 ? commandSourceStack.hasPermission(this.opLevel) : true);
     }
 
     private boolean testPermissionNode(CommandSourceStack commandSourceStack) {
