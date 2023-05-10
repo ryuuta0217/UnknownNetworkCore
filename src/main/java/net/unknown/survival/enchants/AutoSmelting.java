@@ -38,6 +38,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -59,6 +60,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AutoSmelting implements Listener {
+    public static boolean DEBUG = false;
+
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockBreak(BlockBreakEvent event) {
         ServerPlayer player = MinecraftAdapter.player(event.getPlayer());
@@ -78,7 +81,12 @@ public class AutoSmelting implements Listener {
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (!player.hasCorrectToolForDrops(blockState)) return;
 
-        FurnaceBlockEntity dummyFurnace = new FurnaceBlockEntity(BlockPos.ZERO, Blocks.FURNACE.defaultBlockState());
+        FurnaceBlockEntity dummyFurnace = new FurnaceBlockEntity(BlockPos.ZERO, Blocks.FURNACE.defaultBlockState()) {
+            @Override
+            public boolean stillValid(Player player) {
+                return true;
+            }
+        };
         dummyFurnace.setLevel(level);
         dummyFurnace.setItem(1, new ItemStack(Items.LAVA_BUCKET, 1));
         List<ItemStack> drops = Block.getDrops(blockState, level, blockPos, blockEntity, player, player.getMainHandItem());
@@ -90,12 +98,13 @@ public class AutoSmelting implements Listener {
                 if (recipes.size() > 0) {
                     ItemStack result = recipes.get(0).getResultItem();
                     result.setCount(drop.getCount());
+                    dummyFurnace.setItem(2, result);
                     newDrops.add(result);
                 } else {
                     newDrops.add(drop);
                 }
             });
-            player.openMenu(dummyFurnace);
+            if (DEBUG) player.openMenu(dummyFurnace); // for debug
         }
         if (level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && event.isDropItems() && newDrops.size() > 0) {
             newDrops.forEach(drop -> {
