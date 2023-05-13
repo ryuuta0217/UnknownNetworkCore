@@ -45,6 +45,7 @@ import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.enchants.*;
 import net.unknown.survival.enchants.nms.DamageEnchant;
 import net.unknown.survival.events.ModifiableBlockBreakEvent;
+import net.unknown.survival.feature.BlockDisassembler;
 import net.unknown.survival.feature.DebugStickEntityEditor;
 import net.unknown.survival.feature.ProtectedAreaTestStick;
 import net.unknown.survival.feature.VoteListener;
@@ -117,7 +118,7 @@ public class UnknownNetworkSurvival {
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");
-            //ListenerManager.registerListener(new BlockDisassembler());
+            ListenerManager.registerListener(new BlockDisassembler());
             ListenerManager.registerListener(new ConfigureHopperGui.Listener());
         }
 
