@@ -61,9 +61,7 @@ public class PlayerJoinListener implements Listener {
             event.joinMessage(Component.text(event.getPlayer().getName() + " が初めてゲームに参加しました", DefinedTextColor.YELLOW));
         } else {
             long lastLogin = LAST_SEEN.getOrDefault(event.getPlayer().getUniqueId(), 0L);
-            System.out.println("lastLogin=" + lastLogin);
             long now = System.currentTimeMillis();
-            System.out.println("now=" + now);
             long diff = now - lastLogin;
             if (lastLogin > 0 && diff > TimeUnit.HOURS.toMillis(1)) {
                 // 1時間以上前にログインしていた場合
