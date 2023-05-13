@@ -48,22 +48,22 @@ import org.bukkit.entity.LivingEntity;
 
 public enum Permissions {
     /* HOME */
-    COMMAND_HOME("unknown.survival.command.home", 0, HomeCommand.class),
-    COMMAND_HOMES("unknown.survival.command.homes", 0, HomesCommand.class),
-    COMMAND_SETHOME("unknown.survival.command.sethome", 0, SetHomeCommand.class),
-    COMMAND_DELHOME("unknown.survival.command.delhome", 0, DelHomeCommand.class),
-    COMMAND_AHOME("unknown.survival.command.ahome", 2, AHomeCommand.class),
-    COMMAND_AHOMES("unknown.survival.command.ahomes", 2, AHomesCommand.class),
-    COMMAND_ADDHOME("unknown.survival.command.addhome", 4, AddHomeCommand.class),
-    COMMAND_ADELHOME("unknown.survival.command.adelhome", 4, ADelHomeCommand.class),
-    COMMAND_SETHOME_COUNT("unknown.survival.command.sethomecount", 4, SetHomeCountCommand.class),
-    COMMAND_FINDHOME("unknown.survival.command.findhome", 4, FindHomeCommand.class),
+    COMMAND_HOME("unknown.survival.command.home", "minecraft.command.home", 0, HomeCommand.class),
+    COMMAND_HOMES("unknown.survival.command.homes", "minecraft.command.homes", 0, HomesCommand.class),
+    COMMAND_SETHOME("unknown.survival.command.sethome", "minecraft.command.sethome", 0, SetHomeCommand.class),
+    COMMAND_DELHOME("unknown.survival.command.delhome", "minecraft.command.delhome", 0, DelHomeCommand.class),
+    COMMAND_AHOME("unknown.survival.command.ahome", "minecraft.command.ahome", 2, AHomeCommand.class),
+    COMMAND_AHOMES("unknown.survival.command.ahomes", "minecraft.command.ahomes", 2, AHomesCommand.class),
+    COMMAND_ADDHOME("unknown.survival.command.addhome", "minecraft.command.addhome", 4, AddHomeCommand.class),
+    COMMAND_ADELHOME("unknown.survival.command.adelhome", "minecraft.command.adelhome", 4, ADelHomeCommand.class),
+    COMMAND_SETHOME_COUNT("unknown.survival.command.sethomecount", "minecraft.command.sethomecount", 4, SetHomeCountCommand.class),
+    COMMAND_FINDHOME("unknown.survival.command.findhome", "minecraft.command.findhome", 4, FindHomeCommand.class),
     /* HOME */
 
-    COMMAND_TELEPORT_PET("unknown.survival.command.tppet", 0, TeleportPetCommand.class),
-    COMMAND_LASTTP("unknown.survival.command.lasttp", 2, LastTpCommand.class),
-    COMMAND_SPAWN("unknown.survival.command.spawn", 0, SpawnCommand.class),
-    COMMAND_FLY("unknown.survival.command.fly", 0, FlyCommand.class),
+    COMMAND_TELEPORT_PET("unknown.survival.command.tppet", "minecraft.command.tppet", 0, TeleportPetCommand.class),
+    COMMAND_LASTTP("unknown.survival.command.lasttp", "minecraft.command.lasttp", 2, LastTpCommand.class),
+    COMMAND_SPAWN("unknown.survival.command.spawn", "minecraft.command.spawn", 0, SpawnCommand.class),
+    COMMAND_FLY("unknown.survival.command.fly", "minecraft.command.fly", 0, FlyCommand.class),
 
     NOTIFY_MODDED_PLAYER("unknown.survival.notify.mod", 2, null),
     ENTITY_EDITOR("unknown.survival.entity_editor", 2, null),
