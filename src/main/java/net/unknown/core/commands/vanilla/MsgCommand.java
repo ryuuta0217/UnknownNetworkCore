@@ -48,6 +48,8 @@ import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.chat.CustomChatTypes;
@@ -136,6 +138,7 @@ public class MsgCommand {
                 source.sendChatMessage(outMessage, false, outgoingBound);
                 boolean filterMask = source.shouldFilterMessageTo(receiver);
                 receiver.sendChatMessage(outMessage, filterMask, incomingBound);
+                receiver.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.5f, 1);
                 PlayerData.of(receiver.getUUID()).getChatData().setPrivateMessageReplyTarget(source.getEntity() != null ? source.getEntity().getUUID() : SERVER_UUID);
                 filtered |= filterMask && message.isFullyFiltered();
             }

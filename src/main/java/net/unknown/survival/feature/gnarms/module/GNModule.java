@@ -48,6 +48,10 @@ public interface GNModule {
 
     void tick(GNContext ctx);
 
+    void onParticlesEmpty(GNContext ctx);
+
+    void onParticlesAvailable(GNContext ctx);
+
     boolean onInstall(GNContext ctx);
 
     boolean onUninstall(GNContext ctx);

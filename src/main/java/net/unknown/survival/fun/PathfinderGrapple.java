@@ -41,16 +41,24 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 public class PathfinderGrapple implements Listener {
+    public static final Map<UUID, Color> CUSTOM_DRAW_LINE_COLOR = new HashMap<>();
+
     @EventHandler
     public void onEntityBowShoot(EntityShootBowEvent event) {
         if (!(event.getEntity() instanceof Player player)) return;
         if (!(event.getProjectile() instanceof Arrow arrow)) return;
 
-        if (event.getBow() == null || !event.getBow().getItemMeta().getDisplayName().equals("§6§lパスくんのグラップル")) return;
+        ItemStack bow = event.getBow();
+        if (bow == null || !bow.getItemMeta().getDisplayName().equals("§6§lパスくんのグラップル")) return;
 
         if (!player.hasPermission("unknown.survival.feature.pathfinder_grapple")) return;
         arrow.setVelocity(arrow.getVelocity().multiply(2.0D));
@@ -76,7 +84,7 @@ public class PathfinderGrapple implements Listener {
 
                 if (arrow.isOnGround() && !arrow.isDead()) {
                     Vector direction = arrow.getLocation().toVector().subtract(player.getLocation().toVector()).normalize();
-                    player.setVelocity(direction.multiply(2));
+                    player.setVelocity(direction.multiply(arrow.getDamage()));
                     drawLine(player, arrow.getLocation(), 2);
                     if (player.getLocation().distance(arrow.getLocation()) <= 3) {
                         this.cancel();
@@ -100,7 +108,7 @@ public class PathfinderGrapple implements Listener {
 
         double covered = 0;
 
-        Color color = Color.ORANGE;
+        Color color = CUSTOM_DRAW_LINE_COLOR.getOrDefault(player.getUniqueId(), Color.ORANGE);
 
         for (; covered < distance; p1.add(vector)) {
             Particle.DustOptions dustOptions = new Particle.DustOptions(color, 2);

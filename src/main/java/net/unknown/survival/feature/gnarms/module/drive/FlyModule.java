@@ -46,7 +46,9 @@ import java.util.List;
 public class FlyModule implements GNModule {
     public static final FlyModule INSTANCE = new FlyModule();
     private static final long USE_PARTICLE_IN_IDLE = 20;
-    private static final long USE_PARTICLE_IN_USE = 170;
+    private static final long USE_PARTICLE_IN_USE = 105;
+
+    private long overheatTicks = 0;
 
     FlyModule() {
         GNModules.registerMapping(this.getId(), this);
@@ -70,20 +72,47 @@ public class FlyModule implements GNModule {
 
     @Override
     public void tick(GNContext ctx) {
-        this.onEnable(ctx);
+        if (overheatTicks > 0) {
+            overheatTicks--;
+            return;
+        }
+
         if (ctx.getPlayer().getGameMode() != GameMode.CREATIVE && ctx.getPlayer().getGameMode() != GameMode.SPECTATOR) {
-            if (ctx.getPlayer().getAllowFlight()) {
-                if (ctx.getPlayer().isFlying()) {
+            if (ctx.getPlayer().isFlying()) {
+                if (isParticlesAvailable(ctx, USE_PARTICLE_IN_USE)) {
+                    this.onParticlesAvailable(ctx);
                     ctx.addParticlesToUse(USE_PARTICLE_IN_USE);
                     if (ctx.getPlayer().isSprinting()) {
                         ctx.getPlayer().setFlySpeed(Mth.clamp(ctx.getPlayer().getFlySpeed() + 0.005f, -1.0f, 1.0f));
                     } // TODO 静止時、徐々に減少
                 } else {
+                    this.onParticlesEmpty(ctx);
+                    this.overheatTicks = 20 * 5; // 5 seconds
+                }
+            } else {
+                if (isParticlesAvailable(ctx, USE_PARTICLE_IN_IDLE)) {
+                    this.onParticlesAvailable(ctx);
                     ctx.addParticlesToUse(USE_PARTICLE_IN_IDLE);
                     ctx.getPlayer().setFlySpeed(0.1f);
+                } else {
+                    this.onParticlesEmpty(ctx);
                 }
             }
         }
+    }
+
+    private static boolean isParticlesAvailable(GNContext ctx, long useParticle) {
+        return (((ctx.getCurrentParticles() + ctx.getGeneratorParticlesOutput()) - ctx.getParticlesToUse()) - useParticle) > 0;
+    }
+
+    @Override
+    public void onParticlesEmpty(GNContext ctx) {
+        this.onDisable(ctx);
+    }
+
+    @Override
+    public void onParticlesAvailable(GNContext ctx) {
+        this.onEnable(ctx);
     }
 
     @Override

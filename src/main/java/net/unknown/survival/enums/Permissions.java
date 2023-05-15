@@ -33,6 +33,7 @@ package net.unknown.survival.enums;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.entity.player.Player;
 import net.unknown.survival.commands.FlyCommand;
 import net.unknown.survival.commands.SpawnCommand;
 import net.unknown.survival.commands.TeleportPetCommand;
@@ -47,37 +48,49 @@ import org.bukkit.entity.LivingEntity;
 
 public enum Permissions {
     /* HOME */
-    COMMAND_HOME("unknown.survival.command.home", 0, HomeCommand.class),
-    COMMAND_HOMES("unknown.survival.command.homes", 0, HomesCommand.class),
-    COMMAND_SETHOME("unknown.survival.command.sethome", 0, SetHomeCommand.class),
-    COMMAND_DELHOME("unknown.survival.command.delhome", 0, DelHomeCommand.class),
-    COMMAND_AHOME("unknown.survival.command.ahome", 2, AHomeCommand.class),
-    COMMAND_AHOMES("unknown.survival.command.ahomes", 2, AHomesCommand.class),
-    COMMAND_ADDHOME("unknown.survival.command.addhome", 4, AddHomeCommand.class),
-    COMMAND_ADELHOME("unknown.survival.command.adelhome", 4, ADelHomeCommand.class),
-    COMMAND_SETHOME_COUNT("unknown.survival.command.sethomecount", 4, SetHomeCountCommand.class),
-    COMMAND_FINDHOME("unknown.survival.command.findhome", 4, FindHomeCommand.class),
+    COMMAND_HOME("unknown.survival.command.home", "minecraft.command.home", 0, HomeCommand.class),
+    COMMAND_HOMES("unknown.survival.command.homes", "minecraft.command.homes", 0, HomesCommand.class),
+    COMMAND_SETHOME("unknown.survival.command.sethome", "minecraft.command.sethome", 0, SetHomeCommand.class),
+    COMMAND_DELHOME("unknown.survival.command.delhome", "minecraft.command.delhome", 0, DelHomeCommand.class),
+    COMMAND_AHOME("unknown.survival.command.ahome", "minecraft.command.ahome", 2, AHomeCommand.class),
+    COMMAND_AHOMES("unknown.survival.command.ahomes", "minecraft.command.ahomes", 2, AHomesCommand.class),
+    COMMAND_ADDHOME("unknown.survival.command.addhome", "minecraft.command.addhome", 4, AddHomeCommand.class),
+    COMMAND_ADELHOME("unknown.survival.command.adelhome", "minecraft.command.adelhome", 4, ADelHomeCommand.class),
+    COMMAND_SETHOME_COUNT("unknown.survival.command.sethomecount", "minecraft.command.sethomecount", 4, SetHomeCountCommand.class),
+    COMMAND_FINDHOME("unknown.survival.command.findhome", "minecraft.command.findhome", 4, FindHomeCommand.class),
     /* HOME */
 
-    COMMAND_TELEPORT_PET("unknown.survival.command.tppet", 0, TeleportPetCommand.class),
-    COMMAND_LASTTP("unknown.survival.command.lasttp", 2, LastTpCommand.class),
-    COMMAND_SPAWN("unknown.survival.command.spawn", 0, SpawnCommand.class),
-    COMMAND_FLY("unknown.survival.command.fly", 0, FlyCommand.class),
+    COMMAND_TELEPORT_PET("unknown.survival.command.tppet", "minecraft.command.tppet", 0, TeleportPetCommand.class),
+    COMMAND_LASTTP("unknown.survival.command.lasttp", "minecraft.command.lasttp", 2, LastTpCommand.class),
+    COMMAND_SPAWN("unknown.survival.command.spawn", "minecraft.command.spawn", 0, SpawnCommand.class),
+    COMMAND_FLY("unknown.survival.command.fly", "minecraft.command.fly", 0, FlyCommand.class),
 
     NOTIFY_MODDED_PLAYER("unknown.survival.notify.mod", 2, null),
     ENTITY_EDITOR("unknown.survival.entity_editor", 2, null),
     OPEN_GUI("unknown.survival.open_gui", 0, null);
 
     private final int opLevel;
-    private final String permissionNode;
+    private final String[] permissionNodes;
+    private final Class<?> commandClass;
 
     Permissions(String permissionNode, int opLevel, Class<?> commandClass) {
         this.opLevel = opLevel;
-        this.permissionNode = permissionNode;
+        this.permissionNodes = new String[]{ permissionNode };
+        this.commandClass = commandClass;
+    }
+
+    Permissions(String permissionNode, String commandPermissionNode, int opLevel, Class<?> commandClass) {
+        this.opLevel = opLevel;
+        this.permissionNodes = new String[]{ permissionNode, commandPermissionNode };
+        this.commandClass = commandClass;
     }
 
     public String getPermissionNode() {
-        return permissionNode;
+        return this.permissionNodes[0];
+    }
+
+    public String[] getPermissionNodes() {
+        return this.permissionNodes;
     }
 
     public boolean check(CommandContext<CommandSourceStack> context) {
@@ -85,16 +98,25 @@ public enum Permissions {
     }
 
     public boolean check(CommandSourceStack commandSourceStack) {
-        if (opLevel <= 4 && opLevel >= 0) {
-            return commandSourceStack.hasPermission(opLevel) || commandSourceStack.getBukkitSender().hasPermission(permissionNode);
-        } else {
-            return commandSourceStack.getBukkitSender().hasPermission(permissionNode);
-        }
+        return (testPermissionNode(commandSourceStack) && testCommandPermissionNode(commandSourceStack)) && testOpLevel(commandSourceStack);
     }
 
-    public boolean checkAndIsPlayer(CommandSourceStack source) {
-        if (!(source.getBukkitEntity() instanceof CraftPlayer)) return false;
-        return check(source);
+    private boolean testOpLevel(CommandSourceStack commandSourceStack) {
+        return (this.opLevel <= 4 && this.opLevel >= 0 ? commandSourceStack.hasPermission(this.opLevel) : true);
+    }
+
+    private boolean testPermissionNode(CommandSourceStack commandSourceStack) {
+        return commandSourceStack.getBukkitSender().hasPermission(this.permissionNodes[0]);
+    }
+
+    private boolean testCommandPermissionNode(CommandSourceStack commandSourceStack) {
+        if (this.commandClass == null || this.permissionNodes.length == 1) return true; // When not command permission, always return true.
+        return commandSourceStack.getBukkitSender().hasPermission(this.permissionNodes[1]);
+    }
+
+    public boolean checkAndIsPlayer(CommandSourceStack clw) {
+        if (!(clw.source instanceof Player)) return false;
+        return check(clw);
     }
 
     public boolean checkAndIsLivingEntity(CommandSourceStack source) {
