@@ -41,19 +41,19 @@ import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.commands.vanilla.TimeCommand;
 
 public enum Permissions {
-    COMMAND_CRASH("unknown.command.crash", "minecraft.command.crash", 4, CrashCommand.class),
-    COMMAND_EVAL("unknown.command.eval", "minecraft.command.eval", 4, EvalCommand.class),
-    COMMAND_PACKET("unknown.command.packet", "minecraft.command.packet", 2, PacketCommand.class),
-    COMMAND_SKIN("unknown.command.skin", 2, SkinCommand.class),
-    COMMAND_NICK("unknown.command.nick", 2, NickCommand.class),
-    COMMAND_SKULL("unknown.command.skull", "minecraft.command.skull", 0, SkullCommand.class),
+    COMMAND_CRASH("unknown.core.command.crash", "minecraft.command.crash", 4, CrashCommand.class),
+    COMMAND_EVAL("unknown.core.command.eval", "minecraft.command.eval", 4, EvalCommand.class),
+    COMMAND_PACKET("unknown.core.command.packet", "minecraft.command.packet", 2, PacketCommand.class),
+    COMMAND_SKIN("unknown.core.command.skin", 2, SkinCommand.class),
+    COMMAND_NICK("unknown.core.command.nick", 2, NickCommand.class),
+    COMMAND_SKULL("unknown.core.command.skull", "minecraft.command.skull", 0, SkullCommand.class),
 
     COMMAND_MSG("minecraft.command.msg", 0, MsgCommand.class),
     COMMAND_GAMEMODE("minecraft.command.gamemode", 2, GamemodeCommand.class),
     COMMAND_TIME("minecraft.command.time", 2, TimeCommand.class),
-    COMMAND_REPLY("unknown.command.reply", 0, MsgCommand.class),
-    COMMAND_TELEPORTWORLD("unknown.command.teleportworld", 2, TeleportWorldCommand.class),
-    COMMAND_TRASH("unknown.command.trash", "minecraft.command.trash", 0, TrashCommand.class),
+    COMMAND_REPLY("unknown.core.command.reply", 0, MsgCommand.class),
+    COMMAND_TELEPORTWORLD("unknown.core.command.teleportworld", 2, TeleportWorldCommand.class),
+    COMMAND_TRASH("unknown.core.command.trash", "minecraft.command.trash", 0, TrashCommand.class),
 
     FEATURE_USE_COLOR_CODE("unknown.feature.use_color_code", 2, null),
     FEATURE_SEE_VANISHED_PLAYERS("unknown.feature.see_vanished_players", 2, null);
