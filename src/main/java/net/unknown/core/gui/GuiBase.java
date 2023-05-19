@@ -48,6 +48,7 @@ import java.util.function.Consumer;
 
 public class GuiBase implements Listener {
     protected final Inventory inventory;
+    protected boolean onceDeferUnregisterOnClose = false;
     protected boolean unRegisterOnClose;
     protected BiConsumer<Integer, InventoryClickEvent> onClick;
     private Component guiTitle;
@@ -109,7 +110,14 @@ public class GuiBase implements Listener {
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!event.getInventory().equals(this.inventory)) return;
         onClose(event);
-        if (this.unRegisterOnClose) unRegisterAsListener();
+        
+        if (this.unRegisterOnClose) {
+            if (this.onceDeferUnregisterOnClose) {
+                this.onceDeferUnregisterOnClose = false;
+                return;
+            }
+            unRegisterAsListener();
+        }
     }
 
     @EventHandler
@@ -141,6 +149,10 @@ public class GuiBase implements Listener {
 
     protected void registerAsListener() {
         ListenerManager.registerListener(this);
+    }
+
+    protected void onceDeferUnregisterOnClose() {
+        this.onceDeferUnregisterOnClose = true;
     }
 
     protected void unRegisterAsListener() {
