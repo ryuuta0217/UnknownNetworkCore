@@ -51,7 +51,6 @@ public class GuiBase implements Listener {
     protected boolean onceDeferUnregisterOnClose = false;
     protected boolean unRegisterOnClose;
     protected BiConsumer<Integer, InventoryClickEvent> onClick;
-    private Component guiTitle;
 
     public GuiBase(InventoryHolder owner, InventoryType type, Component guiTitle, boolean unRegisterOnClose) {
         this.inventory = Bukkit.createInventory(owner, type, guiTitle);
