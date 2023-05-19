@@ -110,7 +110,7 @@ public class GuiBase implements Listener {
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!event.getInventory().equals(this.inventory)) return;
         onClose(event);
-        
+
         if (this.unRegisterOnClose) {
             if (this.onceDeferUnregisterOnClose) {
                 this.onceDeferUnregisterOnClose = false;
@@ -151,7 +151,7 @@ public class GuiBase implements Listener {
         ListenerManager.registerListener(this);
     }
 
-    protected void onceDeferUnregisterOnClose() {
+    public void onceDeferUnregisterOnClose() {
         this.onceDeferUnregisterOnClose = true;
     }
 
