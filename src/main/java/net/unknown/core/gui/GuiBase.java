@@ -35,7 +35,6 @@ import net.kyori.adventure.text.Component;
 import net.unknown.core.managers.ListenerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
