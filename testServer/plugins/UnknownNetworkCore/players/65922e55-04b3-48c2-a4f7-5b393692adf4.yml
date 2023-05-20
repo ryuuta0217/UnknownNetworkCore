@@ -2,12 +2,14 @@ config-version: 3
 home-base-count: 5
 home-additional-count: 128
 force-global-chat-prefix: g.
-use-kana-convert: true
+use-kana-convert: false
 home-default-group: default
 reply-target: 65922e55-04b3-48c2-a4f7-5b393692adf4
 homeGroupItems:
   default: WHITE_WOOL
   test: WHITE_WOOL
+  helloworld: WHITE_WOOL
+  testw: WHITE_WOOL
 homes:
   default:
     test:
@@ -185,4 +187,13 @@ homes:
       z: 41.988379943563594
       yaw: 66.60002
       pitch: 33.449986
+    cha:
+      world: world
+      x: 29.4518339188448
+      y: 7.0
+      z: 1.5333604800998757
+      yaw: -94.20767
+      pitch: -0.9008331
   test: {}
+  helloworld: {}
+  testw: {}

@@ -137,6 +137,12 @@
     },
     "done": true
   },
+  "minecraft:end/elytra": {
+    "criteria": {
+      "elytra": "2023-05-20 06:14:18 +0900"
+    },
+    "done": true
+  },
   "minecraft:recipes/building_blocks/end_stone_brick_slab_from_end_stone_stonecutting": {
     "criteria": {
       "has_end_stone": "2021-11-27 22:06:22 +0900"
@@ -146,6 +152,12 @@
   "minecraft:recipes/building_blocks/chiseled_stone_bricks_stone_from_stonecutting": {
     "criteria": {
       "has_stone": "2022-02-22 16:16:40 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/mangrove_boat": {
+    "criteria": {
+      "in_water": "2023-05-20 05:37:54 +0900"
     },
     "done": true
   },
@@ -1187,5 +1199,5 @@
     },
     "done": true
   },
-  "DataVersion": 2865
+  "DataVersion": 3218
 }
