@@ -65,11 +65,11 @@ public class BlockDisassembler implements Listener {
                 Direction direction = dispenser.getBlockState().getValue(DispenserBlock.FACING);
                 BlockPos targetPos = pos.relative(direction);
                 BlockState targetState = level.getBlockStateIfLoaded(targetPos);
-                if (targetState == null || targetState.isAir()) return;
+                if (targetState == null || targetState.isAir()) return; // 空気だったり読み込まれてなかったらやめる
 
                 ItemStack shootItem = event.getItem();
-                if (targetState.getBlock() != Blocks.BEDROCK && !shootItem.getItem().isCorrectToolForDrops(targetState)) return;
-
+                if (targetState.getBlock() != Blocks.BEDROCK && !shootItem.getItem().isCorrectToolForDrops(targetState)) return; // 適正ツールじゃないならやめる
+                if (shootItem.getMaxDamage() - shootItem.getDamageValue() == 1) return; // 次のブロック破壊で壊れそうならやめる
                 shootItem.hurt(1, level.random, null);
 
                 destroyBlockWithDrops(level, targetPos, shootItem).forEach(dropItem -> {
