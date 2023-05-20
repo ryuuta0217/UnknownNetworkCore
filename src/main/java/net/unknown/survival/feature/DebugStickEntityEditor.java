@@ -124,24 +124,19 @@ public class DebugStickEntityEditor extends GuiBase {
             case 0 -> {
                 if(this.entity instanceof Mob mob) {
                     mob.setAI(!mob.hasAI());
-                    this.update();
                 }
             }
             case 1 -> {
                 this.entity.setInvulnerable(!this.entity.isInvulnerable());
-                this.update();
             }
             case 2 -> {
                 this.entity.setSilent(!this.entity.isSilent());
-                this.update();
             }
             case 3 -> {
                 this.entity.setGravity(!this.entity.hasGravity());
-                this.update();
             }
             case 4 -> {
                 this.entity.setGlowing(!this.entity.isGlowing());
-                this.update();
             }
             case 5 -> {
                 if(this.entity instanceof Mob mob) {
@@ -152,7 +147,6 @@ public class DebugStickEntityEditor extends GuiBase {
                         event.getWhoClicked().sendMessage(Component.text("自動的に [発光] が有効になりました。\n" +
                                 "[発光] はオフにすることもできます。", DefinedTextColor.YELLOW));
                     }
-                    this.update();
                 }
             }
             case 27 -> {
@@ -174,15 +168,14 @@ public class DebugStickEntityEditor extends GuiBase {
                     entity.setYHeadRot(0f);
                     entity.setYBodyRot(0f);
                 }
-                this.update();
             }
             case 45 -> {
                 if(this.entity instanceof Pig pig) {
                     pig.setSaddle(!pig.hasSaddle());
-                    this.update();
                 }
             }
         }
+        this.update();
     }
 
     public static float loop(float exp, float min, float max) {
