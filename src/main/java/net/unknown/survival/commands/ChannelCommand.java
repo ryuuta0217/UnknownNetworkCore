@@ -194,7 +194,7 @@ public class ChannelCommand {
             }
             case CUSTOM -> {
                 String channelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
-                if (CustomChannels.isChannelFound(channelName)) {
+                if (CustomChannels.isChannelFound(channelName) && CustomChannels.getChannel(channelName).getPlayers().contains(ctx.getSource().getPlayerOrException().getUUID())) {
                     if (!(currentChannel instanceof CustomChannel channel) || !channel.getChannelName().equals(channelName)) {
                         newChannel = CustomChannels.getChannel(channelName);
                     }
