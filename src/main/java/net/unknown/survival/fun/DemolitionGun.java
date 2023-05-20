@@ -35,10 +35,7 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCore;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
@@ -63,8 +60,9 @@ public class DemolitionGun implements Listener {
             if (event.getBow().getItemMeta().getDisplayName().contains("§cデモリッションガン")) {
                 if (event.getProjectile() instanceof Arrow arrow) {
                     if (player.getUseItemRemainingTicks() < TICKS) {
+                        bukkitPlayer.getLocation().getWorld().playSound(bukkitPlayer.getLocation(), Sound.BLOCK_END_GATEWAY_SPAWN, 1.0f, 0.0f);
                         arrow.setVelocity(arrow.getVelocity().multiply(3));
-                        arrow.setDamage(arrow.getDamage() * 6);
+                        arrow.setDamage(arrow.getDamage() * (event.getBow().getType() == Material.BOW ? 12 : 6));
                         arrow.setGlowing(true);
                         arrow.setGravity(false);
                         new BukkitRunnable() {
@@ -75,6 +73,11 @@ public class DemolitionGun implements Listener {
                                     arrow.getLocation().getWorld().spawnParticle(Particle.SONIC_BOOM, arrow.getLocation(), 8);
                                 } else {
                                     arrow.setGlowing(false);
+                                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> {
+                                        arrow.remove();
+                                        return null;
+                                    });
+                                    bukkitPlayer.playSound(bukkitPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.8f);
                                     this.cancel();
                                 }
                             }
@@ -118,6 +121,33 @@ public class DemolitionGun implements Listener {
 
                         if (player.getItemUseRemainingTime() < 72000) {
                             int usedTicks = 72000 - player.getItemUseRemainingTime();
+
+                            switch (usedTicks) {
+                                case (int) (CHARGE_TICKS / 6) -> {
+                                    player.getLocation().getWorld().playSound(player.getLocation(), Sound.BLOCK_PISTON_EXTEND, 0.8f, 1.0f);
+                                }
+
+                                case (int) ((CHARGE_TICKS / 6) * 2) -> {
+                                    player.getLocation().getWorld().playSound(player.getLocation(), Sound.BLOCK_PISTON_EXTEND, 0.8f, 0.8f);
+                                }
+
+                                case (int) ((CHARGE_TICKS / 6) * 3) -> {
+                                    player.getLocation().getWorld().playSound(player.getLocation(), Sound.BLOCK_PISTON_EXTEND, 0.8f, 0.6f);
+                                }
+
+                                case (int) ((CHARGE_TICKS / 6) * 4) -> {
+                                    player.getLocation().getWorld().playSound(player.getLocation(), Sound.BLOCK_PISTON_EXTEND, 0.8f, 0.4f);
+                                }
+
+                                case (int) ((CHARGE_TICKS / 6) * 5) -> {
+                                    player.getLocation().getWorld().playSound(player.getLocation(), Sound.BLOCK_PISTON_EXTEND, 0.8f, 0.2f);
+                                }
+
+                                case (int) CHARGE_TICKS -> {
+                                    player.getLocation().getWorld().playSound(player.getLocation(), Sound.BLOCK_PISTON_EXTEND, 1.0f, 0.0f);
+                                }
+                            }
+
                             if (usedTicks > CHARGE_TICKS) usedTicks = (int) CHARGE_TICKS;
                             float progress = usedTicks / CHARGE_TICKS;
                             PROGRESS.get(player.getUniqueId()).progress(progress);
