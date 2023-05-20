@@ -46,6 +46,7 @@ import net.minecraft.world.phys.Vec3;
 import net.unknown.core.commands.Suggestions;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.model.HomeGroup;
@@ -116,7 +117,7 @@ public class AddHomeCommand {
             return 3;
         }
 
-        Location loc = new Location(world, location.x(), location.y(), location.z(), rotation.x, rotation.y);
+        Location loc = MinecraftAdapter.location(MinecraftAdapter.level(world), location, rotation);
         defaultGroup.addHome(new Home(name, loc), overwrite);
         MessageUtil.sendAdminMessage(ctx.getSource(), "プレイヤー " + targetName + " のグループ " + defaultGroup.getName() + " にホーム " + name + " を設定しました");
         return 0;
