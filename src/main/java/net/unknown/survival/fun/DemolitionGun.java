@@ -53,7 +53,8 @@ import java.util.Map;
 import java.util.UUID;
 
 public class DemolitionGun implements Listener {
-    private static final int TICKS = 72000 - 80;
+    private static final float CHARGE_TICKS = 80.0f;
+    private static final int TICKS = 72000 - (int) CHARGE_TICKS;
 
     @EventHandler
     public void onBowShoot(EntityShootBowEvent event) {
@@ -71,7 +72,7 @@ public class DemolitionGun implements Listener {
                             public void run() {
                                 if (!arrow.isDead() && !arrow.isOnGround()) {
                                     if (arrow.getTicksLived() > 150) arrow.setGravity(true);
-                                    arrow.getLocation().getWorld().spawnParticle(Particle.REDSTONE, arrow.getLocation(), 15, new Particle.DustOptions(Color.AQUA, 1.5f));
+                                    arrow.getLocation().getWorld().spawnParticle(Particle.SONIC_BOOM, arrow.getLocation(), 8);
                                 } else {
                                     arrow.setGlowing(false);
                                     this.cancel();
@@ -117,8 +118,8 @@ public class DemolitionGun implements Listener {
 
                         if (player.getItemUseRemainingTime() < 72000) {
                             int usedTicks = 72000 - player.getItemUseRemainingTime();
-                            if (usedTicks > 80) usedTicks = 80;
-                            float progress = (float) (usedTicks / 80.0);
+                            if (usedTicks > CHARGE_TICKS) usedTicks = (int) CHARGE_TICKS;
+                            float progress = usedTicks / CHARGE_TICKS;
                             PROGRESS.get(player.getUniqueId()).progress(progress);
                             player.showBossBar(PROGRESS.get(player.getUniqueId()));
                             return;
