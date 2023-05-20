@@ -38,6 +38,7 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.UnknownNetworkSurvival;
+import net.unknown.survival.gui.home.HomeGui;
 import net.unknown.survival.gui.prefix.PrefixGui;
 import net.unknown.survival.gui.warp.WarpGui;
 import org.bukkit.Material;
@@ -101,7 +102,7 @@ public class MainGui extends GuiBase {
     @Override
     public void onClick(InventoryClickEvent event) {
         switch (event.getSlot()) {
-            case 12 -> event.getWhoClicked().openInventory(new HomeGui((Player) event.getWhoClicked()).getInventory());
+            case 12 -> new HomeGui((Player) event.getWhoClicked()).open(event.getWhoClicked());
             case 13 -> {
                 if (UnknownNetworkSurvival.isWorldGuardEnabled()) {
                     event.getWhoClicked().openInventory(ProtectionGui.of((Player) event.getWhoClicked()).getInventory());

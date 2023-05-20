@@ -35,7 +35,6 @@ import net.kyori.adventure.text.Component;
 import net.unknown.core.managers.ListenerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -48,9 +47,9 @@ import java.util.function.Consumer;
 
 public class GuiBase implements Listener {
     protected final Inventory inventory;
+    protected boolean onceDeferUnregisterOnClose = false;
     protected boolean unRegisterOnClose;
     protected BiConsumer<Integer, InventoryClickEvent> onClick;
-    private Component guiTitle;
 
     public GuiBase(InventoryHolder owner, InventoryType type, Component guiTitle, boolean unRegisterOnClose) {
         this.inventory = Bukkit.createInventory(owner, type, guiTitle);
@@ -109,7 +108,14 @@ public class GuiBase implements Listener {
     public void onInventoryClose(InventoryCloseEvent event) {
         if (!event.getInventory().equals(this.inventory)) return;
         onClose(event);
-        if (this.unRegisterOnClose) unRegisterAsListener();
+
+        if (this.unRegisterOnClose) {
+            if (this.onceDeferUnregisterOnClose) {
+                this.onceDeferUnregisterOnClose = false;
+                return;
+            }
+            unRegisterAsListener();
+        }
     }
 
     @EventHandler
@@ -141,6 +147,10 @@ public class GuiBase implements Listener {
 
     protected void registerAsListener() {
         ListenerManager.registerListener(this);
+    }
+
+    public void onceDeferUnregisterOnClose() {
+        this.onceDeferUnregisterOnClose = true;
     }
 
     protected void unRegisterAsListener() {

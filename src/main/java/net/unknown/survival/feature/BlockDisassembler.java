@@ -49,19 +49,29 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import java.util.List;
+import java.util.Objects;
 
 public class BlockDisassembler implements Listener {
     @EventHandler
     public void onDispenserShoot(BlockDispenseBeforeEvent event) {
         if (event.getBlockSource().getBlockState().getBlock() == Blocks.DISPENSER && event.getBlockSource().getEntity() instanceof DispenserBlockEntity dispenser) {
             if (dispenser.getDisplayName().contains(Component.literal("Block Disassembler").withStyle(ChatFormatting.RED, ChatFormatting.BOLD))) {
+                event.setCancelled(true);
+
                 ServerLevel level = ((ServerLevel) dispenser.getLevel());
+                Objects.requireNonNull(level);
+
                 BlockPos pos = dispenser.getBlockPos();
                 Direction direction = dispenser.getBlockState().getValue(DispenserBlock.FACING);
                 BlockPos targetPos = pos.relative(direction);
+                BlockState targetState = level.getBlockStateIfLoaded(targetPos);
+                if (targetState == null || targetState.isAir()) return;
+
                 ItemStack shootItem = event.getItem();
+                if (targetState.getBlock() != Blocks.BEDROCK && !shootItem.getItem().isCorrectToolForDrops(targetState)) return;
+
                 shootItem.hurt(1, level.random, null);
-                event.setCancelled(true);
+
                 destroyBlockWithDrops(level, targetPos, shootItem).forEach(dropItem -> {
                     Block.popResource(level, targetPos, dropItem);
                 });

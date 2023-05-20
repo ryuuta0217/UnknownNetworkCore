@@ -35,6 +35,7 @@ import net.unknown.UnknownNetworkCore;
 import net.unknown.core.commands.vanilla.GamemodeCommand;
 import net.unknown.core.commands.vanilla.KillCommand;
 import net.unknown.core.commands.vanilla.MsgCommand;
+import net.unknown.core.commands.vanilla.TimeCommand;
 
 public class Commands {
     public static void init() {
@@ -51,5 +52,6 @@ public class Commands {
         KillCommand.register(UnknownNetworkCore.getBrigadier());
         SkullCommand.register(UnknownNetworkCore.getBrigadier());
         TrashCommand.register(UnknownNetworkCore.getBrigadier());
+        TimeCommand.register(UnknownNetworkCore.getBrigadier());
     }
 }

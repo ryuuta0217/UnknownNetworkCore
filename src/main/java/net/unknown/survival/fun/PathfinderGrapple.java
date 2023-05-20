@@ -77,14 +77,14 @@ public class PathfinderGrapple implements Listener {
                 }
 
                 if (player.isSneaking()) {
-                    player.setVelocity(player.getLocation().getDirection().multiply(5));
+                    player.setVelocity(player.getLocation().getDirection().multiply(arrow.getDamage()));
                     arrow.remove();
                     this.cancel();
                 }
 
                 if (arrow.isOnGround() && !arrow.isDead()) {
                     Vector direction = arrow.getLocation().toVector().subtract(player.getLocation().toVector()).normalize();
-                    player.setVelocity(direction.multiply(arrow.getDamage()));
+                    player.setVelocity(direction.multiply(2));
                     drawLine(player, arrow.getLocation(), 2);
                     if (player.getLocation().distance(arrow.getLocation()) <= 3) {
                         this.cancel();

@@ -2,5 +2,19 @@ config-version: 3
 home-base-count: 5
 home-additional-count: 0
 reply-target: 465d418d-3b73-40a2-bfd9-c97f07b191c2
+home-default-group: default
+force-global-chat-prefix: g.
+use-kana-convert: false
+homeGroupItems:
+  default: WHITE_WOOL
+  ポケ: WHITE_WOOL
 homes:
-  default: {}
+  default:
+    example:
+      world: world
+      x: 33.693683570292265
+      y: 8.0
+      z: 0.9106265115151583
+      yaw: -10.63855
+      pitch: 16.650063
+  ポケ: {}

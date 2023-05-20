@@ -43,6 +43,7 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.data.model.HomeGroup;
@@ -150,8 +151,12 @@ public class HomeGui extends GuiBase {
                                 String newCategoryName = PlainTextComponentSerializer.plainText().serialize(lines.get(0))
                                         .replace(".", "・")
                                         .replace(":", "："); // ぐるーぷ名をConfigのkeyにするので、使えない文字対策
-                                PlayerData.of(this.target).getHomeData().createGroup(newCategoryName, null);
-                                this.guiState = State.CATEGORIES;
+                                if (newCategoryName.length() > 0) {
+                                    PlayerData.of(this.target).getHomeData().createGroup(newCategoryName, null);
+                                    this.guiState = State.CATEGORIES;
+                                } else {
+                                    NewMessageUtil.sendMessage(this.target, Component.text(""));
+                                }
                                 this.target.openInventory(this.getInventory());
                                 this.clearCategories();
                                 this.loadData();
