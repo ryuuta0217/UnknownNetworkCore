@@ -9,6 +9,10 @@ permissions:
     children:
       minecraft.command.skull: true
       unknown.core.command.skull: true
+      minecraft.command.trash: true
+      unknown.core.command.trash: true
+      minecraft.command.reply: true
+      unknown.core.command.reply: true
   unknown.core.admin:
     default: op
     children:
