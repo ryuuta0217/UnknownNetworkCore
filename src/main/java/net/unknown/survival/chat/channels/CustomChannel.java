@@ -125,7 +125,7 @@ public class CustomChannel extends ChatChannel {
         event.message(Component.empty());
 
         event.renderer((source, sourceDisplayName, message, viewer) -> {
-            if ((viewer instanceof Player player && !this.players.contains(player.getUniqueId())) || !(viewer instanceof ConsoleCommandSender)) return Component.empty();
+            if ((viewer instanceof Player player && !this.players.contains(player.getUniqueId())) || (!(viewer instanceof Player) && !(viewer instanceof ConsoleCommandSender))) return Component.empty();
             return Component.empty()
                     .append(getChannelPrefix(false))
                     .append(Component.text(" "))
