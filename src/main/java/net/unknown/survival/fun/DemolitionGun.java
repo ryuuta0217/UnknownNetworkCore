@@ -68,6 +68,10 @@ public class DemolitionGun implements Listener {
                         new BukkitRunnable() {
                             @Override
                             public void run() {
+                                if (!arrow.getLocation().getChunk().isLoaded()) {
+                                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> arrow.getLocation().getChunk().load());
+                                }
+
                                 if (!arrow.isDead() && !arrow.isOnGround()) {
                                     if (arrow.getTicksLived() > 150) arrow.setGravity(true);
                                     arrow.getLocation().getWorld().spawnParticle(Particle.SONIC_BOOM, arrow.getLocation(), 8);
