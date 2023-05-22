@@ -47,6 +47,7 @@ import net.unknown.core.util.YukiKanaConverter;
 import net.unknown.survival.UnknownNetworkSurvival;
 import net.unknown.survival.chat.channels.ChannelType;
 import net.unknown.survival.chat.channels.ChatChannel;
+import net.unknown.survival.chat.channels.CustomChannel;
 import net.unknown.survival.chat.channels.GlobalChannel;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.dependency.LuckPerms;
@@ -61,7 +62,7 @@ public class ChatManager implements Listener {
     private static final Map<UUID, ChatChannel> DEFAULT_CHANNELS = new HashMap<>();
 
     public static boolean setChannel(UUID uniqueId, ChatChannel channel) {
-        if (ChatManager.getCurrentChannel(uniqueId).getType() == channel.getType()) return false;
+        if (!(channel instanceof CustomChannel) && ChatManager.getCurrentChannel(uniqueId).getType() == channel.getType()) return false;
 
         if (channel.getType() == ChannelType.HEADS_UP && !UnknownNetworkSurvival.isHolographicDisplaysEnabled()) {
             return false;

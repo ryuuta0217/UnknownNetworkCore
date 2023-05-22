@@ -234,14 +234,18 @@ public class ChannelCommand {
             return 1;
         }
 
-        ChatManager.setChannel(ctx.getSource().getPlayerOrException().getUUID(), newChannel);
-        if (newChannel instanceof CustomChannel channel) NewMessageUtil.sendMessage(ctx.getSource(),
-                Component.literal("デフォルトの発言先を ")
-                        .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
-                        .append(Component.literal("(" + channel.getChannelName() + ")")
-                                .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
-                        .append(" に変更しました"));
-        else MessageUtil.sendMessage(ctx.getSource(), "デフォルトの発言先を " + newChannel.getChannelName() + " に変更しました");
+        boolean setChannelResult = ChatManager.setChannel(ctx.getSource().getPlayerOrException().getUUID(), newChannel);
+        if (setChannelResult) {
+            if (newChannel instanceof CustomChannel channel) NewMessageUtil.sendMessage(ctx.getSource(),
+                    Component.literal("デフォルトの発言先を ")
+                            .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                            .append(Component.literal("(" + channel.getChannelName() + ")")
+                                    .withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                            .append(" に変更しました"));
+            else MessageUtil.sendMessage(ctx.getSource(), "デフォルトの発言先を " + newChannel.getChannelName() + " に変更しました");
+        } else {
+            MessageUtil.sendErrorMessage(ctx.getSource(), "デフォルトの発言先を変更できませんでした");
+        }
         return 0;
     }
 
