@@ -37,12 +37,11 @@ import net.unknown.UnknownNetworkCore;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerKickEvent;
-import org.spigotmc.SpigotConfig;
 
 public class ServerRestartListener implements Listener {
     @EventHandler
     public void onServeRestart(PlayerKickEvent event) {
-        if (event.getCause() == PlayerKickEvent.Cause.RESTART_COMMAND) {
+        if (event.getCause() == PlayerKickEvent.Cause.RESTART_COMMAND || event.getCause() == PlayerKickEvent.Cause.CHAT_VALIDATION_FAILED || event.getCause() == PlayerKickEvent.Cause.EXPIRED_PROFILE_PUBLIC_KEY) {
             ByteArrayDataOutput out = ByteStreams.newDataOutput();
             out.writeUTF("Connect");
             out.writeUTF("lobby");
