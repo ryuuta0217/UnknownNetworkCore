@@ -42,6 +42,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityShootBowEvent;
+import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -57,7 +58,7 @@ public class DemolitionGun implements Listener {
     public void onBowShoot(EntityShootBowEvent event) {
         if (event.getEntity() instanceof Player bukkitPlayer && event.getBow() != null) {
             ServerPlayer player = ((CraftPlayer) bukkitPlayer).getHandle();
-            if (event.getBow().getItemMeta().getDisplayName().contains("§cデモリッションガン")) {
+            if (event.getBow().hasItemMeta() && event.getBow().getItemMeta().getDisplayName().contains("§cデモリッションガン")) {
                 if (event.getProjectile() instanceof Arrow arrow) {
                     if (player.getUseItemRemainingTicks() < TICKS) {
                         bukkitPlayer.getLocation().getWorld().playSound(bukkitPlayer.getLocation(), Sound.BLOCK_END_GATEWAY_SPAWN, 1.0f, 0.0f);
