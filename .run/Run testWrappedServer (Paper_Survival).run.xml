@@ -13,11 +13,12 @@
           <option value="runWrappedServer" />
         </list>
       </option>
-      <option name="vmOptions" value="-Dun.env=SURVIVAL" />
+      <option name="vmOptions" value="-Xmx768M -Dun.env=SURVIVAL" />
     </ExternalSystemSettings>
     <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
     <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
     <DebugAllEnabled>false</DebugAllEnabled>
+    <ForceTestExec>false</ForceTestExec>
     <method v="2" />
   </configuration>
 </component>
