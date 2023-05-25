@@ -83,8 +83,10 @@ public class FlyModule implements GNModule {
                     this.onParticlesAvailable(ctx);
                     ctx.addParticlesToUse(USE_PARTICLE_IN_USE);
                     if (ctx.getPlayer().isSprinting()) {
-                        ctx.getPlayer().setFlySpeed(Mth.clamp(ctx.getPlayer().getFlySpeed() + 0.005f, -1.0f, 1.0f));
-                    } // TODO 静止時、徐々に減少
+                        ctx.getPlayer().setFlySpeed(Mth.clamp(ctx.getPlayer().getFlySpeed() + 0.005f, 0f, 1.0f));
+                    } else {
+                        ctx.getPlayer().setFlySpeed(Mth.clamp(ctx.getPlayer().getFlySpeed() - 0.01f, 0.1f, 1.0f));
+                    }
                 } else {
                     this.onParticlesEmpty(ctx);
                     this.overheatTicks = 20 * 5; // 5 seconds
