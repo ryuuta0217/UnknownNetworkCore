@@ -67,7 +67,7 @@ public class AutoReplant implements Listener {
 
     private static final String ENCHANTMENT_NAME = "自動再植+回収";
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockBreak(ModifiableBlockBreakEvent event) {
         if (!SUPPORTED_CROPS.contains(event.getOriginal().getBlock().getType())) return;
         ServerPlayer player = MinecraftAdapter.player(event.getOriginal().getPlayer());
@@ -76,41 +76,44 @@ public class AutoReplant implements Listener {
         org.bukkit.inventory.ItemStack selectedBukkitStack = event.getOriginal().getPlayer().getInventory().getItemInMainHand();
         ItemStack selectedStack = MinecraftAdapter.ItemStack.itemStack(selectedBukkitStack);
         boolean onlyMaxAge = isOnlyMaxAge(selectedBukkitStack);
-        if (!(selectedStack.getItem() instanceof HoeItem hoe)) return;
+        if (!(selectedStack.getItem() instanceof HoeItem)) return;
         if (!CustomEnchantUtil.hasEnchantment(ENCHANTMENT_NAME, selectedBukkitStack)) return;
         Block block = event.getOriginal().getBlock();
         if (!(block.getBlockData() instanceof Ageable ageable)) return;
+
         if (ageable.getAge() != ageable.getMaximumAge()) {
             if (onlyMaxAge) event.getOriginal().setCancelled(true);
-            return;
-        }
-
-        event.getOriginal().setCancelled(true);
-        event.getOriginal().setDropItems(false); // Disable original drops
-
-        List<org.bukkit.inventory.ItemStack> drops = event.getOriginalDrops();
-        if (drops.size() == 0) return;
-
-        org.bukkit.inventory.ItemStack firstDropItem = drops.get(0);
-
-        if (event.getOriginal().getBlock().getType() == Material.WHEAT) {
-            if (firstDropItem.getType() == Material.WHEAT_SEEDS) {
-                firstDropItem.setAmount(firstDropItem.getAmount() - 1);
-            }
-        } else if (event.getOriginal().getBlock().getType() == Material.BEETROOTS) {
-            if (firstDropItem.getType() == Material.BEETROOT_SEEDS) {
-                firstDropItem.setAmount(firstDropItem.getAmount() - 1);
-            }
         } else {
-            firstDropItem.setAmount(firstDropItem.getAmount() - 1);
-        }
-        drops.removeIf(bukkitStack -> bukkitStack.getType() == Material.AIR);
-        event.getOriginal().getPlayer().getInventory().addItem(drops.toArray(new org.bukkit.inventory.ItemStack[0])).forEach((slot, stack) -> {
-            event.getOriginal().getPlayer().getWorld().dropItem(event.getOriginal().getBlock().getLocation(), stack);
-        });
+            event.getOriginal().setCancelled(true);
+            event.getOriginal().setDropItems(false);
 
-        ageable.setAge(0);
-        block.setBlockData(ageable);
+            List<org.bukkit.inventory.ItemStack> drops = event.getOriginalDrops();
+            if (drops.size() == 0) return;
+
+            if (event.getOriginal().getBlock().getType() == Material.WHEAT) {
+                drops.stream()
+                        .filter(drop -> drop.getType() == Material.WHEAT_SEEDS)
+                        .findAny()
+                        .ifPresent(drop -> drop.setAmount(drop.getAmount() - 1));
+            } else if (event.getOriginal().getBlock().getType() == Material.BEETROOTS) {
+                drops.stream()
+                        .filter(drop -> drop.getType() == Material.BEETROOT_SEEDS)
+                        .findAny()
+                        .ifPresent(drop -> drop.setAmount(drop.getAmount() - 1));
+            } else {
+                org.bukkit.inventory.ItemStack drop = drops.get(drops.size() - 1);
+                drop.setAmount(drop.getAmount() - 1);
+            }
+            drops.removeIf(bukkitStack -> bukkitStack.getType() == Material.AIR);
+
+            event.getOriginal().getPlayer().getInventory().addItem(drops.toArray(new org.bukkit.inventory.ItemStack[0])).forEach((slot, stack) -> {
+
+                event.getOriginal().getPlayer().getWorld().dropItem(event.getOriginal().getBlock().getLocation(), stack);
+            });
+
+            ageable.setAge(0);
+            block.setBlockData(ageable);
+        }
     }
 
     @EventHandler
