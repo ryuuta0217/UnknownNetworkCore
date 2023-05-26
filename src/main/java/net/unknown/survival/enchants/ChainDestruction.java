@@ -138,10 +138,11 @@ public class ChainDestruction implements Listener {
         toBreak.forEach(pos -> {
             RunnableManager.runDelayed(() -> {
                 if (player.getMainHandItem().equals(selectedITem)) {
-                    if (selectedITem.getItem().getMaxDamage() - selectedITem.getDamageValue() > 1) {
+                    if ((selectedITem.getItem().getMaxDamage() - selectedITem.getDamageValue()) > 1) {
                         BlockUtil.destroyBlock(player, level, pos, selectedITem);
                     } else {
                         player.getBukkitEntity().sendActionBar(Component.text("耐久値がなくなりました", DefinedTextColor.RED));
+                        IGNORE_EVENT.getOrDefault(player.getUUID(), new HashSet<>()).remove(pos);
                     }
                 }
             }, count.getAndIncrement());
