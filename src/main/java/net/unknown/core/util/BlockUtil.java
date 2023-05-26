@@ -169,6 +169,7 @@ public class BlockUtil {
             }
 
             List<ItemEntity> itemsToDrop = level.captureDrops;
+            itemsToDrop.forEach(itemEntity -> itemEntity.moveTo(player.position()));
             level.captureDrops = null;
             if (event.isDropItems()) {
                 CraftEventFactory.handleBlockDropItemEvent(bukkitBlock, bukkitBlockState, player, itemsToDrop);
