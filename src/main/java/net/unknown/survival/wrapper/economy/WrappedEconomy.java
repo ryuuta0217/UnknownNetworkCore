@@ -62,7 +62,7 @@ public class WrappedEconomy implements Economy {
 
     @Override
     public String getName() {
-        return this.original.getName();
+        return this.original.getName() + " (UNC Wrapped)";
     }
 
     @Override

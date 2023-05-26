@@ -65,6 +65,17 @@ public class BlockUtil {
         });
     }
 
+    public static void searchBlockWithinManhattan(BlockPos center, int rangeX, int rangeY, int rangeZ, Level level, Block searchTarget, Set<BlockPos> data) {
+        if (searchTarget == Blocks.AIR) return;
+        BlockPos.withinManhattan(center, rangeX, rangeY, rangeZ).forEach(pos -> {
+            BlockPos immPos = pos.immutable();
+            BlockState state = level.getBlockStateIfLoaded(immPos);
+            if (state != null && state.is(searchTarget) && !data.contains(immPos) && !center.equals(immPos)) {
+                data.add(immPos);
+            }
+        });
+    }
+
     public static void destroyBlockWithNoEvent(ServerPlayer player, ServerLevel level, BlockPos pos, ItemStack usedTool) {
         BlockState blockState = level.getBlockState(pos);
         BlockEntity blockEntity = level.getBlockEntity(pos);
@@ -158,6 +169,7 @@ public class BlockUtil {
             }
 
             List<ItemEntity> itemsToDrop = level.captureDrops;
+            itemsToDrop.forEach(itemEntity -> itemEntity.moveTo(player.position()));
             level.captureDrops = null;
             if (event.isDropItems()) {
                 CraftEventFactory.handleBlockDropItemEvent(bukkitBlock, bukkitBlockState, player, itemsToDrop);

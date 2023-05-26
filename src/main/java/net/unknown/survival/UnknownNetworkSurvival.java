@@ -59,8 +59,10 @@ import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import net.unknown.survival.listeners.*;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 
+import java.util.Optional;
 import java.util.logging.Logger;
 
 public class UnknownNetworkSurvival {
@@ -128,8 +130,13 @@ public class UnknownNetworkSurvival {
         DemolitionGun.BowPullIndicator.boot();
 
         if (isVaultEnabled() && isJeconEnabled()) {
-            WrappedEconomy wrapped = new WrappedEconomy(Bukkit.getServicesManager().getRegistration(Economy.class).getProvider());
-            Bukkit.getServicesManager().register(Economy.class, wrapped, UnknownNetworkCore.getInstance(), ServicePriority.Highest);
+            Optional<RegisteredServiceProvider<Economy>> optionalEconomyServiceProvider = Optional.ofNullable(Bukkit.getServicesManager().getRegistration(Economy.class));
+            if (optionalEconomyServiceProvider.isPresent()) {
+                Economy economyService = optionalEconomyServiceProvider.get().getProvider();
+                Bukkit.getServicesManager().unregister(Economy.class, economyService);
+                WrappedEconomy wrapped = new WrappedEconomy(economyService);
+                Bukkit.getServicesManager().register(Economy.class, wrapped, UnknownNetworkCore.getInstance(), ServicePriority.Highest);
+            }
         }
 
         if (isWorldGuardEnabled()) {
