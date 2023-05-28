@@ -32,8 +32,16 @@
 package net.unknown.core.economy.repository;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 public interface Repository {
+    /**
+     * 口座の所有者を取得します。
+     *
+     * @return このインスタンス（口座）の所有者
+     */
+    UUID getOwner();
+
     /**
      * 口座に指定した金額を入金します。
      *
@@ -56,4 +64,9 @@ public interface Repository {
      * @return 口座残高
      */
     BigDecimal getBalance();
+
+    /**
+     * 口座情報をファイルに書き込みます。
+     */
+    void save();
 }

@@ -28,3 +28,9 @@ time:
   zone: GMT+1
 update-notification: true
 debug: false
+holograms-view-range: 48
+placeholders:
+  PlaceholderAPI:
+    enabled: true
+    expand-short-format: true
+    default-refresh-interval-ticks: 200
