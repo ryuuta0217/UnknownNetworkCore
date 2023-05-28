@@ -88,6 +88,10 @@ public class PaginationView<T, G extends GuiBase> implements View {
     public void initialize() {
         this.clearInventory();
         this.showPage(1);
+        this.placeActionButtons();
+    }
+
+    public void placeActionButtons() {
         if (this.createNewAction != null) this.gui.getInventory().setItem(this.compact ? 22 : 49, DefinedItemStackBuilders.plus()
                 .displayName(Component.text("新規追加", DefinedTextColor.GREEN))
                 .build());
@@ -97,8 +101,9 @@ public class PaginationView<T, G extends GuiBase> implements View {
                 .build());
     }
 
+
     public void setData(Collection<T> data, boolean reload) {
-        this.clearInventory();
+        this.clearElements();
         //this.data = data;
         this.splitData = ListUtil.splitListAsLinkedSet(data, this.compact ? 18 : 45);
         if (reload) this.showPage(Math.min(this.splitData.size(), this.currentPage));
@@ -106,9 +111,9 @@ public class PaginationView<T, G extends GuiBase> implements View {
 
     public void showPage(int newPage) {
         if (newPage < 1) throw new IllegalArgumentException("Page is greater than 1");
-        if (this.splitData.size() > newPage) throw new IllegalArgumentException("Maximum allowed page " + this.splitData.size() + " reached.");
+        if (this.splitData.size() < newPage) throw new IllegalArgumentException("Maximum allowed page " + this.splitData.size() + " reached.");
         this.currentPage = newPage;
-        this.clearInventory();
+        this.clearElements();
         this.splitData.get(this.currentPage - 1).forEach(data -> {
             int slot = this.gui.getInventory().firstEmpty();
             if (slot != -1) {
@@ -194,7 +199,7 @@ public class PaginationView<T, G extends GuiBase> implements View {
                     }
                 }
                 case 53 -> {
-                    if ((this.currentPage + 1) < this.splitData.size()) {
+                    if (this.splitData.size() >= (this.currentPage + 1)) {
                         this.showPage(this.currentPage + 1);
                     }
                 }
@@ -208,14 +213,22 @@ public class PaginationView<T, G extends GuiBase> implements View {
         }
     }
 
-    @Override
-    public void clearInventory() {
+    public void clearElements() {
         this.slot2data.keySet().forEach(slot -> this.gui.getInventory().clear(slot));
         this.slot2data.clear();
-        this.gui.getInventory().clear(this.compact ? 18 : 45);
-        this.gui.getInventory().clear(this.compact ? 22 : 49);
         this.gui.getInventory().clear(this.compact ? 25 : 52);
         this.gui.getInventory().clear(this.compact ? 26 : 53);
+    }
+
+    public void clearActions() {
+        if (this.previousAction != null) this.gui.getInventory().clear(this.compact ? 18 : 45);
+        if (this.createNewAction != null) this.gui.getInventory().clear(this.compact ? 22 : 49);
+    }
+
+    @Override
+    public void clearInventory() {
+        this.clearElements();
+        this.clearActions();
     }
 
     public int getCurrentPage() {
