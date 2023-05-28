@@ -31,5 +31,5 @@
 
 package net.unknown.core.economy;
 
-public class Economy {
+public class UnknownNetworkEconomy {
 }

@@ -49,8 +49,8 @@ public class BankRepository implements Repository {
     private static final Logger LOGGER = LoggerFactory.getLogger("UNC/BankRepository");
     // /root/unknown-network/2.Survival/../economy/banks
     private static final File SAVE_DIR = new File(SharedConstants.DATA_FOLDER, "economy/banks");
-
     private static final Map<UUID, Map<String, BankRepository>> BANKS = new HashMap<>();
+
     private final UUID owner;
     private final String name;
     private BigDecimal balance;
@@ -59,6 +59,81 @@ public class BankRepository implements Repository {
         this.owner = owner;
         this.name = name;
         this.balance = balance;
+    }
+
+    /**
+     * 口座名を取得します。
+     *
+     * @return 口座名
+     */
+    public String getName() {
+        return this.name;
+    }
+
+    /**
+     * 口座の所有者を取得します。
+     *
+     * @return 口座の所有者
+     */
+    public UUID getOwner() {
+        return this.owner;
+    }
+
+    /**
+     * 口座に指定した金額を入金します。
+     *
+     * @param value 入金する金額
+     * @return 入金後の口座残高
+     */
+    @Override
+    public BigDecimal deposit(BigDecimal value) {
+        if (value.compareTo(BigDecimal.ZERO) > 0) throw new IllegalArgumentException("金額は0以上である必要があります。");
+        this.balance = this.balance.add(value);
+        return this.balance;
+    }
+
+    /**
+     * 口座から指定した金額を出金します。
+     *
+     * @param value 出金する金額
+     * @return 出金後の口座残高
+     */
+    @Override
+    public BigDecimal withdraw(BigDecimal value) {
+        if (value.compareTo(BigDecimal.ZERO) > 0) throw new IllegalArgumentException("金額は0以上である必要があります。");
+        this.balance = this.balance.subtract(value);
+        return this.balance;
+    }
+
+    /**
+     * 口座の残高を取得します。
+     *
+     * @return 口座残高
+     */
+    @Override
+    public BigDecimal getBalance() {
+        return this.balance;
+    }
+
+    /**
+     * 口座情報をファイルに書き込みます。
+     */
+    @Override
+    public synchronized void save() {
+        File dir = new File(SAVE_DIR, this.getOwner().toString());
+        if (dir.exists() || dir.mkdirs()) {
+            File file = new File(dir, this.getName() + ".yml");
+            try {
+                if (file.exists() || file.createNewFile()) {
+                    FileConfiguration config = YamlConfiguration.loadConfiguration(file);
+                    config.set("name", this.getName());
+                    config.set("balance", this.getBalance().doubleValue());
+                    config.save(file);
+                }
+            } catch (Throwable t) {
+                LOGGER.error("プレイヤー " + this.getOwner() + " の口座 " + this.getName() + " を保存できませんでした", t);
+            }
+        }
     }
 
     /**
@@ -131,7 +206,7 @@ public class BankRepository implements Repository {
                                         FileConfiguration config = YamlConfiguration.loadConfiguration(bankFile);
                                         if (config.contains("balance") && config.contains("name")) {
                                             String bankName = config.getString("name");
-                                            BigDecimal balance = new BigDecimal(config.getLong("balance"));
+                                            BigDecimal balance = BigDecimal.valueOf(config.getDouble("balance"));
                                             if (!isExists(owner, bankName)) {
                                                 BANKS.get(owner).put(bankName, new BankRepository(owner, bankName, balance));
                                             }
@@ -145,27 +220,12 @@ public class BankRepository implements Repository {
     }
 
     /**
-     * 口座情報をファイルに書き込みます。
+     * プレイヤーの所有する口座情報を全てファイルに書き込みます。
      *
      * @param owner 口座を所有するプレイヤー
      */
     public synchronized static void save(UUID owner) {
-        File dir = new File(SAVE_DIR, owner.toString());
-        if (dir.exists() || dir.mkdirs()) {
-            BANKS.get(owner).forEach((name, repo) -> {
-                File file = new File(dir, name + ".yml");
-                try {
-                    if (file.exists() || file.createNewFile()) {
-                        FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-                        config.set("name", repo.getName());
-                        config.set("balance", repo.getBalance().longValue()); // longValue!
-                        config.save(file);
-                    }
-                } catch (Throwable e) {
-                    LOGGER.error("プレイヤー " + owner + " の口座 " + name + " を保存できませんでした", e);
-                }
-            });
-        }
+        BANKS.get(owner).forEach((name, repo) -> repo.save());
     }
 
     /**
@@ -173,59 +233,5 @@ public class BankRepository implements Repository {
      */
     public synchronized static void saveAll() {
         BANKS.keySet().forEach(BankRepository::save);
-    }
-
-    /**
-     * 口座名を取得します。
-     *
-     * @return 口座名
-     */
-    public String getName() {
-        return this.name;
-    }
-
-    /**
-     * 口座の所有者を取得します。
-     *
-     * @return 口座の所有者
-     */
-    public UUID getOwner() {
-        return this.owner;
-    }
-
-    /**
-     * 口座に指定した金額を入金します。
-     *
-     * @param value 入金する金額
-     * @return 入金後の口座残高
-     */
-    @Override
-    public BigDecimal deposit(BigDecimal value) {
-        if (value.compareTo(BigDecimal.ZERO) > 0) throw new IllegalArgumentException("金額は0以上である必要があります。");
-        this.balance = this.balance.add(value);
-        return this.balance;
-    }
-
-    /**
-     * 口座から指定した金額を出金します。
-     *
-     * @param value 出金する金額
-     * @return 出金後の口座残高
-     */
-    @Override
-    public BigDecimal withdraw(BigDecimal value) {
-        if (value.compareTo(BigDecimal.ZERO) > 0) throw new IllegalArgumentException("金額は0以上である必要があります。");
-        this.balance = this.balance.subtract(value);
-        return this.balance;
-    }
-
-    /**
-     * 口座の残高を取得します。
-     *
-     * @return 口座残高
-     */
-    @Override
-    public BigDecimal getBalance() {
-        return this.balance;
     }
 }
