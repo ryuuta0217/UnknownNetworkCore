@@ -39,7 +39,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ThrownEgg;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;

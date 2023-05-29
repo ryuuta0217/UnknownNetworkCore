@@ -117,8 +117,7 @@ public class SkinCommand {
                 player.getRotationVector().y,
                 player.getRotationVector().x,
                 new HashSet<>(),
-                -1,
-                false);
+                -1);
 
         player.connection.send(toRemove);
         player.connection.send(toAdd);

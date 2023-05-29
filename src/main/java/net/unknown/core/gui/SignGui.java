@@ -41,7 +41,7 @@ import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.core.Vec3i;
 import net.unknown.core.events.PacketReceivedEvent;
 import net.unknown.core.events.interfaces.PacketListener;
 import net.unknown.core.managers.PacketManager;
@@ -49,8 +49,8 @@ import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_19_R2.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R3.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -106,7 +106,7 @@ public class SignGui {
 
         Location bukkitLoc = this.target.getLocation();
         bukkitLoc.setY(1);
-        Vec3 nmsLoc = new Vec3(bukkitLoc.getX(), bukkitLoc.getY(), bukkitLoc.getZ());
+        Vec3i nmsLoc = new Vec3i(bukkitLoc.getBlockX(), bukkitLoc.getBlockY(), bukkitLoc.getBlockZ());
         BlockPos blockPos = new BlockPos(nmsLoc);
         BlockState signBlock = CraftMagicNumbers.getBlock(this.signType).defaultBlockState();
 

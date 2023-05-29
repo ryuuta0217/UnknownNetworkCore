@@ -47,9 +47,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Fluid;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_19_R2.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_19_R2.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.v1_19_R2.util.CraftNamespacedKey;
+import org.bukkit.craftbukkit.v1_19_R3.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_19_R3.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_19_R3.util.CraftNamespacedKey;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -91,7 +91,7 @@ public class RegistryUtil {
                 Field f = org.bukkit.enchantments.Enchantment.class.getDeclaredField("acceptingNew");
                 if (f.trySetAccessible()) {
                     f.set(null, true);
-                    org.bukkit.enchantments.Enchantment.registerEnchantment(new org.bukkit.craftbukkit.v1_19_R2.enchantments.CraftEnchantment(enchant));
+                    org.bukkit.enchantments.Enchantment.registerEnchantment(new org.bukkit.craftbukkit.v1_19_R3.enchantments.CraftEnchantment(enchant));
                     f.set(null, false);
                 }
             } catch(IllegalAccessException | NoSuchFieldException e) {

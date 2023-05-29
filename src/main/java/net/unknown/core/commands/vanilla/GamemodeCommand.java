@@ -38,9 +38,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.LiteralContents;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import net.unknown.core.enums.Permissions;
@@ -88,7 +86,7 @@ public class GamemodeCommand {
             if (player.getBukkitEntity().getGameMode() != gameMode) {
                 player.getBukkitEntity().setGameMode(gameMode);
                 if (player.getBukkitEntity().getGameMode() != gameMode) {
-                    ctx.getSource().sendFailure(MutableComponent.create(new LiteralContents("Failed to set the gamemode of '" + player.getName() + "'")));
+                    ctx.getSource().sendFailure(Component.literal("Failed to set the gamemode of '" + player.getName() + "'"));
                 } else {
                     logGamemodeChange(ctx.getSource(), player, gameMode);
                 }
@@ -98,20 +96,20 @@ public class GamemodeCommand {
     }
 
     public static void logGamemodeChange(CommandSourceStack source, ServerPlayer player, GameMode gameMode) {
-        Component gameModeTranslation = MutableComponent.create(new TranslatableContents("gameMode." + gameMode.name().toLowerCase()));
+        Component gameModeTranslation = Component.translatable("gameMode." + gameMode.name().toLowerCase());
 
         if (source.getEntity() == player) {
             // 実行者と対象が一致する場合は、自身のゲームモードを変更したことを <source> に通知する
-            source.sendSuccess(MutableComponent.create(new TranslatableContents("commands.gamemode.success.self", gameModeTranslation)), true);
+            source.sendSuccess(Component.translatable("commands.gamemode.success.self", gameModeTranslation), true);
         } else {
             //　実行者と対象が一致しない
             if (source.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
                 // gameRule commandFeedbackがtrue
-                player.sendSystemMessage(MutableComponent.create(new TranslatableContents("gameMode.changed", gameModeTranslation)));
+                player.sendSystemMessage(Component.translatable("gameMode.changed", gameModeTranslation));
             }
 
             // 他のプレイヤーのゲームモードを変更したことを <source> に通知する
-            source.sendSuccess(MutableComponent.create(new TranslatableContents("commands.gamemode.success.other", player.getScoreboardName(), gameModeTranslation)), true);
+            source.sendSuccess(Component.translatable("commands.gamemode.success.other", player.getScoreboardName(), gameModeTranslation), true);
         }
     }
 

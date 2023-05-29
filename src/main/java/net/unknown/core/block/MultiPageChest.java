@@ -40,7 +40,7 @@ import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import net.unknown.UnknownNetworkCore;
-import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_19_R3.inventory.CraftInventory;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
