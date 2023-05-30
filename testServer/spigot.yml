@@ -108,6 +108,7 @@ world-settings:
       item: 2.5
       exp: 3.0
     entity-tracking-range:
+      display: 128
       players: 48
       animals: 48
       monsters: 48
@@ -140,6 +141,7 @@ world-settings:
         flying-monsters-every: 200
         flying-monsters-for: 100
     growth:
+      torchflower-modifier: 100
       twistingvines-modifier: 100
       weepingvines-modifier: 100
       cavevines-modifier: 100
