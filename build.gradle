@@ -118,7 +118,7 @@ task downloadWaterfall(type: Task) {
 
     if (!wf.exists()) {
         download {
-            src "https://api.papermc.io/v2/projects/waterfall/versions/1.19/builds/519/downloads/waterfall-1.19-519.jar"
+            src "https://api.papermc.io/v2/projects/waterfall/versions/1.19/builds/526/downloads/waterfall-1.19-526.jar"
             dest 'libs/standalone/waterfall.jar'
         }
 
