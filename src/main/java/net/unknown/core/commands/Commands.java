@@ -33,7 +33,6 @@ package net.unknown.core.commands;
 
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.commands.vanilla.GamemodeCommand;
-import net.unknown.core.commands.vanilla.KillCommand;
 import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.commands.vanilla.TimeCommand;
 
@@ -49,7 +48,6 @@ public class Commands {
         MsgCommand.register(UnknownNetworkCore.getBrigadier());
         TeleportWorldCommand.register(UnknownNetworkCore.getBrigadier());
         DeepFakeCommand.register(UnknownNetworkCore.getBrigadier());
-        KillCommand.register(UnknownNetworkCore.getBrigadier());
         SkullCommand.register(UnknownNetworkCore.getBrigadier());
         TrashCommand.register(UnknownNetworkCore.getBrigadier());
         TimeCommand.register(UnknownNetworkCore.getBrigadier());

@@ -39,7 +39,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.events.PacketReceivedEvent;
 import net.unknown.core.events.interfaces.PacketListener;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -115,7 +115,7 @@ public class PacketManager implements Listener {
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        Channel c = ((CraftPlayer) event.getPlayer()).getHandle().connection.getConnection().channel;
+        Channel c = ((CraftPlayer) event.getPlayer()).getHandle().connection.connection.channel;
         c.eventLoop().submit(() -> c.pipeline().remove(event.getPlayer().getName()));
     }
 }

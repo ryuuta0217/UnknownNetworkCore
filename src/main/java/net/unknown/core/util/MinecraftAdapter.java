@@ -33,7 +33,9 @@ package net.unknown.core.util;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.chat.SignedMessage;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.PlayerChatMessage;
@@ -45,12 +47,12 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_19_R2.CraftWorld;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftInventory;
-import org.bukkit.craftbukkit.v1_19_R2.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_19_R2.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R3.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_19_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_19_R3.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.Contract;
@@ -121,7 +123,7 @@ public class MinecraftAdapter {
 
     @Contract("_ -> new;")
     public static net.minecraft.core.BlockPos blockPos(Location bukkit) {
-        return new net.minecraft.core.BlockPos(bukkit.getX(), bukkit.getY(), bukkit.getZ());
+        return new net.minecraft.core.BlockPos(bukkit.getBlockX(), bukkit.getBlockY(), bukkit.getBlockZ());
     }
 
     public static net.minecraft.server.level.ServerLevel level(World world) {

@@ -40,8 +40,8 @@ import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftHumanEntity;
-import org.bukkit.craftbukkit.v1_19_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
 import org.spigotmc.SpigotConfig;
 
 public class NewMessageUtil {
@@ -263,7 +263,7 @@ public class NewMessageUtil {
     private static void broadcastCommandFeedback(Component component, CommandSourceStack source, boolean error) {
         // commandBlockOutput: false の時にコマンドブロックからfeedbackが出ることを防ぐが、エラーの時は無視する
         if (!error && !source.source.shouldInformAdmins()) return;
-        MutableComponent msg = MutableComponent.create(new TranslatableContents("chat.type.admin", source.getDisplayName(), component))
+        MutableComponent msg = Component.translatable("chat.type.admin", source.getDisplayName(), component)
                 .withStyle(error ? ChatFormatting.RED : ChatFormatting.GRAY, ChatFormatting.ITALIC);
 
         source.getServer().getPlayerList().getPlayers().forEach(player -> {

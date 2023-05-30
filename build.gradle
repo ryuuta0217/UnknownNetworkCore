@@ -56,13 +56,13 @@ repositories {
 }
 
 dependencies {
-    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.19.3-R0.1-SNAPSHOT")
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.19.4-R0.1-SNAPSHOT")
     compileOnly fileTree(dir: "libs", include: "*.jar")
     compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '+'
     compileOnly group: 'com.github.MilkBowl', name: 'VaultAPI', version: '+'
     compileOnly group: 'net.luckperms', name: 'api', version: '+'
-    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'e083fbd6'
-    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'e083fbd6', classifier: 'spigot'
+    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: '5067cf46'
+    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: '5067cf46', classifier: 'spigot'
     implementation group: 'org.mozilla', name: 'rhino', version: '+'
     compileOnly group: 'com.github.NuVotifier', name: 'NuVotifier', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
@@ -109,6 +109,8 @@ task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
     classpath(configurations.launchwrapper)
     args("--nogui", "--add-plugin=../build/libs/UnknownNetworkCore.jar")
     workingDir(project.file("testServer"))
+    systemProperty "UnknownNetworkMagic", "1.20"
+    systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
 }
 
 task downloadWaterfall(type: Task) {
@@ -116,7 +118,7 @@ task downloadWaterfall(type: Task) {
 
     if (!wf.exists()) {
         download {
-            src "https://api.papermc.io/v2/projects/waterfall/versions/1.19/builds/519/downloads/waterfall-1.19-519.jar"
+            src "https://api.papermc.io/v2/projects/waterfall/versions/1.19/builds/526/downloads/waterfall-1.19-526.jar"
             dest 'libs/standalone/waterfall.jar'
         }
 
