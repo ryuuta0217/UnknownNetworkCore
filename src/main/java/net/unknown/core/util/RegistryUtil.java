@@ -111,7 +111,7 @@ public class RegistryUtil {
                 if (key != null) {
                     int rawId = mappedRegistry.getId(objectFrom);
                     unfreeze(registry);
-                    mappedRegistry.register(key, objectTo, lifecycle);
+                    mappedRegistry.register(key, objectTo, lifecycle); // TODO its now duplicate register. first, remove() to try replace.
                     freeze(registry);
 
                     T result = registry.get(id);
