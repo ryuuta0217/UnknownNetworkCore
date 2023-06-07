@@ -32,9 +32,7 @@
 package net.unknown.survival.enchants;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
@@ -48,10 +46,12 @@ import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.BlockUtil;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChainDestruction implements Listener {
     public static final Set<Block> CHAIN_DESTRUCT_TARGETS = new HashSet<>() {{
@@ -95,7 +95,7 @@ public class ChainDestruction implements Listener {
 
     public static final Map<UUID, Set<BlockPos>> IGNORE_EVENT = new HashMap<>();
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBlockBreak(BlockBreakEvent event) {
         BlockPos breakBlockPos = MinecraftAdapter.blockPos(event.getBlock().getLocation());
 
@@ -110,42 +110,48 @@ public class ChainDestruction implements Listener {
         if (player == null) return;
 
         /* Enchant test */
-        ItemStack selectedITem = player.getMainHandItem();
+        ItemStack selectedItem = player.getMainHandItem();
         org.bukkit.inventory.ItemStack selectedItemB = event.getPlayer().getInventory().getItemInMainHand();
-        if (!(selectedITem.getItem() instanceof PickaxeItem) && !(selectedITem.getItem() instanceof AxeItem)) return;
-        if (selectedItemB.lore() == null) return;
-        List<String> lore = selectedItemB.lore().stream().map(LegacyComponentSerializer.legacySection()::serialize).toList();
-        if (lore.stream().noneMatch(s -> s.startsWith("§7一括破壊"))) return;
+        if (!(selectedItem.getItem() instanceof PickaxeItem) && !(selectedItem.getItem() instanceof AxeItem)) return;
+        if (!CustomEnchantUtil.hasEnchantment("一括破壊", selectedItemB)) return;
         /* test end */
 
-        int maxBlocks = (selectedITem.getItem() instanceof PickaxeItem ? 8 : 32) * CustomEnchantUtil.getEnchantmentLevel(lore.stream().filter(s -> s.startsWith("§7一括破壊")).toList().get(0));
+        int maxBlocks = (selectedItem.getItem() instanceof PickaxeItem ? 8 : 32) * CustomEnchantUtil.getEnchantmentLevel(CustomEnchantUtil.getEnchantmentLine("§7一括破壊", selectedItemB));
 
         ServerLevel level = MinecraftAdapter.level(event.getBlock().getLocation().getWorld());
         BlockState blockState = MinecraftAdapter.blockState(event.getBlock());
         Block chainDestructTarget = blockState.getBlock();
         if (!CHAIN_DESTRUCT_TARGETS.contains(chainDestructTarget)) return;
-        if (blockState.is(BlockTags.LOGS) && !(selectedITem.getItem() instanceof AxeItem)) return;
+        if (blockState.is(BlockTags.LOGS) && !(selectedItem.getItem() instanceof AxeItem)) return;
         if (!player.hasCorrectToolForDrops(blockState)) return;
-        if (selectedITem.getItem().getMaxDamage() - selectedITem.getDamageValue() == 1) return;
+        if (selectedItem.getItem().getMaxDamage() - selectedItem.getDamageValue() == 1) return;
 
         Set<BlockPos> toBreak = new HashSet<>();
 
         BlockUtil.searchBlock(breakBlockPos, maxBlocks, level, chainDestructTarget, toBreak);
 
-        IGNORE_EVENT.put(event.getPlayer().getUniqueId(), new HashSet<>(toBreak));
+        IGNORE_EVENT.put(player.getUUID(), new HashSet<>());
+
+        AtomicInteger delay = new AtomicInteger(0);
 
         toBreak.forEach(pos -> {
-            if (player.getMainHandItem().equals(selectedITem)) {
-                if ((selectedITem.getItem().getMaxDamage() - selectedITem.getDamageValue()) > 1) {
-                    BlockUtil.destroyBlock(player, level, pos, selectedITem);
-                } else {
-                    player.getBukkitEntity().sendActionBar(Component.text("耐久値がなくなりました", DefinedTextColor.RED));
-                    IGNORE_EVENT.getOrDefault(player.getUUID(), new HashSet<>()).remove(pos);
+            RunnableManager.runDelayed(() -> {
+                if (player.getMainHandItem().equals(selectedItem)) {
+                    if ((selectedItem.getItem().getMaxDamage() - selectedItem.getDamageValue()) > 1) {
+                        IGNORE_EVENT.get(player.getUUID()).add(pos);
+                        try {
+                            player.gameMode.destroyBlock(pos);
+                        } catch(Exception ignored) {}
+                        IGNORE_EVENT.get(player.getUUID()).remove(pos);
+                    } else {
+                        player.getBukkitEntity().sendActionBar(Component.text("耐久値がなくなりました", DefinedTextColor.RED));
+                    }
                 }
-            }
+            }, delay.getAndAdd(2));
         });
+
         RunnableManager.runAsyncDelayed(() -> {
             IGNORE_EVENT.getOrDefault(player.getUUID(), new HashSet<>()).clear();
-        }, 2L);
+        }, delay.get());
     }
 }
