@@ -31,7 +31,6 @@
 
 package net.unknown.survival.enchants;
 
-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -56,13 +55,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AutoSmelting implements Listener {
     public static boolean DEBUG = false;
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.LOW)
     public void onBlockBreak(BlockBreakEvent event) {
         ServerPlayer player = MinecraftAdapter.player(event.getPlayer());
         if (player == null) return;
@@ -73,8 +71,7 @@ public class AutoSmelting implements Listener {
         org.bukkit.inventory.ItemStack selectedItemB = event.getPlayer().getInventory().getItemInMainHand();
         if (!(selectedItem.getItem() instanceof DiggerItem)) return;
         if (selectedItemB.lore() == null) return;
-        List<String> lore = selectedItemB.lore().stream().map(LegacyComponentSerializer.legacySection()::serialize).toList();
-        if (lore.stream().noneMatch(s -> s.startsWith("§7自動精錬"))) return;
+        if (!CustomEnchantUtil.hasEnchantment("自動精錬", selectedItemB)) return;
 
         ServerLevel level = MinecraftAdapter.level(event.getBlock().getWorld());
         BlockState blockState = level.getBlockState(blockPos);
@@ -88,30 +85,26 @@ public class AutoSmelting implements Listener {
             }
         };
         dummyFurnace.setLevel(level);
+        if (DEBUG) player.openMenu(dummyFurnace); // for debug
         dummyFurnace.setItem(1, new ItemStack(Items.LAVA_BUCKET, 1));
-        List<ItemStack> drops = Block.getDrops(blockState, level, blockPos, blockEntity, player, player.getMainHandItem());
-        List<ItemStack> newDrops = new ArrayList<>();
-        if (drops.size() > 0) {
-            drops.forEach(drop -> {
-                dummyFurnace.setItem(0, drop);
-                List<SmeltingRecipe> recipes = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, dummyFurnace, level);
-                if (recipes.size() > 0) {
-                    ItemStack result = recipes.get(0).getResultItem(level.registryAccess());
-                    result.setCount(drop.getCount());
-                    dummyFurnace.setItem(2, result);
-                    newDrops.add(result);
-                } else {
-                    newDrops.add(drop);
-                }
-            });
-            if (DEBUG) player.openMenu(dummyFurnace); // for debug
-        }
+
+        List<ItemStack> newDrops = Block.getDrops(blockState, level, blockPos, blockEntity).stream()
+                .map(minecraftDropStack -> {
+                    dummyFurnace.setItem(0, minecraftDropStack);
+                    List<SmeltingRecipe> recipes = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, dummyFurnace, level);
+                    if (recipes.size() > 0) {
+                        ItemStack smeltingResult = recipes.get(0).getResultItem(level.registryAccess());
+                        smeltingResult.setCount(minecraftDropStack.getCount());
+                        return smeltingResult;
+                    }
+                    return minecraftDropStack;
+                })
+                .toList();
+
         if (level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && event.isDropItems() && newDrops.size() > 0) {
-            newDrops.forEach(drop -> {
-                Block.popResource(level, blockPos, drop);
-            });
-            player.playNotifySound(SoundEvents.GENERIC_BURN, SoundSource.BLOCKS, 0.3f, 1.0f);
             event.setDropItems(false);
+            newDrops.forEach(minecraftDropStack -> Block.popResource(level, blockPos, minecraftDropStack));
+            player.playNotifySound(SoundEvents.GENERIC_BURN, SoundSource.BLOCKS, 0.3f, 1.0f);
         }
     }
 }
