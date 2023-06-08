@@ -33,6 +33,7 @@ package net.unknown.survival;
 
 import net.milkbowl.vault.economy.Economy;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.discord.UnknownNetworkDiscordBot;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.antivillagerlag.AntiVillagerLag;
 import net.unknown.survival.bossbar.BlueMapBar;
@@ -42,6 +43,7 @@ import net.unknown.survival.commands.Commands;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
+import net.unknown.survival.discord.MinecraftToDiscordMessageListener;
 import net.unknown.survival.enchants.*;
 import net.unknown.survival.enchants.nms.DamageEnchant;
 import net.unknown.survival.events.ModifiableBlockBreakEvent;
@@ -83,6 +85,8 @@ public class UnknownNetworkSurvival {
             BOOTSTRAPPED = true;
         } catch (ClassNotFoundException ignored) {
         }
+
+        UnknownNetworkDiscordBot.runAnotherThread(UnknownNetworkDiscordBot.defaultBuilder());
     }
 
     public static void onEnable() {
@@ -117,6 +121,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new ServerRestartListener());
         ListenerManager.registerListener(new ProtectedAreaTestStick());
         ListenerManager.registerListener(new PlayerJoinListener());
+        ListenerManager.registerListener(new MinecraftToDiscordMessageListener());
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");
