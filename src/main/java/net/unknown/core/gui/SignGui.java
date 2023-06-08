@@ -53,6 +53,7 @@ import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_19_R3.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 import java.util.*;
@@ -101,6 +102,7 @@ public class SignGui {
         if (this.completeHandler == null) logger.warning("Complete handler is null, it is stupid.");
         if (SignGui.SIGN_GUI_OPENED.containsKey(this.target.getUniqueId()))
             throw new IllegalStateException("Double Sign Gui?");
+        this.target.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
 
         ServerPlayer nmsTarget = ((CraftPlayer) this.target).getHandle();
 
