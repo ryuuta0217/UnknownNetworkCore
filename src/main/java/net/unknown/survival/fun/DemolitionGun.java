@@ -36,7 +36,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCore;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

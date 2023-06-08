@@ -40,6 +40,7 @@ import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.core.Vec3i;
 import net.unknown.core.events.PacketReceivedEvent;
@@ -49,8 +50,8 @@ import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_19_R3.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryCloseEvent;
@@ -116,12 +117,14 @@ public class SignGui {
         nmsTarget.connection.send(blockUpdatePacket); // set sign block
 
         SignBlockEntity sign = new SignBlockEntity(blockPos, signBlock);
+        SignText signText = new SignText();
         for (int i = 0; i < this.defaultLines.length; i++) {
-            sign.setMessage(i, this.defaultLines[i]);
+            signText.setMessage(i, this.defaultLines[i]);
         }
+        sign.setText(signText, true);
         nmsTarget.connection.send(sign.getUpdatePacket()); // set lines
 
-        ClientboundOpenSignEditorPacket signEditorPacket = new ClientboundOpenSignEditorPacket(blockPos);
+        ClientboundOpenSignEditorPacket signEditorPacket = new ClientboundOpenSignEditorPacket(blockPos, true);
 
         nmsTarget.connection.send(signEditorPacket); // show sign editor
 

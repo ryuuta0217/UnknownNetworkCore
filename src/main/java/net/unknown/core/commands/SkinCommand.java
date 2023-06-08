@@ -101,15 +101,16 @@ public class SkinCommand {
         // this.gameMode.getPreviousGameModeForPlayer(),
         // worldserver.isDebug(), worldserver.isFlat(), true, this.getLastDeathLocation()));
         ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(
-                player.getLevel().dimensionTypeId(),
-                player.getLevel().dimension(),
-                BiomeManager.obfuscateSeed(player.getLevel().getSeed()),
+                player.serverLevel().dimensionTypeId(),
+                player.serverLevel().dimension(),
+                BiomeManager.obfuscateSeed(player.serverLevel().getSeed()),
                 player.gameMode.getGameModeForPlayer(),
                 player.gameMode.getPreviousGameModeForPlayer(),
-                player.getLevel().isDebug(),
-                player.getLevel().isFlat(),
+                player.serverLevel().isDebug(),
+                player.serverLevel().isFlat(),
                 (byte) 3,
-                player.getLastDeathLocation());
+                player.getLastDeathLocation(),
+                player.getPortalCooldown());
         ClientboundPlayerPositionPacket teleport = new ClientboundPlayerPositionPacket(
                 player.position().x(),
                 player.position().y(),

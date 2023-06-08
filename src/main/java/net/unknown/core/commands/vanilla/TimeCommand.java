@@ -57,7 +57,7 @@ import net.unknown.core.commands.brigadier.CustomBrigadierExceptions;
 import net.unknown.core.managers.RunnableManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.world.TimeSkipEvent;
@@ -126,7 +126,7 @@ public class TimeCommand {
             default -> throw new IllegalStateException("Failed to parse");
         }
 
-        source.sendSuccess(Component.translatable("commands.time.query", time), false);
+        source.sendSuccess(() -> Component.translatable("commands.time.query", time), false);
         return time;
     }
 
@@ -162,7 +162,7 @@ public class TimeCommand {
             // CraftBukkit end
         }
 
-        source.sendSuccess(Component.translatable("commands.time.set", time), true);
+        source.sendSuccess(() -> Component.translatable("commands.time.set", time), true);
         return TimeCommand.getDayTime(source.getLevel());
     }
 
@@ -191,7 +191,7 @@ public class TimeCommand {
 
         int j = TimeCommand.getDayTime(source.getLevel());
 
-        source.sendSuccess(Component.translatable("commands.time.set", j), true);
+        source.sendSuccess(() -> Component.translatable("commands.time.set", j), true);
         return j;
     }
 

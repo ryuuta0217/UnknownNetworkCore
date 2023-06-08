@@ -53,7 +53,7 @@ import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
