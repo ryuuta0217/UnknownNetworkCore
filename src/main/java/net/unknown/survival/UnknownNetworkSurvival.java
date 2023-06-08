@@ -33,6 +33,7 @@ package net.unknown.survival;
 
 import net.milkbowl.vault.economy.Economy;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.discord.UnknownNetworkDiscordBot;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.antivillagerlag.AntiVillagerLag;
 import net.unknown.survival.bossbar.BlueMapBar;
@@ -83,6 +84,8 @@ public class UnknownNetworkSurvival {
             BOOTSTRAPPED = true;
         } catch (ClassNotFoundException ignored) {
         }
+
+        UnknownNetworkDiscordBot.runAnotherThread(UnknownNetworkDiscordBot.defaultBuilder());
     }
 
     public static void onEnable() {
@@ -117,6 +120,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new ServerRestartListener());
         ListenerManager.registerListener(new ProtectedAreaTestStick());
         ListenerManager.registerListener(new PlayerJoinListener());
+        ListenerManager.registerListener(new DiscordAudience.MinecraftListener());
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");
