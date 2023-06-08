@@ -112,7 +112,7 @@ public class ModifiableBlockBreakEvent extends Event {
             return INSTANCE;
         }
 
-        @EventHandler(priority = EventPriority.MONITOR)
+        @EventHandler(priority = EventPriority.LOWEST)
         public void onBlockBreak(BlockBreakEvent event) {
             ModifiableBlockBreakEvent modifiable = new ModifiableBlockBreakEvent(event);
             Bukkit.getPluginManager().callEvent(modifiable);

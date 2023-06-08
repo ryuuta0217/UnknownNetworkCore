@@ -33,9 +33,6 @@ package net.unknown.survival.enchants;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.PickaxeItem;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.HashMap;
@@ -75,15 +72,17 @@ public class CustomEnchantUtil {
     }
 
     public static int getEnchantmentLevel(String loreLine) {
-        String[] split = loreLine.split(" ", 2);
-        if (split.length == 1) return 1;
+        if (loreLine != null) {
+            String[] split = loreLine.split(" ", 2);
+            if (split.length == 1) return 1;
 
-        if (isRoman(split[1])) {
-            return convertRomanToArabic(split[1]);
-        } else if (split[1].matches("\\d+")) {
-            try {
-                return Integer.parseInt(split[1]);
-            } catch (NumberFormatException ignored) {
+            if (isRoman(split[1])) {
+                return convertRomanToArabic(split[1]);
+            } else if (split[1].matches("\\d+")) {
+                try {
+                    return Integer.parseInt(split[1]);
+                } catch (NumberFormatException ignored) {
+                }
             }
         }
 

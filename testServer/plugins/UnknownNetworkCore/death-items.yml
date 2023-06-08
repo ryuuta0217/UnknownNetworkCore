@@ -1,0 +1,33 @@
+death_items:
+  77196405-24a5-4624-b4f5-95aeb9d36d14:
+    '1':
+      removal_time: 1685739984192
+      location:
+        world: world
+        x: 44.0
+        y: -56.0
+        z: -32.0
+        yaw: 0.0
+        pitch: 0.0
+      items:
+      - '{Count:1b,id:"minecraft:light"}'
+      - '{Count:1b,id:"minecraft:wheat"}'
+      - '{Count:3b,id:"minecraft:wheat_seeds"}'
+    '2':
+      removal_time: 1685740156164
+      location:
+        world: world_nether
+        x: 4.0
+        y: 20.0
+        z: -23.0
+        yaw: 0.0
+        pitch: 0.0
+      items:
+      - '{Count:22b,id:"minecraft:dirt"}'
+      - '{Count:1b,id:"minecraft:iron_chestplate",tag:{Damage:0,GNDrive:{Capacity:{Current:5000L,Maximum:5000L},Generator:{Current:100L,Maximum:100L,Minimum:20L},ID:[I;1847511131,-1897641258,-1148272989,-1514129512],Modules:{Disabled:[],Enabled:["gnarms:fly"]},Owner:[I;1704078933,78858434,-1527293127,915582452]},display:{Lore:[''{"text":"==========",
+        "color":"gray", "italic":"false"}'',''{"text":"==== 有効なモジュール ===", "color":"green",
+        "italic":"false"}'',''[{"text":"[*]", "color":"green", "bold":"true", "italic":"false"},
+        {"text":" ", "color":"white"}, {"text":"飛行", "color":"green", "italic":"false"}]'',''{"text":"====
+        無効なモジュール ===", "color":"red", "italic":"false"}'',''{"text":"     なし", "color":"gray",
+        "italic":"false"}'',''{"text":"現在の粒子生産量: 100", "color":"aqua", "italic":"false"}'',''{"text":"現在の粒子貯蔵量:
+        5080/5000", "color":"aqua", "italic":"false"}''],Name:''{"bold":true,"italic":false,"color":"green","text":"GNドライヴ"}''}}}'

@@ -161,15 +161,14 @@ public class BlockUtil {
             ItemStack usedToolCopy = usedTool.copy();
             boolean isCorrectTool = !blockState.requiresCorrectToolForDrops() || usedTool.isCorrectToolForDrops(blockState);
 
-            if (!player.isCreative()) {
-                usedTool.mineBlock(level, blockState, pos, player);
-                if (removed && isCorrectTool && event.isDropItems()) {
-                    block.playerDestroy(level, player, pos, blockState, blockEntity, usedToolCopy);
+            if (!player.isCreative()) { // Player is not creative mode
+                usedTool.mineBlock(level, blockState, pos, player); // awardStat() to UsedTool
+                if (removed && isCorrectTool && event.isDropItems()) { // Successfully removed block, is correct tool, dropItems true.
+                    block.playerDestroy(level, player, pos, blockState, blockEntity, usedToolCopy); // awardStat() to Block, hungry, popResource
                 }
             }
 
             List<ItemEntity> itemsToDrop = level.captureDrops;
-            itemsToDrop.forEach(itemEntity -> itemEntity.moveTo(player.position()));
             level.captureDrops = null;
             if (event.isDropItems()) {
                 CraftEventFactory.handleBlockDropItemEvent(bukkitBlock, bukkitBlockState, player, itemsToDrop);
