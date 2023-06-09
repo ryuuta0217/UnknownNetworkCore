@@ -100,7 +100,7 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
     }
 
     public void reassessWeaponGoal() {
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             this.goalSelector.removeGoal(this.meleeGoal);
             this.goalSelector.removeGoal(this.bowGoal);
 
@@ -117,14 +117,14 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
     @Nullable
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnReason, @Nullable SpawnGroupData entityData, @Nullable CompoundTag entityNbt) {
-        if (!this.level.isClientSide) this.reassessWeaponGoal();
+        if (!this.level().isClientSide) this.reassessWeaponGoal();
         return super.finalizeSpawn(world, difficulty, spawnReason, entityData, entityNbt);
     }
 
     @Override
     public void readAdditionalSaveData(CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             this.reassessWeaponGoal();
         }
     }
@@ -132,7 +132,7 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
     @Override
     public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
         super.setItemSlot(slot, stack);
-        if (!this.level.isClientSide) {
+        if (!this.level().isClientSide) {
             this.reassessWeaponGoal();
         }
     }
@@ -146,7 +146,7 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
         double z = target.getZ() - this.getZ();
         double f = Math.sqrt(x * x + z * z);
 
-        arrow.shoot(x, y + f * 0.20000000298023224D, z, 1.6F, (float) (14 - this.level.getDifficulty().getId() * 4));
+        arrow.shoot(x, y + f * 0.20000000298023224D, z, 1.6F, (float) (14 - this.level().getDifficulty().getId() * 4));
         EntityShootBowEvent event = CraftEventFactory.callEntityShootBowEvent(this, this.getMainHandItem(), arrow.getPickupItem(), arrow, net.minecraft.world.InteractionHand.MAIN_HAND, 0.8F, true); // Paper
         if (event.isCancelled()) {
             event.getProjectile().remove();
