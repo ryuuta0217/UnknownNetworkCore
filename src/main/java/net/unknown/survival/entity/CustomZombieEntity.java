@@ -154,7 +154,7 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
         }
 
         if (event.getProjectile() == arrow.getBukkitEntity()) {
-            level.addFreshEntity(arrow);
+            this.level().addFreshEntity(arrow);
         }
         this.playSound(SoundEvents.SKELETON_SHOOT, 1.0F, 1.0F / (this.getRandom().nextFloat() * 0.4F + 0.8F));
     }
