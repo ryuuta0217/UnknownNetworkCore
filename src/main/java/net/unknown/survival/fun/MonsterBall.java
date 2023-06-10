@@ -39,7 +39,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ThrownEgg;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.CreatureSpawnEvent;
@@ -72,8 +72,8 @@ public class MonsterBall implements Listener {
                         spawnEggTag.put("EntityTag", entityTag);
                         spawnEgg.setTag(spawnEggTag);
 
-                        ItemEntity e = new ItemEntity(mob.getLevel(), mob.getX(), mob.getY(), mob.getZ(), spawnEgg);
-                        mob.getLevel().addFreshEntity(e, CreatureSpawnEvent.SpawnReason.EGG);
+                        ItemEntity e = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), spawnEgg);
+                        mob.level().addFreshEntity(e, CreatureSpawnEvent.SpawnReason.EGG);
                         mob.kill();
                     }
                 }

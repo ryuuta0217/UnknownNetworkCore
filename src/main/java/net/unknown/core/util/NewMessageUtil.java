@@ -40,15 +40,15 @@ import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftHumanEntity;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.spigotmc.SpigotConfig;
 
 public class NewMessageUtil {
     /* NORMAL MESSAGES */
     /* START - Minecraft Components & ROOT */
     public static void sendMessage(CommandSourceStack source, Component component, boolean broadcastToOps) {
-        source.sendSuccess(NewMessageUtil.format(component), false);
+        source.sendSuccess(() -> NewMessageUtil.format(component), false);
         if (broadcastToOps) broadcastCommandFeedback(component, source, false);
     }
 
@@ -273,7 +273,7 @@ public class NewMessageUtil {
                 //  ワールドA(sendCommandFeedback: false) で実行されたコマンドがワールドB(sendCommandFeedback: true)のワールドで表示される
                 //  → プレイヤーの行動追跡に若干の難が生まれる？
                 //  ただし、実行者のワールドAがtrueでも受信者のいるワールドBがfalseだとフィードバックを受信できない
-                if (player.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
+                if (player.serverLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
                     player.sendSystemMessage(msg);
                 }
             }

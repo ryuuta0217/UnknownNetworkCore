@@ -149,6 +149,10 @@ public class EvalCommand {
     }
 
     public static class Util {
+        public Class<?> getClass(Object obj) {
+            return obj.getClass();
+        }
+
         public Method[] getMethods(Object targetObj) {
             return Arrays.stream(targetObj.getClass().getMethods())
                     .filter(m -> m.canAccess(targetObj))

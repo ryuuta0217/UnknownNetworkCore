@@ -100,7 +100,7 @@ public class GamemodeCommand {
 
         if (source.getEntity() == player) {
             // 実行者と対象が一致する場合は、自身のゲームモードを変更したことを <source> に通知する
-            source.sendSuccess(Component.translatable("commands.gamemode.success.self", gameModeTranslation), true);
+            source.sendSuccess(() -> Component.translatable("commands.gamemode.success.self", gameModeTranslation), true);
         } else {
             //　実行者と対象が一致しない
             if (source.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
@@ -109,7 +109,7 @@ public class GamemodeCommand {
             }
 
             // 他のプレイヤーのゲームモードを変更したことを <source> に通知する
-            source.sendSuccess(Component.translatable("commands.gamemode.success.other", player.getScoreboardName(), gameModeTranslation), true);
+            source.sendSuccess(() -> Component.translatable("commands.gamemode.success.other", player.getScoreboardName(), gameModeTranslation), true);
         }
     }
 

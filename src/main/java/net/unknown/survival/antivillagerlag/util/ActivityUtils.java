@@ -36,7 +36,7 @@ import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.entity.schedule.Schedule;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftVillager;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftVillager;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.memory.MemoryKey;
 

@@ -46,7 +46,7 @@ import net.minecraft.world.item.ItemStack;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_19_R3.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHumanEntity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

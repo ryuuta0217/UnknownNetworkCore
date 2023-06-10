@@ -52,7 +52,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.unknown.core.managers.RunnableManager;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_19_R3.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.EnumSet;
@@ -218,13 +218,13 @@ public class TomatoZombieEntity extends Zombie {
 
                         if (this.attackStep > 1) {
                             if (!this.zombie.isSilent()) {
-                                this.zombie.level.levelEvent(null, 1018, this.zombie.blockPosition(), 0);
+                                this.zombie.level().levelEvent(null, 1018, this.zombie.blockPosition(), 0);
                             }
 
                             for (int i = 0; i < 1; ++i) {
-                                SmallFireball smallFireball = new SmallFireball(this.zombie.level, this.zombie, x + (this.zombie.getRandom().nextGaussian() / 2), y, z + (this.zombie.getRandom().nextGaussian() / 2));
+                                SmallFireball smallFireball = new SmallFireball(this.zombie.level(), this.zombie, x + (this.zombie.getRandom().nextGaussian() / 2), y, z + (this.zombie.getRandom().nextGaussian() / 2));
                                 smallFireball.setPos(smallFireball.getX(), this.zombie.getY(0.5D) + 0.5D, smallFireball.getZ());
-                                this.zombie.level.addFreshEntity(smallFireball);
+                                this.zombie.level().addFreshEntity(smallFireball);
                             }
                         }
                     }
