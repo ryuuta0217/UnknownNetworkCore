@@ -38,6 +38,7 @@ import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundOpenSignEditorPacket;
 import net.minecraft.network.protocol.game.ServerboundSignUpdatePacket;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
@@ -48,6 +49,7 @@ import net.unknown.core.events.interfaces.PacketListener;
 import net.unknown.core.managers.PacketManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
@@ -105,31 +107,47 @@ public class SignGui {
             throw new IllegalStateException("Double Sign Gui?");
         this.target.closeInventory(InventoryCloseEvent.Reason.PLUGIN);
 
-        ServerPlayer nmsTarget = ((CraftPlayer) this.target).getHandle();
+        RunnableManager.runDelayed(() -> {
+            ServerPlayer nmsTarget = ((CraftPlayer) this.target).getHandle();
 
-        Location bukkitLoc = this.target.getLocation();
-        bukkitLoc.setY(1);
-        Vec3i nmsLoc = new Vec3i(bukkitLoc.getBlockX(), bukkitLoc.getBlockY(), bukkitLoc.getBlockZ());
-        BlockPos blockPos = new BlockPos(nmsLoc);
-        BlockState signBlock = CraftMagicNumbers.getBlock(this.signType).defaultBlockState();
+            ServerLevel level = nmsTarget.serverLevel();
+            BlockPos blockPos = nmsTarget.blockPosition().above(2);
+            BlockState signBlock = CraftMagicNumbers.getBlock(this.signType).defaultBlockState();
 
-        ClientboundBlockUpdatePacket blockUpdatePacket = new ClientboundBlockUpdatePacket(blockPos, signBlock);
-        nmsTarget.connection.send(blockUpdatePacket); // set sign block
+            /* Place “Virtual Sign” that are visible only to the target  */
+            ClientboundBlockUpdatePacket blockUpdatePacket = new ClientboundBlockUpdatePacket(blockPos, signBlock);
+            nmsTarget.connection.send(blockUpdatePacket); // set sign block
 
-        SignBlockEntity sign = new SignBlockEntity(blockPos, signBlock);
-        SignText signText = new SignText();
-        for (int i = 0; i < this.defaultLines.length; i++) {
-            signText.setMessage(i, this.defaultLines[i]);
-        }
-        sign.setText(signText, true);
-        nmsTarget.connection.send(sign.getUpdatePacket()); // set lines
+            /* Create instance "Virtual Sign" */
+            SignBlockEntity sign = new SignBlockEntity(blockPos, signBlock);
+            sign.setAllowedPlayerEditor(this.target.getUniqueId());
 
-        ClientboundOpenSignEditorPacket signEditorPacket = new ClientboundOpenSignEditorPacket(blockPos, true);
+            /* Set virtual sign lines */
+            SignText signText = sign.getText(true);
+            for (int i = 0; i < this.defaultLines.length; i++) {
+                signText = signText.setMessage(i, this.defaultLines[i]); // set lines
+            }
+            sign.setText(signText, true);
+            nmsTarget.connection.send(sign.getUpdatePacket()); // set lines
 
-        nmsTarget.connection.send(signEditorPacket); // show sign editor
+            /* Rollback BlockState */
+            Consumer<List<Component>> completeHandlerCopy = this.completeHandler;
+            this.onComplete((lines) -> {
+                if (completeHandlerCopy != null) completeHandlerCopy.accept(lines); // First, process user-defined completeHandler
 
-        this.isOpened = true;
-        SignGui.SIGN_GUI_OPENED.put(this.target.getUniqueId(), this);
+                // rollback block.
+                ClientboundBlockUpdatePacket rollbackBlockUpdatePacket = new ClientboundBlockUpdatePacket(blockPos, level.getBlockState(blockPos));
+                nmsTarget.connection.send(rollbackBlockUpdatePacket);
+            });
+
+            /* Open SignGUI */
+            ClientboundOpenSignEditorPacket signEditorPacket = new ClientboundOpenSignEditorPacket(blockPos, true);
+
+            nmsTarget.connection.send(signEditorPacket); // show sign editor
+
+            this.isOpened = true;
+            SignGui.SIGN_GUI_OPENED.put(this.target.getUniqueId(), this);
+        }, 1L);
     }
 
     private void convertAdventureToNMS() {
