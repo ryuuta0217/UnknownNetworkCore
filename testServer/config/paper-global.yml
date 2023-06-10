@@ -26,6 +26,14 @@ chunk-loading:
   player-max-chunk-load-rate: -1.0
   player-max-concurrent-loads: 20.0
   target-player-chunk-send-rate: 100.0
+chunk-loading-advanced:
+  auto-config-send-distance: true
+  player-max-concurrent-chunk-generates: 0
+  player-max-concurrent-chunk-loads: 0
+chunk-loading-basic:
+  player-max-chunk-generate-rate: -1.0
+  player-max-chunk-load-rate: 100.0
+  player-max-chunk-send-rate: 75.0
 chunk-system:
   gen-parallelism: default
   io-threads: -1

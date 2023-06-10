@@ -141,6 +141,7 @@ world-settings:
         flying-monsters-every: 200
         flying-monsters-for: 100
     growth:
+      pitcherplant-modifier: 100
       torchflower-modifier: 100
       twistingvines-modifier: 100
       weepingvines-modifier: 100
