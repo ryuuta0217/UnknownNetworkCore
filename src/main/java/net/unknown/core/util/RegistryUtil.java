@@ -58,9 +58,12 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.function.Function;
+import java.util.logging.Logger;
 
 @SuppressWarnings("unchecked")
 public class RegistryUtil {
+    private static final Logger LOGGER = Logger.getLogger("UNC/RegistryUtil");
+
     public static <T> boolean unfreeze(Registry<T> registry) {
         if (registry instanceof MappedRegistry<T>) {
             try {
@@ -84,7 +87,7 @@ public class RegistryUtil {
     }
 
     public static <T> T forceRegister(Registry<T> registry, ResourceLocation id, T value) {
-        unfreeze(registry);
+        if (!unfreeze(registry)) LOGGER.warning("Failed to unfreeze Registry! But continue force registering.");
         Registry.register(registry, id, value);
         if(registry == BuiltInRegistries.ENCHANTMENT && value instanceof Enchantment enchant) {
             try {
@@ -103,19 +106,91 @@ public class RegistryUtil {
     }
 
     public static <T> boolean forceReplace(Registry<T> registry, ResourceLocation id, T objectTo) {
+        String logPrefix = "[forceReplace] [" + id.toString() + "] ";
         if (registry instanceof MappedRegistry<T> mappedRegistry) {
             T objectFrom = mappedRegistry.get(id);
             if (objectFrom != null) {
-                ResourceKey<T> key = mappedRegistry.getResourceKey(objectFrom).orElse(null);
+                ResourceKey<T> resourceKey = mappedRegistry.getResourceKey(objectFrom).orElse(null);
                 Lifecycle lifecycle = mappedRegistry.lifecycle(objectFrom);
-                if (key != null) {
-                    int rawId = mappedRegistry.getId(objectFrom);
-                    unfreeze(registry);
-                    mappedRegistry.register(key, objectTo, lifecycle); // TODO its now duplicate register. first, remove() to try replace.
-                    freeze(registry);
+                if (resourceKey != null) {
+                    int registryId = mappedRegistry.getId(objectFrom);
+                    if (!unfreeze(registry)) LOGGER.warning("Failed to unfreeze Registry! But continue force replace object.");
 
-                    T result = registry.get(id);
-                    return result != null && result.equals(objectTo);
+                    try {
+                        ObfuscationUtil.Class obfUtilClass = ObfuscationUtil.getClassByMojangName("net.minecraft.core.MappedRegistry");
+                        if (obfUtilClass != null) {
+                            LOGGER.info(logPrefix + "Registry class found, getting required fields...");
+                            Field byKeyField = obfUtilClass.getFieldByMojangName("byKey").getField();
+                            Map<ResourceKey<T>, Holder.Reference<T>> byKey = null;
+                            if (byKeyField.trySetAccessible()) byKey = (Map<ResourceKey<T>, Holder.Reference<T>>) byKeyField.get(mappedRegistry);
+
+                            Field byLocationField = obfUtilClass.getFieldByMojangName("byLocation").getField();
+                            Map<ResourceLocation, Holder.Reference<T>> byLocation = null;
+                            if (byLocationField.trySetAccessible()) byLocation = (Map<ResourceLocation, Holder.Reference<T>>) byLocationField.get(registry);
+
+                            Field byValueField = obfUtilClass.getFieldByMojangName("byValue").getField();
+                            Map<T, Holder.Reference<T>> byValue = null;
+                            if (byValueField.trySetAccessible()) byValue = (Map<T, Holder.Reference<T>>) byValueField.get(mappedRegistry);
+
+                            Field byIdField = obfUtilClass.getFieldByMojangName("byId").getField();
+                            ObjectList<Holder.Reference<T>> byId = null;
+                            if (byIdField.trySetAccessible()) byId = (ObjectList<Holder.Reference<T>>) byIdField.get(mappedRegistry);
+
+                            Field toIdField = obfUtilClass.getFieldByMojangName("toId").getField();
+                            Reference2IntOpenHashMap<T> toId = null;
+                            if (toIdField.trySetAccessible()) toId = (Reference2IntOpenHashMap<T>) toIdField.get(mappedRegistry);
+
+                            Field lifecyclesField = obfUtilClass.getFieldByMojangName("lifecycles").getField();
+                            Map<T, Lifecycle> lifecycles = null;
+                            if (lifecyclesField.trySetAccessible()) lifecycles = (Map<T, Lifecycle>) lifecyclesField.get(mappedRegistry);
+
+                            if (byKey != null && byLocation != null && byValue != null && byId != null && toId != null && lifecycles != null) {
+                                LOGGER.info(logPrefix + "Got fields successfully, proceed as field-modify mode.");
+                                Holder.Reference<T> oldReference = byKey.get(resourceKey);
+                                Holder.Reference<T> reference = Holder.Reference.createStandAlone(mappedRegistry.holderOwner(), resourceKey);
+
+                                byKey.remove(resourceKey);
+                                byKey.put(resourceKey, reference);
+                                LOGGER.info(logPrefix + "Modified byKey Map");
+
+                                byLocation.remove(resourceKey.location());
+                                byLocation.put(resourceKey.location(), reference);
+                                LOGGER.info(logPrefix + "Modified byLocation Map");
+
+                                byValue.remove(objectFrom);
+                                byValue.put(objectTo, reference);
+                                LOGGER.info(logPrefix + "Modified byValue Map");
+
+                                byId.remove(registryId);
+                                byId.set(registryId, reference);
+                                LOGGER.info(logPrefix + "Modified byId Map");
+
+                                toId.remove(objectFrom);
+                                toId.put(objectTo, registryId);
+                                LOGGER.info(logPrefix + "Modified toId Map");
+
+                                lifecycles.remove(objectFrom);
+                                lifecycles.put(objectTo, lifecycle);
+                                LOGGER.info(logPrefix + "Modified lifecycles Map");
+                                if (mappedRegistry.getId(objectTo) == registryId && !oldReference.equals(mappedRegistry.getHolder(resourceKey).orElse(null))) {
+                                    LOGGER.info(logPrefix + "Successfully replaced object.");
+                                    freeze(mappedRegistry);
+                                    return true;
+                                }
+                            } else {
+                                LOGGER.warning("Failed to get some field(s). Proceed to duplicate key registration.");
+                                mappedRegistry.register(resourceKey, objectTo, lifecycle);
+                                if (mappedRegistry.getKey(objectTo) != null) {
+                                    LOGGER.info(logPrefix + "Successfully registered object.");
+                                    freeze(mappedRegistry);
+                                    return true;
+                                }
+                            }
+                            freeze(mappedRegistry);
+                        }
+                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
