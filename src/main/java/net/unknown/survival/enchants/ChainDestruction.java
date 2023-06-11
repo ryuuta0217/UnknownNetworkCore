@@ -33,12 +33,16 @@ package net.unknown.survival.enchants;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PickaxeItem;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
 import net.unknown.core.define.DefinedTextColor;
@@ -55,42 +59,22 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChainDestruction implements Listener {
     public static final Set<Block> CHAIN_DESTRUCT_TARGETS = new HashSet<>() {{
-        add(Blocks.COAL_ORE);
-        add(Blocks.DEEPSLATE_COAL_ORE);
-
-        add(Blocks.COPPER_ORE);
-        add(Blocks.DEEPSLATE_COPPER_ORE);
-
-        add(Blocks.IRON_ORE);
-        add(Blocks.DEEPSLATE_IRON_ORE);
-
-        add(Blocks.REDSTONE_ORE);
-        add(Blocks.DEEPSLATE_REDSTONE_ORE);
-
-        add(Blocks.LAPIS_ORE);
-        add(Blocks.DEEPSLATE_LAPIS_ORE);
-
-        add(Blocks.GOLD_ORE);
-        add(Blocks.DEEPSLATE_GOLD_ORE);
-        add(Blocks.NETHER_GOLD_ORE);
-
-        add(Blocks.DIAMOND_ORE);
-        add(Blocks.DEEPSLATE_DIAMOND_ORE);
-
-        add(Blocks.EMERALD_ORE);
-        add(Blocks.DEEPSLATE_EMERALD_ORE);
-
         add(Blocks.NETHER_QUARTZ_ORE);
-
         add(Blocks.GLOWSTONE);
+    }};
 
-        add(Blocks.OAK_LOG);
-        add(Blocks.BIRCH_LOG);
-        add(Blocks.SPRUCE_LOG);
-        add(Blocks.JUNGLE_LOG);
-        add(Blocks.ACACIA_LOG);
-        add(Blocks.DARK_OAK_LOG);
-        add(Blocks.MANGROVE_LOG);
+    public static final Set<TagKey<Block>> CHAIN_DESTRUCT_TARGET_TAGS = new HashSet<>() {{
+        add(BlockTags.COAL_ORES);
+        add(BlockTags.COPPER_ORES);
+        add(BlockTags.IRON_ORES);
+        add(BlockTags.REDSTONE_ORES);
+        add(BlockTags.LAPIS_ORES);
+        add(BlockTags.GOLD_ORES);
+        add(BlockTags.DIAMOND_ORES);
+        add(BlockTags.EMERALD_ORES);
+
+        add(BlockTags.LOGS);
+        add(BlockTags.OVERWORLD_NATURAL_LOGS);
     }};
 
     public static final Map<UUID, Set<BlockPos>> IGNORE_EVENT = new HashMap<>();
@@ -121,7 +105,7 @@ public class ChainDestruction implements Listener {
         ServerLevel level = MinecraftAdapter.level(event.getBlock().getLocation().getWorld());
         BlockState blockState = MinecraftAdapter.blockState(event.getBlock());
         Block chainDestructTarget = blockState.getBlock();
-        if (!CHAIN_DESTRUCT_TARGETS.contains(chainDestructTarget)) return;
+        if (!isValidTarget(chainDestructTarget)) return;
         if (blockState.is(BlockTags.LOGS) && !(selectedItem.getItem() instanceof AxeItem)) return;
         if (!player.hasCorrectToolForDrops(blockState)) return;
         if (selectedItem.getItem().getMaxDamage() - selectedItem.getDamageValue() == 1) return;
@@ -153,5 +137,11 @@ public class ChainDestruction implements Listener {
         RunnableManager.runAsyncDelayed(() -> {
             IGNORE_EVENT.getOrDefault(player.getUUID(), new HashSet<>()).clear();
         }, delay.get());
+    }
+
+    private static boolean isValidTarget(Block targetBlock) {
+        boolean blockMatch = CHAIN_DESTRUCT_TARGETS.contains(targetBlock);
+        boolean tagMatch = CHAIN_DESTRUCT_TARGET_TAGS.stream().anyMatch(tag -> targetBlock.builtInRegistryHolder().is(tag));
+        return blockMatch || tagMatch;
     }
 }
