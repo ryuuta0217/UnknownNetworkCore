@@ -46,6 +46,7 @@ import net.minecraft.world.item.enchantment.DamageEnchantment;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.unknown.UnknownNetworkCore;
 import net.unknown.core.util.RegistryUtil;
 
 public class DamageEnchant extends Enchantment {
@@ -64,7 +65,9 @@ public class DamageEnchant extends Enchantment {
     }
 
     public static void register() {
-        RegistryUtil.forceReplace(BuiltInRegistries.ENCHANTMENT, ResourceLocation.of("minecraft:sharpness", ':'), new DamageEnchant(Rarity.COMMON, 0, EquipmentSlot.MAINHAND));
+        if (!RegistryUtil.forceReplace(BuiltInRegistries.ENCHANTMENT, ResourceLocation.of("minecraft:sharpness", ':'), new DamageEnchant(Rarity.COMMON, 0, EquipmentSlot.MAINHAND))) {
+            UnknownNetworkCore.getInstance().getLogger().warning("Failed to register \"Sharpness V -> Sharpness X\" enchantment.");
+        };
     }
 
     @Override
