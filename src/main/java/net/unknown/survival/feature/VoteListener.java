@@ -83,7 +83,7 @@ public class VoteListener implements Listener {
             Player player = Bukkit.getPlayer(event.getVote().getUsername());
             player.getInventory().addItem(ticket).forEach((slot, item) -> player.getWorld().dropItem(player.getLocation(), item));
         } else {
-            if (INSERT_ITEM_QUEUE.containsKey(offlinePlayer.getUniqueId())) INSERT_ITEM_QUEUE.put(offlinePlayer.getUniqueId(), new HashSet<>());
+            if (!INSERT_ITEM_QUEUE.containsKey(offlinePlayer.getUniqueId())) INSERT_ITEM_QUEUE.put(offlinePlayer.getUniqueId(), new HashSet<>());
             INSERT_ITEM_QUEUE.get(offlinePlayer.getUniqueId()).add(ticket);
             LOGGER.info("Give vote ticket queued. Currently queued " + INSERT_ITEM_QUEUE.size() + " player(s).");
         }
