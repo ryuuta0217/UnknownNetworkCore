@@ -51,5 +51,6 @@ public class Commands {
         SkullCommand.register(UnknownNetworkCore.getBrigadier());
         TrashCommand.register(UnknownNetworkCore.getBrigadier());
         TimeCommand.register(UnknownNetworkCore.getBrigadier());
+        SwapLocationCommand.register(UnknownNetworkCore.getBrigadier());
     }
 }
