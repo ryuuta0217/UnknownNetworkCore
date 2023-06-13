@@ -51,6 +51,7 @@ import net.minecraft.world.entity.player.Player;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
@@ -132,7 +133,13 @@ public class ChannelCommand {
                         .then(Commands.argument("対象", EntityArgument.player())
                                 .executes(ChannelCommand::denyInvite)
                                 .then(Commands.argument("チャンネル名", StringArgumentType.word())
-                                        .executes(ChannelCommand::denyInvite))));
+                                        .executes(ChannelCommand::denyInvite))))
+                .then(Commands.literal("modify")
+                        .then(Commands.argument("チャンネル名", StringArgumentType.word())
+                                .suggests(Suggestions.OWNED_CHANNELS_SUGGEST)
+                                .then(Commands.literal("displayName")
+                                        .then(Commands.argument("表示名", ComponentArgument.textComponent())
+                                                .executes(ChannelCommand::modifyChannelDisplayName)))));
 
         builder.then(Commands.literal("options")
                 .then(Commands.literal("global")
@@ -658,6 +665,27 @@ public class ChannelCommand {
                 return 3;
             }
         }
+        return 0;
+    }
+
+    private static int modifyChannelDisplayName(CommandContext<CommandSourceStack> ctx) {
+        String channelName = StringArgumentType.getString(ctx, "チャンネル名");
+        Component displayName = ComponentArgument.getComponent(ctx, "表示名");
+        net.kyori.adventure.text.Component displayName$adventure = NewMessageUtil.convertMinecraft2Adventure(displayName);
+
+        CustomChannel channel = CustomChannels.getChannel(channelName);
+        if (channel == null) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "チャンネル " + channelName + " は存在しません");
+            return -1;
+        }
+
+        channel.setDisplayName(displayName$adventure);
+        NewMessageUtil.sendMessage(ctx.getSource(), Component.literal("チャンネル ")
+                .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                .append(Component.literal("(" + channel.getChannelName() + ")").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                .append(Component.literal(" の表示名を "))
+                .append(displayName)
+                .append(Component.literal(" に変更しました")));
         return 0;
     }
 
