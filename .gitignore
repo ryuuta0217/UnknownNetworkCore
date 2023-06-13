@@ -16,3 +16,4 @@ testServer/plugins/*/
 !testServer/plugins/UnknownNetworkCore/
 .DS_Store
 shared/discord-config.txt
+shared/tokens.txt
