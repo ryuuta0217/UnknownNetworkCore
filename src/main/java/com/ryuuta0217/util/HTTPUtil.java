@@ -41,6 +41,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class HTTPUtil {
     private String method;
     private String targetAddress;
