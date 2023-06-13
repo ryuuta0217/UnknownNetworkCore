@@ -76,7 +76,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 processResources {
     filesMatching("*.yml") {
         duplicatesStrategy(DuplicatesStrategy.INCLUDE)
-        filter ReplaceTokens, tokens: [version: "git-" + project.name + "-" + versionDetails().branchName + "-" + versionDetails().gitHash[0..7]]
+        filter ReplaceTokens, tokens: [version: "git-" + project.name + "-" + (versionDetails().branchName != null ? versionDetails().branchName : System.getenv("BRANCH_NAME")) + "-" + versionDetails().gitHash[0..7]]
     }
 }
 
