@@ -66,6 +66,7 @@ dependencies {
     implementation group: 'org.mozilla', name: 'rhino', version: '+'
     compileOnly group: 'com.github.NuVotifier', name: 'NuVotifier', version: '+'
     implementation group: 'net.dv8tion', name: 'JDA', version: '+'
+    implementation group: 'org.json', name: 'json', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
 }
