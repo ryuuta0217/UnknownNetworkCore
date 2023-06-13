@@ -29,28 +29,38 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.commands;
+package com.ryuuta0217.api.github;
 
-import net.unknown.UnknownNetworkCore;
-import net.unknown.core.commands.vanilla.GamemodeCommand;
-import net.unknown.core.commands.vanilla.MsgCommand;
-import net.unknown.core.commands.vanilla.TimeCommand;
+import org.json.JSONObject;
 
-public class Commands {
-    public static void init() {
-        CrashCommand.register(UnknownNetworkCore.getBrigadier());
-        EvalCommand.register(UnknownNetworkCore.getBrigadier());
-        PacketCommand.register(UnknownNetworkCore.getBrigadier());
-        SkinCommand.register(UnknownNetworkCore.getBrigadier());
-        NickCommand.register(UnknownNetworkCore.getBrigadier());
-        SetPoseCommand.register(UnknownNetworkCore.getBrigadier());
-        GamemodeCommand.register(UnknownNetworkCore.getBrigadier());
-        MsgCommand.register(UnknownNetworkCore.getBrigadier());
-        TeleportWorldCommand.register(UnknownNetworkCore.getBrigadier());
-        DeepFakeCommand.register(UnknownNetworkCore.getBrigadier());
-        SkullCommand.register(UnknownNetworkCore.getBrigadier());
-        TrashCommand.register(UnknownNetworkCore.getBrigadier());
-        TimeCommand.register(UnknownNetworkCore.getBrigadier());
-        SwapLocationCommand.register(UnknownNetworkCore.getBrigadier());
+import java.time.ZonedDateTime;
+
+public class GitUser {
+    private final GitHubAPI api;
+    private final String name;
+    private final String email;
+    private final ZonedDateTime date;
+
+    public GitUser(GitHubAPI api, String name, String email, ZonedDateTime date) {
+        this.api = api;
+        this.name = name;
+        this.email = email;
+        this.date = date;
+    }
+
+    public GitUser(GitHubAPI api, JSONObject data) {
+        this.api = api;
+        this.name = data.getString("name");
+        this.email = data.getString("email");
+        this.date = ZonedDateTime.parse(data.getString("date"));
+    }
+
+    public User tryGetUser() {
+        if (!this.email.endsWith("@users.noreply.github.com")) return null;
+        String userNameRaw = this.email.substring(0, this.email.indexOf('@'));
+        String[] userNameParts = userNameRaw.split("\\+", 2);
+        String userId = userNameParts[0];
+        String userName = userNameParts[1];
+        return this.api.getUser(userName);
     }
 }

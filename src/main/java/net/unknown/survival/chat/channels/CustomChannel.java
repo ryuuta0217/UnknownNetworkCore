@@ -55,7 +55,7 @@ public class CustomChannel extends ChatChannel {
     private final Set<UUID> players = new HashSet<>();
     private final UUID owner;
     private final String channelName;
-    private final Component displayName;
+    private Component displayName;
 
     public CustomChannel(String channelName, Component displayName, UUID owner) {
         this(channelName, displayName, owner, Collections.emptyList());
@@ -144,6 +144,11 @@ public class CustomChannel extends ChatChannel {
 
     public String getDisplayNameAsPlainText() {
         return PlainTextComponentSerializer.plainText().serialize(this.getDisplayName());
+    }
+
+    public void setDisplayName(Component displayName) {
+        this.displayName = displayName;
+        RunnableManager.runAsync(CustomChannels::save);
     }
 
     public UUID getOwner() {

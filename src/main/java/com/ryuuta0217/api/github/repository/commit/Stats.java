@@ -29,28 +29,40 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.commands;
+package com.ryuuta0217.api.github.repository.commit;
 
-import net.unknown.UnknownNetworkCore;
-import net.unknown.core.commands.vanilla.GamemodeCommand;
-import net.unknown.core.commands.vanilla.MsgCommand;
-import net.unknown.core.commands.vanilla.TimeCommand;
+import com.ryuuta0217.api.github.GitHubAPI;
+import org.json.JSONObject;
 
-public class Commands {
-    public static void init() {
-        CrashCommand.register(UnknownNetworkCore.getBrigadier());
-        EvalCommand.register(UnknownNetworkCore.getBrigadier());
-        PacketCommand.register(UnknownNetworkCore.getBrigadier());
-        SkinCommand.register(UnknownNetworkCore.getBrigadier());
-        NickCommand.register(UnknownNetworkCore.getBrigadier());
-        SetPoseCommand.register(UnknownNetworkCore.getBrigadier());
-        GamemodeCommand.register(UnknownNetworkCore.getBrigadier());
-        MsgCommand.register(UnknownNetworkCore.getBrigadier());
-        TeleportWorldCommand.register(UnknownNetworkCore.getBrigadier());
-        DeepFakeCommand.register(UnknownNetworkCore.getBrigadier());
-        SkullCommand.register(UnknownNetworkCore.getBrigadier());
-        TrashCommand.register(UnknownNetworkCore.getBrigadier());
-        TimeCommand.register(UnknownNetworkCore.getBrigadier());
-        SwapLocationCommand.register(UnknownNetworkCore.getBrigadier());
+public class Stats {
+    private final GitHubAPI api;
+    private final long total;
+    private final long additions;
+    private final long deletions;
+
+    public Stats(GitHubAPI api, long total, long additions, long deletions) {
+        this.api = api;
+        this.total = total;
+        this.additions = additions;
+        this.deletions = deletions;
+    }
+
+    public Stats(GitHubAPI api, JSONObject data) {
+        this.api = api;
+        this.total = data.getLong("total");
+        this.additions = data.getLong("additions");
+        this.deletions = data.getLong("deletions");
+    }
+
+    public long getTotal() {
+        return this.total;
+    }
+
+    public long getAdditions() {
+        return this.additions;
+    }
+
+    public long getDeletions() {
+        return this.deletions;
     }
 }

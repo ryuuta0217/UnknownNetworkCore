@@ -29,28 +29,36 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.commands;
+package com.ryuuta0217.api.github.repository.commit;
 
-import net.unknown.UnknownNetworkCore;
-import net.unknown.core.commands.vanilla.GamemodeCommand;
-import net.unknown.core.commands.vanilla.MsgCommand;
-import net.unknown.core.commands.vanilla.TimeCommand;
+import com.ryuuta0217.api.github.GitHubAPI;
+import org.json.JSONObject;
 
-public class Commands {
-    public static void init() {
-        CrashCommand.register(UnknownNetworkCore.getBrigadier());
-        EvalCommand.register(UnknownNetworkCore.getBrigadier());
-        PacketCommand.register(UnknownNetworkCore.getBrigadier());
-        SkinCommand.register(UnknownNetworkCore.getBrigadier());
-        NickCommand.register(UnknownNetworkCore.getBrigadier());
-        SetPoseCommand.register(UnknownNetworkCore.getBrigadier());
-        GamemodeCommand.register(UnknownNetworkCore.getBrigadier());
-        MsgCommand.register(UnknownNetworkCore.getBrigadier());
-        TeleportWorldCommand.register(UnknownNetworkCore.getBrigadier());
-        DeepFakeCommand.register(UnknownNetworkCore.getBrigadier());
-        SkullCommand.register(UnknownNetworkCore.getBrigadier());
-        TrashCommand.register(UnknownNetworkCore.getBrigadier());
-        TimeCommand.register(UnknownNetworkCore.getBrigadier());
-        SwapLocationCommand.register(UnknownNetworkCore.getBrigadier());
+import javax.annotation.Nullable;
+
+public class Parent {
+    private final GitHubAPI api;
+    private final String sha;
+    private final String url;
+    @Nullable private final String htmlUrl;
+
+    public Parent(GitHubAPI api, JSONObject data) {
+        this.api = api;
+        this.sha = data.getString("sha");
+        this.url = data.getString("url");
+        this.htmlUrl = data.has("html_url") && !data.get("html_url").equals(JSONObject.NULL) ? data.getString("html_url") : null;
+    }
+
+    public String getSha() {
+        return this.sha;
+    }
+
+    public String getUrl() {
+        return this.url;
+    }
+
+    @Nullable
+    public String getHtmlUrl() {
+        return this.htmlUrl;
     }
 }

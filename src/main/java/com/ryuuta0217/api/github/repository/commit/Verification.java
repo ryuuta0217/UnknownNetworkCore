@@ -29,28 +29,43 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.commands;
+package com.ryuuta0217.api.github.repository.commit;
 
-import net.unknown.UnknownNetworkCore;
-import net.unknown.core.commands.vanilla.GamemodeCommand;
-import net.unknown.core.commands.vanilla.MsgCommand;
-import net.unknown.core.commands.vanilla.TimeCommand;
+import com.ryuuta0217.api.github.GitHubAPI;
+import org.json.JSONObject;
 
-public class Commands {
-    public static void init() {
-        CrashCommand.register(UnknownNetworkCore.getBrigadier());
-        EvalCommand.register(UnknownNetworkCore.getBrigadier());
-        PacketCommand.register(UnknownNetworkCore.getBrigadier());
-        SkinCommand.register(UnknownNetworkCore.getBrigadier());
-        NickCommand.register(UnknownNetworkCore.getBrigadier());
-        SetPoseCommand.register(UnknownNetworkCore.getBrigadier());
-        GamemodeCommand.register(UnknownNetworkCore.getBrigadier());
-        MsgCommand.register(UnknownNetworkCore.getBrigadier());
-        TeleportWorldCommand.register(UnknownNetworkCore.getBrigadier());
-        DeepFakeCommand.register(UnknownNetworkCore.getBrigadier());
-        SkullCommand.register(UnknownNetworkCore.getBrigadier());
-        TrashCommand.register(UnknownNetworkCore.getBrigadier());
-        TimeCommand.register(UnknownNetworkCore.getBrigadier());
-        SwapLocationCommand.register(UnknownNetworkCore.getBrigadier());
+import javax.annotation.Nullable;
+
+public class Verification {
+    private final GitHubAPI api;
+    private final String reason;
+    @Nullable private final String signature;
+    @Nullable private final String payload;
+    private final boolean verified;
+
+    public Verification(GitHubAPI api, JSONObject data) {
+        this.api = api;
+        this.reason = data.getString("reason");
+        this.signature = !data.get("signature").equals(JSONObject.NULL) ? data.getString("signature") : null;
+        this.payload = !data.get("payload").equals(JSONObject.NULL) ? data.getString("payload") : null;
+        this.verified = data.getBoolean("verified");
+    }
+
+    public String getReason() {
+        return this.reason;
+    }
+
+    @Nullable
+    public String getSignature() {
+        return this.signature;
+    }
+
+    @Nullable
+    public String getPayload() {
+        return this.payload;
+    }
+
+    public boolean isVerified() {
+        return this.verified;
     }
 }

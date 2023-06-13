@@ -29,28 +29,58 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.commands;
+package com.ryuuta0217.api.github.repository.commit;
 
-import net.unknown.UnknownNetworkCore;
-import net.unknown.core.commands.vanilla.GamemodeCommand;
-import net.unknown.core.commands.vanilla.MsgCommand;
-import net.unknown.core.commands.vanilla.TimeCommand;
+import com.ryuuta0217.api.github.GitHubAPI;
+import com.ryuuta0217.api.github.GitUser;
+import org.json.JSONObject;
 
-public class Commands {
-    public static void init() {
-        CrashCommand.register(UnknownNetworkCore.getBrigadier());
-        EvalCommand.register(UnknownNetworkCore.getBrigadier());
-        PacketCommand.register(UnknownNetworkCore.getBrigadier());
-        SkinCommand.register(UnknownNetworkCore.getBrigadier());
-        NickCommand.register(UnknownNetworkCore.getBrigadier());
-        SetPoseCommand.register(UnknownNetworkCore.getBrigadier());
-        GamemodeCommand.register(UnknownNetworkCore.getBrigadier());
-        MsgCommand.register(UnknownNetworkCore.getBrigadier());
-        TeleportWorldCommand.register(UnknownNetworkCore.getBrigadier());
-        DeepFakeCommand.register(UnknownNetworkCore.getBrigadier());
-        SkullCommand.register(UnknownNetworkCore.getBrigadier());
-        TrashCommand.register(UnknownNetworkCore.getBrigadier());
-        TimeCommand.register(UnknownNetworkCore.getBrigadier());
-        SwapLocationCommand.register(UnknownNetworkCore.getBrigadier());
+public class GitCommit {
+    private final GitHubAPI api;
+    private final long commentCount;
+    private final GitUser committer;
+    private final GitUser author;
+    private final Tree tree;
+    private final String message;
+    private final String url;
+    private final Verification verification;
+
+    public GitCommit(GitHubAPI api, JSONObject data) {
+        this.api = api;
+        this.commentCount = data.getLong("comment_count");
+        this.committer = new GitUser(api, data.getJSONObject("committer"));
+        this.author = new GitUser(api, data.getJSONObject("author"));
+        this.tree = new Tree(api, data.getJSONObject("tree"));
+        this.message = data.getString("message");
+        this.url = data.getString("url");
+        this.verification = new Verification(api, data.getJSONObject("verification"));
+    }
+
+    public long getCommentCount() {
+        return this.commentCount;
+    }
+
+    public GitUser getCommitter() {
+        return this.committer;
+    }
+
+    public GitUser getAuthor() {
+        return this.author;
+    }
+
+    public Tree getTree() {
+        return this.tree;
+    }
+
+    public String getMessage() {
+        return this.message;
+    }
+
+    public String getUrl() {
+        return this.url;
+    }
+
+    public Verification getVerification() {
+        return this.verification;
     }
 }

@@ -41,6 +41,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
+@Deprecated
 public class HTTPUtil {
     private String method;
     private String targetAddress;
@@ -200,7 +201,7 @@ public class HTTPUtil {
                     response.close();
                 }
 
-                System.out.println("エラー: " + responseCode + "\n" + sb);
+                //System.out.println("エラー: " + responseCode + "\n" + sb);
             }
         } catch (MalformedURLException e) {
             throw new NullPointerException("URLが不正です: " + e.getLocalizedMessage());

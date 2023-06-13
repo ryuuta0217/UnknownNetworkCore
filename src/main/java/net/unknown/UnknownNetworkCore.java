@@ -47,6 +47,7 @@ import net.unknown.core.managers.TrashManager;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.tab.TabListPingManager;
 import net.unknown.core.util.ObfuscationUtil;
+import net.unknown.shared.VersionInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.bukkit.event.HandlerList;
@@ -162,5 +163,9 @@ public class UnknownNetworkCore extends JavaPlugin {
     public void onDisable() {
         HandlerList.unregisterAll(this);
         ENV.onDisable();
+    }
+
+    public static VersionInfo getVersion() {
+        return VersionInfo.parseFromString(getInstance().getPluginMeta().getVersion());
     }
 }

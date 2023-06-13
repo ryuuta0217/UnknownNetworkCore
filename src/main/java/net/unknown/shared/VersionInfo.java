@@ -29,28 +29,36 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.commands;
+package net.unknown.shared;
 
 import net.unknown.UnknownNetworkCore;
-import net.unknown.core.commands.vanilla.GamemodeCommand;
-import net.unknown.core.commands.vanilla.MsgCommand;
-import net.unknown.core.commands.vanilla.TimeCommand;
 
-public class Commands {
-    public static void init() {
-        CrashCommand.register(UnknownNetworkCore.getBrigadier());
-        EvalCommand.register(UnknownNetworkCore.getBrigadier());
-        PacketCommand.register(UnknownNetworkCore.getBrigadier());
-        SkinCommand.register(UnknownNetworkCore.getBrigadier());
-        NickCommand.register(UnknownNetworkCore.getBrigadier());
-        SetPoseCommand.register(UnknownNetworkCore.getBrigadier());
-        GamemodeCommand.register(UnknownNetworkCore.getBrigadier());
-        MsgCommand.register(UnknownNetworkCore.getBrigadier());
-        TeleportWorldCommand.register(UnknownNetworkCore.getBrigadier());
-        DeepFakeCommand.register(UnknownNetworkCore.getBrigadier());
-        SkullCommand.register(UnknownNetworkCore.getBrigadier());
-        TrashCommand.register(UnknownNetworkCore.getBrigadier());
-        TimeCommand.register(UnknownNetworkCore.getBrigadier());
-        SwapLocationCommand.register(UnknownNetworkCore.getBrigadier());
+public record VersionInfo(String gitBranch, String commitSha) {
+    public static VersionInfo parseFromString(String version) {
+        String[] split = version.split("-", 4);
+        if (split.length != 4) return null;
+        String gitBranch = split[2];
+        String commitSha = split[3];
+        return new VersionInfo(gitBranch, commitSha);
+    }
+
+    public boolean diffVersion(VersionInfo other) {
+        return this.sameBranch(other) && this.diffCommit(other);
+    }
+
+    public boolean sameBranch(VersionInfo other) {
+        return gitBranch.equals(other.gitBranch);
+    }
+
+    public boolean diffBranch(VersionInfo other) {
+        return !gitBranch.equals(other.gitBranch);
+    }
+
+    public boolean sameCommit(VersionInfo other) {
+        return commitSha.equals(other.commitSha);
+    }
+
+    public boolean diffCommit(VersionInfo other) {
+        return !commitSha.equals(other.commitSha);
     }
 }
