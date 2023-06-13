@@ -31,14 +31,14 @@
 
 package com.ryuuta0217.api.github;
 
+import com.ryuuta0217.api.github.repository.branch.Branch;
+import com.ryuuta0217.api.github.repository.Repository;
 import com.ryuuta0217.util.HTTPFetch;
-import com.ryuuta0217.util.HTTPUtil;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.net.MalformedURLException;
 
 public class GitHubAPI {
     public static final String GITHUB_API_BASE = "https://api.github.com";
@@ -79,7 +79,7 @@ public class GitHubAPI {
                 "/" + branchName
         );
         if (!(obj instanceof JSONObject json)) return null;
-        return new Branch(this, json);
+        return new Branch(this, this.getRepository(owner, repositoryName), json);
     }
 
     @Nullable
@@ -91,7 +91,8 @@ public class GitHubAPI {
 
         try {
             //System.out.println(endpoint);
-            HTTPFetch fetch = HTTPFetch.fetch(method, GITHUB_API_BASE + endpoint).addHeader("Authorization", "Bearer " + accessToken);
+            HTTPFetch fetch = HTTPFetch.fetch(method, GITHUB_API_BASE + endpoint);
+            if (this.accessToken != null) fetch.addHeader("Authorization", "Bearer " + accessToken);
             String response = fetch.sentAndReadAsString();
             //System.out.println(response);
             if (response == null) return null;

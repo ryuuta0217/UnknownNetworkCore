@@ -29,8 +29,11 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github;
+package com.ryuuta0217.api.github.repository;
 
+import com.ryuuta0217.api.github.GitHubAPI;
+import com.ryuuta0217.api.github.User;
+import com.ryuuta0217.api.github.repository.branch.Branch;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
@@ -637,7 +640,7 @@ public class Repository {
     public Branch getBranch(String branchName) {
         Object obj = this.api.requestAndParse("GET", GitHubAPI.replaceArgumentPatternFromUrl(this.getBranchesUrl(), "branch", branchName));
         if (!(obj instanceof JSONObject json)) return null;
-        return new Branch(this.api, json);
+        return new Branch(this.api, this, json);
     }
 
     public List<Branch> getBranches() {
@@ -647,7 +650,7 @@ public class Repository {
                 .filter(raw -> raw instanceof HashMap<?,?>)
                 .map(raw -> ((HashMap<?, ?>) raw))
                 .map(map -> new JSONObject(map))
-                .map(json -> new Branch(this.api, json))
+                .map(json -> new Branch(this.api, this,json))
                 .toList();
     }
 

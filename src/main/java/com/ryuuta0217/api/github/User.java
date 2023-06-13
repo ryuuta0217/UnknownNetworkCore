@@ -31,19 +31,17 @@
 
 package com.ryuuta0217.api.github;
 
+import com.ryuuta0217.api.github.repository.Repository;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class User {
     private final GitHubAPI api;
@@ -56,23 +54,23 @@ public class User {
     private final ZonedDateTime createdAt;
     private final String login;
     private final String type;
-    private final String blog;
-    @Nullable private final Long privateGists;
-    @Nullable private final Long totalPrivateRepos;
-    private final String subscriptionsUrl;
+    @Nullable private final String blog;
+    private final long privateGists;
+    private final long totalPrivateRepos;
+    @Nullable private final String subscriptionsUrl;
     private final ZonedDateTime updatedAt;
     private final boolean siteAdmin;
-    @Nullable private final Long diskUsage;
-    @Nullable private final Long collaborators;
-    private final Object company;
-    @Nullable private final Long ownedPrivateRepos;
+    private final long diskUsage;
+    private final long collaborators;
+    @Nullable private final Object company;
+    private final long ownedPrivateRepos;
     private final long id;
     private final long publicRepos;
     private final String gravatarId;
     @Nullable private final Plan plan;
     private final String email;
     private final String organizationsUrl;
-    @Nullable private final Boolean hireable;
+    private final boolean hireable;
     private final String starredUrl;
     private final String followersUrl;
     private final long publicGists;
@@ -92,43 +90,43 @@ public class User {
         this.gistsUrl = data.getString("gists_url");
         this.reposUrl = data.getString("repos_url");
         this.followingUrl = data.getString("following_url");
-        this.twitterUsername = !data.get("twitter_username").equals(JSONObject.NULL) ? data.getString("twitter_username") : null;
-        this.bio = !data.get("bio").equals(JSONObject.NULL) ? data.getString("bio") : null;
-        this.createdAt = ZonedDateTime.parse(data.getString("created_at"));
+        this.twitterUsername = data.has("twitter_username") && !data.get("twitter_username").equals(JSONObject.NULL) ? data.getString("twitter_username") : null;
+        this.bio = data.has("bio") && !data.get("bio").equals(JSONObject.NULL) ? data.getString("bio") : null;
+        this.createdAt = data.has("created_at") ? ZonedDateTime.parse(data.getString("created_at")) : ZonedDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault());
         this.login = data.getString("login");
         this.type = data.getString("type");
-        this.blog = data.getString("blog");
-        this.subscriptionsUrl = data.getString("subscriptions_url");
-        this.updatedAt = ZonedDateTime.parse(data.getString("updated_at"));
+        this.blog = data.has("blog") && !data.get("blog").equals(JSONObject.NULL) ? data.getString("blog") : null;
+        this.subscriptionsUrl = data.has("subscriptions_url") && !data.get("subscriptions_url").equals(JSONObject.NULL) ? data.getString("subscriptions_url") : null;
+        this.updatedAt = data.has("updated_at") ? ZonedDateTime.parse(data.getString("updated_at")) : ZonedDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault());
         this.siteAdmin = data.getBoolean("site_admin");
-        this.company = data.get("company");
+        this.company = data.has("company") ? data.get("company") : null;
         this.id = data.getLong("id");
-        this.publicRepos = data.getLong("public_repos");
+        this.publicRepos = data.has("public_repos") ? data.getLong("public_repos") : 0;
         this.gravatarId = data.getString("gravatar_id");
-        this.email = !data.get("email").equals(JSONObject.NULL) ? data.getString("email") : null;
+        this.email = data.has("email") && !data.get("email").equals(JSONObject.NULL) ? data.getString("email") : null;
         this.organizationsUrl = data.getString("organizations_url");
-        this.hireable = !data.get("hireable").equals(JSONObject.NULL) ? data.getBoolean("hireable") : null;
+        this.hireable = data.has("hireable") && !data.get("hireable").equals(JSONObject.NULL) && data.getBoolean("hireable");
         this.starredUrl = data.getString("starred_url");
         this.followersUrl = data.getString("followers_url");
-        this.publicGists = data.getLong("public_gists");
+        this.publicGists = data.has("public_gists") ? data.getLong("public_gists") : 0;
         this.url = data.getString("url");
         this.receivedEventsUrl = data.getString("received_events_url");
-        this.followers = data.getLong("followers");
+        this.followers = data.has("followers") ? data.getLong("followers") : 0;
         this.avatarUrl = data.getString("avatar_url");
         this.eventsUrl = data.getString("events_url");
         this.htmlUrl = data.getString("html_url");
-        this.following = data.getLong("following");
-        this.name = !data.get("name").equals(JSONObject.NULL) ? data.getString("name") : null;
-        this.location = !data.get("location").equals(JSONObject.NULL) ? data.getString("location") : null;
+        this.following = data.has("following") ? data.getLong("following") : 0;
+        this.name = data.has("name") && !data.get("name").equals(JSONObject.NULL) ? data.getString("name") : null;
+        this.location = data.has("location") && !data.get("location").equals(JSONObject.NULL) ? data.getString("location") : null;
         this.nodeId = data.getString("node_id");
 
         /* for self account */
-        this.twoFactorAuthentication = data.has("two_factor_authentication") && !data.get("two_factor_authentication").equals(JSONObject.NULL) ? data.getBoolean("two_factor_authentication") : null;
-        this.privateGists = data.has("private_gists") && !data.get("private_gists").equals(JSONObject.NULL) ? data.getLong("private_gists") : null;
-        this.totalPrivateRepos = data.has("total_private_repos") && !data.get("total_private_repos").equals(JSONObject.NULL) ? data.getLong("total_private_repos") : null;
-        this.diskUsage = data.has("disk_usage") && !data.get("disk_usage").equals(JSONObject.NULL) ? data.getLong("disk_usage") : null;
-        this.collaborators = data.has("collaborators") && !data.get("collaborators").equals(JSONObject.NULL) ? data.getLong("collaborators") : null;
-        this.ownedPrivateRepos = data.has("owned_private_repos") && !data.get("owned_private_repos").equals(JSONObject.NULL) ? data.getLong("owned_private_repos") : null;
+        this.twoFactorAuthentication = data.has("two_factor_authentication") ? data.getBoolean("two_factor_authentication") : null;
+        this.privateGists = data.has("private_gists") ? data.getLong("private_gists") : -1;
+        this.totalPrivateRepos = data.has("total_private_repos") ? data.getLong("total_private_repos") : -1;
+        this.diskUsage = data.has("disk_usage") ? data.getLong("disk_usage") : -1;
+        this.collaborators = data.has("collaborators") ? data.getLong("collaborators") : -1;
+        this.ownedPrivateRepos = data.has("owned_private_repos") ? data.getLong("owned_private_repos") : -1;
         this.plan = data.has("plan") && !data.get("plan").equals(JSONObject.NULL) ? new Plan(this.api, data.getJSONObject("plan")) : null;
     }
 
@@ -171,20 +169,20 @@ public class User {
         return this.type;
     }
 
+    @Nullable
     public String getBlog() {
         return this.blog;
     }
 
-    @Nullable
-    public Long getPrivateGists() {
+    public long getPrivateGists() {
         return this.privateGists;
     }
 
-    @Nullable
-    public Long getTotalPrivateRepos() {
+    public long getTotalPrivateRepos() {
         return this.totalPrivateRepos;
     }
 
+    @Nullable
     public String getSubscriptionsUrl() {
         return this.subscriptionsUrl;
     }
@@ -197,22 +195,20 @@ public class User {
         return this.siteAdmin;
     }
 
-    @Nullable
-    public Long getDiskUsage() {
+    public long getDiskUsage() {
         return this.diskUsage;
     }
 
-    @Nullable
-    public Long getCollaborators() {
+    public long getCollaborators() {
         return this.collaborators;
     }
 
+    @Nullable
     public Object getCompany() {
         return this.company;
     }
 
-    @Nullable
-    public Long getOwnedPrivateRepos() {
+    public long getOwnedPrivateRepos() {
         return this.ownedPrivateRepos;
     }
 
@@ -241,8 +237,7 @@ public class User {
         return this.organizationsUrl;
     }
 
-    @Nullable
-    public Boolean getHireable() {
+    public boolean isHireable() {
         return this.hireable;
     }
 
@@ -298,6 +293,11 @@ public class User {
 
     public String getNodeId() {
         return this.nodeId;
+    }
+
+    @Nullable
+    public User tryFetchCompleteData() {
+        return this.api.getUser(this.getLogin());
     }
 
     @Nullable
