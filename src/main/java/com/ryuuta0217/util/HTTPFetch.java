@@ -110,6 +110,21 @@ public class HTTPFetch {
         return this;
     }
 
+    public HTTPFetch setOnError(BiConsumer<HttpURLConnection, Exception> onError) {
+        this.onError = onError;
+        return this;
+    }
+
+    public HTTPFetch setPreRequest(Consumer<HttpURLConnection> preRequest) {
+        this.preRequest = preRequest;
+        return this;
+    }
+
+    public HTTPFetch setOnSuccess(BiConsumer<HttpURLConnection, InputStream> onSuccess) {
+        this.onSuccess = onSuccess;
+        return this;
+    }
+
     private void buildURL() throws MalformedURLException {
         if (this.urlStr != null) {
             AtomicReference<String> tempUrlStr = new AtomicReference<>(this.urlStr);
@@ -179,13 +194,16 @@ public class HTTPFetch {
     }
 
     public void sentAsync() {
-        new Thread(() -> {
+        Thread thread = new Thread(() -> {
             try {
                 if (this.onSuccess != null) this.onSuccess.accept(this.connection, this.sent());
             } catch (Exception e) {
                 if (this.onError != null) this.onError.accept(this.connection, e);
             }
-        }).start();
+        });
+        thread.setDaemon(true);
+        thread.setName("HTTPFetch Async Request Thread - " + this.url.getHost());
+        thread.start();
     }
 
     public enum Method {
