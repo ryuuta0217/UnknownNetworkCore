@@ -39,10 +39,14 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.core.PositionImpl;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
-import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
+
+import java.util.EnumSet;
 
 public class SwapLocationCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -56,10 +60,24 @@ public class SwapLocationCommand {
     }
 
     private static int execute(CommandSourceStack source, Entity a, Entity b) {
-        a.teleportTo((ServerLevel) b.level(), new PositionImpl(b.position().x(), b.position().y(), b.position().z()));
-        if (a instanceof ServerPlayer player) player.connection.send(new ClientboundSetActionBarTextPacket(Component.empty().append(b.getName()).append(" と場所が入れ替わりました")));
-        b.teleportTo((ServerLevel) a.level(), new PositionImpl(a.position().x(), a.position().y(), a.position().z()));
-        if (b instanceof ServerPlayer player) player.connection.send(new ClientboundSetActionBarTextPacket(Component.empty().append(a.getName()).append(" と場所が入れ替わりました")));
+        ServerLevel aLevel = (ServerLevel) a.level();
+        Vec3 aPos = a.position();
+        float aYRot = a.getYRot();
+        float aXRot = a.getXRot();
+
+        ServerLevel bLevel = (ServerLevel) b.level();
+        Vec3 bPos = b.position();
+        float bYRot = b.getYRot();
+        float bXRot = b.getXRot();
+
+        if (a.teleportTo(bLevel, bPos.x(), bPos.y(), bPos.z(), EnumSet.noneOf(RelativeMovement.class), bYRot, bXRot)) {
+            if (a instanceof ServerPlayer player) player.connection.send(new ClientboundSetActionBarTextPacket(Component.empty().append(b.getName()).append(" と場所が入れ替わりました")));
+        }
+
+        if (b.teleportTo(aLevel, aPos.x(), aPos.y(), aPos.z(), EnumSet.noneOf(RelativeMovement.class), aYRot, aXRot)) {
+            if (b instanceof ServerPlayer player) player.connection.send(new ClientboundSetActionBarTextPacket(Component.empty().append(a.getName()).append(" と場所が入れ替わりました")));
+        }
+
         if (a.equals(source.getEntity()) || b.equals(source.getEntity())) {
             source.sendSuccess(() -> Component.empty().append(a.equals(source.getEntity()) ? b.getName() : a.getName()).append(" と場所を入れ替えました"), true);
         } else {
