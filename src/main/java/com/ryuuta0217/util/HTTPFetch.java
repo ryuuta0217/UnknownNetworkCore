@@ -201,7 +201,6 @@ public class HTTPFetch {
                 if (this.onError != null) this.onError.accept(this.connection, e);
             }
         });
-        thread.setDaemon(true);
         thread.setName("HTTPFetch Async Request Thread - " + this.url.getHost());
         thread.start();
     }
