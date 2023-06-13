@@ -200,7 +200,7 @@ public class HTTPUtil {
                     response.close();
                 }
 
-                System.out.println("エラー: " + responseCode + "\n" + sb);
+                //System.out.println("エラー: " + responseCode + "\n" + sb);
             }
         } catch (MalformedURLException e) {
             throw new NullPointerException("URLが不正です: " + e.getLocalizedMessage());
