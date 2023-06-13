@@ -17,8 +17,12 @@ jobs:
           java-version: 17
       - name: Grant execution permission to gradlew
         run: chmod +x gradlew
+      - name: Extract branch name for versioning
+        id: extract_branch
+        run: echo ::set-output name=branch::$(echo ${GITHUB_REF#refs/heads/})
       - name: Build
         env:
+          BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
           NEXUS_USERNAME: ${{secrets.NEXUS_USERNAME}}
           NEXUS_PASSWORD: ${{secrets.NEXUS_PASSWORD}}
         run: ./gradlew clean downloadWaterfall reCompressWaterfall compileJava jar shadowJar reobfJar publish
