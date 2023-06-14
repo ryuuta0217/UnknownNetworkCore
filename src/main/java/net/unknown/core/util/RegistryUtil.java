@@ -47,9 +47,12 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.Fluid;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.v1_20_R1.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_20_R1.enchantments.CraftEnchantment;
 import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
 import org.bukkit.craftbukkit.v1_20_R1.util.CraftNamespacedKey;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -60,7 +63,7 @@ import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "deprecated"})
 public class RegistryUtil {
     private static final Logger LOGGER = Logger.getLogger("UNC/RegistryUtil");
 
@@ -114,68 +117,232 @@ public class RegistryUtil {
                 Lifecycle lifecycle = mappedRegistry.lifecycle(objectFrom);
                 if (resourceKey != null) {
                     int registryId = mappedRegistry.getId(objectFrom);
+                    logPrefix += "[ID=" + registryId + "] ";
+
+                    CraftEnchantment bukkitOldEnchant = null;
+                    String bukkitOldEnchantName = null;
+                    if (registry == BuiltInRegistries.ENCHANTMENT && objectFrom instanceof Enchantment && objectTo instanceof Enchantment) {
+                        bukkitOldEnchant = (CraftEnchantment) org.bukkit.enchantments.Enchantment.getByKey(CraftNamespacedKey.fromMinecraft(registry.getKey(objectFrom)));
+                        bukkitOldEnchantName = bukkitOldEnchant.getName();
+                    }
+
                     if (!unfreeze(registry)) LOGGER.warning("Failed to unfreeze Registry! But continue force replace object.");
 
                     try {
                         ObfuscationUtil.Class obfUtilClass = ObfuscationUtil.getClassByMojangName("net.minecraft.core.MappedRegistry");
                         if (obfUtilClass != null) {
-                            LOGGER.info(logPrefix + "Registry class found, getting required fields...");
+                            LOGGER.info(logPrefix + "MappedRegistry class found, getting required fields...");
                             Field byKeyField = obfUtilClass.getFieldByMojangName("byKey").getField();
-                            Map<ResourceKey<T>, Holder.Reference<T>> byKey = null;
-                            if (byKeyField.trySetAccessible()) byKey = (Map<ResourceKey<T>, Holder.Reference<T>>) byKeyField.get(mappedRegistry);
+                            Map<ResourceKey<T>, Holder.Reference<T>> byKey = getObject(byKeyField, mappedRegistry, Map.class);
 
                             Field byLocationField = obfUtilClass.getFieldByMojangName("byLocation").getField();
-                            Map<ResourceLocation, Holder.Reference<T>> byLocation = null;
-                            if (byLocationField.trySetAccessible()) byLocation = (Map<ResourceLocation, Holder.Reference<T>>) byLocationField.get(registry);
+                            Map<ResourceLocation, Holder.Reference<T>> byLocation = getObject(byLocationField, mappedRegistry, Map.class);
 
                             Field byValueField = obfUtilClass.getFieldByMojangName("byValue").getField();
-                            Map<T, Holder.Reference<T>> byValue = null;
-                            if (byValueField.trySetAccessible()) byValue = (Map<T, Holder.Reference<T>>) byValueField.get(mappedRegistry);
+                            Map<T, Holder.Reference<T>> byValue = getObject(byValueField, mappedRegistry, Map.class);
 
                             Field byIdField = obfUtilClass.getFieldByMojangName("byId").getField();
-                            ObjectList<Holder.Reference<T>> byId = null;
-                            if (byIdField.trySetAccessible()) byId = (ObjectList<Holder.Reference<T>>) byIdField.get(mappedRegistry);
+                            ObjectList<Holder.Reference<T>> byId = getObject(byIdField, mappedRegistry, ObjectList.class);
 
                             Field toIdField = obfUtilClass.getFieldByMojangName("toId").getField();
-                            Reference2IntOpenHashMap<T> toId = null;
-                            if (toIdField.trySetAccessible()) toId = (Reference2IntOpenHashMap<T>) toIdField.get(mappedRegistry);
+                            Reference2IntOpenHashMap<T> toId = getObject(toIdField, mappedRegistry, Reference2IntOpenHashMap.class);
 
                             Field lifecyclesField = obfUtilClass.getFieldByMojangName("lifecycles").getField();
-                            Map<T, Lifecycle> lifecycles = null;
-                            if (lifecyclesField.trySetAccessible()) lifecycles = (Map<T, Lifecycle>) lifecyclesField.get(mappedRegistry);
+                            Map<T, Lifecycle> lifecycles = getObject(lifecyclesField, mappedRegistry, Map.class);
 
                             if (byKey != null && byLocation != null && byValue != null && byId != null && toId != null && lifecycles != null) {
+                                int registryCount = registry.size();
                                 LOGGER.info(logPrefix + "Got fields successfully, proceed as field-modify mode.");
                                 Holder.Reference<T> oldReference = byKey.get(resourceKey);
                                 Holder.Reference<T> reference = Holder.Reference.createStandAlone(mappedRegistry.holderOwner(), resourceKey);
 
+                                /* ResourceKey => Reference Map */
+                                int originalByKeySize = byKey.size();
+                                int byKeySize = originalByKeySize;
+
                                 byKey.remove(resourceKey);
+                                if (byKeySize - 1 == byKey.size() && byKey.getOrDefault(resourceKey, null) == null) {
+                                    LOGGER.info(logPrefix + "[byKey] Successfully removed " + resourceKey + " => " + oldReference + " Map");
+                                } else {
+                                    LOGGER.warning(logPrefix + "[byKey] Failed to remove " + resourceKey + " => " + oldReference + " Map");
+                                }
+
+                                byKeySize = byKey.size();
+
                                 byKey.put(resourceKey, reference);
-                                LOGGER.info(logPrefix + "Modified byKey Map");
+                                if (byKeySize + 1 == byKey.size() && byKey.size() == originalByKeySize && byKey.getOrDefault(resourceKey, null) == reference) {
+                                    LOGGER.info(logPrefix + "[byKey] Successfully added " + resourceKey + " => " + reference + " Map");
+                                } else {
+                                    LOGGER.warning(logPrefix + "[byKey] Failed to add " + resourceKey + " => " + reference + " Map");
+                                }
+                                /* END OF ResourceKey => Reference Map */
+
+                                /* ResourceLocation => Reference Map */
+                                int originalByLocationSize = byLocation.size();
+                                int byLocationSize = originalByLocationSize;
 
                                 byLocation.remove(resourceKey.location());
+                                if ((byLocationSize - 1) == byLocation.size() && byLocation.getOrDefault(resourceKey.location(), null) == null) {
+                                    LOGGER.info(logPrefix + "[byLocation] Successfully removed " + resourceKey.location() + " => " + oldReference + " Map");
+                                } else {
+                                    LOGGER.warning(logPrefix + "[byLocation] Failed to remove " + resourceKey.location() + " => " + oldReference + " Map");
+                                }
+
+                                byLocationSize = byLocation.size();
+
                                 byLocation.put(resourceKey.location(), reference);
-                                LOGGER.info(logPrefix + "Modified byLocation Map");
+                                if ((byLocationSize + 1) == byLocation.size() && byLocation.size() == originalByLocationSize && byLocation.getOrDefault(resourceKey.location(), null) == reference) {
+                                    LOGGER.info(logPrefix + "[byLocation] Successfully added " + resourceKey.location() + " => " + reference + " Map");
+                                } else {
+                                    LOGGER.warning(logPrefix + "[byLocation] Failed to add " + resourceKey.location() + " => " + reference + " Map");
+                                }
+                                /* END OF ResourceLocation => Reference Map */
+
+                                /* Object => Reference Map */
+                                int originalByValueSize = byValue.size();
+                                int byValueSize = originalByValueSize;
 
                                 byValue.remove(objectFrom);
-                                byValue.put(objectTo, reference);
-                                LOGGER.info(logPrefix + "Modified byValue Map");
+                                if ((byValueSize - 1) == byValue.size() && byValue.getOrDefault(objectFrom, null) == null) {
+                                    LOGGER.info(logPrefix + "[byValue] Successfully removed " + objectFrom + " => " + oldReference + " Map");
+                                } else {
+                                    LOGGER.warning(logPrefix + "[byValue] Failed to remove " + objectFrom + " => " + oldReference + " Map");
+                                }
 
-                                byId.remove(registryId);
+                                byValueSize = byValue.size();
+
+                                byValue.put(objectTo, reference);
+                                if ((byValueSize + 1) == byValue.size() && byValue.size() == originalByValueSize && byValue.getOrDefault(objectTo, null) == reference) {
+                                    LOGGER.info(logPrefix + "[byValue] Successfully added " + objectTo + " => " + reference + " Map");
+                                } else {
+                                    LOGGER.warning(logPrefix + "[byValue] Failed to add " + objectTo + " => " + reference + " Map");
+                                }
+                                /* END OF Object => Reference Map */
+
+                                /* ID => Object Map */
                                 byId.set(registryId, reference);
-                                LOGGER.info(logPrefix + "Modified byId Map");
+                                if (byId.get(registryId) == reference) {
+                                    LOGGER.info(logPrefix + "[byId] Successfully overwritten as " + registryId + " => " + reference);
+                                } else {
+                                    LOGGER.warning(logPrefix + "[byId] Failed to overwrite as " + registryId + " => " + reference);
+                                }
+                                /* END OF ID => Object Map */
+
+                                /* Object => ID Map*/
+                                int originalToIdSize = toId.size();
+                                int toIdSize = originalToIdSize;
 
                                 toId.remove(objectFrom);
+                                if ((toIdSize - 1) == toId.size() && toId.getOrDefault(objectFrom, -1) == -1) {
+                                    LOGGER.info(logPrefix + "[toId] Successfully removed " + objectFrom + " => " + registryId + " Map");
+                                } else {
+                                    LOGGER.warning(logPrefix + "[toId] Failed to remove " + objectFrom + " => " + registryId + " Map");
+                                }
+
+                                toIdSize = toId.size();
+
                                 toId.put(objectTo, registryId);
-                                LOGGER.info(logPrefix + "Modified toId Map");
+                                if ((toIdSize + 1) == toId.size() && toId.size() == originalToIdSize && toId.getOrDefault(objectTo, -1) == registryId) {
+                                    LOGGER.info(logPrefix + "[toId] Successfully added " + objectTo + " => " + registryId + " Map");
+                                } else {
+                                    LOGGER.warning(logPrefix + "[toId] Failed to add " + objectTo + " => " + registryId + " Map");
+                                }
+                                /* END OF Object => ID Map */
+
+                                /* LIFECYCLES */
+                                int originalLifecyclesSize = lifecycles.size();
+                                int lifecyclesSize = originalLifecyclesSize;
 
                                 lifecycles.remove(objectFrom);
+                                if (lifecyclesSize - 1 == lifecycles.size() && lifecycles.getOrDefault(objectFrom, null) == null) {
+                                    LOGGER.info(logPrefix + "[lifecycles] Successfully removed " + objectFrom + " => " + lifecycle + " Map");
+                                } else {
+                                    LOGGER.warning(logPrefix + "[lifecycles] Failed to remove " + objectFrom + " => " + lifecycle + " Map");
+                                }
+
+                                lifecyclesSize = lifecycles.size();
+
                                 lifecycles.put(objectTo, lifecycle);
-                                LOGGER.info(logPrefix + "Modified lifecycles Map");
-                                if (mappedRegistry.getId(objectTo) == registryId && !oldReference.equals(mappedRegistry.getHolder(resourceKey).orElse(null))) {
-                                    LOGGER.info(logPrefix + "Successfully replaced object.");
-                                    freeze(mappedRegistry);
-                                    return true;
+                                if ((lifecyclesSize + 1) == lifecycles.size() && lifecycles.size() == originalLifecyclesSize && lifecycles.get(objectTo) == lifecycle) {
+                                    LOGGER.info(logPrefix + "[lifecycles] Successfully added " + objectTo + " => " + lifecycle + " Map");
+                                } else {
+                                    LOGGER.warning(logPrefix + "[lifecycles] Failed to add " + objectTo + " => " + lifecycle + " Map");
+                                }
+                                /* END OF LIFECYCLES */
+
+                                if (bukkitOldEnchant != null) {
+                                    LOGGER.info(logPrefix + "[Bukkit/Enchantment] Enchantment registry replacing detected, applying to Bukkit's enchantment registry as new object.");
+
+                                    Enchantment oldEnchant = (Enchantment) objectFrom;
+                                    Enchantment newEnchant = (Enchantment) objectTo;
+
+                                    CraftEnchantment bukkitNewEnchant = new CraftEnchantment(newEnchant);
+
+                                    if (bukkitOldEnchant.getHandle().equals(oldEnchant) && bukkitNewEnchant.getHandle().equals(newEnchant)) {
+                                        Class<org.bukkit.enchantments.Enchantment> bukkitEnchantmentClass = org.bukkit.enchantments.Enchantment.class;
+
+                                        Field bukkitByKeyField = bukkitEnchantmentClass.getDeclaredField("byKey");
+                                        Map<NamespacedKey, org.bukkit.enchantments.Enchantment> bukkitByKey = getObject(bukkitByKeyField, null, Map.class);
+
+                                        Field bukkitByNameField = bukkitEnchantmentClass.getDeclaredField("byName");
+                                        Map<String, org.bukkit.enchantments.Enchantment> bukkitByName = getObject(bukkitByNameField, null, Map.class);
+
+                                        if (bukkitByKey != null && bukkitByName != null) {
+                                            LOGGER.info(logPrefix + "[Bukkit/Enchantment] Got bukkit fields successfully, proceed as field-modify mode.");
+
+                                            /* [Bukkit] Key => Enchantment Map */
+                                            int originalBukkitByKeySize = bukkitByKey.size();
+                                            int bukkitByKeySize = originalBukkitByKeySize;
+
+                                            bukkitByKey.remove(bukkitOldEnchant.getKey());
+                                            if ((bukkitByKeySize - 1) == bukkitByKey.size() && bukkitByKey.getOrDefault(bukkitOldEnchant.getKey(), null) == null) {
+                                                LOGGER.info(logPrefix + "[Bukkit/Enchantment] [byKey] Successfully removed " + bukkitOldEnchant.getKey() + " => " + bukkitOldEnchant + " Map");
+                                            } else {
+                                                LOGGER.warning(logPrefix + "[Bukkit/Enchantment] [byKey] Failed to remove " + bukkitOldEnchant.getKey() + " => " + bukkitOldEnchant + " Map");
+                                            }
+
+                                            bukkitByKeySize = bukkitByKey.size();
+
+                                            bukkitByKey.put(bukkitNewEnchant.getKey(), bukkitNewEnchant);
+                                            if ((bukkitByKeySize + 1) == bukkitByKey.size() && bukkitByKey.size() == originalBukkitByKeySize && bukkitByKey.get(bukkitNewEnchant.getKey()) == bukkitNewEnchant) {
+                                                LOGGER.info(logPrefix + "[Bukkit/Enchantment] [byKey] Successfully added " + bukkitNewEnchant.getKey() + " => " + bukkitNewEnchant + " Map");
+                                            } else {
+                                                LOGGER.warning(logPrefix + "[Bukkit/Enchantment] [byKey] Failed to add " + bukkitNewEnchant.getKey() + " => " + bukkitNewEnchant + " Map");
+                                            }
+                                            /* [Bukkit] END OF Key => Enchantment Map */
+
+                                            /* [Bukkit] EnchantName => Enchantment Map */
+                                            int originalBukkitByNameSize = bukkitByName.size();
+                                            int bukkitByNameSize = originalBukkitByNameSize;
+
+                                            bukkitByName.remove(bukkitOldEnchantName);
+                                            if ((bukkitByNameSize - 1) == bukkitByName.size() && bukkitByName.getOrDefault(bukkitOldEnchantName, null) == null) {
+                                                LOGGER.info(logPrefix + "[Bukkit/Enchantment] [byName] Successfully removed " + bukkitOldEnchantName + " => " + bukkitOldEnchant + " Map");
+                                            } else {
+                                                LOGGER.warning(logPrefix + "[Bukkit/Enchantment] [byName] Failed to remove " + bukkitOldEnchantName + " => " + bukkitOldEnchant + " Map");
+                                            }
+
+                                            bukkitByNameSize = bukkitByName.size();
+
+                                            bukkitByName.put(bukkitNewEnchant.getName(), bukkitNewEnchant);
+                                            if ((bukkitByNameSize + 1) == bukkitByName.size() && bukkitByName.size() == originalBukkitByNameSize && bukkitByName.get(bukkitNewEnchant.getName()) == bukkitNewEnchant) {
+                                                LOGGER.info(logPrefix + "[Bukkit/Enchantment] [byName] Successfully added " + bukkitNewEnchant.getName() + " => " + bukkitNewEnchant + " Map");
+                                            } else {
+                                                LOGGER.warning(logPrefix + "[Bukkit/Enchantment] [byName] Failed to add " + bukkitNewEnchant.getName() + " => " + bukkitNewEnchant + " Map");
+                                            }
+                                            /* [Bukkit] END OF EnchantName => Enchantment Map */
+                                        }
+                                    }
+                                }
+
+                                if (mappedRegistry.getId(objectTo) == registryId && registry.size() == registryCount) {
+                                    if (!oldReference.equals(mappedRegistry.getHolder(resourceKey).orElse(null))) {
+                                        if (byKey.size() == originalByKeySize && byLocation.size() == originalByLocationSize && byValue.size() == originalByValueSize && toId.size() == originalToIdSize && lifecycles.size() == originalLifecyclesSize) {
+                                            LOGGER.info(logPrefix + "Successfully replaced object.");
+                                            freeze(mappedRegistry);
+                                            return true;
+                                        }
+                                    }
                                 }
                             } else {
                                 LOGGER.warning("Failed to get some field(s). Proceed to duplicate key registration.");
@@ -188,7 +355,7 @@ public class RegistryUtil {
                             }
                             freeze(mappedRegistry);
                         }
-                    } catch (NoSuchFieldException | IllegalAccessException e) {
+                    } catch (NoSuchFieldException e) {
                         e.printStackTrace();
                     }
                 }
@@ -201,6 +368,16 @@ public class RegistryUtil {
         if (field.trySetAccessible()) {
             try {
                 return field.get(instance);
+            } catch (IllegalAccessException ignored) {
+            }
+        }
+        return null;
+    }
+
+    private static <T> T getObject(Field field, Object instance, Class<T> type) {
+        if (field.trySetAccessible()) {
+            try {
+                return type.cast(field.get(instance));
             } catch (IllegalAccessException ignored) {
             }
         }
