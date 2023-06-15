@@ -31,28 +31,47 @@
 
 package net.unknown.survival.gui.hopper.view;
 
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.unknown.core.gui.view.PaginationView;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
+import net.unknown.launchwrapper.hopper.Filter;
 import net.unknown.launchwrapper.hopper.ItemFilter;
+import net.unknown.launchwrapper.hopper.TagFilter;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-public class ConfigureHopperFilterManageView extends PaginationView<ItemFilter, ConfigureHopperGui> {
+import java.util.Iterator;
+
+public class ConfigureHopperFilterManageView extends PaginationView<Filter, ConfigureHopperGui> {
     private final ConfigureHopperViewBase parentView;
 
     public ConfigureHopperFilterManageView(ConfigureHopperViewBase parentView) {
         super(parentView.getGui(), parentView.getGui().getMixinHopper().getFilters(), (filter) -> {
-            ItemStack viewItem = new ItemStack(filter.item());
-            if (filter.tag() != null) viewItem.setTag(filter.tag());
+            ItemStack viewItem = ItemStack.EMPTY;
+            if (filter instanceof ItemFilter itemFilter) {
+                viewItem = new ItemStack(itemFilter.getItem());
+                if (itemFilter.getNbt() != null) viewItem.setTag(itemFilter.getNbt());
+            } else if (filter instanceof TagFilter tagFilter) {
+                Holder<Item> taggedFirstItem = BuiltInRegistries.ITEM.wrapAsHolder(Items.AIR);
+                Iterable<Holder<Item>> taggedItems = BuiltInRegistries.ITEM.getTagOrEmpty(tagFilter.getTag());
+                Iterator<Holder<Item>> taggedItemsIterator = taggedItems.iterator();
+                if (taggedItemsIterator.hasNext()) taggedFirstItem = taggedItemsIterator.next();
+                viewItem = new ItemStack(taggedFirstItem);
+                if (tagFilter.getNbt() != null) viewItem.setTag(tagFilter.getNbt());
+            }
             return MinecraftAdapter.ItemStack.itemStack(viewItem);
         }, true, true);
         this.parentView = parentView;
     }
 
     @Override
-    public void onElementButtonClicked(InventoryClickEvent event, ItemFilter filter) {
+    public void onElementButtonClicked(InventoryClickEvent event, Filter filter) {
         switch (event.getClick()) {
             case SHIFT_RIGHT -> {
                 parentView.getGui().getMixinHopper().getFilters().remove(filter);
