@@ -47,10 +47,7 @@ import net.unknown.survival.discord.MinecraftToDiscordMessageListener;
 import net.unknown.survival.enchants.*;
 import net.unknown.survival.enchants.nms.DamageEnchant;
 import net.unknown.survival.events.ModifiableBlockBreakEvent;
-import net.unknown.survival.feature.BlockDisassembler;
-import net.unknown.survival.feature.DebugStickEntityEditor;
-import net.unknown.survival.feature.ProtectedAreaTestStick;
-import net.unknown.survival.feature.VoteListener;
+import net.unknown.survival.feature.*;
 import net.unknown.survival.feature.gnarms.GNArms;
 import net.unknown.survival.fml.FMLConnectionListener;
 import net.unknown.survival.fml.ModdedPlayerManager;
@@ -127,6 +124,7 @@ public class UnknownNetworkSurvival {
             getLogger().info("Successfully Bootstrapped!");
             ListenerManager.registerListener(new BlockDisassembler());
             ListenerManager.registerListener(new ConfigureHopperGui.Listener());
+            ListenerManager.registerListener(new ChestLinkStick());
         }
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");
