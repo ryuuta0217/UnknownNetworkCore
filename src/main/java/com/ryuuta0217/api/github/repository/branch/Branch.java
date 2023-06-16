@@ -33,14 +33,16 @@ package com.ryuuta0217.api.github.repository.branch;
 
 import com.ryuuta0217.api.github.GitHubAPI;
 import com.ryuuta0217.api.github.GitUser;
-import com.ryuuta0217.api.github.User;
+import com.ryuuta0217.api.github.user.SimpleUserImpl;
 import com.ryuuta0217.api.github.repository.Repository;
 import com.ryuuta0217.api.github.repository.commit.Parent;
 import com.ryuuta0217.api.github.repository.commit.Tree;
 import com.ryuuta0217.api.github.repository.commit.Verification;
+import com.ryuuta0217.api.github.user.interfaces.SimpleUser;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 
 public class Branch {
@@ -88,6 +90,10 @@ public class Branch {
         return this.protectionUrl;
     }
 
+    public List<com.ryuuta0217.api.github.repository.commit.Commit> getCommits() {
+        return this.api.getCommits(this.repository.getOwner().getLogin(), this.repository, this.getName());
+    }
+
     @Nullable
     public Branch tryFetchCompleteData() {
         return this.repository.getBranch(this.getName());
@@ -96,8 +102,8 @@ public class Branch {
     public static class Commit {
         private final GitHubAPI api;
         private final Branch branch;
-        @Nullable private final User committer;
-        @Nullable private final User author;
+        @Nullable private final SimpleUser committer;
+        @Nullable private final SimpleUser author;
         @Nullable private final String htmlUrl;
         @Nullable private final GitCommit commit;
         @Nullable private final String commentsUrl;
@@ -109,8 +115,8 @@ public class Branch {
         public Commit(GitHubAPI api, Branch branch, JSONObject data) {
             this.api = api;
             this.branch = branch;
-            this.committer = data.isNull("committer") ? null : new User(api, data.getJSONObject("committer"));
-            this.author = data.isNull("author") ? null : new User(api, data.getJSONObject("author"));
+            this.committer = data.isNull("committer") ? null : new SimpleUserImpl(api, data.getJSONObject("committer"));
+            this.author = data.isNull("author") ? null : new SimpleUserImpl(api, data.getJSONObject("author"));
             this.htmlUrl = data.isNull("html_url") ? null : data.getString("html_url");
             this.commit = data.isNull("commit") ? null : new GitCommit(api, this, data.getJSONObject("commit"));
             this.commentsUrl = data.isNull("comments_url") ? null : data.getString("comments_url");
@@ -125,12 +131,12 @@ public class Branch {
         }
 
         @Nullable
-        public User getCommitter() {
+        public SimpleUser getCommitter() {
             return this.committer;
         }
 
         @Nullable
-        public User getAuthor() {
+        public SimpleUser getAuthor() {
             return this.author;
         }
 

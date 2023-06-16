@@ -29,43 +29,41 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.repository.commit;
+package com.ryuuta0217.api.github.repository.check.pr;
 
 import com.ryuuta0217.api.github.GitHubAPI;
 import org.json.JSONObject;
 
-import javax.annotation.Nullable;
-
-public class Verification {
+public class BranchPointer {
     private final GitHubAPI api;
-    private final String reason;
-    @Nullable private final String signature;
-    @Nullable private final String payload;
-    private final boolean verified;
+    private final PullRequest pullRequest;
 
-    public Verification(GitHubAPI api, JSONObject data) {
+    private final String ref;
+    private final String sha;
+    private final Repository repo;
+
+    public BranchPointer(GitHubAPI api, PullRequest pullRequest, JSONObject data) {
         this.api = api;
-        this.reason = data.getString("reason");
-        this.signature = data.has("signature") && !data.get("signature").equals(JSONObject.NULL) ? data.getString("signature") : null;
-        this.payload = data.has("payload") && !data.get("payload").equals(JSONObject.NULL) ? data.getString("payload") : null;
-        this.verified = data.getBoolean("verified");
+        this.pullRequest = pullRequest;
+
+        this.ref = data.getString("ref");
+        this.sha = data.getString("sha");
+        this.repo = new Repository(api, pullRequest, data.getJSONObject("repo"));
     }
 
-    public String getReason() {
-        return this.reason;
+    public PullRequest getPullRequest() {
+        return this.pullRequest;
     }
 
-    @Nullable
-    public String getSignature() {
-        return this.signature;
+    public String getRef() {
+        return this.ref;
     }
 
-    @Nullable
-    public String getPayload() {
-        return this.payload;
+    public String getSha() {
+        return this.sha;
     }
 
-    public boolean isVerified() {
-        return this.verified;
+    public Repository getRepo() {
+        return this.repo;
     }
 }

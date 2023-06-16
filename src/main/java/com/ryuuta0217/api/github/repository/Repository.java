@@ -32,15 +32,13 @@
 package com.ryuuta0217.api.github.repository;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.User;
+import com.ryuuta0217.api.github.user.SimpleUserImpl;
 import com.ryuuta0217.api.github.repository.branch.Branch;
-import org.json.JSONArray;
+import com.ryuuta0217.api.github.user.interfaces.SimpleUser;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 public class Repository {
@@ -108,7 +106,7 @@ public class Repository {
     @Nullable private final Boolean deleteBranchOnMerge;
     private final String gitUrl;
     private final boolean hasPages;
-    private final Owner owner;
+    private final SimpleUser owner;
     @Nullable private final Boolean allowSquashMerge;
     private final String commitsUrl;
     private final String compareUrl;
@@ -196,7 +194,7 @@ public class Repository {
         this.disabled = data.getBoolean("disabled");
         this.gitUrl = data.getString("git_url");
         this.hasPages = data.getBoolean("has_pages");
-        this.owner = new Owner(api, data.getJSONObject("owner"));
+        this.owner = new SimpleUserImpl(api, data.getJSONObject("owner"));
         this.commitsUrl = data.getString("commits_url");
         this.compareUrl = data.getString("compare_url");
         this.gitCommitsUrl = data.getString("git_commits_url");
@@ -504,7 +502,7 @@ public class Repository {
         return this.hasPages;
     }
 
-    public Owner getOwner() {
+    public SimpleUser getOwner() {
         return this.owner;
     }
 
@@ -638,20 +636,11 @@ public class Repository {
 
     @Nullable
     public Branch getBranch(String branchName) {
-        Object obj = this.api.requestAndParse("GET", GitHubAPI.replaceArgumentPatternFromUrl(this.getBranchesUrl(), "branch", branchName));
-        if (!(obj instanceof JSONObject json)) return null;
-        return new Branch(this.api, this, json);
+        return this.api.getBranch(this, branchName);
     }
 
     public List<Branch> getBranches() {
-        Object obj = this.api.requestAndParse("GET", GitHubAPI.stripArgumentPatternFromUrl(this.getBranchesUrl()));
-        if (!(obj instanceof JSONArray jsonArray)) return Collections.emptyList();
-        return jsonArray.toList().stream()
-                .filter(raw -> raw instanceof HashMap<?,?>)
-                .map(raw -> ((HashMap<?, ?>) raw))
-                .map(map -> new JSONObject(map))
-                .map(json -> new Branch(this.api, this,json))
-                .toList();
+        return this.api.getBranches(this);
     }
 
     public static class Permissions {
@@ -728,126 +717,6 @@ public class Repository {
 
         public String getNodeId() {
             return this.nodeId;
-        }
-    }
-
-    public static class Owner {
-        private final GitHubAPI api;
-        private final String gistsUrl;
-        private final String reposUrl;
-        private final String followingUrl;
-        private final String starredUrl;
-        private final String login;
-        private final String followersUrl;
-        private final String type;
-        private final String url;
-        private final String subscriptionsUrl;
-        private final String receivedEventsUrl;
-        private final String avatarUrl;
-        private final String eventsUrl;
-        private final String htmlUrl;
-        private final boolean siteAdmin;
-        private final long id;
-        private final String gravatarId;
-        private final String nodeId;
-        private final String organizationsUrl;
-
-        public Owner(GitHubAPI api, JSONObject data) {
-            this.api = api;
-            this.gistsUrl = data.getString("gists_url");
-            this.reposUrl = data.getString("repos_url");
-            this.followingUrl = data.getString("following_url");
-            this.starredUrl = data.getString("starred_url");
-            this.login = data.getString("login");
-            this.followersUrl = data.getString("followers_url");
-            this.type = data.getString("type");
-            this.url = data.getString("url");
-            this.subscriptionsUrl = data.getString("subscriptions_url");
-            this.receivedEventsUrl = data.getString("received_events_url");
-            this.avatarUrl = data.getString("avatar_url");
-            this.eventsUrl = data.getString("events_url");
-            this.htmlUrl = data.getString("html_url");
-            this.siteAdmin = data.getBoolean("site_admin");
-            this.id = data.getLong("id");
-            this.gravatarId = data.getString("gravatar_id");
-            this.nodeId = data.getString("node_id");
-            this.organizationsUrl = data.getString("organizations_url");
-        }
-
-        public String getGistsUrl() {
-            return this.gistsUrl;
-        }
-
-        public String getReposUrl() {
-            return this.reposUrl;
-        }
-
-        public String getFollowingUrl() {
-            return this.followingUrl;
-        }
-
-        public String getStarredUrl() {
-            return this.starredUrl;
-        }
-
-        public String getLogin() {
-            return this.login;
-        }
-
-        public String getFollowersUrl() {
-            return this.followersUrl;
-        }
-
-        public String getType() {
-            return this.type;
-        }
-
-        public String getUrl() {
-            return this.url;
-        }
-
-        public String getSubscriptionsUrl() {
-            return this.subscriptionsUrl;
-        }
-
-        public String getReceivedEventsUrl() {
-            return this.receivedEventsUrl;
-        }
-
-        public String getAvatarUrl() {
-            return this.avatarUrl;
-        }
-
-        public String getEventsUrl() {
-            return this.eventsUrl;
-        }
-
-        public String getHtmlUrl() {
-            return this.htmlUrl;
-        }
-
-        public boolean isSiteAdmin() {
-            return this.siteAdmin;
-        }
-
-        public long getId() {
-            return this.id;
-        }
-
-        public String getGravatarId() {
-            return this.gravatarId;
-        }
-
-        public String getNodeId() {
-            return this.nodeId;
-        }
-
-        public String getOrganizationsUrl() {
-            return this.organizationsUrl;
-        }
-
-        public User getUser() {
-            return this.api.getUser(this.login);
         }
     }
 }

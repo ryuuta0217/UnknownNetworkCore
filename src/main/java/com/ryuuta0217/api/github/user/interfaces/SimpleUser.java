@@ -29,43 +29,33 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.repository.commit;
-
-import com.ryuuta0217.api.github.GitHubAPI;
-import org.json.JSONObject;
+package com.ryuuta0217.api.github.user.interfaces;
 
 import javax.annotation.Nullable;
+import java.time.ZonedDateTime;
 
-public class Verification {
-    private final GitHubAPI api;
-    private final String reason;
-    @Nullable private final String signature;
-    @Nullable private final String payload;
-    private final boolean verified;
+public interface SimpleUser {
+    String getAvatarUrl();
+    String getEventsUrl();
+    String getFollowersUrl();
+    String getFollowingUrl();
+    String getGistsUrl();
+    @Nullable String getGravatarId();
+    String getHtmlUrl();
+    long getId();
+    String getNodeId();
+    String getLogin();
+    String getOrganizationsUrl();
+    String getReceivedEventsUrl();
+    String getReposUrl();
+    boolean isSiteAdmin();
+    String getStarredUrl();
+    String getSubscriptionsUrl();
+    String getType();
+    String getUrl();
 
-    public Verification(GitHubAPI api, JSONObject data) {
-        this.api = api;
-        this.reason = data.getString("reason");
-        this.signature = data.has("signature") && !data.get("signature").equals(JSONObject.NULL) ? data.getString("signature") : null;
-        this.payload = data.has("payload") && !data.get("payload").equals(JSONObject.NULL) ? data.getString("payload") : null;
-        this.verified = data.getBoolean("verified");
-    }
-
-    public String getReason() {
-        return this.reason;
-    }
-
-    @Nullable
-    public String getSignature() {
-        return this.signature;
-    }
-
-    @Nullable
-    public String getPayload() {
-        return this.payload;
-    }
-
-    public boolean isVerified() {
-        return this.verified;
-    }
+    /* NOT REQUIRED UNDER */
+    @Nullable String getName();
+    @Nullable String getEmail();
+    @Nullable ZonedDateTime getStarredAt();
 }

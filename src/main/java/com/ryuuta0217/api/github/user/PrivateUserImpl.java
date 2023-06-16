@@ -29,43 +29,45 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.repository.commit;
+package com.ryuuta0217.api.github.user;
 
 import com.ryuuta0217.api.github.GitHubAPI;
+import com.ryuuta0217.api.github.user.interfaces.PrivateUser;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-import javax.annotation.Nullable;
+public class PrivateUserImpl extends PublicUserImpl implements PrivateUser {
+    private long ownedPrivateRepos;
+    private boolean twoFactorAuthentication;
+    private boolean businessPlus;
+    @Nullable private String ldapDistinguishedName;
 
-public class Verification {
-    private final GitHubAPI api;
-    private final String reason;
-    @Nullable private final String signature;
-    @Nullable private final String payload;
-    private final boolean verified;
-
-    public Verification(GitHubAPI api, JSONObject data) {
-        this.api = api;
-        this.reason = data.getString("reason");
-        this.signature = data.has("signature") && !data.get("signature").equals(JSONObject.NULL) ? data.getString("signature") : null;
-        this.payload = data.has("payload") && !data.get("payload").equals(JSONObject.NULL) ? data.getString("payload") : null;
-        this.verified = data.getBoolean("verified");
+    public PrivateUserImpl(GitHubAPI api, JSONObject data) {
+        super(api, data);
+        this.ownedPrivateRepos = data.has("owned_private_repos") ? data.getLong("owned_private_repos") : -1;
+        this.twoFactorAuthentication = data.has("two_factor_authentication") && data.getBoolean("two_factor_authentication");
+        this.businessPlus = data.has("is_business_plus") && data.getBoolean("is_business_plus");
+        this.ldapDistinguishedName = data.has("ldap_distinguished_name") && !data.get("ldap_distinguished_name").equals(JSONObject.NULL) ? data.getString("ldap_distinguished_name") : null;
     }
 
-    public String getReason() {
-        return this.reason;
+    @Override
+    public long getOwnedPrivateRepos() {
+        return 0;
+    }
+
+    @Override
+    public boolean isTwoFactorAuthentication() {
+        return false;
+    }
+
+    @Override
+    public boolean isBusinessPlus() {
+        return false;
     }
 
     @Nullable
-    public String getSignature() {
-        return this.signature;
-    }
-
-    @Nullable
-    public String getPayload() {
-        return this.payload;
-    }
-
-    public boolean isVerified() {
-        return this.verified;
+    @Override
+    public String getLdapDistinguishedName() {
+        return null;
     }
 }

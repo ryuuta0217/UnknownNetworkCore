@@ -29,43 +29,69 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.repository.commit;
+package com.ryuuta0217.api.github.repository.check;
 
 import com.ryuuta0217.api.github.GitHubAPI;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public class Verification {
+public class Permissions {
     private final GitHubAPI api;
-    private final String reason;
-    @Nullable private final String signature;
-    @Nullable private final String payload;
-    private final boolean verified;
+    private final App app;
 
-    public Verification(GitHubAPI api, JSONObject data) {
+    private final String issues;
+    private final String checks;
+    private final String metadata;
+    private final String contents;
+    private final String deployments;
+    private final Map<String, String> additionalProperties;
+
+    public Permissions(GitHubAPI api, App app, JSONObject data) {
         this.api = api;
-        this.reason = data.getString("reason");
-        this.signature = data.has("signature") && !data.get("signature").equals(JSONObject.NULL) ? data.getString("signature") : null;
-        this.payload = data.has("payload") && !data.get("payload").equals(JSONObject.NULL) ? data.getString("payload") : null;
-        this.verified = data.getBoolean("verified");
+        this.app = app;
+
+        this.issues = data.getString("issues");
+        this.checks = data.getString("checks");
+        this.metadata = data.getString("metadata");
+        this.contents = data.getString("contents");
+        this.deployments = data.getString("deployments");
+        this.additionalProperties = data.toMap().entrySet()
+                .stream()
+                .filter(entry -> !entry.getKey().matches("issues|checks|metadata|contents|deployments"))
+                .filter(entry -> entry.getValue() instanceof String)
+                .map(entry -> Map.entry(entry.getKey(), entry.getValue().toString()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    public String getReason() {
-        return this.reason;
+    public App getApp() {
+        return this.app;
+    }
+
+    public String getIssuesPermission() {
+        return this.issues;
+    }
+
+    public String getChecksPermission() {
+        return this.checks;
+    }
+
+    public String getMetadataPermission() {
+        return this.metadata;
+    }
+
+    public String getContentsPermission() {
+        return this.contents;
+    }
+
+    public String getDeploymentsPermission() {
+        return this.deployments;
     }
 
     @Nullable
-    public String getSignature() {
-        return this.signature;
-    }
-
-    @Nullable
-    public String getPayload() {
-        return this.payload;
-    }
-
-    public boolean isVerified() {
-        return this.verified;
+    public String getAdditionalPermission(String key) {
+        return this.additionalProperties.getOrDefault(key, null);
     }
 }

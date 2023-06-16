@@ -31,41 +31,9 @@
 
 package com.ryuuta0217.api.github.repository.commit;
 
-import com.ryuuta0217.api.github.GitHubAPI;
-import org.json.JSONObject;
-
-import javax.annotation.Nullable;
-
-public class Verification {
-    private final GitHubAPI api;
-    private final String reason;
-    @Nullable private final String signature;
-    @Nullable private final String payload;
-    private final boolean verified;
-
-    public Verification(GitHubAPI api, JSONObject data) {
-        this.api = api;
-        this.reason = data.getString("reason");
-        this.signature = data.has("signature") && !data.get("signature").equals(JSONObject.NULL) ? data.getString("signature") : null;
-        this.payload = data.has("payload") && !data.get("payload").equals(JSONObject.NULL) ? data.getString("payload") : null;
-        this.verified = data.getBoolean("verified");
-    }
-
-    public String getReason() {
-        return this.reason;
-    }
-
-    @Nullable
-    public String getSignature() {
-        return this.signature;
-    }
-
-    @Nullable
-    public String getPayload() {
-        return this.payload;
-    }
-
-    public boolean isVerified() {
-        return this.verified;
-    }
+public enum CompareStatus {
+    DIVERGED,
+    AHEAD,
+    BEHIND,
+    IDENTICAL
 }

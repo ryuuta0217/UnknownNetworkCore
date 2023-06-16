@@ -29,43 +29,53 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.repository.commit;
+package com.ryuuta0217.api.github.repository.check.pr;
 
 import com.ryuuta0217.api.github.GitHubAPI;
+import com.ryuuta0217.api.github.repository.check.CheckRun;
 import org.json.JSONObject;
 
-import javax.annotation.Nullable;
-
-public class Verification {
+public class PullRequest {
     private final GitHubAPI api;
-    private final String reason;
-    @Nullable private final String signature;
-    @Nullable private final String payload;
-    private final boolean verified;
+    private final CheckRun checkRun;
+    private final long id;
+    private final long number;
+    private final String url;
+    private final BranchPointer head;
+    private final BranchPointer base;
 
-    public Verification(GitHubAPI api, JSONObject data) {
+    public PullRequest(GitHubAPI api, CheckRun checkRun, JSONObject data) {
         this.api = api;
-        this.reason = data.getString("reason");
-        this.signature = data.has("signature") && !data.get("signature").equals(JSONObject.NULL) ? data.getString("signature") : null;
-        this.payload = data.has("payload") && !data.get("payload").equals(JSONObject.NULL) ? data.getString("payload") : null;
-        this.verified = data.getBoolean("verified");
+        this.checkRun = checkRun;
+
+        this.id = data.getLong("id");
+        this.number = data.getLong("number");
+        this.url = data.getString("url");
+        this.head = new BranchPointer(api, this, data.getJSONObject("head"));
+        this.base = new BranchPointer(api, this, data.getJSONObject("base"));
     }
 
-    public String getReason() {
-        return this.reason;
+    public CheckRun getCheckRun() {
+        return this.checkRun;
     }
 
-    @Nullable
-    public String getSignature() {
-        return this.signature;
+    public long getId() {
+        return this.id;
     }
 
-    @Nullable
-    public String getPayload() {
-        return this.payload;
+    public long getNumber() {
+        return this.number;
     }
 
-    public boolean isVerified() {
-        return this.verified;
+    public String getUrl() {
+        return this.url;
+    }
+
+    public BranchPointer getHead() {
+        return this.head;
+    }
+
+    public BranchPointer getBase() {
+        return this.base;
     }
 }
