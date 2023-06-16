@@ -37,14 +37,16 @@ import org.json.JSONObject;
 import javax.annotation.Nullable;
 
 public class Output {
-    private GitHubAPI api;
-    private CheckRun checkRun;
-
-    @Nullable private final String title;
-    @Nullable private final String summary;
-    @Nullable private final String text;
+    @Nullable
+    private final String title;
+    @Nullable
+    private final String summary;
+    @Nullable
+    private final String text;
     private final long annotationsCount;
     private final String annotationsUrl;
+    private final GitHubAPI api;
+    private final CheckRun checkRun;
 
     public Output(GitHubAPI api, CheckRun checkRun, JSONObject data) {
         this.api = api;

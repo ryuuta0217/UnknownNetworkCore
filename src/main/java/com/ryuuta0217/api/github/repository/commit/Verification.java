@@ -39,8 +39,10 @@ import javax.annotation.Nullable;
 public class Verification {
     private final GitHubAPI api;
     private final String reason;
-    @Nullable private final String signature;
-    @Nullable private final String payload;
+    @Nullable
+    private final String signature;
+    @Nullable
+    private final String payload;
     private final boolean verified;
 
     public Verification(GitHubAPI api, JSONObject data) {

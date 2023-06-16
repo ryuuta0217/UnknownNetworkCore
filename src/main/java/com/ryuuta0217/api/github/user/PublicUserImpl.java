@@ -40,9 +40,12 @@ import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
 
 public class PublicUserImpl extends UserImpl implements PublicUser {
-    @Nullable private final ZonedDateTime suspendedAt;
-    @Nullable private final String twitterUsername;
-    @Nullable private final Plan plan;
+    @Nullable
+    private final ZonedDateTime suspendedAt;
+    @Nullable
+    private final String twitterUsername;
+    @Nullable
+    private final Plan plan;
     private final long privateGists;
     private final long totalPrivateRepos;
     private final long diskUsage;

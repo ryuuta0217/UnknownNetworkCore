@@ -35,10 +35,13 @@ import javax.annotation.Nullable;
 
 public interface PrivateUser extends PublicUser {
     long getOwnedPrivateRepos();
+
     boolean isTwoFactorAuthentication();
 
     /* NOT REQUIRED UNDER (when null, null or false) */
     boolean isBusinessPlus();
-    @Nullable String getLdapDistinguishedName();
+
+    @Nullable
+    String getLdapDistinguishedName();
 
 }

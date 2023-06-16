@@ -35,15 +35,29 @@ import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
 
 public interface User extends SimpleUser {
-    @Nullable String getBio();
-    @Nullable String getBlog();
-    @Nullable String getCompany();
+    @Nullable
+    String getBio();
+
+    @Nullable
+    String getBlog();
+
+    @Nullable
+    String getCompany();
+
     long getFollowers();
+
     long getFollowing();
+
     boolean isHireable(); // when null, false
-    @Nullable String getLocation();
+
+    @Nullable
+    String getLocation();
+
     long getPublicRepos();
+
     long getPublicGists();
+
     ZonedDateTime getCreatedAt();
+
     ZonedDateTime getUpdatedAt();
 }

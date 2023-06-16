@@ -40,7 +40,8 @@ public class Parent {
     private final GitHubAPI api;
     private final String sha;
     private final String url;
-    @Nullable private final String htmlUrl;
+    @Nullable
+    private final String htmlUrl;
 
     public Parent(GitHubAPI api, JSONObject data) {
         this.api = api;

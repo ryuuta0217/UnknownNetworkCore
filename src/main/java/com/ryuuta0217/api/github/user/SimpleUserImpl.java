@@ -40,8 +40,10 @@ import java.time.ZonedDateTime;
 
 public class SimpleUserImpl implements SimpleUser {
     protected final GitHubAPI api;
-    @Nullable private final String name;
-    @Nullable private final String email;
+    @Nullable
+    private final String name;
+    @Nullable
+    private final String email;
     private final String login;
     private final long id;
     private final String nodeId;
@@ -60,7 +62,8 @@ public class SimpleUserImpl implements SimpleUser {
     private final String receivedEventsUrl;
     private final String type;
     private final boolean siteAdmin;
-    @Nullable private final ZonedDateTime starredAt;
+    @Nullable
+    private final ZonedDateTime starredAt;
 
     public SimpleUserImpl(GitHubAPI api, JSONObject data) {
         this.api = api;

@@ -31,7 +31,6 @@
 
 package com.ryuuta0217.api.github.user;
 
-import com.ryuuta0217.api.github.GitHubAPI;
 import com.ryuuta0217.api.github.user.interfaces.Plan;
 import org.json.JSONObject;
 

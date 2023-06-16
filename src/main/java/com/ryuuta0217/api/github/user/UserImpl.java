@@ -47,17 +47,21 @@ import java.util.HashMap;
 import java.util.List;
 
 public class UserImpl extends SimpleUserImpl implements User {
-    @Nullable private final String bio;
+    @Nullable
+    private final String bio;
     private final ZonedDateTime createdAt;
-    @Nullable private final String blog;
+    @Nullable
+    private final String blog;
     private final ZonedDateTime updatedAt;
-    @Nullable private final String company;
+    @Nullable
+    private final String company;
     private final long publicRepos;
     private final boolean hireable;
     private final long publicGists;
     private final long followers;
     private final long following;
-    @Nullable private final String location;
+    @Nullable
+    private final String location;
 
     public UserImpl(GitHubAPI api, JSONObject data) {
         super(api, data);
@@ -147,8 +151,8 @@ public class UserImpl extends SimpleUserImpl implements User {
         Object obj = this.api.requestAndParse("GET", this.getReposUrl());
         if (!(obj instanceof JSONArray jsonArray)) return Collections.emptyList();
         return jsonArray.toList().stream()
-                .filter(raw -> raw instanceof HashMap<?,?>)
-                .map(raw -> (HashMap<?,?>) raw)
+                .filter(raw -> raw instanceof HashMap<?, ?>)
+                .map(raw -> (HashMap<?, ?>) raw)
                 .map(map -> new JSONObject(map))
                 .map(json -> new Repository(this.api, json))
                 .toList();

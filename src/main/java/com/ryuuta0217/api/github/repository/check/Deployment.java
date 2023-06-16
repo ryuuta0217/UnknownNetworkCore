@@ -45,16 +45,19 @@ public class Deployment {
     private final String nodeId;
     private final String task;
     private final String environment;
-    @Nullable private final String description;
+    @Nullable
+    private final String description;
     private final String statusesUrl;
     private final String repositoryUrl;
     private final String url;
     private final ZonedDateTime createdAt;
     private final ZonedDateTime updatedAt;
-    @Nullable private final String originalEnvironment;
+    @Nullable
+    private final String originalEnvironment;
     private final boolean transientEnvironment; // default : false
     private final boolean productionEnvironment; // default : false
-    @Nullable private final App performedViaGithubApp;
+    @Nullable
+    private final App performedViaGithubApp;
 
     public Deployment(GitHubAPI api, CheckRun checkRun, JSONObject data) {
         this.api = api;

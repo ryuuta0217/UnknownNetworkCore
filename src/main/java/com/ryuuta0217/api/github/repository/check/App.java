@@ -45,9 +45,11 @@ public class App {
 
     private final long id;
     private final String nodeId;
-    @Nullable private final SimpleUser owner;
+    @Nullable
+    private final SimpleUser owner;
     private final String name;
-    @Nullable private final String description;
+    @Nullable
+    private final String description;
     private final String externalUrl;
     private final String htmlUrl;
     private final ZonedDateTime createdAt;
@@ -55,12 +57,17 @@ public class App {
     private final Permissions permissions;
     private final String[] events;
 
-    @Nullable private final String slug;
+    @Nullable
+    private final String slug;
     private final long installationsCount;
-    @Nullable private final String clientId;
-    @Nullable private final String clientSecret;
-    @Nullable private final String webhookSecret;
-    @Nullable private final String pem;
+    @Nullable
+    private final String clientId;
+    @Nullable
+    private final String clientSecret;
+    @Nullable
+    private final String webhookSecret;
+    @Nullable
+    private final String pem;
 
     public App(GitHubAPI api, CheckRun checkRun, JSONObject data) {
         this.api = api;

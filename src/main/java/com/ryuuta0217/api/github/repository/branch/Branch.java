@@ -33,11 +33,11 @@ package com.ryuuta0217.api.github.repository.branch;
 
 import com.ryuuta0217.api.github.GitHubAPI;
 import com.ryuuta0217.api.github.GitUser;
-import com.ryuuta0217.api.github.user.SimpleUserImpl;
 import com.ryuuta0217.api.github.repository.Repository;
 import com.ryuuta0217.api.github.repository.commit.Parent;
 import com.ryuuta0217.api.github.repository.commit.Tree;
 import com.ryuuta0217.api.github.repository.commit.Verification;
+import com.ryuuta0217.api.github.user.SimpleUserImpl;
 import com.ryuuta0217.api.github.user.interfaces.SimpleUser;
 import org.json.JSONObject;
 
@@ -51,8 +51,10 @@ public class Branch {
     private final boolean isProtected;
     private final String name;
     private final Commit commit;
-    @Nullable private final Protection protection;
-    @Nullable private final String protectionUrl;
+    @Nullable
+    private final Protection protection;
+    @Nullable
+    private final String protectionUrl;
 
     public Branch(GitHubAPI api, Repository repository, JSONObject data) {
         this.api = api;
@@ -102,15 +104,22 @@ public class Branch {
     public static class Commit {
         private final GitHubAPI api;
         private final Branch branch;
-        @Nullable private final SimpleUser committer;
-        @Nullable private final SimpleUser author;
-        @Nullable private final String htmlUrl;
-        @Nullable private final GitCommit commit;
-        @Nullable private final String commentsUrl;
+        @Nullable
+        private final SimpleUser committer;
+        @Nullable
+        private final SimpleUser author;
+        @Nullable
+        private final String htmlUrl;
+        @Nullable
+        private final GitCommit commit;
+        @Nullable
+        private final String commentsUrl;
         private final String sha;
         private final String url;
-        @Nullable private final String nodeId;
-        @Nullable private final Parent[] parents;
+        @Nullable
+        private final String nodeId;
+        @Nullable
+        private final Parent[] parents;
 
         public Commit(GitHubAPI api, Branch branch, JSONObject data) {
             this.api = api;

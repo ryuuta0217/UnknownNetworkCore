@@ -36,11 +36,20 @@ import java.time.ZonedDateTime;
 
 public interface PublicUser extends User {
     /* NOT REQUIRED UNDER (when null, null or -1) */
-    @Nullable ZonedDateTime getSuspendedAt();
-    @Nullable String getTwitterUsername();
-    @Nullable Plan getPlan();
+    @Nullable
+    ZonedDateTime getSuspendedAt();
+
+    @Nullable
+    String getTwitterUsername();
+
+    @Nullable
+    Plan getPlan();
+
     long getPrivateGists();
+
     long getTotalPrivateRepos();
+
     long getDiskUsage();
+
     long getCollaborators();
 }

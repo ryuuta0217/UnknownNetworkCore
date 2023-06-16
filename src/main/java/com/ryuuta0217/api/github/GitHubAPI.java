@@ -31,8 +31,8 @@
 
 package com.ryuuta0217.api.github;
 
-import com.ryuuta0217.api.github.repository.branch.Branch;
 import com.ryuuta0217.api.github.repository.Repository;
+import com.ryuuta0217.api.github.repository.branch.Branch;
 import com.ryuuta0217.api.github.repository.check.CheckRun;
 import com.ryuuta0217.api.github.repository.commit.Commit;
 import com.ryuuta0217.api.github.repository.commit.CompareResult;
@@ -47,7 +47,6 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 public class GitHubAPI {
     public static final String GITHUB_API_BASE = "https://api.github.com";
@@ -55,6 +54,18 @@ public class GitHubAPI {
 
     public GitHubAPI(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public static String stripArgumentPatternFromUrl(String url) {
+        return url.replaceAll("\\{.*?}", "");
+    }
+
+    public static String replaceArgumentPatternFromUrl(String url, String argumentName, String value) {
+        if (url.contains("{/" + argumentName + "}")) {
+            return url.replaceAll("\\{/" + argumentName + "}", "/" + value);
+        } else {
+            return url.replaceAll("\\{" + argumentName + "}", value);
+        }
     }
 
     @Nullable
@@ -120,8 +131,8 @@ public class GitHubAPI {
         Object obj = this.requestAndParse("GET", stripArgumentPatternFromUrl(repository.getCommitsUrl()), (sha != null ? "?sha=" + sha : ""));
         if (!(obj instanceof JSONArray arr)) return null;
         return arr.toList().stream()
-                .filter(raw -> raw instanceof Map<?,?>)
-                .map(raw -> (Map<?,?>) raw)
+                .filter(raw -> raw instanceof Map<?, ?>)
+                .map(raw -> (Map<?, ?>) raw)
                 .map(raw -> new JSONObject(raw))
                 .map(json -> new Commit(this, repository, json))
                 .toList();
@@ -163,8 +174,8 @@ public class GitHubAPI {
         Object obj = this.requestAndParse("GET", repository.getBranchesUrl());
         if (!(obj instanceof JSONArray arr)) return null;
         return arr.toList().stream()
-                .filter(raw -> raw instanceof Map<?,?>)
-                .map(raw -> (Map<?,?>) raw)
+                .filter(raw -> raw instanceof Map<?, ?>)
+                .map(raw -> (Map<?, ?>) raw)
                 .map(raw -> new JSONObject(raw))
                 .map(json -> new Branch(this, repository, json))
                 .toList();
@@ -180,14 +191,14 @@ public class GitHubAPI {
 
     public List<CheckRun> getCheckRunsByCommit(Repository repository, String ref) {
         if (repository == null) return null;
-        Object obj = this.requestAndParse("GET", 
+        Object obj = this.requestAndParse("GET",
                 replaceArgumentPatternFromUrl(repository.getCommitsUrl(), "sha", ref),
                 "/check-runs"
         );
         if (!(obj instanceof JSONObject data)) return null;
         return data.getJSONArray("check_runs").toList().stream()
-                .filter(raw -> raw instanceof Map<?,?>)
-                .map(raw -> (Map<?,?>) raw)
+                .filter(raw -> raw instanceof Map<?, ?>)
+                .map(raw -> (Map<?, ?>) raw)
                 .map(raw -> new JSONObject(raw))
                 .map(json -> new CheckRun(this, json))
                 .toList();
@@ -220,18 +231,6 @@ public class GitHubAPI {
             else return new JSONObject(response);
         } catch (IOException e) {
             return null;
-        }
-    }
-
-    public static String stripArgumentPatternFromUrl(String url) {
-        return url.replaceAll("\\{.*?}", "");
-    }
-
-    public static String replaceArgumentPatternFromUrl(String url, String argumentName, String value) {
-        if (url.contains("{/" + argumentName + "}")) {
-            return url.replaceAll("\\{/" + argumentName + "}", "/" + value);
-        } else {
-            return url.replaceAll("\\{" + argumentName + "}", value);
         }
     }
 }

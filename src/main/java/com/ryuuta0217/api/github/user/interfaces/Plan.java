@@ -33,7 +33,10 @@ package com.ryuuta0217.api.github.user.interfaces;
 
 public interface Plan {
     long getCollaborators();
+
     String getName();
+
     long getSpace();
+
     long getPrivateRepos();
 }

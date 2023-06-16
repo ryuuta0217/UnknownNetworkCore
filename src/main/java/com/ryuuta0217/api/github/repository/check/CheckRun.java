@@ -50,15 +50,18 @@ public class CheckRun {
     private final String htmlUrl;
     private final String detailsUrl;
     private final Status status;
-    @Nullable private final Conclusion conclusion;
+    @Nullable
+    private final Conclusion conclusion;
     private final ZonedDateTime startedAt;
     private final ZonedDateTime completedAt;
     private final Output output;
     private final String name;
     private final CheckSuite checkSuite;
-    @Nullable private final App app;
+    @Nullable
+    private final App app;
     private final PullRequest[] pullRequests;
-    @Nullable private final Deployment deployment;
+    @Nullable
+    private final Deployment deployment;
 
     public CheckRun(GitHubAPI api, JSONObject data) {
         this.api = api;
@@ -72,7 +75,7 @@ public class CheckRun {
         this.completedAt = ZonedDateTime.parse(data.getString("completed_at"));
         this.pullRequests = data.getJSONArray("pull_requests").toList()
                 .stream()
-                .filter(raw -> raw instanceof Map<?,?>)
+                .filter(raw -> raw instanceof Map<?, ?>)
                 .map(raw -> ((Map<?, ?>) raw))
                 .map(map -> new JSONObject(map))
                 .map(json -> new PullRequest(api, this, json))

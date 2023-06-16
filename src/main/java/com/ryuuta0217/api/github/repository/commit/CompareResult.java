@@ -36,7 +36,6 @@ import com.ryuuta0217.api.github.repository.Repository;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Map;
 
 // {
@@ -600,7 +599,8 @@ public class CompareResult {
     private final long behindBy;
     private final long totalCommits;
     private final Commit[] commits;
-    @Nullable private final File[] files;
+    @Nullable
+    private final File[] files;
 
     public CompareResult(GitHubAPI api, Repository repository, JSONObject data) {
         this.api = api;
@@ -617,13 +617,13 @@ public class CompareResult {
         this.behindBy = data.getLong("behind_by");
         this.totalCommits = data.getLong("total_commits");
         this.commits = data.getJSONArray("commits").toList().stream()
-                .filter(raw -> raw instanceof Map<?,?>)
+                .filter(raw -> raw instanceof Map<?, ?>)
                 .map(raw -> ((Map<?, ?>) raw))
                 .map(map -> new JSONObject(map))
                 .map(json -> new Commit(api, repository, json))
                 .toArray(Commit[]::new);
         this.files = data.has("files") ? data.getJSONArray("files").toList().stream()
-                .filter(raw -> raw instanceof Map<?,?>)
+                .filter(raw -> raw instanceof Map<?, ?>)
                 .map(raw -> ((Map<?, ?>) raw))
                 .map(map -> new JSONObject(map))
                 .map(json -> new File(api, json))

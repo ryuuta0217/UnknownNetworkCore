@@ -36,26 +36,49 @@ import java.time.ZonedDateTime;
 
 public interface SimpleUser {
     String getAvatarUrl();
+
     String getEventsUrl();
+
     String getFollowersUrl();
+
     String getFollowingUrl();
+
     String getGistsUrl();
-    @Nullable String getGravatarId();
+
+    @Nullable
+    String getGravatarId();
+
     String getHtmlUrl();
+
     long getId();
+
     String getNodeId();
+
     String getLogin();
+
     String getOrganizationsUrl();
+
     String getReceivedEventsUrl();
+
     String getReposUrl();
+
     boolean isSiteAdmin();
+
     String getStarredUrl();
+
     String getSubscriptionsUrl();
+
     String getType();
+
     String getUrl();
 
     /* NOT REQUIRED UNDER */
-    @Nullable String getName();
-    @Nullable String getEmail();
-    @Nullable ZonedDateTime getStarredAt();
+    @Nullable
+    String getName();
+
+    @Nullable
+    String getEmail();
+
+    @Nullable
+    ZonedDateTime getStarredAt();
 }

@@ -43,8 +43,10 @@ public class File {
     private final long deletions;
     private final long changes;
     private final String sha;
-    @Nullable private final String blobUrl;
-    @Nullable private final String rawUrl;
+    @Nullable
+    private final String blobUrl;
+    @Nullable
+    private final String rawUrl;
     private final Status status;
     private final String contentsUrl;
 

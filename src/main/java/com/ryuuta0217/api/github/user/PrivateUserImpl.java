@@ -37,10 +37,11 @@ import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 public class PrivateUserImpl extends PublicUserImpl implements PrivateUser {
-    private long ownedPrivateRepos;
-    private boolean twoFactorAuthentication;
-    private boolean businessPlus;
-    @Nullable private String ldapDistinguishedName;
+    private final long ownedPrivateRepos;
+    private final boolean twoFactorAuthentication;
+    private final boolean businessPlus;
+    @Nullable
+    private final String ldapDistinguishedName;
 
     public PrivateUserImpl(GitHubAPI api, JSONObject data) {
         super(api, data);

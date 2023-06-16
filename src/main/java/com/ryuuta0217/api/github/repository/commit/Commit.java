@@ -46,12 +46,14 @@ public class Commit {
     private final GitHubAPI api;
     private final Repository repository;
     private final SimpleUser committer;
-    @Nullable private final Stats stats;
+    @Nullable
+    private final Stats stats;
     private final SimpleUser author;
     private final String htmlUrl;
     private final GitCommit commit;
     private final String commentsUrl;
-    @Nullable private final File[] files;
+    @Nullable
+    private final File[] files;
     private final String sha;
     private final String url;
     private final String nodeId;
@@ -68,7 +70,7 @@ public class Commit {
         this.commentsUrl = data.getString("comments_url");
         this.files = data.has("files") ? data.getJSONArray("files").toList()
                 .stream()
-                .filter(raw -> raw instanceof Map<?,?>)
+                .filter(raw -> raw instanceof Map<?, ?>)
                 .map(raw -> ((Map<?, ?>) raw))
                 .map(map -> new JSONObject(map))
                 .map(json -> new File(api, json))
@@ -78,7 +80,7 @@ public class Commit {
         this.nodeId = data.getString("node_id");
         this.parents = data.getJSONArray("parents").toList()
                 .stream()
-                .filter(raw -> raw instanceof Map<?,?>)
+                .filter(raw -> raw instanceof Map<?, ?>)
                 .map(raw -> ((Map<?, ?>) raw))
                 .map(map -> new JSONObject(map))
                 .map(json -> new Parent(api, json))
