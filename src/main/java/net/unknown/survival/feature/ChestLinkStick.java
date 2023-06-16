@@ -31,13 +31,12 @@
 
 package net.unknown.survival.feature;
 
-import kotlin.Suppress;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.unknown.UnknownNetworkCore;
+import net.minecraft.world.phys.Vec2;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.MinecraftAdapter;
@@ -48,9 +47,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -66,8 +67,15 @@ import java.util.Objects;
 
 
 public class ChestLinkStick implements Listener {
-    @EventHandler
+    private static boolean SKIP_NEXT_INTERACT_EVENT = false;
+
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if (SKIP_NEXT_INTERACT_EVENT) {
+            SKIP_NEXT_INTERACT_EVENT = false;
+            return;
+        }
+        if (event.useInteractedBlock() == Event.Result.DENY) return;
         if (event.getHand() != EquipmentSlot.HAND) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK && event.getAction() != Action.LEFT_CLICK_BLOCK) return;
         Block clickedBlock = event.getClickedBlock();
@@ -80,6 +88,7 @@ public class ChestLinkStick implements Listener {
         if (stickMode == null) return;
 
         switch (stickMode) {
+            case SHOW_INFORMATION -> showInformation(event.getPlayer(), handItem, clickedBlock.getLocation());
             case SET_SOURCE -> setSource(event.getPlayer(), handItem, clickedBlock.getLocation());
             case ADD_CLIENT -> addClient(event.getPlayer(), handItem, clickedBlock.getLocation());
             case REMOVE_CLIENT -> removeClient(event.getPlayer(), handItem, clickedBlock.getLocation());
@@ -155,6 +164,32 @@ public class ChestLinkStick implements Listener {
                 .findFirst().orElse(null);
     }
 
+    private static void showInformation(Player player, ItemStack stack, Location blockLoc) {
+        if (!isChestLinkStick(stack)) return;
+        if (!stack.hasItemMeta()) return;
+        ItemMeta meta = stack.getItemMeta();
+        if (!meta.hasLore()) return;
+
+        IMixinChestBlockEntity chestBlockEntity = getChestBlockEntity(blockLoc);
+        if (chestBlockEntity == null) return;
+
+        if (chestBlockEntity.getChestTransportMode() == LinkChestMode.SOURCE) {
+            NewMessageUtil.sendMessage(player, Component.text("このチェストは現在、ソースとなるチェストとして設定されています"));
+        } else if (chestBlockEntity.getChestTransportMode() == LinkChestMode.CLIENT) {
+            BlockEntity sourceBlockEntity = chestBlockEntity.getLinkSource().getBlockEntity(true, 3);
+            if (sourceBlockEntity instanceof IMixinChestBlockEntity sourceChestBlockEntity) {
+                if (sourceChestBlockEntity.getChestTransportMode() == LinkChestMode.SOURCE) {
+                    Location sourcePos = MinecraftAdapter.location(chestBlockEntity.getLinkSource().serverLevel(), chestBlockEntity.getLinkSource().blockPos().getCenter(), Vec2.ZERO);
+                    NewMessageUtil.sendMessage(player, Component.text("このチェストは " + getLocationStrForDisplay(sourcePos) + " のクライアントとして設定されています"));
+                } else {
+                    NewMessageUtil.sendMessage(player, Component.text("このチェストはクライアントとして設定されていますが、宛先のチェストはクライアントでした"));
+                }
+            } else {
+                NewMessageUtil.sendMessage(player, Component.text("このチェストはクライアントとして設定されていますが、ソースとなるチェストが見つかりませんでした"));
+            }
+        }
+    }
+
     private static boolean hasSource(ItemStack stack) {
         if (!stack.hasItemMeta()) return false;
         if (!stack.getItemMeta().hasLore()) return false;
@@ -186,7 +221,7 @@ public class ChestLinkStick implements Listener {
                     }});
                 }
                 stack.setItemMeta(meta);
-                NewMessageUtil.sendMessage(player, Component.text("ソースとなるチェストを" + MessageUtil.getWorldName(sourcePos.getWorld()) + "," + sourcePos.getBlockX() + "," + sourcePos.getBlockY() + "," + sourcePos.getBlockZ() + "に設定しました"));
+                NewMessageUtil.sendMessage(player, Component.text("ソースとなるチェストを " + getLocationStrForDisplay(sourcePos) + " に設定しました"));
                 updateStickMode(player, stack, StickMode.ADD_CLIENT);
             } else {
                 NewMessageUtil.sendErrorMessage(player, Component.text("クリックされたチェストは IMixinChestBlockEntity ではありませんでした。これはバグの可能性があります。"));
@@ -212,10 +247,16 @@ public class ChestLinkStick implements Listener {
             if (sourcePos != null) {
                 IMixinChestBlockEntity sourceChestBlockEntity = getChestBlockEntity(sourcePos);
                 if (sourceChestBlockEntity != null && sourceChestBlockEntity.getChestTransportMode() == LinkChestMode.SOURCE) {
-                    chestBlockEntity.setChestTransportMode(LinkChestMode.CLIENT);
-                    chestBlockEntity.setLinkSource(MinecraftAdapter.level(sourcePos.getWorld()), MinecraftAdapter.blockPos(sourcePos));
+                    if (!sourcePos.isChunkLoaded()) sourcePos.getWorld().loadChunk(sourcePos.getChunk());
+                    PlayerInteractEvent event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, stack, sourcePos.getBlock(), BlockFace.SELF);
+                    SKIP_NEXT_INTERACT_EVENT = true;
+                    Bukkit.getPluginManager().callEvent(event);
+                    if (event.useInteractedBlock() != Event.Result.DENY) {
+                        chestBlockEntity.setChestTransportMode(LinkChestMode.CLIENT);
+                        chestBlockEntity.setLinkSource(MinecraftAdapter.level(sourcePos.getWorld()), MinecraftAdapter.blockPos(sourcePos));
 
-                    NewMessageUtil.sendMessage(player, Component.text(MessageUtil.getWorldName(clientPos.getWorld()) + "," + clientPos.getBlockX() + "," + clientPos.getBlockY() + "," + clientPos.getBlockZ() + "のチェストをクライアントとして設定しました"));
+                        NewMessageUtil.sendMessage(player, Component.text(getLocationStrForDisplay(clientPos) + " のチェストをクライアントとして設定しました"));
+                    }
                 } else {
                     NewMessageUtil.sendErrorMessage(player, Component.text("ソースとして設定されている座標にチェストが見つかりませんでした。先にソースとなるチェストを設定してください。"));
                     setSource(player, stack, null);
@@ -237,7 +278,7 @@ public class ChestLinkStick implements Listener {
         if (chestBlockEntity != null) {
             if (chestBlockEntity.getChestTransportMode() == LinkChestMode.CLIENT && chestBlockEntity.getLinkSource() != null) {
                 chestBlockEntity.setChestTransportMode(LinkChestMode.DISABLED);
-                NewMessageUtil.sendMessage(player, Component.text(MessageUtil.getWorldName(clientPos.getWorld()) + "," + clientPos.getBlockX() + "," + clientPos.getBlockY() + "," + clientPos.getBlockZ() + "のクライアントを解除しました"));
+                NewMessageUtil.sendMessage(player, Component.text(getLocationStrForDisplay(clientPos) + " のクライアントを解除しました"));
             } else {
                 NewMessageUtil.sendErrorMessage(player, Component.text("クリックされたチェストはクライアントとして設定されていません。"));
             }
@@ -246,7 +287,7 @@ public class ChestLinkStick implements Listener {
         }
     }
 
-    private static IMixinChestBlockEntity getChestBlockEntity(Location pos) {
+    public static IMixinChestBlockEntity getChestBlockEntity(Location pos) {
         BlockEntity blockEntity = MinecraftAdapter.level(pos.getWorld()).getBlockEntity(MinecraftAdapter.blockPos(pos));
         if (!(blockEntity instanceof IMixinChestBlockEntity chestBlockEntity)) return null;
         return chestBlockEntity;
@@ -264,7 +305,12 @@ public class ChestLinkStick implements Listener {
                 .findFirst().orElse(null);
     }
 
+    private static String getLocationStrForDisplay(Location loc) {
+        return MessageUtil.getWorldName(loc.getWorld()) + ", " + loc.getBlockX() + ", " + loc.getBlockY() + ", " + loc.getBlockZ();
+    }
+
     private enum StickMode {
+        SHOW_INFORMATION("情報表示", Component.text("チェストの情報を表示", DefinedTextColor.AQUA)),
         SET_SOURCE("ソース設定", Component.text("ソースの設定", DefinedTextColor.YELLOW)),
         ADD_CLIENT("クライアント追加", Component.text("クライアントの追加", DefinedTextColor.GREEN)),
         REMOVE_CLIENT("クライアント削除", Component.text("クライアントの削除", DefinedTextColor.RED));
