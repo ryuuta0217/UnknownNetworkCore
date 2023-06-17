@@ -52,9 +52,9 @@ public class Output {
         this.api = api;
         this.checkRun = checkRun;
 
-        this.title = data.has("title") && !data.get("title").equals(JSONObject.NULL) ? data.getString("title") : null;
-        this.summary = data.has("summary") && !data.get("summary").equals(JSONObject.NULL) ? data.getString("summary") : null;
-        this.text = data.has("text") && !data.get("text").equals(JSONObject.NULL) ? data.getString("text") : null;
+        this.title = data.has("title") && !data.isNull("title") ? data.getString("title") : null;
+        this.summary = data.has("summary") && !data.isNull("summary") ? data.getString("summary") : null;
+        this.text = data.has("text") && !data.isNull("text") ? data.getString("text") : null;
         this.annotationsCount = data.has("annotations_count") ? data.getLong("annotations_count") : 0;
         this.annotationsUrl = data.has("annotations_url") ? data.getString("annotations_url") : null;
     }

@@ -29,46 +29,47 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.user;
+package com.ryuuta0217.api.github.repository.pullreq;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.user.interfaces.PrivateUser;
-import org.jetbrains.annotations.Nullable;
+import com.ryuuta0217.api.github.repository.check.pr.BranchPointer;
 import org.json.JSONObject;
 
-public class PrivateUserImpl extends PublicUserImpl implements PrivateUser {
-    private final long ownedPrivateRepos;
-    private final boolean twoFactorAuthentication;
-    private final boolean businessPlus;
-    @Nullable
-    private final String ldapDistinguishedName;
+public class PullRequestMinimal {
+    private final GitHubAPI api;
+    private final long id;
+    private final long number;
+    private final String url;
+    private final BranchPointer head;
+    private final BranchPointer base;
 
-    public PrivateUserImpl(GitHubAPI api, JSONObject data) {
-        super(api, data);
-        this.ownedPrivateRepos = data.has("owned_private_repos") ? data.getLong("owned_private_repos") : -1;
-        this.twoFactorAuthentication = data.has("two_factor_authentication") && data.getBoolean("two_factor_authentication");
-        this.businessPlus = data.has("is_business_plus") && data.getBoolean("is_business_plus");
-        this.ldapDistinguishedName = data.has("ldap_distinguished_name") && !data.isNull("ldap_distinguished_name") ? data.getString("ldap_distinguished_name") : null;
+    public PullRequestMinimal(GitHubAPI api, JSONObject data) {
+        this.api = api;
+
+        this.id = data.getLong("id");
+        this.number = data.getLong("number");
+        this.url = data.getString("url");
+        this.head = new BranchPointer(api, this, data.getJSONObject("head"));
+        this.base = new BranchPointer(api, this, data.getJSONObject("base"));
     }
 
-    @Override
-    public long getOwnedPrivateRepos() {
-        return 0;
+    public long getId() {
+        return this.id;
     }
 
-    @Override
-    public boolean isTwoFactorAuthentication() {
-        return false;
+    public long getNumber() {
+        return this.number;
     }
 
-    @Override
-    public boolean isBusinessPlus() {
-        return false;
+    public String getUrl() {
+        return this.url;
     }
 
-    @Nullable
-    @Override
-    public String getLdapDistinguishedName() {
-        return null;
+    public BranchPointer getHead() {
+        return this.head;
+    }
+
+    public BranchPointer getBase() {
+        return this.base;
     }
 }

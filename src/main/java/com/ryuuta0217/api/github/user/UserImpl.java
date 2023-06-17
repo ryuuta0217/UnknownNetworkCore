@@ -32,7 +32,9 @@
 package com.ryuuta0217.api.github.user;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.repository.Repository;
+import com.ryuuta0217.api.github.repository.RepositoryMinimalImpl;
+import com.ryuuta0217.api.github.repository.interfaces.Repository;
+import com.ryuuta0217.api.github.repository.interfaces.RepositoryMinimal;
 import com.ryuuta0217.api.github.user.interfaces.PublicUser;
 import com.ryuuta0217.api.github.user.interfaces.User;
 import org.json.JSONArray;
@@ -65,13 +67,13 @@ public class UserImpl extends SimpleUserImpl implements User {
 
     public UserImpl(GitHubAPI api, JSONObject data) {
         super(api, data);
-        this.bio = data.has("bio") && !data.get("bio").equals(JSONObject.NULL) ? data.getString("bio") : null;
-        this.blog = data.has("blog") && !data.get("blog").equals(JSONObject.NULL) ? data.getString("blog") : null;
-        this.company = data.has("company") && !data.get("company").equals(JSONObject.NULL) ? data.getString("company") : null;
+        this.bio = data.has("bio") && !data.isNull("bio") ? data.getString("bio") : null;
+        this.blog = data.has("blog") && !data.isNull("blog") ? data.getString("blog") : null;
+        this.company = data.has("company") && !data.isNull("company") ? data.getString("company") : null;
         this.followers = data.has("followers") ? data.getLong("followers") : 0;
         this.following = data.has("following") ? data.getLong("following") : 0;
-        this.hireable = data.has("hireable") && !data.get("hireable").equals(JSONObject.NULL) && data.getBoolean("hireable");
-        this.location = data.has("location") && !data.get("location").equals(JSONObject.NULL) ? data.getString("location") : null;
+        this.hireable = data.has("hireable") && !data.isNull("hireable") && data.getBoolean("hireable");
+        this.location = data.has("location") && !data.isNull("location") ? data.getString("location") : null;
         this.publicRepos = data.has("public_repos") ? data.getLong("public_repos") : 0;
         this.publicGists = data.has("public_gists") ? data.getLong("public_gists") : 0;
         this.createdAt = data.has("created_at") ? ZonedDateTime.parse(data.getString("created_at")) : ZonedDateTime.ofInstant(Instant.ofEpochMilli(0), ZoneId.systemDefault());
@@ -147,14 +149,15 @@ public class UserImpl extends SimpleUserImpl implements User {
         return this.api.getRepository(this.getLogin(), repositoryName);
     }
 
-    public List<Repository> getRepositories() {
+    public List<RepositoryMinimal> getRepositories() {
         Object obj = this.api.requestAndParse("GET", this.getReposUrl());
         if (!(obj instanceof JSONArray jsonArray)) return Collections.emptyList();
         return jsonArray.toList().stream()
                 .filter(raw -> raw instanceof HashMap<?, ?>)
                 .map(raw -> (HashMap<?, ?>) raw)
                 .map(map -> new JSONObject(map))
-                .map(json -> new Repository(this.api, json))
+                .map(json -> new RepositoryMinimalImpl(this.api, json))
+                .map(impl -> (RepositoryMinimal) impl)
                 .toList();
     }
 }

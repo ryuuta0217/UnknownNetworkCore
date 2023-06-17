@@ -29,46 +29,58 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.user;
+package com.ryuuta0217.api.github.repository;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.user.interfaces.PrivateUser;
-import org.jetbrains.annotations.Nullable;
+import com.ryuuta0217.api.github.repository.interfaces.RepositoryMinimal;
 import org.json.JSONObject;
 
-public class PrivateUserImpl extends PublicUserImpl implements PrivateUser {
-    private final long ownedPrivateRepos;
-    private final boolean twoFactorAuthentication;
-    private final boolean businessPlus;
+import javax.annotation.Nullable;
+
+public class License {
+    private final GitHubAPI api;
+    private final RepositoryMinimal repository;
+
+    private final String name;
+    private final String spdxId;
+    private final String key;
     @Nullable
-    private final String ldapDistinguishedName;
+    private final String url;
+    private final String nodeId;
 
-    public PrivateUserImpl(GitHubAPI api, JSONObject data) {
-        super(api, data);
-        this.ownedPrivateRepos = data.has("owned_private_repos") ? data.getLong("owned_private_repos") : -1;
-        this.twoFactorAuthentication = data.has("two_factor_authentication") && data.getBoolean("two_factor_authentication");
-        this.businessPlus = data.has("is_business_plus") && data.getBoolean("is_business_plus");
-        this.ldapDistinguishedName = data.has("ldap_distinguished_name") && !data.isNull("ldap_distinguished_name") ? data.getString("ldap_distinguished_name") : null;
+    public License(GitHubAPI api, RepositoryMinimal repository, JSONObject data) {
+        this.api = api;
+        this.repository = repository;
+
+        this.name = data.getString("name");
+        this.spdxId = data.getString("spdx_id");
+        this.key = data.getString("key");
+        this.url = data.has("url") && !data.isNull("url") ? data.getString("url") : null;
+        this.nodeId = data.getString("node_id");
     }
 
-    @Override
-    public long getOwnedPrivateRepos() {
-        return 0;
+    public RepositoryMinimal getRepository() {
+        return this.repository;
     }
 
-    @Override
-    public boolean isTwoFactorAuthentication() {
-        return false;
+    public String getName() {
+        return this.name;
     }
 
-    @Override
-    public boolean isBusinessPlus() {
-        return false;
+    public String getSpdxId() {
+        return this.spdxId;
+    }
+
+    public String getKey() {
+        return this.key;
     }
 
     @Nullable
-    @Override
-    public String getLdapDistinguishedName() {
-        return null;
+    public String getUrl() {
+        return this.url;
+    }
+
+    public String getNodeId() {
+        return this.nodeId;
     }
 }

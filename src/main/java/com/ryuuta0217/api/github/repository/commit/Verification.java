@@ -48,8 +48,8 @@ public class Verification {
     public Verification(GitHubAPI api, JSONObject data) {
         this.api = api;
         this.reason = data.getString("reason");
-        this.signature = data.has("signature") && !data.get("signature").equals(JSONObject.NULL) ? data.getString("signature") : null;
-        this.payload = data.has("payload") && !data.get("payload").equals(JSONObject.NULL) ? data.getString("payload") : null;
+        this.signature = data.has("signature") && !data.isNull("signature") ? data.getString("signature") : null;
+        this.payload = data.has("payload") && !data.isNull("payload") ? data.getString("payload") : null;
         this.verified = data.getBoolean("verified");
     }
 

@@ -29,46 +29,10 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.user;
+package com.ryuuta0217.api.github.repository.shared;
 
-import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.user.interfaces.PrivateUser;
-import org.jetbrains.annotations.Nullable;
-import org.json.JSONObject;
-
-public class PrivateUserImpl extends PublicUserImpl implements PrivateUser {
-    private final long ownedPrivateRepos;
-    private final boolean twoFactorAuthentication;
-    private final boolean businessPlus;
-    @Nullable
-    private final String ldapDistinguishedName;
-
-    public PrivateUserImpl(GitHubAPI api, JSONObject data) {
-        super(api, data);
-        this.ownedPrivateRepos = data.has("owned_private_repos") ? data.getLong("owned_private_repos") : -1;
-        this.twoFactorAuthentication = data.has("two_factor_authentication") && data.getBoolean("two_factor_authentication");
-        this.businessPlus = data.has("is_business_plus") && data.getBoolean("is_business_plus");
-        this.ldapDistinguishedName = data.has("ldap_distinguished_name") && !data.isNull("ldap_distinguished_name") ? data.getString("ldap_distinguished_name") : null;
-    }
-
-    @Override
-    public long getOwnedPrivateRepos() {
-        return 0;
-    }
-
-    @Override
-    public boolean isTwoFactorAuthentication() {
-        return false;
-    }
-
-    @Override
-    public boolean isBusinessPlus() {
-        return false;
-    }
-
-    @Nullable
-    @Override
-    public String getLdapDistinguishedName() {
-        return null;
-    }
+public enum Status {
+    QUEUED,
+    IN_PROGRESS,
+    COMPLETED
 }

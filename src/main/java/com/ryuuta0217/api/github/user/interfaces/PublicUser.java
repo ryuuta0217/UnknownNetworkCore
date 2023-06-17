@@ -52,4 +52,10 @@ public interface PublicUser extends User {
     long getDiskUsage();
 
     long getCollaborators();
+
+    @Nullable
+    @Override
+    default PublicUser tryGetUser() {
+        return this;
+    }
 }

@@ -29,42 +29,93 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.repository.check.pr;
+package com.ryuuta0217.api.github.repository.actions;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.repository.pullreq.PullRequestMinimal;
+import com.ryuuta0217.api.github.repository.interfaces.RepositoryMinimal;
 import org.json.JSONObject;
 
-public class Repository {
+import javax.annotation.Nullable;
+import java.time.ZonedDateTime;
+
+public class Workflow {
     private final GitHubAPI api;
-    private final PullRequestMinimal pullRequest;
-
+    private final RepositoryMinimal repository;
+    
     private final long id;
-    private final String url;
+    private final String nodeId;
     private final String name;
+    private final String path;
+    private final State state;
+    private final ZonedDateTime createAt;
+    private final ZonedDateTime updatedAt;
+    private final String url;
+    private final String htmlUrl;
+    private final String badgeUrl;
+    @Nullable private final ZonedDateTime deletedAt;
 
-    public Repository(GitHubAPI api, PullRequestMinimal pullRequest, JSONObject data) {
+    public Workflow(GitHubAPI api, RepositoryMinimal repository, JSONObject data) {
         this.api = api;
-        this.pullRequest = pullRequest;
-
+        this.repository = repository;
         this.id = data.getLong("id");
-        this.url = data.getString("url");
+        this.nodeId = data.getString("node_id");
         this.name = data.getString("name");
+        this.path = data.getString("path");
+        this.state = State.valueOf(data.getString("state").toUpperCase());
+        this.createAt = ZonedDateTime.parse(data.getString("created_at"));
+        this.updatedAt = ZonedDateTime.parse(data.getString("updated_at"));
+        this.url = data.getString("url");
+        this.htmlUrl = data.getString("html_url");
+        this.badgeUrl = data.getString("badge_url");
+        this.deletedAt = data.isNull("deleted_at") ? null : ZonedDateTime.parse(data.getString("deleted_at"));
     }
 
-    public PullRequestMinimal getPullRequest() {
-        return this.pullRequest;
+    public RepositoryMinimal getRepository() {
+        return this.repository;
     }
 
     public long getId() {
         return this.id;
     }
 
-    public String getUrl() {
-        return this.url;
+    public String getNodeId() {
+        return this.nodeId;
     }
 
     public String getName() {
         return this.name;
+    }
+
+    public String getPath() {
+        return this.path;
+    }
+
+    public State getState() {
+        return this.state;
+    }
+
+    public ZonedDateTime getCreateAt() {
+        return this.createAt;
+    }
+
+    public ZonedDateTime getUpdatedAt() {
+        return this.updatedAt;
+    }
+
+    public String getUrl() {
+        return this.url;
+    }
+
+    public String getHtmlUrl() {
+        return this.htmlUrl;
+    }
+
+    public String getBadgeUrl() {
+        return this.badgeUrl;
+    }
+
+    @Nullable
+    public ZonedDateTime getDeletedAt() {
+        return this.deletedAt;
     }
 }

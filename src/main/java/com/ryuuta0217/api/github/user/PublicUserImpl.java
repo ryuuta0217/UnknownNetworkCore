@@ -54,8 +54,8 @@ public class PublicUserImpl extends UserImpl implements PublicUser {
     public PublicUserImpl(GitHubAPI api, JSONObject data) {
         super(api, data);
         this.suspendedAt = data.has("suspended_at") ? ZonedDateTime.parse(data.getString("suspended_at")) : null;
-        this.twitterUsername = data.has("twitter_username") && !data.get("twitter_username").equals(JSONObject.NULL) ? data.getString("twitter_username") : null;
-        this.plan = data.has("plan") && !data.get("plan").equals(JSONObject.NULL) ? new PlanImpl(data.getJSONObject("plan")) : null;
+        this.twitterUsername = data.has("twitter_username") && !data.isNull("twitter_username") ? data.getString("twitter_username") : null;
+        this.plan = data.has("plan") && !data.isNull("plan") ? new PlanImpl(data.getJSONObject("plan")) : null;
         this.privateGists = data.has("private_gists") ? data.getLong("private_gists") : -1;
         this.totalPrivateRepos = data.has("total_private_repos") ? data.getLong("total_private_repos") : -1;
         this.diskUsage = data.has("disk_usage") ? data.getLong("disk_usage") : -1;

@@ -32,17 +32,18 @@
 package com.ryuuta0217.api.github.repository.check.pr;
 
 import com.ryuuta0217.api.github.GitHubAPI;
+import com.ryuuta0217.api.github.repository.pullreq.PullRequestMinimal;
 import org.json.JSONObject;
 
 public class BranchPointer {
     private final GitHubAPI api;
-    private final PullRequest pullRequest;
+    private final PullRequestMinimal pullRequest;
 
     private final String ref;
     private final String sha;
     private final Repository repo;
 
-    public BranchPointer(GitHubAPI api, PullRequest pullRequest, JSONObject data) {
+    public BranchPointer(GitHubAPI api, PullRequestMinimal pullRequest, JSONObject data) {
         this.api = api;
         this.pullRequest = pullRequest;
 
@@ -51,7 +52,7 @@ public class BranchPointer {
         this.repo = new Repository(api, pullRequest, data.getJSONObject("repo"));
     }
 
-    public PullRequest getPullRequest() {
+    public PullRequestMinimal getPullRequest() {
         return this.pullRequest;
     }
 

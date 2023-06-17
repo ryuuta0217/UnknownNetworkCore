@@ -29,53 +29,47 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.repository.check.pr;
+package com.ryuuta0217.api.github.repository.commit.interfaces;
 
-import com.ryuuta0217.api.github.GitHubAPI;
 import com.ryuuta0217.api.github.repository.check.CheckRun;
-import org.json.JSONObject;
+import com.ryuuta0217.api.github.repository.commit.File;
+import com.ryuuta0217.api.github.repository.commit.GitCommit;
+import com.ryuuta0217.api.github.repository.commit.Parent;
+import com.ryuuta0217.api.github.repository.commit.Stats;
+import com.ryuuta0217.api.github.user.interfaces.GitUser;
+import com.ryuuta0217.api.github.user.interfaces.SimpleUser;
 
-public class PullRequest {
-    private final GitHubAPI api;
-    private final CheckRun checkRun;
-    private final long id;
-    private final long number;
-    private final String url;
-    private final BranchPointer head;
-    private final BranchPointer base;
+import javax.annotation.Nullable;
+import java.util.List;
 
-    public PullRequest(GitHubAPI api, CheckRun checkRun, JSONObject data) {
-        this.api = api;
-        this.checkRun = checkRun;
+public interface Commit extends SimpleCommit {
+    @Deprecated
+    GitUser getCommitter();
 
-        this.id = data.getLong("id");
-        this.number = data.getLong("number");
-        this.url = data.getString("url");
-        this.head = new BranchPointer(api, this, data.getJSONObject("head"));
-        this.base = new BranchPointer(api, this, data.getJSONObject("base"));
-    }
+    SimpleUser getCommitterUser();
 
-    public CheckRun getCheckRun() {
-        return this.checkRun;
-    }
+    @Nullable
+    Stats getStats();
 
-    public long getId() {
-        return this.id;
-    }
+    @Deprecated
+    GitUser getAuthor();
 
-    public long getNumber() {
-        return this.number;
-    }
+    SimpleUser getAuthorUser();
 
-    public String getUrl() {
-        return this.url;
-    }
+    String getHtmlUrl();
 
-    public BranchPointer getHead() {
-        return this.head;
-    }
+    GitCommit getCommit();
 
-    public BranchPointer getBase() {
-        return this.base;
-    }
+    String getCommentsUrl();
+
+    @Nullable
+    File[] getFiles();
+
+    String getUrl();
+
+    String getNodeId();
+
+    Parent[] getParents();
+
+    List<CheckRun> tryGetCheckRuns();
 }

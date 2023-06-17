@@ -34,7 +34,7 @@ package com.ryuuta0217.api.github.user.interfaces;
 import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
 
-public interface SimpleUser {
+public interface SimpleUser extends GitUser {
     String getAvatarUrl();
 
     String getEventsUrl();
@@ -73,12 +73,6 @@ public interface SimpleUser {
     String getUrl();
 
     /* NOT REQUIRED UNDER */
-    @Nullable
-    String getName();
-
-    @Nullable
-    String getEmail();
-
     @Nullable
     ZonedDateTime getStarredAt();
 }
