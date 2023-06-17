@@ -51,6 +51,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
@@ -144,7 +145,15 @@ public class UpdateUtil {
         GitHubAPI api = new GitHubAPI(GITHUB_ACCESS_TOKEN);
         Branch branch = api.getBranch("ryuuta0217", "UnknownNetworkCore" , branchName);
         if (branch != null) {
-            return new VersionInfo(branchName, branch.getCommit().getSha().substring(0, 8));
+            Optional<Commit> first = branch.getCommits().stream().filter(commit -> {
+                List<CheckRun> checkRuns = commit.tryGetCheckRuns();
+                if (checkRuns.size() == 0) return false;
+                return checkRuns.stream().anyMatch(checkRun -> checkRun.getStatus() == Status.COMPLETED);
+            }).findFirst();
+
+            if (first.isPresent()) {
+                return new VersionInfo(branchName, first.get().getSha().substring(0, 8));
+            }
         }
         return null;
     }
