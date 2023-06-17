@@ -32,15 +32,13 @@
 package com.ryuuta0217.api.github.repository;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.User;
 import com.ryuuta0217.api.github.repository.branch.Branch;
-import org.json.JSONArray;
+import com.ryuuta0217.api.github.user.SimpleUserImpl;
+import com.ryuuta0217.api.github.user.interfaces.SimpleUser;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 
 public class Repository {
@@ -50,33 +48,42 @@ public class Repository {
     private final boolean isTemplate;
     private final ZonedDateTime pushedAt;
     private final String subscriptionUrl;
-    @Nullable private final String language;
+    @Nullable
+    private final String language;
     private final String branchesUrl;
     private final String issueCommentUrl;
-    @Nullable private final Boolean allowRebaseMerge;
+    @Nullable
+    private final Boolean allowRebaseMerge;
     private final String labelsUrl;
     private final String subscribersUrl;
     private final Permissions permissions;
-    @Nullable private final String tempCloneToken;
+    @Nullable
+    private final String tempCloneToken;
     private final String releasesUrl;
     private final String svnUrl;
-    @Nullable private final String squashMergeCommitMessage;
-    @Nullable private final Long subscribersCount;
+    @Nullable
+    private final String squashMergeCommitMessage;
+    @Nullable
+    private final Long subscribersCount;
     private final long id;
     private final boolean hasDiscussions;
     private final long forks;
     private final String archiveUrl;
-    @Nullable private final Boolean allowMergeCommit;
+    @Nullable
+    private final Boolean allowMergeCommit;
     private final String gitRefsUrl;
     private final String forksUrl;
     private final String visibility;
     private final String statusesUrl;
-    @Nullable private final Long networkCount;
+    @Nullable
+    private final Long networkCount;
     private final String sshUrl;
-    @Nullable private final License license;
+    @Nullable
+    private final License license;
     private final String fullName;
     private final long size;
-    @Nullable private final Boolean allowAutoMerge;
+    @Nullable
+    private final Boolean allowAutoMerge;
     private final String languagesUrl;
     private final String htmlUrl;
     private final String collaboratorsUrl;
@@ -92,7 +99,8 @@ public class Repository {
     private final boolean hasDownloads;
     private final String notificationsUrl;
     private final long openIssuesCount;
-    @Nullable private final String description;
+    @Nullable
+    private final String description;
     private final ZonedDateTime createdAt;
     private final long watchers;
     private final String keysUrl;
@@ -101,43 +109,53 @@ public class Repository {
     private final boolean archived;
     private final boolean hasWiki;
     private final ZonedDateTime updatedAt;
-    @Nullable private final String mergeCommitTitle;
+    @Nullable
+    private final String mergeCommitTitle;
     private final String commentsUrl;
     private final String stargazersUrl;
     private final boolean disabled;
-    @Nullable private final Boolean deleteBranchOnMerge;
+    @Nullable
+    private final Boolean deleteBranchOnMerge;
     private final String gitUrl;
     private final boolean hasPages;
-    private final Owner owner;
-    @Nullable private final Boolean allowSquashMerge;
+    private final SimpleUser owner;
+    @Nullable
+    private final Boolean allowSquashMerge;
     private final String commitsUrl;
     private final String compareUrl;
     private final String gitCommitsUrl;
     private final String[] topics;
     private final String blobsUrl;
-    @Nullable private final Boolean allowUpdateBranch;
+    @Nullable
+    private final Boolean allowUpdateBranch;
     private final String gitTagsUrl;
     private final String mergesUrl;
     private final String downloadsUrl;
     private final boolean hasIssues;
     private final boolean webCommitSignOffRequired;
     private final String url;
-    @Nullable private final String contentsUrl;
-    @Nullable private final String mirrorUrl;
+    @Nullable
+    private final String contentsUrl;
+    @Nullable
+    private final String mirrorUrl;
     private final String milestonesUrl;
     private final String teamsUrl;
     private final boolean fork;
     private final String issuesUrl;
     private final String eventsUrl;
-    @Nullable private final Boolean useSquashPrTitleAsDefault;
+    @Nullable
+    private final Boolean useSquashPrTitleAsDefault;
     private final String issueEventsUrl;
-    @Nullable private final String mergeCommitMessage;
+    @Nullable
+    private final String mergeCommitMessage;
     private final String assigneesUrl;
     private final long openIssues;
-    @Nullable private final String squashMergeCommitTitle;
+    @Nullable
+    private final String squashMergeCommitTitle;
     private final long watchersCount;
     private final String nodeId;
-    @Nullable private final String homepage;
+    @Nullable
+    private final String homepage;
     private final long forksCount;
 
     public Repository(GitHubAPI api, JSONObject data) {
@@ -196,7 +214,7 @@ public class Repository {
         this.disabled = data.getBoolean("disabled");
         this.gitUrl = data.getString("git_url");
         this.hasPages = data.getBoolean("has_pages");
-        this.owner = new Owner(api, data.getJSONObject("owner"));
+        this.owner = new SimpleUserImpl(api, data.getJSONObject("owner"));
         this.commitsUrl = data.getString("commits_url");
         this.compareUrl = data.getString("compare_url");
         this.gitCommitsUrl = data.getString("git_commits_url");
@@ -504,7 +522,7 @@ public class Repository {
         return this.hasPages;
     }
 
-    public Owner getOwner() {
+    public SimpleUser getOwner() {
         return this.owner;
     }
 
@@ -638,20 +656,11 @@ public class Repository {
 
     @Nullable
     public Branch getBranch(String branchName) {
-        Object obj = this.api.requestAndParse("GET", GitHubAPI.replaceArgumentPatternFromUrl(this.getBranchesUrl(), "branch", branchName));
-        if (!(obj instanceof JSONObject json)) return null;
-        return new Branch(this.api, this, json);
+        return this.api.getBranch(this, branchName);
     }
 
     public List<Branch> getBranches() {
-        Object obj = this.api.requestAndParse("GET", GitHubAPI.stripArgumentPatternFromUrl(this.getBranchesUrl()));
-        if (!(obj instanceof JSONArray jsonArray)) return Collections.emptyList();
-        return jsonArray.toList().stream()
-                .filter(raw -> raw instanceof HashMap<?,?>)
-                .map(raw -> ((HashMap<?, ?>) raw))
-                .map(map -> new JSONObject(map))
-                .map(json -> new Branch(this.api, this,json))
-                .toList();
+        return this.api.getBranches(this);
     }
 
     public static class Permissions {
@@ -697,7 +706,8 @@ public class Repository {
         private final String name;
         private final String spdxId;
         private final String key;
-        @Nullable private final String url;
+        @Nullable
+        private final String url;
         private final String nodeId;
 
         public License(GitHubAPI api, JSONObject data) {
@@ -728,126 +738,6 @@ public class Repository {
 
         public String getNodeId() {
             return this.nodeId;
-        }
-    }
-
-    public static class Owner {
-        private final GitHubAPI api;
-        private final String gistsUrl;
-        private final String reposUrl;
-        private final String followingUrl;
-        private final String starredUrl;
-        private final String login;
-        private final String followersUrl;
-        private final String type;
-        private final String url;
-        private final String subscriptionsUrl;
-        private final String receivedEventsUrl;
-        private final String avatarUrl;
-        private final String eventsUrl;
-        private final String htmlUrl;
-        private final boolean siteAdmin;
-        private final long id;
-        private final String gravatarId;
-        private final String nodeId;
-        private final String organizationsUrl;
-
-        public Owner(GitHubAPI api, JSONObject data) {
-            this.api = api;
-            this.gistsUrl = data.getString("gists_url");
-            this.reposUrl = data.getString("repos_url");
-            this.followingUrl = data.getString("following_url");
-            this.starredUrl = data.getString("starred_url");
-            this.login = data.getString("login");
-            this.followersUrl = data.getString("followers_url");
-            this.type = data.getString("type");
-            this.url = data.getString("url");
-            this.subscriptionsUrl = data.getString("subscriptions_url");
-            this.receivedEventsUrl = data.getString("received_events_url");
-            this.avatarUrl = data.getString("avatar_url");
-            this.eventsUrl = data.getString("events_url");
-            this.htmlUrl = data.getString("html_url");
-            this.siteAdmin = data.getBoolean("site_admin");
-            this.id = data.getLong("id");
-            this.gravatarId = data.getString("gravatar_id");
-            this.nodeId = data.getString("node_id");
-            this.organizationsUrl = data.getString("organizations_url");
-        }
-
-        public String getGistsUrl() {
-            return this.gistsUrl;
-        }
-
-        public String getReposUrl() {
-            return this.reposUrl;
-        }
-
-        public String getFollowingUrl() {
-            return this.followingUrl;
-        }
-
-        public String getStarredUrl() {
-            return this.starredUrl;
-        }
-
-        public String getLogin() {
-            return this.login;
-        }
-
-        public String getFollowersUrl() {
-            return this.followersUrl;
-        }
-
-        public String getType() {
-            return this.type;
-        }
-
-        public String getUrl() {
-            return this.url;
-        }
-
-        public String getSubscriptionsUrl() {
-            return this.subscriptionsUrl;
-        }
-
-        public String getReceivedEventsUrl() {
-            return this.receivedEventsUrl;
-        }
-
-        public String getAvatarUrl() {
-            return this.avatarUrl;
-        }
-
-        public String getEventsUrl() {
-            return this.eventsUrl;
-        }
-
-        public String getHtmlUrl() {
-            return this.htmlUrl;
-        }
-
-        public boolean isSiteAdmin() {
-            return this.siteAdmin;
-        }
-
-        public long getId() {
-            return this.id;
-        }
-
-        public String getGravatarId() {
-            return this.gravatarId;
-        }
-
-        public String getNodeId() {
-            return this.nodeId;
-        }
-
-        public String getOrganizationsUrl() {
-            return this.organizationsUrl;
-        }
-
-        public User getUser() {
-            return this.api.getUser(this.login);
         }
     }
 }

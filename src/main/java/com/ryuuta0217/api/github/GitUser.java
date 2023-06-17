@@ -31,6 +31,7 @@
 
 package com.ryuuta0217.api.github;
 
+import com.ryuuta0217.api.github.user.interfaces.PublicUser;
 import org.json.JSONObject;
 
 import java.time.ZonedDateTime;
@@ -55,7 +56,19 @@ public class GitUser {
         this.date = ZonedDateTime.parse(data.getString("date"));
     }
 
-    public User tryGetUser() {
+    public String getName() {
+        return this.name;
+    }
+
+    public String getEmail() {
+        return this.email;
+    }
+
+    public ZonedDateTime getDate() {
+        return this.date;
+    }
+
+    public PublicUser tryGetUser() {
         if (!this.email.endsWith("@users.noreply.github.com")) return null;
         String userNameRaw = this.email.substring(0, this.email.indexOf('@'));
         String[] userNameParts = userNameRaw.split("\\+", 2);

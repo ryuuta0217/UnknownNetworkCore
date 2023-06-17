@@ -29,48 +29,56 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared;
-
-import com.ryuuta0217.api.github.repository.commit.CompareResult;
-import net.unknown.UnknownNetworkCore;
-import net.unknown.shared.util.UpdateUtil;
+package com.ryuuta0217.api.github.user.interfaces;
 
 import javax.annotation.Nullable;
+import java.time.ZonedDateTime;
 
-public record VersionInfo(String gitBranch, String commitSha) {
-    public static VersionInfo parseFromString(String version) {
-        String[] split = version.split("-", 4);
-        if (split.length != 4) return null;
-        String gitBranch = split[2];
-        String commitSha = split[3];
-        return new VersionInfo(gitBranch, commitSha);
-    }
+public interface SimpleUser {
+    String getAvatarUrl();
 
-    public boolean diffVersion(VersionInfo other) {
-        return this.sameBranch(other) && this.diffCommit(other);
-    }
+    String getEventsUrl();
 
-    public boolean sameBranch(VersionInfo other) {
-        return gitBranch.equals(other.gitBranch);
-    }
+    String getFollowersUrl();
 
-    public boolean diffBranch(VersionInfo other) {
-        return !gitBranch.equals(other.gitBranch);
-    }
+    String getFollowingUrl();
 
-    public boolean sameCommit(VersionInfo other) {
-        return commitSha.equals(other.commitSha);
-    }
-
-    public boolean diffCommit(VersionInfo other) {
-        return !commitSha.equals(other.commitSha);
-    }
+    String getGistsUrl();
 
     @Nullable
-    public CompareResult compareLatest() {
-        if (UpdateUtil.GITHUB_API != null) {
-            return UpdateUtil.GITHUB_API.getCompareResult(UpdateUtil.GITHUB_API.getRepository("ryuuta0217", "UnknownNetworkCore"), this.commitSha(), this.gitBranch());
-        }
-        return null;
-    }
+    String getGravatarId();
+
+    String getHtmlUrl();
+
+    long getId();
+
+    String getNodeId();
+
+    String getLogin();
+
+    String getOrganizationsUrl();
+
+    String getReceivedEventsUrl();
+
+    String getReposUrl();
+
+    boolean isSiteAdmin();
+
+    String getStarredUrl();
+
+    String getSubscriptionsUrl();
+
+    String getType();
+
+    String getUrl();
+
+    /* NOT REQUIRED UNDER */
+    @Nullable
+    String getName();
+
+    @Nullable
+    String getEmail();
+
+    @Nullable
+    ZonedDateTime getStarredAt();
 }

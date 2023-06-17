@@ -29,48 +29,41 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared;
+package com.ryuuta0217.api.github.user;
 
-import com.ryuuta0217.api.github.repository.commit.CompareResult;
-import net.unknown.UnknownNetworkCore;
-import net.unknown.shared.util.UpdateUtil;
+import com.ryuuta0217.api.github.user.interfaces.Plan;
+import org.json.JSONObject;
 
-import javax.annotation.Nullable;
+public class PlanImpl implements Plan {
+    private final long collaborators;
+    private final String name;
+    private final long space;
+    private final long privateRepos;
 
-public record VersionInfo(String gitBranch, String commitSha) {
-    public static VersionInfo parseFromString(String version) {
-        String[] split = version.split("-", 4);
-        if (split.length != 4) return null;
-        String gitBranch = split[2];
-        String commitSha = split[3];
-        return new VersionInfo(gitBranch, commitSha);
+    public PlanImpl(JSONObject data) {
+        this.collaborators = data.getLong("collaborators");
+        this.name = data.getString("name");
+        this.space = data.getLong("space");
+        this.privateRepos = data.getLong("private_repos");
     }
 
-    public boolean diffVersion(VersionInfo other) {
-        return this.sameBranch(other) && this.diffCommit(other);
+    @Override
+    public long getCollaborators() {
+        return 0;
     }
 
-    public boolean sameBranch(VersionInfo other) {
-        return gitBranch.equals(other.gitBranch);
-    }
-
-    public boolean diffBranch(VersionInfo other) {
-        return !gitBranch.equals(other.gitBranch);
-    }
-
-    public boolean sameCommit(VersionInfo other) {
-        return commitSha.equals(other.commitSha);
-    }
-
-    public boolean diffCommit(VersionInfo other) {
-        return !commitSha.equals(other.commitSha);
-    }
-
-    @Nullable
-    public CompareResult compareLatest() {
-        if (UpdateUtil.GITHUB_API != null) {
-            return UpdateUtil.GITHUB_API.getCompareResult(UpdateUtil.GITHUB_API.getRepository("ryuuta0217", "UnknownNetworkCore"), this.commitSha(), this.gitBranch());
-        }
+    @Override
+    public String getName() {
         return null;
+    }
+
+    @Override
+    public long getSpace() {
+        return 0;
+    }
+
+    @Override
+    public long getPrivateRepos() {
+        return 0;
     }
 }

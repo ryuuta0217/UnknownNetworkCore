@@ -33,20 +33,26 @@ package com.ryuuta0217.api.github.repository.commit;
 
 import com.ryuuta0217.api.github.GitHubAPI;
 import com.ryuuta0217.api.github.repository.Repository;
-import com.ryuuta0217.api.github.User;
+import com.ryuuta0217.api.github.repository.check.CheckRun;
+import com.ryuuta0217.api.github.user.SimpleUserImpl;
+import com.ryuuta0217.api.github.user.interfaces.SimpleUser;
 import org.json.JSONObject;
 
+import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Map;
 
 public class Commit {
     private final GitHubAPI api;
     private final Repository repository;
-    private final User committer;
+    private final SimpleUser committer;
+    @Nullable
     private final Stats stats;
-    private final User author;
+    private final SimpleUser author;
     private final String htmlUrl;
     private final GitCommit commit;
     private final String commentsUrl;
+    @Nullable
     private final File[] files;
     private final String sha;
     private final String url;
@@ -56,40 +62,45 @@ public class Commit {
     public Commit(GitHubAPI api, Repository repository, JSONObject data) {
         this.api = api;
         this.repository = repository;
-        this.committer = new User(api, data.getJSONObject("committer"));
-        this.stats = new Stats(api, data.getJSONObject("stats"));
-        this.author = new User(api, data.getJSONObject("author"));
+        this.committer = new SimpleUserImpl(api, data.getJSONObject("committer"));
+        this.stats = data.has("stats") ? new Stats(api, data.getJSONObject("stats")) : null;
+        this.author = new SimpleUserImpl(api, data.getJSONObject("author"));
         this.htmlUrl = data.getString("html_url");
         this.commit = new GitCommit(api, data.getJSONObject("commit"));
         this.commentsUrl = data.getString("comments_url");
-        this.files = data.getJSONArray("files").toList()
+        this.files = data.has("files") ? data.getJSONArray("files").toList()
                 .stream()
-                .filter(raw -> raw instanceof Map<?,?>)
+                .filter(raw -> raw instanceof Map<?, ?>)
                 .map(raw -> ((Map<?, ?>) raw))
                 .map(map -> new JSONObject(map))
                 .map(json -> new File(api, json))
-                .toArray(File[]::new);
+                .toArray(File[]::new) : null;
         this.sha = data.getString("sha");
         this.url = data.getString("url");
         this.nodeId = data.getString("node_id");
         this.parents = data.getJSONArray("parents").toList()
                 .stream()
-                .filter(raw -> raw instanceof Map<?,?>)
+                .filter(raw -> raw instanceof Map<?, ?>)
                 .map(raw -> ((Map<?, ?>) raw))
                 .map(map -> new JSONObject(map))
                 .map(json -> new Parent(api, json))
                 .toArray(Parent[]::new);
     }
 
-    public User getCommitter() {
+    public Repository getRepository() {
+        return this.repository;
+    }
+
+    public SimpleUser getCommitter() {
         return this.committer;
     }
 
+    @Nullable
     public Stats getStats() {
         return this.stats;
     }
 
-    public User getAuthor() {
+    public SimpleUser getAuthor() {
         return this.author;
     }
 
@@ -105,6 +116,7 @@ public class Commit {
         return this.commentsUrl;
     }
 
+    @Nullable
     public File[] getFiles() {
         return this.files;
     }
@@ -123,5 +135,17 @@ public class Commit {
 
     public Parent[] getParents() {
         return this.parents;
+    }
+
+    public Commit tryGetCompleteData() {
+        return this.api.getCommit(this.repository, this.sha);
+    }
+
+    public List<CheckRun> tryGetCheckRuns() {
+        return this.api.getCheckRunsByCommit(this);
+    }
+
+    public CompareResult compare(Commit head) {
+        return this.api.getCompareResult(this.getRepository(), this.getSha(), head.getSha());
     }
 }

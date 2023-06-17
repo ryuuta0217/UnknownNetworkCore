@@ -29,48 +29,46 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared;
+package com.ryuuta0217.api.github.user;
 
-import com.ryuuta0217.api.github.repository.commit.CompareResult;
-import net.unknown.UnknownNetworkCore;
-import net.unknown.shared.util.UpdateUtil;
+import com.ryuuta0217.api.github.GitHubAPI;
+import com.ryuuta0217.api.github.user.interfaces.PrivateUser;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONObject;
 
-import javax.annotation.Nullable;
+public class PrivateUserImpl extends PublicUserImpl implements PrivateUser {
+    private final long ownedPrivateRepos;
+    private final boolean twoFactorAuthentication;
+    private final boolean businessPlus;
+    @Nullable
+    private final String ldapDistinguishedName;
 
-public record VersionInfo(String gitBranch, String commitSha) {
-    public static VersionInfo parseFromString(String version) {
-        String[] split = version.split("-", 4);
-        if (split.length != 4) return null;
-        String gitBranch = split[2];
-        String commitSha = split[3];
-        return new VersionInfo(gitBranch, commitSha);
+    public PrivateUserImpl(GitHubAPI api, JSONObject data) {
+        super(api, data);
+        this.ownedPrivateRepos = data.has("owned_private_repos") ? data.getLong("owned_private_repos") : -1;
+        this.twoFactorAuthentication = data.has("two_factor_authentication") && data.getBoolean("two_factor_authentication");
+        this.businessPlus = data.has("is_business_plus") && data.getBoolean("is_business_plus");
+        this.ldapDistinguishedName = data.has("ldap_distinguished_name") && !data.get("ldap_distinguished_name").equals(JSONObject.NULL) ? data.getString("ldap_distinguished_name") : null;
     }
 
-    public boolean diffVersion(VersionInfo other) {
-        return this.sameBranch(other) && this.diffCommit(other);
+    @Override
+    public long getOwnedPrivateRepos() {
+        return 0;
     }
 
-    public boolean sameBranch(VersionInfo other) {
-        return gitBranch.equals(other.gitBranch);
+    @Override
+    public boolean isTwoFactorAuthentication() {
+        return false;
     }
 
-    public boolean diffBranch(VersionInfo other) {
-        return !gitBranch.equals(other.gitBranch);
-    }
-
-    public boolean sameCommit(VersionInfo other) {
-        return commitSha.equals(other.commitSha);
-    }
-
-    public boolean diffCommit(VersionInfo other) {
-        return !commitSha.equals(other.commitSha);
+    @Override
+    public boolean isBusinessPlus() {
+        return false;
     }
 
     @Nullable
-    public CompareResult compareLatest() {
-        if (UpdateUtil.GITHUB_API != null) {
-            return UpdateUtil.GITHUB_API.getCompareResult(UpdateUtil.GITHUB_API.getRepository("ryuuta0217", "UnknownNetworkCore"), this.commitSha(), this.gitBranch());
-        }
+    @Override
+    public String getLdapDistinguishedName() {
         return null;
     }
 }

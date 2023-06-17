@@ -29,48 +29,41 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared;
+package com.ryuuta0217.api.github.repository.check.pr;
 
-import com.ryuuta0217.api.github.repository.commit.CompareResult;
-import net.unknown.UnknownNetworkCore;
-import net.unknown.shared.util.UpdateUtil;
+import com.ryuuta0217.api.github.GitHubAPI;
+import org.json.JSONObject;
 
-import javax.annotation.Nullable;
+public class BranchPointer {
+    private final GitHubAPI api;
+    private final PullRequest pullRequest;
 
-public record VersionInfo(String gitBranch, String commitSha) {
-    public static VersionInfo parseFromString(String version) {
-        String[] split = version.split("-", 4);
-        if (split.length != 4) return null;
-        String gitBranch = split[2];
-        String commitSha = split[3];
-        return new VersionInfo(gitBranch, commitSha);
+    private final String ref;
+    private final String sha;
+    private final Repository repo;
+
+    public BranchPointer(GitHubAPI api, PullRequest pullRequest, JSONObject data) {
+        this.api = api;
+        this.pullRequest = pullRequest;
+
+        this.ref = data.getString("ref");
+        this.sha = data.getString("sha");
+        this.repo = new Repository(api, pullRequest, data.getJSONObject("repo"));
     }
 
-    public boolean diffVersion(VersionInfo other) {
-        return this.sameBranch(other) && this.diffCommit(other);
+    public PullRequest getPullRequest() {
+        return this.pullRequest;
     }
 
-    public boolean sameBranch(VersionInfo other) {
-        return gitBranch.equals(other.gitBranch);
+    public String getRef() {
+        return this.ref;
     }
 
-    public boolean diffBranch(VersionInfo other) {
-        return !gitBranch.equals(other.gitBranch);
+    public String getSha() {
+        return this.sha;
     }
 
-    public boolean sameCommit(VersionInfo other) {
-        return commitSha.equals(other.commitSha);
-    }
-
-    public boolean diffCommit(VersionInfo other) {
-        return !commitSha.equals(other.commitSha);
-    }
-
-    @Nullable
-    public CompareResult compareLatest() {
-        if (UpdateUtil.GITHUB_API != null) {
-            return UpdateUtil.GITHUB_API.getCompareResult(UpdateUtil.GITHUB_API.getRepository("ryuuta0217", "UnknownNetworkCore"), this.commitSha(), this.gitBranch());
-        }
-        return null;
+    public Repository getRepo() {
+        return this.repo;
     }
 }

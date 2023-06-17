@@ -29,48 +29,53 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared;
+package com.ryuuta0217.api.github.repository.check.pr;
 
-import com.ryuuta0217.api.github.repository.commit.CompareResult;
-import net.unknown.UnknownNetworkCore;
-import net.unknown.shared.util.UpdateUtil;
+import com.ryuuta0217.api.github.GitHubAPI;
+import com.ryuuta0217.api.github.repository.check.CheckRun;
+import org.json.JSONObject;
 
-import javax.annotation.Nullable;
+public class PullRequest {
+    private final GitHubAPI api;
+    private final CheckRun checkRun;
+    private final long id;
+    private final long number;
+    private final String url;
+    private final BranchPointer head;
+    private final BranchPointer base;
 
-public record VersionInfo(String gitBranch, String commitSha) {
-    public static VersionInfo parseFromString(String version) {
-        String[] split = version.split("-", 4);
-        if (split.length != 4) return null;
-        String gitBranch = split[2];
-        String commitSha = split[3];
-        return new VersionInfo(gitBranch, commitSha);
+    public PullRequest(GitHubAPI api, CheckRun checkRun, JSONObject data) {
+        this.api = api;
+        this.checkRun = checkRun;
+
+        this.id = data.getLong("id");
+        this.number = data.getLong("number");
+        this.url = data.getString("url");
+        this.head = new BranchPointer(api, this, data.getJSONObject("head"));
+        this.base = new BranchPointer(api, this, data.getJSONObject("base"));
     }
 
-    public boolean diffVersion(VersionInfo other) {
-        return this.sameBranch(other) && this.diffCommit(other);
+    public CheckRun getCheckRun() {
+        return this.checkRun;
     }
 
-    public boolean sameBranch(VersionInfo other) {
-        return gitBranch.equals(other.gitBranch);
+    public long getId() {
+        return this.id;
     }
 
-    public boolean diffBranch(VersionInfo other) {
-        return !gitBranch.equals(other.gitBranch);
+    public long getNumber() {
+        return this.number;
     }
 
-    public boolean sameCommit(VersionInfo other) {
-        return commitSha.equals(other.commitSha);
+    public String getUrl() {
+        return this.url;
     }
 
-    public boolean diffCommit(VersionInfo other) {
-        return !commitSha.equals(other.commitSha);
+    public BranchPointer getHead() {
+        return this.head;
     }
 
-    @Nullable
-    public CompareResult compareLatest() {
-        if (UpdateUtil.GITHUB_API != null) {
-            return UpdateUtil.GITHUB_API.getCompareResult(UpdateUtil.GITHUB_API.getRepository("ryuuta0217", "UnknownNetworkCore"), this.commitSha(), this.gitBranch());
-        }
-        return null;
+    public BranchPointer getBase() {
+        return this.base;
     }
 }

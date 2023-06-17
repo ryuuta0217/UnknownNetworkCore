@@ -56,6 +56,7 @@ import net.unknown.survival.fun.MonsterBall;
 import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import net.unknown.survival.listeners.*;
+import net.unknown.survival.update.UNCUpdateCheckTask;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -103,6 +104,7 @@ public class UnknownNetworkSurvival {
         CustomEnchantments.initialize();
         GNArms.initialize();
         BlueMapBar.initialize();
+        UNCUpdateCheckTask.start();
         DebugStickEntityEditor.Listener.register();
 
         Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
@@ -125,6 +127,7 @@ public class UnknownNetworkSurvival {
             ListenerManager.registerListener(new BlockDisassembler());
             ListenerManager.registerListener(new ConfigureHopperGui.Listener());
             ListenerManager.registerListener(new ChestLinkStick());
+            ListenerManager.registerListener(new ChestLinkProtectionListener());
         }
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");
