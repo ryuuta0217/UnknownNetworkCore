@@ -31,7 +31,11 @@
 
 package net.unknown.shared;
 
+import com.ryuuta0217.api.github.repository.commit.CompareResult;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.shared.util.UpdateUtil;
+
+import javax.annotation.Nullable;
 
 public record VersionInfo(String gitBranch, String commitSha) {
     public static VersionInfo parseFromString(String version) {
@@ -60,5 +64,13 @@ public record VersionInfo(String gitBranch, String commitSha) {
 
     public boolean diffCommit(VersionInfo other) {
         return !commitSha.equals(other.commitSha);
+    }
+
+    @Nullable
+    public CompareResult compareLatest() {
+        if (UpdateUtil.GITHUB_API != null) {
+            return UpdateUtil.GITHUB_API.getCompareResult(UpdateUtil.GITHUB_API.getRepository("ryuuta0217", "UnknownNetworkCore"), this.commitSha(), this.gitBranch());
+        }
+        return null;
     }
 }
