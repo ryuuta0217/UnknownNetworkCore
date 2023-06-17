@@ -43,11 +43,13 @@ import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.launchwrapper.linkchest.LinkChestMode;
 import net.unknown.launchwrapper.mixininterfaces.IMixinChestBlockEntity;
+import net.unknown.launchwrapper.util.WrappedBlockPos;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -66,10 +68,11 @@ import java.util.List;
 import java.util.Objects;
 
 
-public class ChestLinkStick implements Listener {
+public class ChestLink implements Listener {
     private static boolean SKIP_NEXT_INTERACT_EVENT = false;
+    private static boolean SKIP_NEXT_INTERACT_EVENT_PRT = false;
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (SKIP_NEXT_INTERACT_EVENT) {
             SKIP_NEXT_INTERACT_EVENT = false;
@@ -92,6 +95,49 @@ public class ChestLinkStick implements Listener {
             case SET_SOURCE -> setSource(event.getPlayer(), handItem, clickedBlock.getLocation());
             case ADD_CLIENT -> addClient(event.getPlayer(), handItem, clickedBlock.getLocation());
             case REMOVE_CLIENT -> removeClient(event.getPlayer(), handItem, clickedBlock.getLocation());
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void chestProtection(PlayerInteractEvent event) {
+        if (SKIP_NEXT_INTERACT_EVENT_PRT) {
+            SKIP_NEXT_INTERACT_EVENT_PRT = false;
+            return;
+        }
+        if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        if (event.getHand() != EquipmentSlot.HAND) return;
+
+        Block clickedBlock = event.getClickedBlock();
+        if (clickedBlock == null || clickedBlock.getType() != Material.CHEST) return;
+
+        ItemStack useItem = event.getItem();
+        if (!isChestLinkStick(useItem)) return;
+
+        IMixinChestBlockEntity blockEntity = ChestLink.getChestBlockEntity(clickedBlock.getLocation());
+        if (blockEntity == null) return;
+        if (blockEntity.getChestTransportMode() != LinkChestMode.CLIENT) return;
+
+        WrappedBlockPos linkSource = blockEntity.getLinkSource();
+        if (linkSource == null) return;
+
+        BlockEntity sourceBlockEntity = linkSource.getBlockEntity(true, 3);
+        if (sourceBlockEntity == null) return; // Failed to load the source chest
+        if (!(sourceBlockEntity instanceof IMixinChestBlockEntity sourceChestBlockEntity)) return; // BlockEntity is not a chest or not bootstrapped
+        if (sourceChestBlockEntity.getChestTransportMode() != LinkChestMode.SOURCE) return; // Specified chest is not a source chest
+
+        Location linkSourceBukkit = MinecraftAdapter.location(linkSource.serverLevel(), linkSource.blockPos().getCenter(), Vec2.ZERO);
+        if (!linkSourceBukkit.isChunkLoaded()) linkSourceBukkit.getWorld().loadChunk(linkSourceBukkit.getChunk()); // Some plugins may not work unless the chunk is loaded
+
+        PlayerInteractEvent newEvent = new PlayerInteractEvent(event.getPlayer(), Action.RIGHT_CLICK_BLOCK, event.getItem(), linkSourceBukkit.getBlock(), event.getBlockFace());
+        SKIP_NEXT_INTERACT_EVENT = true;
+        SKIP_NEXT_INTERACT_EVENT_PRT = true;
+        Bukkit.getPluginManager().callEvent(newEvent);
+        SKIP_NEXT_INTERACT_EVENT = false;
+        SKIP_NEXT_INTERACT_EVENT_PRT = false;
+
+        if (newEvent.useInteractedBlock() == Event.Result.DENY) {
+            event.setCancelled(true);
+            clickedBlock.getLocation().getBlock().breakNaturally(new ItemStack(Material.NETHERITE_AXE), true);
         }
     }
 
@@ -250,6 +296,7 @@ public class ChestLinkStick implements Listener {
                     if (!sourcePos.isChunkLoaded()) sourcePos.getWorld().loadChunk(sourcePos.getChunk());
                     PlayerInteractEvent event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, stack, sourcePos.getBlock(), BlockFace.SELF);
                     SKIP_NEXT_INTERACT_EVENT = true;
+                    SKIP_NEXT_INTERACT_EVENT_PRT = true;
                     Bukkit.getPluginManager().callEvent(event);
                     if (event.useInteractedBlock() != Event.Result.DENY) {
                         chestBlockEntity.setChestTransportMode(LinkChestMode.CLIENT);
