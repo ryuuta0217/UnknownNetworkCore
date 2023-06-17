@@ -87,7 +87,7 @@ public class UNCUpdateCheckTask extends BukkitRunnable implements Listener {
             return;
         }
 
-        VersionInfo current = VersionInfo.parseFromString("git-UnknownNetworkCore-production-dd3eb32d");
+        VersionInfo current = UnknownNetworkCore.getVersion();
         if (current == null) {
             LOGGER.warning("現在実行中のUnknownNetworkCoreのバージョンを取得できませんでした。自家製、またはGitのセットアップを完了してください。");
             this.cancel();
