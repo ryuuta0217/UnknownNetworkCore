@@ -29,14 +29,60 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.repository.check;
+package com.ryuuta0217.api.github.repository.actions;
 
-public enum Conclusion {
-    SUCCESS,
-    FAILURE,
-    NEUTRAL,
-    CANCELLED,
-    SKIPPED,
-    TIMED_OUT,
-    ACTION_REQUIRED
+import com.ryuuta0217.api.github.GitHubAPI;
+import com.ryuuta0217.api.github.repository.shared.Conclusion;
+import com.ryuuta0217.api.github.repository.shared.Status;
+import org.json.JSONObject;
+
+import javax.annotation.Nullable;
+import java.time.ZonedDateTime;
+
+public class Step {
+    private final GitHubAPI api;
+    private final WorkflowRunJob job;
+
+    private final Status status;
+    @Nullable private final Conclusion conclusion;
+    private final String name;
+    private final long number;
+    @Nullable private final ZonedDateTime startedAt;
+
+    public Step(GitHubAPI api, WorkflowRunJob job, JSONObject data) {
+        this.api = api;
+        this.job = job;
+
+        this.status = Status.valueOf(data.getString("status").toUpperCase());
+        this.conclusion = data.has("conclusion") && !data.isNull("conclusion") ? Conclusion.valueOf(data.getString("conclusion").toUpperCase()) : null;
+        this.name = data.getString("name");
+        this.number = data.getLong("number");
+        this.startedAt = data.has("started_at") && !data.isNull("started_at") ? ZonedDateTime.parse(data.getString("started_at")) : null;
+    }
+
+    public WorkflowRunJob getJob() {
+        return this.job;
+    }
+
+    public Status getStatus() {
+        return this.status;
+    }
+
+    @Nullable
+    public Conclusion getConclusion() {
+        return this.conclusion;
+    }
+
+    public String getName() {
+        return this.name;
+    }
+
+    public long getNumber() {
+        return this.number;
+    }
+
+    @Nullable
+    public ZonedDateTime getStartedAt() {
+        return this.startedAt;
+    }
 }

@@ -29,46 +29,60 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.user;
+package com.ryuuta0217.api.github.repository;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.user.interfaces.PrivateUser;
-import org.jetbrains.annotations.Nullable;
+import com.ryuuta0217.api.github.repository.interfaces.RepositoryMinimal;
 import org.json.JSONObject;
 
-public class PrivateUserImpl extends PublicUserImpl implements PrivateUser {
-    private final long ownedPrivateRepos;
-    private final boolean twoFactorAuthentication;
-    private final boolean businessPlus;
+import javax.annotation.Nullable;
+
+public class CodeOfConduct {
+    private final GitHubAPI api;
+    private final RepositoryMinimal repository;
+
+    private final String url;
+    @Nullable private final String htmlUrl;
+    private final String key;
+    private final String name;
+
+    @Nullable private final String body;
+
+    public CodeOfConduct(GitHubAPI api, RepositoryMinimal repository, JSONObject data) {
+        this.api = api;
+        this.repository = repository;
+
+        this.url = data.getString("url");
+        this.htmlUrl = data.has("html_url") && !data.isNull("html_url") ? data.getString("html_url") : null;
+        this.key = data.getString("key");
+        this.name = data.getString("name");
+
+        this.body = data.has("body") && !data.isNull("body") ? data.getString("body") : null;
+    }
+
+    public RepositoryMinimal getRepository() {
+        return this.repository;
+    }
+
+    public String getUrl() {
+        return this.url;
+    }
+
     @Nullable
-    private final String ldapDistinguishedName;
-
-    public PrivateUserImpl(GitHubAPI api, JSONObject data) {
-        super(api, data);
-        this.ownedPrivateRepos = data.has("owned_private_repos") ? data.getLong("owned_private_repos") : -1;
-        this.twoFactorAuthentication = data.has("two_factor_authentication") && data.getBoolean("two_factor_authentication");
-        this.businessPlus = data.has("is_business_plus") && data.getBoolean("is_business_plus");
-        this.ldapDistinguishedName = data.has("ldap_distinguished_name") && !data.isNull("ldap_distinguished_name") ? data.getString("ldap_distinguished_name") : null;
+    public String getHtmlUrl() {
+        return this.htmlUrl;
     }
 
-    @Override
-    public long getOwnedPrivateRepos() {
-        return 0;
+    public String getKey() {
+        return this.key;
     }
 
-    @Override
-    public boolean isTwoFactorAuthentication() {
-        return false;
-    }
-
-    @Override
-    public boolean isBusinessPlus() {
-        return false;
+    public String getName() {
+        return this.name;
     }
 
     @Nullable
-    @Override
-    public String getLdapDistinguishedName() {
-        return null;
+    public String getBody() {
+        return this.body;
     }
 }

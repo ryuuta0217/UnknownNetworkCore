@@ -47,7 +47,7 @@ public class Parent {
         this.api = api;
         this.sha = data.getString("sha");
         this.url = data.getString("url");
-        this.htmlUrl = data.has("html_url") && !data.get("html_url").equals(JSONObject.NULL) ? data.getString("html_url") : null;
+        this.htmlUrl = data.has("html_url") && !data.isNull("html_url") ? data.getString("html_url") : null;
     }
 
     public String getSha() {

@@ -31,11 +31,18 @@
 
 package com.ryuuta0217.api.github;
 
-import com.ryuuta0217.api.github.repository.Repository;
+import com.ryuuta0217.api.github.repository.RepositoryImpl;
+import com.ryuuta0217.api.github.repository.actions.Workflow;
+import com.ryuuta0217.api.github.repository.actions.WorkflowRun;
+import com.ryuuta0217.api.github.repository.actions.WorkflowRunJob;
 import com.ryuuta0217.api.github.repository.branch.Branch;
 import com.ryuuta0217.api.github.repository.check.CheckRun;
-import com.ryuuta0217.api.github.repository.commit.Commit;
+import com.ryuuta0217.api.github.repository.commit.CommitImpl;
 import com.ryuuta0217.api.github.repository.commit.CompareResult;
+import com.ryuuta0217.api.github.repository.commit.interfaces.Commit;
+import com.ryuuta0217.api.github.repository.commit.interfaces.SimpleCommit;
+import com.ryuuta0217.api.github.repository.interfaces.Repository;
+import com.ryuuta0217.api.github.repository.interfaces.RepositoryMinimal;
 import com.ryuuta0217.api.github.user.PublicUserImpl;
 import com.ryuuta0217.api.github.user.interfaces.PublicUser;
 import com.ryuuta0217.api.github.user.interfaces.SimpleUser;
@@ -86,7 +93,7 @@ public class GitHubAPI {
                 "/" + repositoryName
         );
         if (!(obj instanceof JSONObject json)) return null;
-        return new Repository(this, json);
+        return new RepositoryImpl(this, json);
     }
 
     @Nullable
@@ -101,11 +108,11 @@ public class GitHubAPI {
     }
 
     @Nullable
-    public Commit getCommit(Repository repository, String sha) {
+    public Commit getCommit(RepositoryMinimal repository, String sha) {
         if (repository == null) return null;
         Object obj = this.requestAndParse("GET", replaceArgumentPatternFromUrl(repository.getCommitsUrl(), "sha", sha));
         if (!(obj instanceof JSONObject json)) return null;
-        return new Commit(this, repository, json);
+        return new CommitImpl(this, repository, json);
     }
 
     @Nullable
@@ -115,7 +122,7 @@ public class GitHubAPI {
     }
 
     @Nullable
-    public List<Commit> getCommits(SimpleUser user, Repository repository, @Nullable String sha) {
+    public List<Commit> getCommits(SimpleUser user, RepositoryMinimal repository, @Nullable String sha) {
         if (user == null) return null;
         return getCommits(user.getLogin(), repository, sha);
     }
@@ -126,7 +133,7 @@ public class GitHubAPI {
     }
 
     @Nullable
-    public List<Commit> getCommits(String owner, Repository repository, @Nullable String sha) {
+    public List<Commit> getCommits(String owner, RepositoryMinimal repository, @Nullable String sha) {
         if (repository == null) return null;
         Object obj = this.requestAndParse("GET", stripArgumentPatternFromUrl(repository.getCommitsUrl()), (sha != null ? "?sha=" + sha : ""));
         if (!(obj instanceof JSONArray arr)) return null;
@@ -134,7 +141,8 @@ public class GitHubAPI {
                 .filter(raw -> raw instanceof Map<?, ?>)
                 .map(raw -> (Map<?, ?>) raw)
                 .map(raw -> new JSONObject(raw))
-                .map(json -> new Commit(this, repository, json))
+                .map(json -> new CommitImpl(this, repository, json))
+                .map(commit -> (Commit) commit)
                 .toList();
     }
 
@@ -150,7 +158,7 @@ public class GitHubAPI {
     }
 
     @Nullable
-    public Branch getBranch(Repository repository, String branchName) {
+    public Branch getBranch(RepositoryMinimal repository, String branchName) {
         if (repository == null) return null;
         Object obj = this.requestAndParse("GET", replaceArgumentPatternFromUrl(repository.getBranchesUrl(), "branch", branchName));
         if (!(obj instanceof JSONObject json)) return null;
@@ -169,9 +177,9 @@ public class GitHubAPI {
     }
 
     @Nullable
-    public List<Branch> getBranches(Repository repository) {
+    public List<Branch> getBranches(RepositoryMinimal repository) {
         if (repository == null) return null;
-        Object obj = this.requestAndParse("GET", repository.getBranchesUrl());
+        Object obj = this.requestAndParse("GET", stripArgumentPatternFromUrl(repository.getBranchesUrl()));
         if (!(obj instanceof JSONArray arr)) return null;
         return arr.toList().stream()
                 .filter(raw -> raw instanceof Map<?, ?>)
@@ -181,15 +189,20 @@ public class GitHubAPI {
                 .toList();
     }
 
-    public List<CheckRun> getCheckRunsByCommit(Commit commit) {
-        return getCheckRunsByCommit(commit.getRepository(), commit.getSha());
+    @Nullable
+    public List<CheckRun> getCheckRunsByCommit(SimpleCommit commit) {
+        Commit full = commit.tryGetCommit();
+        if (full == null) return null;
+        return getCheckRunsByCommit(full.getRepository(), full.getSha());
     }
 
+    @Nullable
     public List<CheckRun> getCheckRunsByCommit(String owner, String repositoryName, String ref) {
         return getCheckRunsByCommit(this.getRepository(owner, repositoryName), ref);
     }
 
-    public List<CheckRun> getCheckRunsByCommit(Repository repository, String ref) {
+    @Nullable
+    public List<CheckRun> getCheckRunsByCommit(RepositoryMinimal repository, String ref) {
         if (repository == null) return null;
         Object obj = this.requestAndParse("GET",
                 replaceArgumentPatternFromUrl(repository.getCommitsUrl(), "sha", ref),
@@ -204,13 +217,38 @@ public class GitHubAPI {
                 .toList();
     }
 
-    public CompareResult getCompareResult(Repository repository, String base, String head) {
+    public CompareResult getCompareResult(RepositoryMinimal repository, String base, String head) {
         if (repository == null) return null;
         Object obj = this.requestAndParse("GET",
                 replaceArgumentPatternFromUrl(replaceArgumentPatternFromUrl(repository.getCompareUrl(), "base", base), "head", head)
         );
         if (!(obj instanceof JSONObject json)) return null;
         return new CompareResult(this, repository, json);
+    }
+
+    public List<WorkflowRunJob> getWorkflowRunJobs(WorkflowRun workflowRun) {
+        if (workflowRun == null) return null;
+        Object obj = this.requestAndParse("GET", workflowRun.getJobsUrl());
+        if (!(obj instanceof JSONObject json)) return null;
+        return json.getJSONArray("jobs").toList().stream()
+                .filter(raw -> raw instanceof Map<?, ?>)
+                .map(raw -> (Map<?, ?>) raw)
+                .map(raw -> new JSONObject(raw))
+                .map(jsonObj -> new WorkflowRunJob(this, workflowRun, jsonObj))
+                .toList();
+    }
+
+    public WorkflowRun getWorkflowRun(String owner, String repo, String runId) {
+        Object obj = this.requestAndParse("GET",
+                "/repos",
+                "/" + owner,
+                "/" + repo,
+                "/actions",
+                "/runs",
+                "/" + runId
+        );
+        if (!(obj instanceof JSONObject json)) return null;
+        return new WorkflowRun(this, json);
     }
 
     @Nullable

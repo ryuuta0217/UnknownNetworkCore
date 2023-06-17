@@ -32,7 +32,8 @@
 package com.ryuuta0217.api.github.repository.commit;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.GitUser;
+import com.ryuuta0217.api.github.user.GitUserImpl;
+import com.ryuuta0217.api.github.user.interfaces.GitUser;
 import org.json.JSONObject;
 
 public class GitCommit {
@@ -48,8 +49,8 @@ public class GitCommit {
     public GitCommit(GitHubAPI api, JSONObject data) {
         this.api = api;
         this.commentCount = data.getLong("comment_count");
-        this.committer = new GitUser(api, data.getJSONObject("committer"));
-        this.author = new GitUser(api, data.getJSONObject("author"));
+        this.committer = new GitUserImpl(api, data.getJSONObject("committer"));
+        this.author = new GitUserImpl(api, data.getJSONObject("author"));
         this.tree = new Tree(api, data.getJSONObject("tree"));
         this.message = data.getString("message");
         this.url = data.getString("url");

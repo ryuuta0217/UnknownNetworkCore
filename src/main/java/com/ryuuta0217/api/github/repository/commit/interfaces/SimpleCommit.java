@@ -29,51 +29,37 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github;
+package com.ryuuta0217.api.github.repository.commit.interfaces;
 
-import com.ryuuta0217.api.github.user.interfaces.PublicUser;
-import org.json.JSONObject;
+import com.ryuuta0217.api.github.repository.commit.CompareResult;
+import com.ryuuta0217.api.github.repository.interfaces.RepositoryMinimal;
+import com.ryuuta0217.api.github.user.interfaces.GitUser;
 
+import javax.annotation.Nullable;
 import java.time.ZonedDateTime;
 
-public class GitUser {
-    private final GitHubAPI api;
-    private final String name;
-    private final String email;
-    private final ZonedDateTime date;
+public interface SimpleCommit {
+    RepositoryMinimal getRepository();
 
-    public GitUser(GitHubAPI api, String name, String email, ZonedDateTime date) {
-        this.api = api;
-        this.name = name;
-        this.email = email;
-        this.date = date;
-    }
+    @Deprecated
+    String getId();
 
-    public GitUser(GitHubAPI api, JSONObject data) {
-        this.api = api;
-        this.name = data.getString("name");
-        this.email = data.getString("email");
-        this.date = ZonedDateTime.parse(data.getString("date"));
-    }
+    String getSha();
 
-    public String getName() {
-        return this.name;
-    }
+    String getTreeId();
 
-    public String getEmail() {
-        return this.email;
-    }
+    String getMessage();
 
-    public ZonedDateTime getDate() {
-        return this.date;
-    }
+    ZonedDateTime getTimestamp();
 
-    public PublicUser tryGetUser() {
-        if (!this.email.endsWith("@users.noreply.github.com")) return null;
-        String userNameRaw = this.email.substring(0, this.email.indexOf('@'));
-        String[] userNameParts = userNameRaw.split("\\+", 2);
-        String userId = userNameParts[0];
-        String userName = userNameParts[1];
-        return this.api.getUser(userName);
-    }
+    @Nullable
+    GitUser getAuthor();
+
+    @Nullable
+    GitUser getCommitter();
+
+    @Nullable
+    Commit tryGetCommit();
+
+    CompareResult compare(SimpleCommit head);
 }

@@ -88,12 +88,12 @@ public class App {
                 .map(String::valueOf)
                 .toArray(String[]::new);
 
-        this.slug = data.has("slug") && !data.get("slug").equals(JSONObject.NULL) ? data.getString("slug") : null;
+        this.slug = data.has("slug") && !data.isNull("slug") ? data.getString("slug") : null;
         this.installationsCount = data.has("installations_count") ? data.getLong("installations_count") : -1;
-        this.clientId = data.has("client_id") && !data.get("client_id").equals(JSONObject.NULL) ? data.getString("client_id") : null;
-        this.clientSecret = data.has("client_secret") && !data.get("client_secret").equals(JSONObject.NULL) ? data.getString("client_secret") : null;
-        this.webhookSecret = data.has("webhook_secret") && !data.get("webhook_secret").equals(JSONObject.NULL) ? data.getString("webhook_secret") : null;
-        this.pem = data.has("pem") && !data.get("pem").equals(JSONObject.NULL) ? data.getString("pem") : null;
+        this.clientId = data.has("client_id") && !data.isNull("client_id") ? data.getString("client_id") : null;
+        this.clientSecret = data.has("client_secret") && !data.isNull("client_secret") ? data.getString("client_secret") : null;
+        this.webhookSecret = data.has("webhook_secret") && !data.isNull("webhook_secret") ? data.getString("webhook_secret") : null;
+        this.pem = data.has("pem") && !data.isNull("pem") ? data.getString("pem") : null;
     }
 
     public CheckRun getCheckRun() {

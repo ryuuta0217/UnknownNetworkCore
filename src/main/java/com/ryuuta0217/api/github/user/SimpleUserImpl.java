@@ -32,6 +32,7 @@
 package com.ryuuta0217.api.github.user;
 
 import com.ryuuta0217.api.github.GitHubAPI;
+import com.ryuuta0217.api.github.user.interfaces.PublicUser;
 import com.ryuuta0217.api.github.user.interfaces.SimpleUser;
 import org.json.JSONObject;
 
@@ -40,6 +41,7 @@ import java.time.ZonedDateTime;
 
 public class SimpleUserImpl implements SimpleUser {
     protected final GitHubAPI api;
+
     @Nullable
     private final String name;
     @Nullable
@@ -67,8 +69,8 @@ public class SimpleUserImpl implements SimpleUser {
 
     public SimpleUserImpl(GitHubAPI api, JSONObject data) {
         this.api = api;
-        this.name = data.has("name") && !data.get("name").equals(JSONObject.NULL) ? data.getString("name") : null;
-        this.email = data.has("email") && !data.get("email").equals(JSONObject.NULL) ? data.getString("email") : null;
+        this.name = data.has("name") && !data.isNull("name") ? data.getString("name") : null;
+        this.email = data.has("email") && !data.isNull("email") ? data.getString("email") : null;
         this.login = data.getString("login");
         this.id = data.getLong("id");
         this.nodeId = data.getString("node_id");
@@ -87,7 +89,7 @@ public class SimpleUserImpl implements SimpleUser {
         this.receivedEventsUrl = data.getString("received_events_url");
         this.type = data.getString("type");
         this.siteAdmin = data.getBoolean("site_admin");
-        this.starredAt = data.has("starred_at") && !data.get("starred_at").equals(JSONObject.NULL) ? ZonedDateTime.parse(data.getString("starred_at")) : null;
+        this.starredAt = data.has("starred_at") && !data.isNull("starred_at") ? ZonedDateTime.parse(data.getString("starred_at")) : null;
     }
 
     @Override
@@ -191,6 +193,19 @@ public class SimpleUserImpl implements SimpleUser {
     @Override
     public String getEmail() {
         return this.email;
+    }
+
+    @Deprecated
+    @Nullable
+    @Override
+    public ZonedDateTime getDate() {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public PublicUser tryGetUser() {
+        return this.api.getUser(this.getLogin());
     }
 
     @Nullable

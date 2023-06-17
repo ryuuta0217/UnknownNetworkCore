@@ -32,7 +32,10 @@
 package com.ryuuta0217.api.github.repository.check;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.repository.check.pr.PullRequest;
+import com.ryuuta0217.api.github.repository.actions.WorkflowRun;
+import com.ryuuta0217.api.github.repository.pullreq.PullRequestMinimal;
+import com.ryuuta0217.api.github.repository.shared.Conclusion;
+import com.ryuuta0217.api.github.repository.shared.Status;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
@@ -59,7 +62,7 @@ public class CheckRun {
     private final CheckSuite checkSuite;
     @Nullable
     private final App app;
-    private final PullRequest[] pullRequests;
+    private final PullRequestMinimal[] pullRequests;
     @Nullable
     private final Deployment deployment;
 
@@ -70,7 +73,7 @@ public class CheckRun {
         this.detailsUrl = data.getString("details_url");
         this.headSha = data.getString("head_sha");
         this.url = data.getString("url");
-        this.conclusion = data.has("conclusion") && !data.get("conclusion").equals(JSONObject.NULL) ? Conclusion.valueOf(data.getString("conclusion").toUpperCase()) : null;
+        this.conclusion = data.has("conclusion") && !data.isNull("conclusion") ? Conclusion.valueOf(data.getString("conclusion").toUpperCase()) : null;
         this.output = new Output(api, this, data.getJSONObject("output"));
         this.completedAt = ZonedDateTime.parse(data.getString("completed_at"));
         this.pullRequests = data.getJSONArray("pull_requests").toList()
@@ -78,8 +81,8 @@ public class CheckRun {
                 .filter(raw -> raw instanceof Map<?, ?>)
                 .map(raw -> ((Map<?, ?>) raw))
                 .map(map -> new JSONObject(map))
-                .map(json -> new PullRequest(api, this, json))
-                .toArray(PullRequest[]::new);
+                .map(json -> new PullRequestMinimal(api, json))
+                .toArray(PullRequestMinimal[]::new);
         this.htmlUrl = data.getString("html_url");
         this.name = data.getString("name");
         this.startedAt = ZonedDateTime.parse(data.getString("started_at"));
@@ -152,12 +155,24 @@ public class CheckRun {
         return this.app;
     }
 
-    public PullRequest[] getPullRequests() {
+    public PullRequestMinimal[] getPullRequests() {
         return this.pullRequests;
     }
 
     @Nullable
     public Deployment getDeployment() {
         return this.deployment;
+    }
+
+    @Nullable
+    public WorkflowRun tryGetWorkflowRun() {
+        if (this.getDetailsUrl().startsWith("https://github.com/") && this.getDetailsUrl().contains("/actions/runs/")) {
+            String[] urlParts = this.getDetailsUrl().replace("https://", "").split("/");
+            String owner = urlParts[1];
+            String repo = urlParts[2];
+            String runId = urlParts[5];
+            return this.api.getWorkflowRun(owner, repo, runId);
+        }
+        return null;
     }
 }

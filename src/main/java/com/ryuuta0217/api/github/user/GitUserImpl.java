@@ -32,43 +32,58 @@
 package com.ryuuta0217.api.github.user;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.user.interfaces.PrivateUser;
-import org.jetbrains.annotations.Nullable;
+import com.ryuuta0217.api.github.user.interfaces.GitUser;
+import com.ryuuta0217.api.github.user.interfaces.PublicUser;
 import org.json.JSONObject;
 
-public class PrivateUserImpl extends PublicUserImpl implements PrivateUser {
-    private final long ownedPrivateRepos;
-    private final boolean twoFactorAuthentication;
-    private final boolean businessPlus;
+import javax.annotation.Nullable;
+import java.time.ZonedDateTime;
+
+public class GitUserImpl implements GitUser {
+    protected final GitHubAPI api;
     @Nullable
-    private final String ldapDistinguishedName;
+    private final String name;
+    private final String email;
+    @Nullable
+    private final ZonedDateTime date;
 
-    public PrivateUserImpl(GitHubAPI api, JSONObject data) {
-        super(api, data);
-        this.ownedPrivateRepos = data.has("owned_private_repos") ? data.getLong("owned_private_repos") : -1;
-        this.twoFactorAuthentication = data.has("two_factor_authentication") && data.getBoolean("two_factor_authentication");
-        this.businessPlus = data.has("is_business_plus") && data.getBoolean("is_business_plus");
-        this.ldapDistinguishedName = data.has("ldap_distinguished_name") && !data.isNull("ldap_distinguished_name") ? data.getString("ldap_distinguished_name") : null;
+    public GitUserImpl(GitHubAPI api, String name, String email, ZonedDateTime date) {
+        this.api = api;
+        this.name = name;
+        this.email = email;
+        this.date = date;
+    }
+
+    public GitUserImpl(GitHubAPI api, JSONObject data) {
+        this.api = api;
+        this.name = data.getString("name");
+        this.email = data.getString("email");
+        this.date = data.has("date") && !data.isNull("date") ? ZonedDateTime.parse(data.getString("date")) : null;
     }
 
     @Override
-    public long getOwnedPrivateRepos() {
-        return 0;
+    public String getName() {
+        return this.name;
     }
 
     @Override
-    public boolean isTwoFactorAuthentication() {
-        return false;
+    public String getEmail() {
+        return this.email;
     }
 
     @Override
-    public boolean isBusinessPlus() {
-        return false;
+    public ZonedDateTime getDate() {
+        return this.date;
     }
 
     @Nullable
     @Override
-    public String getLdapDistinguishedName() {
-        return null;
+    public PublicUser tryGetUser() {
+        if (!this.getEmail().endsWith("@users.noreply.github.com")) return null;
+        String userNameRaw = this.getEmail().substring(0, this.getEmail().indexOf('@'));
+        String[] userNameParts = userNameRaw.split("\\+", 2);
+        String userId = userNameParts[0];
+        String userName = userNameParts[1];
+        return this.api.getUser(userName);
     }
 }

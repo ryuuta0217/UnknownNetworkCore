@@ -31,10 +31,11 @@
 
 package net.unknown.survival.update;
 
-import com.ryuuta0217.api.github.repository.commit.Commit;
+import com.ryuuta0217.api.github.repository.commit.CommitImpl;
 import com.ryuuta0217.api.github.repository.commit.CompareResult;
 import com.ryuuta0217.api.github.repository.commit.CompareStatus;
 import com.ryuuta0217.api.github.repository.commit.Stats;
+import com.ryuuta0217.api.github.repository.commit.interfaces.Commit;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
@@ -151,7 +152,7 @@ public class UNCUpdateCheckTask extends BukkitRunnable implements Listener {
                 .append(Component.text("変更履歴:", DefinedTextColor.AQUA));
 
         for (Commit commitSimple : compare.getCommits()) {
-            Commit commit = commitSimple.tryGetCompleteData();
+            Commit commit = commitSimple.tryGetCommit();
             String commitMessage = commit.getCommit().getMessage();
             Component hoverMessage = Component.text(commit.getCommit().getAuthor().getName(), DefinedTextColor.GREEN)
                     .appendNewline()

@@ -31,14 +31,18 @@
 
 package net.unknown.shared.util;
 
+import com.ryuuta0217.api.github.repository.actions.WorkflowRun;
+import com.ryuuta0217.api.github.repository.actions.WorkflowRunJob;
 import com.ryuuta0217.api.github.repository.branch.Branch;
 import com.ryuuta0217.api.github.GitHubAPI;
 import com.ryuuta0217.api.github.repository.check.CheckRun;
-import com.ryuuta0217.api.github.repository.check.Status;
-import com.ryuuta0217.api.github.repository.commit.Commit;
-import com.ryuuta0217.api.github.repository.commit.CompareResult;
+import com.ryuuta0217.api.github.repository.commit.interfaces.Commit;
+import com.ryuuta0217.api.github.repository.interfaces.Repository;
+import com.ryuuta0217.api.github.repository.shared.Conclusion;
+import com.ryuuta0217.api.github.repository.shared.Status;
+import com.ryuuta0217.api.github.repository.commit.CommitImpl;
+import com.ryuuta0217.api.github.user.interfaces.PublicUser;
 import com.ryuuta0217.util.HTTPFetch;
-import com.ryuuta0217.util.HTTPUtil;
 import net.unknown.shared.SharedConstants;
 import net.unknown.shared.VersionInfo;
 import org.json.JSONObject;
@@ -47,7 +51,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.*;
 import java.net.MalformedURLException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -94,12 +97,26 @@ public class UpdateUtil {
 
     public static void main(String[] args) {
         GitHubAPI api = new GitHubAPI(GITHUB_ACCESS_TOKEN);
-        Commit currentCommit = api.getCommit("ryuuta0217", "UnknownNetworkCore", "f8eb54ac");
-        Commit latestCommit = api.getCommit("ryuuta0217", "UnknownNetworkCore", "production");
-        if (currentCommit == null || latestCommit == null) return;
-        CompareResult compare = currentCommit.compare(latestCommit);
-        if (compare == null) return;
-        System.out.println("Ahead by: " + compare.getAheadBy() + " | Behind by: " + compare.getBehindBy() + " | Status: " + compare.getStatus());
+        Branch branch = api.getBranch("ryuuta0217", "UnknownNetworkCore", "production");
+        List<CheckRun> checkRuns = branch.getCommit().tryGetCommit().tryGetCheckRuns();
+        if (checkRuns != null) {
+            checkRuns.forEach(checkRun -> {
+                WorkflowRun workflowRun = checkRun.tryGetWorkflowRun();
+                if (workflowRun != null) {
+                    System.out.println(workflowRun.getStatus());
+                    List<WorkflowRunJob> jobs = workflowRun.getJobs();
+                    if (jobs != null) {
+                        jobs.forEach(job -> {
+                            System.out.println(job.getConclusion());
+                        });
+                    }
+                }
+            });
+        }
+        //Commit currentCommit = api.getCommit("ryuuta0217", "UnknownNetworkCore", "f8eb54ac");
+        //Commit latestCommit = api.getCommit("ryuuta0217", "UnknownNetworkCore", "production");
+        //if (latestCommit == null) return;
+        //api.getWorkflowRunJobs(api.getRepository("ryuuta0217", "UnknownNetworkCore"), 5280989681L);
     }
 
     public static void updateUNC(String targetBranch, @Nullable File downloadAs, boolean replaceOnShutdown, @Nonnull File replaceAs, Logger logger) {
@@ -107,7 +124,7 @@ public class UpdateUtil {
         GitHubAPI api = new GitHubAPI(GITHUB_ACCESS_TOKEN);
         Branch branch = api.getBranch("ryuuta0217", "UnknownNetworkCore", targetBranch == null ? "production" : targetBranch);
         if (branch != null) {
-            String commitSha = branch.getCommit().getSha().substring(0, 8);
+            String commitSha = branch.getCommit().getId().substring(0, 8);
             logger.info("ブランチ " + targetBranch + " の取得に成功しました。最新コミットハッシュは " + commitSha + " です。");
 
             String downloadUrl = String.format(UNC_FILE_PATTERN, commitSha);
@@ -148,7 +165,7 @@ public class UpdateUtil {
             Optional<Commit> first = branch.getCommits().stream().filter(commit -> {
                 List<CheckRun> checkRuns = commit.tryGetCheckRuns();
                 if (checkRuns.size() == 0) return false;
-                return checkRuns.stream().anyMatch(checkRun -> checkRun.getStatus() == Status.COMPLETED);
+                return checkRuns.stream().anyMatch(checkRun -> checkRun.tryGetWorkflowRun().getJobs().stream().anyMatch(job -> job.getConclusion() == Conclusion.SUCCESS));
             }).findFirst();
 
             if (first.isPresent()) {

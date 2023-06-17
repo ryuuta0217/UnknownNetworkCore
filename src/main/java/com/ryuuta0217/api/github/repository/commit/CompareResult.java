@@ -32,7 +32,8 @@
 package com.ryuuta0217.api.github.repository.commit;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.repository.Repository;
+import com.ryuuta0217.api.github.repository.commit.interfaces.Commit;
+import com.ryuuta0217.api.github.repository.interfaces.RepositoryMinimal;
 import org.json.JSONObject;
 
 import javax.annotation.Nullable;
@@ -592,8 +593,8 @@ public class CompareResult {
     private final String permalinkUrl;
     private final String diffUrl;
     private final String patchUrl;
-    private final Commit baseCommit;
-    private final Commit mergeBaseCommit;
+    private final CommitImpl baseCommit;
+    private final CommitImpl mergeBaseCommit;
     private final CompareStatus status;
     private final long aheadBy;
     private final long behindBy;
@@ -602,7 +603,7 @@ public class CompareResult {
     @Nullable
     private final File[] files;
 
-    public CompareResult(GitHubAPI api, Repository repository, JSONObject data) {
+    public CompareResult(GitHubAPI api, RepositoryMinimal repository, JSONObject data) {
         this.api = api;
 
         this.url = data.getString("url");
@@ -610,8 +611,8 @@ public class CompareResult {
         this.permalinkUrl = data.getString("permalink_url");
         this.diffUrl = data.getString("diff_url");
         this.patchUrl = data.getString("patch_url");
-        this.baseCommit = new Commit(api, repository, data.getJSONObject("base_commit"));
-        this.mergeBaseCommit = new Commit(api, repository, data.getJSONObject("merge_base_commit"));
+        this.baseCommit = new CommitImpl(api, repository, data.getJSONObject("base_commit"));
+        this.mergeBaseCommit = new CommitImpl(api, repository, data.getJSONObject("merge_base_commit"));
         this.status = CompareStatus.valueOf(data.getString("status").toUpperCase());
         this.aheadBy = data.getLong("ahead_by");
         this.behindBy = data.getLong("behind_by");
@@ -620,8 +621,8 @@ public class CompareResult {
                 .filter(raw -> raw instanceof Map<?, ?>)
                 .map(raw -> ((Map<?, ?>) raw))
                 .map(map -> new JSONObject(map))
-                .map(json -> new Commit(api, repository, json))
-                .toArray(Commit[]::new);
+                .map(json -> new CommitImpl(api, repository, json))
+                .toArray(CommitImpl[]::new);
         this.files = data.has("files") ? data.getJSONArray("files").toList().stream()
                 .filter(raw -> raw instanceof Map<?, ?>)
                 .map(raw -> ((Map<?, ?>) raw))
@@ -650,11 +651,11 @@ public class CompareResult {
         return this.patchUrl;
     }
 
-    public Commit getBaseCommit() {
+    public CommitImpl getBaseCommit() {
         return this.baseCommit;
     }
 
-    public Commit getMergeBaseCommit() {
+    public CommitImpl getMergeBaseCommit() {
         return this.mergeBaseCommit;
     }
 

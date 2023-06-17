@@ -32,7 +32,6 @@
 package net.unknown.shared;
 
 import com.ryuuta0217.api.github.repository.commit.CompareResult;
-import net.unknown.UnknownNetworkCore;
 import net.unknown.shared.util.UpdateUtil;
 
 import javax.annotation.Nullable;

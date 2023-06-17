@@ -29,46 +29,45 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.user;
+package com.ryuuta0217.api.github.repository;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.user.interfaces.PrivateUser;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class PrivateUserImpl extends PublicUserImpl implements PrivateUser {
-    private final long ownedPrivateRepos;
-    private final boolean twoFactorAuthentication;
-    private final boolean businessPlus;
-    @Nullable
-    private final String ldapDistinguishedName;
+public class Permissions {
+    private final GitHubAPI api;
+    private final boolean pull;
+    private final boolean maintain;
+    private final boolean admin;
+    private final boolean triage;
+    private final boolean push;
 
-    public PrivateUserImpl(GitHubAPI api, JSONObject data) {
-        super(api, data);
-        this.ownedPrivateRepos = data.has("owned_private_repos") ? data.getLong("owned_private_repos") : -1;
-        this.twoFactorAuthentication = data.has("two_factor_authentication") && data.getBoolean("two_factor_authentication");
-        this.businessPlus = data.has("is_business_plus") && data.getBoolean("is_business_plus");
-        this.ldapDistinguishedName = data.has("ldap_distinguished_name") && !data.isNull("ldap_distinguished_name") ? data.getString("ldap_distinguished_name") : null;
+    public Permissions(GitHubAPI api, JSONObject data) {
+        this.api = api;
+        this.pull = data.getBoolean("pull");
+        this.maintain = data.getBoolean("maintain");
+        this.admin = data.getBoolean("admin");
+        this.triage = data.getBoolean("triage");
+        this.push = data.getBoolean("push");
     }
 
-    @Override
-    public long getOwnedPrivateRepos() {
-        return 0;
+    public boolean canPull() {
+        return this.pull;
     }
 
-    @Override
-    public boolean isTwoFactorAuthentication() {
-        return false;
+    public boolean canMaintain() {
+        return this.maintain;
     }
 
-    @Override
-    public boolean isBusinessPlus() {
-        return false;
+    public boolean isAdmin() {
+        return this.admin;
     }
 
-    @Nullable
-    @Override
-    public String getLdapDistinguishedName() {
-        return null;
+    public boolean canTriage() {
+        return this.triage;
+    }
+
+    public boolean canPush() {
+        return this.push;
     }
 }

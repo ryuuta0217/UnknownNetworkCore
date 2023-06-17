@@ -29,46 +29,65 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.api.github.user;
+package com.ryuuta0217.api.github.repository.branch;
 
 import com.ryuuta0217.api.github.GitHubAPI;
-import com.ryuuta0217.api.github.user.interfaces.PrivateUser;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
-public class PrivateUserImpl extends PublicUserImpl implements PrivateUser {
-    private final long ownedPrivateRepos;
-    private final boolean twoFactorAuthentication;
-    private final boolean businessPlus;
-    @Nullable
-    private final String ldapDistinguishedName;
+public class Protection {
+    private final GitHubAPI api;
+    private final Branch branch;
+    private final RequiredStatusChecks requiredStatusChecks;
+    private final boolean enabled;
 
-    public PrivateUserImpl(GitHubAPI api, JSONObject data) {
-        super(api, data);
-        this.ownedPrivateRepos = data.has("owned_private_repos") ? data.getLong("owned_private_repos") : -1;
-        this.twoFactorAuthentication = data.has("two_factor_authentication") && data.getBoolean("two_factor_authentication");
-        this.businessPlus = data.has("is_business_plus") && data.getBoolean("is_business_plus");
-        this.ldapDistinguishedName = data.has("ldap_distinguished_name") && !data.isNull("ldap_distinguished_name") ? data.getString("ldap_distinguished_name") : null;
+    public Protection(GitHubAPI api, Branch branch, JSONObject data) {
+        this.api = api;
+        this.branch = branch;
+        this.requiredStatusChecks = new RequiredStatusChecks(api, this, data.getJSONObject("required_status_checks"));
+        this.enabled = data.getBoolean("enabled");
     }
 
-    @Override
-    public long getOwnedPrivateRepos() {
-        return 0;
+    public Branch getBranch() {
+        return this.branch;
     }
 
-    @Override
-    public boolean isTwoFactorAuthentication() {
-        return false;
+    public RequiredStatusChecks getRequiredStatusChecks() {
+        return this.requiredStatusChecks;
     }
 
-    @Override
-    public boolean isBusinessPlus() {
-        return false;
+    public boolean isEnabled() {
+        return this.enabled;
     }
 
-    @Nullable
-    @Override
-    public String getLdapDistinguishedName() {
-        return null;
+    public static class RequiredStatusChecks {
+        private final GitHubAPI api;
+        private final Protection protection;
+        private final String enforcementLevel;
+        private final Object[] checks;
+        private final Object[] contexts;
+
+        public RequiredStatusChecks(GitHubAPI api, Protection protection, JSONObject data) {
+            this.api = api;
+            this.protection = protection;
+            this.enforcementLevel = data.getString("enforcement_level");
+            this.checks = data.getJSONArray("contexts").toList().toArray();
+            this.contexts = data.getJSONArray("contexts").toList().toArray();
+        }
+
+        public Protection getProtection() {
+            return this.protection;
+        }
+
+        public String getEnforcementLevel() {
+            return this.enforcementLevel;
+        }
+
+        public Object[] getChecks() {
+            return this.checks;
+        }
+
+        public Object[] getContexts() {
+            return this.contexts;
+        }
     }
 }
