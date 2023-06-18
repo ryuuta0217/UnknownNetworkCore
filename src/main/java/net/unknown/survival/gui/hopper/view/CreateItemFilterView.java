@@ -33,50 +33,36 @@ package net.unknown.survival.gui.hopper.view;
 
 import net.kyori.adventure.text.Component;
 import net.unknown.core.builder.ItemStackBuilder;
-import net.unknown.core.define.DefinedItemStackBuilders;
-import net.unknown.core.define.DefinedTextColor;
-import net.unknown.core.gui.view.View;
-import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-public class ConfigureHopperPullView extends ConfigureHopperViewBase {
-    public ConfigureHopperPullView(ConfigureHopperViewBase parentView) {
+public class CreateItemFilterView extends ConfigureHopperViewBase {
+    public CreateItemFilterView(ConfigureHopperViewBase parentView) {
         super(parentView);
     }
 
     @Override
     public void initialize() {
-        this.getGui().getInventory().setItem(22, new ItemStackBuilder(this.getGui().getMixinHopper().isEnabledFindItem() ? Material.LIME_WOOL : Material.RED_WOOL)
-                .displayName(this.getGui().getMixinHopper().isEnabledFindItem() ? Component.text("吸引: 有効", DefinedTextColor.GREEN) : Component.text("", DefinedTextColor.RED))
-                .build());
-
-        if (this.getParentView() != null) {
-            this.getGui().getInventory().setItem(45, DefinedItemStackBuilders.leftArrow()
-                    .displayName(Component.text("戻る", DefinedTextColor.YELLOW))
+        for (int i = 0; i < this.getGui().getInventory().getSize(); i++) {
+            this.getGui().getInventory().setItem(i, new ItemStackBuilder(Material.RED_STAINED_GLASS_PANE)
+                    .displayName(Component.empty())
                     .build());
         }
+
+        // S L O T S
+        // 13: insert the item slot (copy item by clickEvent)
+        // 31: Equals Tag (use Material.NAME_TAG) right click to edit tag using BookGui TODO: create BookGui class
+        // 40: Confirm (create filter)
+        // 45: Back, cancel (to parent view)
     }
 
     @Override
     public void onClick(InventoryClickEvent event) {
-        switch (event.getSlot()) {
-            case 22 -> {
-                this.getGui().getMixinHopper().setEnabledFindItem(!this.getGui().getMixinHopper().isEnabledFindItem());
-                this.initialize();
-            }
 
-            case 45 -> {
-                if (this.getParentView() != null) {
-                    this.getGui().setView(this.getParentView());
-                }
-            }
-        }
     }
 
     @Override
     public void clearInventory() {
-        this.getGui().getInventory().clear(22);
-        this.getGui().getInventory().clear(45);
+
     }
 }

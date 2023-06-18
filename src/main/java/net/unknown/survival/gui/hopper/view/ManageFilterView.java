@@ -33,42 +33,56 @@ package net.unknown.survival.gui.hopper.view;
 
 import net.kyori.adventure.text.Component;
 import net.unknown.core.builder.ItemStackBuilder;
+import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.launchwrapper.hopper.FilterType;
-import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-public class ConfigureHopperView extends ConfigureHopperViewBase {
-    public ConfigureHopperView(ConfigureHopperGui gui) {
-        super(gui);
+public class ManageFilterView extends ConfigureHopperViewBase {
+    public ManageFilterView(ConfigureHopperViewBase parentView) {
+        super(parentView);
     }
 
     @Override
     public void initialize() {
-        this.getGui().getInventory().setItem(21, new ItemStackBuilder(Material.HOPPER)
-                .displayName(Component.text("アイテムの吸取設定", DefinedTextColor.YELLOW))
-                .lore(Component.text("ホッパーがアイテムを吸い取るかどうかや、吸取範囲を変更できます。", DefinedTextColor.GREEN),
-                        Component.text("ホッパーのアイテム吸取: ", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().isEnabledFindItem() ? Component.text("有効", DefinedTextColor.GREEN) : Component.text("無効", DefinedTextColor.RED)))
+        FilterType filterMode = this.getGui().getMixinHopper().getFilterMode();
+        boolean isFilterEnabled = this.getGui().getMixinHopper().isFilterEnabled();
+        this.getGui().getInventory().setItem(21, new ItemStackBuilder(isFilterEnabled ? Material.LIME_WOOL : Material.RED_WOOL)
+                .displayName(isFilterEnabled ? Component.text("フィルター: 有効 (モード: " + filterMode.getLocalizedName() + ")", DefinedTextColor.GREEN) : Component.text("フィルター: 無効", DefinedTextColor.RED))
                 .build());
 
         this.getGui().getInventory().setItem(23, new ItemStackBuilder(Material.COMPARATOR)
-                .displayName(Component.text("アイテムフィルター設定", DefinedTextColor.GREEN))
-                .lore(Component.text("ホッパーが吸い取るアイテムにフィルターを設定します。", DefinedTextColor.GREEN),
-                        Component.text("アイテムフィルター: ", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().isFilterEnabled() ? Component.text("有効", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().getFilterMode() == FilterType.WHITELIST ? Component.text(" (ホワイトリスト)", DefinedTextColor.AQUA) : Component.text(" (ブラックリスト)", DefinedTextColor.YELLOW)) : Component.text("無効", DefinedTextColor.RED)),
-                        Component.text("アイテムフィルター登録数: " + this.getGui().getMixinHopper().getFilters().size() + "件", DefinedTextColor.GREEN))
+                .displayName(Component.text("フィルターの管理", DefinedTextColor.GREEN))
                 .build());
+
+        if (this.getParentView() != null) {
+            this.getGui().getInventory().setItem(45, DefinedItemStackBuilders.leftArrow()
+                    .displayName(Component.text("戻る", DefinedTextColor.YELLOW))
+                    .build());
+        }
     }
 
     @Override
     public void onClick(InventoryClickEvent event) {
         switch (event.getSlot()) {
             case 21 -> {
-                this.getGui().setView(new ConfigureHopperPullView(this));
+                int nextMode = ((this.getGui().getMixinHopper().getFilterMode().ordinal() + 1) % 3);
+                this.getGui().getMixinHopper().setFilterMode(FilterType.values()[nextMode]);
+                this.getGui().getView().clearInventory();
+                this.getGui().getView().initialize();
             }
 
             case 23 -> {
-                this.getGui().setView(new ConfigureHopperFilterView(this));
+                this.getGui().getView().clearInventory();
+                this.getGui().setView(new FiltersView(this));
+                this.getGui().getView().initialize();
+            }
+
+            case 45 -> {
+                this.getGui().getView().clearInventory();
+                this.getGui().setView(this.getParentView());
+                this.getGui().getView().initialize();
             }
         }
     }
@@ -77,5 +91,6 @@ public class ConfigureHopperView extends ConfigureHopperViewBase {
     public void clearInventory() {
         this.getGui().getInventory().clear(21);
         this.getGui().getInventory().clear(23);
+        this.getGui().getInventory().clear(45);
     }
 }
