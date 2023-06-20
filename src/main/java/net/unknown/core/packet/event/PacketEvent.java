@@ -29,42 +29,44 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.managers;
+package net.unknown.core.packet.event;
 
-import net.minecraft.Util;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.unknown.core.packet.event.PacketReceivedEvent;
-import net.unknown.core.packet.listener.IncomingPacketListener;
-import net.unknown.core.packet.PacketManager;
-import net.unknown.survival.data.PlayerData;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerPlayer;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 
-public class AFKManager {
-    private static boolean INITIALIZED = false;
-    private static AFKManager INSTANCE = null;
+public class PacketEvent<P extends Packet<?>> implements Cancellable {
 
-    public static void initialize() {
-        if (!INITIALIZED) {
-            INSTANCE = new AFKManager();
-            INITIALIZED = true;
-        } else {
-            throw new IllegalStateException("AFKManager is already initialized.");
-        }
+    private final ServerPlayer player;
+    private final P packet;
+
+    private boolean cancelled = false;
+
+    public PacketEvent(ServerPlayer player, P packet) {
+        this.player = player;
+        this.packet = packet;
     }
 
-    private final MoveListener moveListener = new MoveListener();
-
-    public AFKManager() {
-        PacketManager.getInstance().registerIncomingC2SListener(ServerboundMovePlayerPacket.class, this.moveListener);
+    protected ServerPlayer getMinecraftPlayer() {
+        return player;
     }
 
-    public static class MoveListener extends IncomingPacketListener<ServerboundMovePlayerPacket> {
-        public MoveListener() {
-            super(false);
-        }
+    protected Player getBukkitPlayer() {
+        return player.getBukkitEntity();
+    }
 
-        @Override
-        public void onPacketReceived(PacketReceivedEvent<ServerboundMovePlayerPacket> event) {
-            PlayerData.of(event.getPlayer()).getSessionData().setLastActionTime(Util.getMillis());
-        }
+    protected P getPacket() {
+        return this.packet;
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return this.cancelled;
+    }
+
+    @Override
+    public void setCancelled(boolean cancel) {
+        this.cancelled = cancel;
     }
 }

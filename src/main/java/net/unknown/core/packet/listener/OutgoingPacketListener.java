@@ -29,25 +29,18 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.events.interfaces;
+package net.unknown.core.packet.listener;
 
 import net.minecraft.network.protocol.Packet;
-import net.unknown.core.events.PacketReceivedEvent;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.unknown.core.packet.event.PacketSendingEvent;
 
-public abstract class PacketListener<P extends Packet<?>> {
-    private final boolean ignoreCancelled;
+public abstract class OutgoingPacketListener<P extends Packet<ClientGamePacketListener>> extends PacketListener<P> {
+    public OutgoingPacketListener() {}
 
-    public PacketListener() {
-        this.ignoreCancelled = true; // defaults ignore cancelled packets to call
+    public OutgoingPacketListener(boolean ignoreCancelled) {
+        super(ignoreCancelled);
     }
 
-    public PacketListener(boolean ignoreCancelled) {
-        this.ignoreCancelled = ignoreCancelled;
-    }
-
-    public boolean isIgnoreCancelled() {
-        return this.ignoreCancelled;
-    }
-
-    public abstract void onPacketReceived(PacketReceivedEvent<P> event);
+    public abstract void onSendingPacket(PacketSendingEvent<P> event);
 }

@@ -29,16 +29,17 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.managers;
+package net.unknown.core.packet;
 
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPipeline;
+import io.netty.channel.*;
 import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.server.level.ServerPlayer;
-import net.unknown.core.events.PacketReceivedEvent;
-import net.unknown.core.events.interfaces.PacketListener;
+import net.unknown.core.packet.event.PacketReceivedEvent;
+import net.unknown.core.packet.event.PacketSendingEvent;
+import net.unknown.core.packet.listener.IncomingPacketListener;
+import net.unknown.core.packet.listener.OutgoingPacketListener;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -55,7 +56,8 @@ import java.util.Set;
 public class PacketManager implements Listener {
     private static final Logger LOGGER = LoggerFactory.getLogger("UNC/PacketManager");
     private static final PacketManager INSTANCE = new PacketManager();
-    private final Map<String, Set<PacketListener<?>>> REGISTERED_LISTENERS = new HashMap<>();
+    private final Map<String, Set<IncomingPacketListener<?>>> REGISTERED_INCOMING_C2S_LISTENERS = new HashMap<>();
+    private final Map<String, Set<OutgoingPacketListener<?>>> REGISTERED_OUTGOING_S2C_LISTENERS = new HashMap<>();
 
     protected PacketManager() {
     }
@@ -64,17 +66,36 @@ public class PacketManager implements Listener {
         return INSTANCE;
     }
 
-    public <P extends Packet<?>> void registerListener(Class<P> packetClass, PacketListener<P> listener) {
-        if (!REGISTERED_LISTENERS.containsKey(packetClass.getName())) {
-            REGISTERED_LISTENERS.put(packetClass.getName(), new HashSet<>());
+    public <P extends Packet<ServerGamePacketListener>> void registerIncomingC2SListener(Class<P> packetClass, IncomingPacketListener<P> listener) {
+        if (!REGISTERED_INCOMING_C2S_LISTENERS.containsKey(packetClass.getName())) {
+            REGISTERED_INCOMING_C2S_LISTENERS.put(packetClass.getName(), new HashSet<>());
         }
 
-        REGISTERED_LISTENERS.get(packetClass.getName()).add(listener);
+        REGISTERED_INCOMING_C2S_LISTENERS.get(packetClass.getName()).add(listener);
     }
 
-    public <P extends Packet<?>> boolean unregisterListener(Class<P> packetClass, PacketListener<P> listener) {
-        if (REGISTERED_LISTENERS.containsKey(packetClass.getName())) {
-            Set<PacketListener<?>> listeners = REGISTERED_LISTENERS.get(packetClass.getName());
+    public <P extends Packet<ServerGamePacketListener>> boolean unregisterIncomingC2SListener(Class<P> packetClass, IncomingPacketListener<P> listener) {
+        if (REGISTERED_INCOMING_C2S_LISTENERS.containsKey(packetClass.getName())) {
+            Set<IncomingPacketListener<?>> listeners = REGISTERED_INCOMING_C2S_LISTENERS.get(packetClass.getName());
+            if (listeners.contains(listener)) {
+                listeners.remove(listener);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public <P extends Packet<ClientGamePacketListener>> void registerOutgoingS2CListener(Class<P> packetClass, OutgoingPacketListener<P> listener) {
+        if (!REGISTERED_OUTGOING_S2C_LISTENERS.containsKey(packetClass.getName())) {
+            REGISTERED_OUTGOING_S2C_LISTENERS.put(packetClass.getName(), new HashSet<>());
+        }
+
+        REGISTERED_OUTGOING_S2C_LISTENERS.get(packetClass.getName()).add(listener);
+    }
+
+    public <P extends Packet<ClientGamePacketListener>> boolean unregisterOutgoingS2CListener(Class<P> packetClass, OutgoingPacketListener<P> listener) {
+        if (REGISTERED_OUTGOING_S2C_LISTENERS.containsKey(packetClass.getName())) {
+            Set<OutgoingPacketListener<?>> listeners = REGISTERED_OUTGOING_S2C_LISTENERS.get(packetClass.getName());
             if (listeners.contains(listener)) {
                 listeners.remove(listener);
                 return true;
@@ -88,12 +109,29 @@ public class PacketManager implements Listener {
         ServerPlayer player = ((CraftPlayer) event.getPlayer()).getHandle();
         ChannelDuplexHandler packetHandler = new ChannelDuplexHandler() {
             @Override
+            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+                if (msg instanceof Packet packet) {
+                    PacketSendingEvent event = new PacketSendingEvent(player, packet);
+                    if (REGISTERED_OUTGOING_S2C_LISTENERS.containsKey(packet.getClass().getName())) {
+                        REGISTERED_OUTGOING_S2C_LISTENERS.get(packet.getClass().getName()).forEach(listener -> {
+                            if (listener.isIgnoreCancelled() && event.isCancelled()) return;
+                            listener.onSendingPacket(event);
+                        });
+                    }
+                    if (event.isCancelled()) return;
+                } else {
+                    LOGGER.info("PacketManager detected unknown instance packet: " + msg.getClass().getName());
+                }
+                super.write(ctx, msg, promise);
+            }
+
+            @Override
             public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
                 //long start = System.nanoTime();
                 if (msg instanceof Packet packet) {
                     PacketReceivedEvent event = new PacketReceivedEvent(player, packet);
-                    if (REGISTERED_LISTENERS.containsKey(packet.getClass().getName())) {
-                        REGISTERED_LISTENERS.get(packet.getClass().getName()).forEach(listener -> {
+                    if (REGISTERED_INCOMING_C2S_LISTENERS.containsKey(packet.getClass().getName())) {
+                        REGISTERED_INCOMING_C2S_LISTENERS.get(packet.getClass().getName()).forEach(listener -> {
                             if (listener.isIgnoreCancelled() && event.isCancelled()) return;
                             listener.onPacketReceived(event);
                         });
@@ -110,12 +148,12 @@ public class PacketManager implements Listener {
             }
         };
         ChannelPipeline pipeline = player.connection.connection.channel.pipeline();
-        pipeline.addBefore("packet_handler", player.getGameProfile().getName(), packetHandler);
+        pipeline.addAfter("encoder", "UNC_PacketHandler#" + player.getGameProfile().getName(), packetHandler);
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Channel c = ((CraftPlayer) event.getPlayer()).getHandle().connection.connection.channel;
-        c.eventLoop().submit(() -> c.pipeline().remove(event.getPlayer().getName()));
+        c.eventLoop().submit(() -> c.pipeline().remove("UNC_PacketHandler#" + event.getPlayer().getName()));
     }
 }
