@@ -29,44 +29,26 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.events;
+package net.unknown.core.packet.event;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
 
-public class PacketReceivedEvent<P extends Packet<?>> implements Cancellable {
-
-    private final ServerPlayer sender;
-    private final P packet;
-
-    private boolean cancelled = false;
-
-    public PacketReceivedEvent(ServerPlayer sender, P receivedPacket) {
-        this.sender = sender;
-        this.packet = receivedPacket;
+public class PacketSendingEvent<P extends Packet<?>> extends PacketEvent<P> {
+    public PacketSendingEvent(ServerPlayer receiver, P sendingPacket) {
+        super(receiver, sendingPacket);
     }
 
-    public ServerPlayer getSender() {
-        return sender;
+    public ServerPlayer getReceiver() {
+        return this.getMinecraftPlayer();
     }
 
     public Player getPlayer() {
-        return sender.getBukkitEntity();
+        return this.getBukkitPlayer();
     }
 
     public P getPacket() {
-        return this.packet;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return this.cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
+        return super.getPacket();
     }
 }

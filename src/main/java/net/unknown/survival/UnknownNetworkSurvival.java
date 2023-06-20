@@ -126,8 +126,7 @@ public class UnknownNetworkSurvival {
             getLogger().info("Successfully Bootstrapped!");
             ListenerManager.registerListener(new BlockDisassembler());
             ListenerManager.registerListener(new ConfigureHopperGui.Listener());
-            ListenerManager.registerListener(new ChestLinkStick());
-            ListenerManager.registerListener(new ChestLinkProtectionListener());
+            ListenerManager.registerListener(new ChestLink());
         }
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");

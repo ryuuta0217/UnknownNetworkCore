@@ -29,42 +29,18 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.managers;
+package net.unknown.core.packet.listener;
 
-import net.minecraft.Util;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.unknown.core.packet.event.PacketReceivedEvent;
-import net.unknown.core.packet.listener.IncomingPacketListener;
-import net.unknown.core.packet.PacketManager;
-import net.unknown.survival.data.PlayerData;
 
-public class AFKManager {
-    private static boolean INITIALIZED = false;
-    private static AFKManager INSTANCE = null;
+public abstract class IncomingPacketListener<P extends Packet<ServerGamePacketListener>> extends PacketListener<P> {
+    public IncomingPacketListener() {}
 
-    public static void initialize() {
-        if (!INITIALIZED) {
-            INSTANCE = new AFKManager();
-            INITIALIZED = true;
-        } else {
-            throw new IllegalStateException("AFKManager is already initialized.");
-        }
+    public IncomingPacketListener(boolean ignoreCancelled) {
+        super(ignoreCancelled);
     }
 
-    private final MoveListener moveListener = new MoveListener();
-
-    public AFKManager() {
-        PacketManager.getInstance().registerIncomingC2SListener(ServerboundMovePlayerPacket.class, this.moveListener);
-    }
-
-    public static class MoveListener extends IncomingPacketListener<ServerboundMovePlayerPacket> {
-        public MoveListener() {
-            super(false);
-        }
-
-        @Override
-        public void onPacketReceived(PacketReceivedEvent<ServerboundMovePlayerPacket> event) {
-            PlayerData.of(event.getPlayer()).getSessionData().setLastActionTime(Util.getMillis());
-        }
-    }
+    public abstract void onPacketReceived(PacketReceivedEvent<P> event);
 }

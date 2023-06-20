@@ -48,6 +48,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 public class HomesView extends PaginationView<Home, HomeGui> {
     private final HomeGroupsView homeGroupsView;
+    private final HomeGroup homeGroup;
 
     public HomesView(HomeGui gui, HomeGroupsView homeGroupsView, HomeGroup homeGroup) {
         super(gui,
@@ -64,14 +65,19 @@ public class HomesView extends PaginationView<Home, HomeGui> {
                 true,
                 true);
         this.homeGroupsView = homeGroupsView;
+        this.homeGroup = homeGroup;
     }
 
     @Override
     public void onElementButtonClicked(InventoryClickEvent event, Home home) {
-        // TODO: SHIFT_RIGHT_CLICK TO REMOVE HOME
-        home.teleportPlayer((Player) event.getWhoClicked());
-        event.getWhoClicked().closeInventory();
-        MessageUtil.sendMessage((Player) event.getWhoClicked(), "ホーム " + home.name() + " にテレポートしました (GUI)");
+        if (event.isShiftClick() && event.isRightClick()) {
+            this.homeGroup.removeHome(home);
+            NewMessageUtil.sendMessage(event.getWhoClicked(), "ホーム " + home.name() + " を削除しました");
+        } else {
+            home.teleportPlayer((Player) event.getWhoClicked());
+            event.getWhoClicked().closeInventory();
+            NewMessageUtil.sendMessage((Player) event.getWhoClicked(), "ホーム " + home.name() + " にテレポートしました (GUI)");
+        }
     }
 
     @Override

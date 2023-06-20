@@ -33,7 +33,6 @@ package net.unknown.survival.gui.hopper.view;
 
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -48,10 +47,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.Iterator;
 
-public class ConfigureHopperFilterManageView extends PaginationView<Filter, ConfigureHopperGui> {
+public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> {
     private final ConfigureHopperViewBase parentView;
 
-    public ConfigureHopperFilterManageView(ConfigureHopperViewBase parentView) {
+    public FiltersView(ConfigureHopperViewBase parentView) {
         super(parentView.getGui(), parentView.getGui().getMixinHopper().getFilters(), (filter) -> {
             ItemStack viewItem = ItemStack.EMPTY;
             if (filter instanceof ItemFilter itemFilter) {

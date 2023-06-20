@@ -56,6 +56,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.regex.Pattern;
 
+@Deprecated(forRemoval = true)
 public class MessageUtil {
     private static final String PREFIX = "§7[§6§lU.N.§r§7] §r";
     private static final Component PREFIX_ADVENTURE_COMPONENT = Component.empty()

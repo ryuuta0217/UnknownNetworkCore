@@ -42,7 +42,7 @@ import net.unknown.core.commands.Commands;
 import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.managers.ListenerManager;
-import net.unknown.core.managers.PacketManager;
+import net.unknown.core.packet.PacketManager;
 import net.unknown.core.managers.TrashManager;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.tab.TabListPingManager;

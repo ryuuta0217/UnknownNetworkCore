@@ -37,7 +37,7 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.gui.view.View;
 import net.unknown.launchwrapper.hopper.IMixinHopperBlockEntity;
-import net.unknown.survival.gui.hopper.view.ConfigureHopperView;
+import net.unknown.survival.gui.hopper.view.ManageHopperView;
 import org.bukkit.craftbukkit.v1_20_R1.block.CraftHopper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -50,7 +50,7 @@ import org.bukkit.inventory.EquipmentSlot;
 public class ConfigureHopperGui extends GuiBase {
     private final HopperBlockEntity hopper;
     private final IMixinHopperBlockEntity mixinHopper;
-    private View view = new ConfigureHopperView(this);
+    private View view = new ManageHopperView(this);
 
     /*
      *  0  1  2  3  4  5  6  7  8
