@@ -76,7 +76,10 @@ public class PlayerJoinListener implements Listener {
         long hours = (time / (1000 * 60 * 60)) % 24;
         long minutes = (time / (1000 * 60)) % 60;
         long seconds = (time / 1000) % 60;
-        System.out.println("days=" + days + ", hours=" + hours + ", minutes=" + minutes + ", seconds=" + seconds);
-        return (days > 0 ? days + "日" : "") + (hours > 0 ? hours + "時間" : "") + minutes + "分" + seconds + "秒";
+        return (days > 0 ? days + "日" : "") + (hours > 0 ? getZeroPaddedString(hours) + "時間" : "") + getZeroPaddedString(minutes) + "分" + getZeroPaddedString(seconds) + "秒";
+    }
+
+    private static String getZeroPaddedString(long num) {
+        return num < 10 ? "0" + num : String.valueOf(num);
     }
 }
