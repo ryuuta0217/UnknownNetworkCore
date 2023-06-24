@@ -31,9 +31,9 @@
 
 package net.unknown.survival.data;
 
-import net.unknown.core.configurations.Config;
+import net.unknown.core.configurations.ConfigurationBase;
 
-public class ProtectionGroups extends Config {
+public class ProtectionGroups extends ConfigurationBase {
     public ProtectionGroups() {
         super("protection_groups.yml", false, "ProtectionGroups");
     }

@@ -39,33 +39,38 @@ import java.io.File;
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public abstract class Config {
-    private final Logger LOGGER;
-    private final String FILE_NAME;
-    private final File FILE;
-    private FileConfiguration CONFIG;
+public abstract class ConfigurationBase {
+    private final Logger logger;
+    private final String configurationFileName;
+    private final File configurationFile;
+    private FileConfiguration configuration;
 
-    public Config(String fileName, boolean ifNotExistsExtractFromJar, String loggerName) {
+    public ConfigurationBase(String fileName, boolean ifNotExistsExtractFromJar, String loggerName) {
         this(fileName, ifNotExistsExtractFromJar, loggerName, '.');
     }
 
-    public Config(String fileName, boolean ifNotExistsExtractFromJar, String loggerName, char pathSeparator) {
-        this.FILE_NAME = fileName;
-        this.FILE = new File(UnknownNetworkCore.getInstance().getDataFolder(), FILE_NAME);
-        this.LOGGER = Logger.getLogger(loggerName);
+    public ConfigurationBase(String fileName, boolean ifNotExistsExtractFromJar, String loggerName, char pathSeparator) {
+        this(new File(UnknownNetworkCore.getInstance().getDataFolder(), fileName), ifNotExistsExtractFromJar, loggerName, pathSeparator);
+    }
 
-        if (!FILE.exists()) {
-            if (ifNotExistsExtractFromJar) UnknownNetworkCore.getInstance().saveResource(FILE_NAME, false);
+
+    public ConfigurationBase(File file, boolean ifNotExistsExtractFromJar, String loggerName, char pathSeparator) {
+        this.configurationFileName = file.getName();
+        this.configurationFile = file;
+        this.logger = Logger.getLogger(loggerName);
+
+        if (!configurationFile.exists()) {
+            if (ifNotExistsExtractFromJar) UnknownNetworkCore.getInstance().saveResource(configurationFileName, false);
             else {
-                if (!FILE.getParentFile().exists()) {
-                    if (!FILE.getParentFile().mkdirs())
-                        LOGGER.severe("フォルダー " + FILE.getParentFile().getName() + " を作成できませんでした");
+                if (!configurationFile.getParentFile().exists()) {
+                    if (!configurationFile.getParentFile().mkdirs())
+                        logger.severe("フォルダー " + configurationFile.getParentFile().getName() + " を作成できませんでした");
                 }
 
                 try {
-                    if (!FILE.createNewFile()) LOGGER.severe(FILE_NAME + " を作成できませんでした");
+                    if (!configurationFile.createNewFile()) logger.severe(configurationFileName + " を作成できませんでした");
                 } catch (IOException e) {
-                    LOGGER.warning(FILE_NAME + " の作成に失敗しました: " + e.getLocalizedMessage());
+                    logger.warning(configurationFileName + " の作成に失敗しました: " + e.getLocalizedMessage());
                     return;
                 }
             }
@@ -73,31 +78,31 @@ public abstract class Config {
 
         // TODO Use FileConfigurationOptions#pathSeparator(char) to allows contains dot<.> values
         // TODO this.CONFIG.options().pathSeparator(pathSeparator);
-        this.CONFIG = YamlConfiguration.loadConfiguration(FILE);
+        this.configuration = YamlConfiguration.loadConfiguration(configurationFile);
         onLoad();
     }
 
     public FileConfiguration getConfig() {
-        return CONFIG;
+        return configuration;
     }
 
     public Logger getLogger() {
-        return LOGGER;
+        return logger;
     }
 
     public File getFile() {
-        return FILE;
+        return configurationFile;
     }
 
     public String getFileName() {
-        return FILE_NAME;
+        return configurationFileName;
     }
 
     public synchronized void save() {
         try {
-            CONFIG.save(FILE);
+            configuration.save(configurationFile);
         } catch (IOException e) {
-            LOGGER.severe(FILE_NAME + " の保存に失敗しました: " + e.getLocalizedMessage());
+            logger.severe(configurationFileName + " の保存に失敗しました: " + e.getLocalizedMessage());
         }
     }
 

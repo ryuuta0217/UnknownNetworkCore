@@ -33,7 +33,7 @@ package net.unknown.survival.data;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCore;
-import net.unknown.core.configurations.Config;
+import net.unknown.core.configurations.ConfigurationBase;
 import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
@@ -59,7 +59,7 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PlayerData extends Config {
+public class PlayerData extends ConfigurationBase {
     private static final int VERSION = 3;
     private static final Map<UUID, PlayerData> PLAYER_DATA_MAP = new HashMap<>();
     private final UUID uniqueId;
