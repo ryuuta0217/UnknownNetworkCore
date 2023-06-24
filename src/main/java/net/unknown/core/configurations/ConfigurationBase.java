@@ -54,7 +54,7 @@ public abstract class ConfigurationBase {
     }
 
 
-    public ConfigurationBase(File file, boolean ifNotExistsExtractFromJar, String loggerName, char pathSeparator) {
+    public ConfigurationBase(File file, boolean ifNotExistsExtractFromJar, String loggerName, char configurationPathSeparator) {
         this.configurationFileName = file.getName();
         this.configurationFile = file;
         this.logger = Logger.getLogger(loggerName);
@@ -77,7 +77,7 @@ public abstract class ConfigurationBase {
         }
 
         // TODO Use FileConfigurationOptions#pathSeparator(char) to allows contains dot<.> values
-        // TODO this.CONFIG.options().pathSeparator(pathSeparator);
+        // TODO this.CONFIG.options().pathSeparator(configurationPathSeparator);
         this.configuration = YamlConfiguration.loadConfiguration(configurationFile);
         onLoad();
     }
