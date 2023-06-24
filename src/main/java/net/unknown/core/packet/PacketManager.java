@@ -41,6 +41,7 @@ import net.unknown.core.packet.event.PacketSendingEvent;
 import net.unknown.core.packet.listener.IncomingPacketListener;
 import net.unknown.core.packet.listener.OutgoingPacketListener;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -55,6 +56,7 @@ import java.util.Set;
 
 public class PacketManager implements Listener {
     private static final Logger LOGGER = LoggerFactory.getLogger("UNC/PacketManager");
+    private static final String PACKET_HANDLER_NAME_FORMAT = "UNC_PacketHandler#%player%";
     private static final PacketManager INSTANCE = new PacketManager();
     private final Map<String, Set<IncomingPacketListener<?>>> REGISTERED_INCOMING_C2S_LISTENERS = new HashMap<>();
     private final Map<String, Set<OutgoingPacketListener<?>>> REGISTERED_OUTGOING_S2C_LISTENERS = new HashMap<>();
@@ -148,12 +150,16 @@ public class PacketManager implements Listener {
             }
         };
         ChannelPipeline pipeline = player.connection.connection.channel.pipeline();
-        pipeline.addAfter("encoder", "UNC_PacketHandler#" + player.getGameProfile().getName(), packetHandler);
+        pipeline.addAfter("encoder", PacketManager.getPacketHandlerName(event.getPlayer().getName()), packetHandler);
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
         Channel c = ((CraftPlayer) event.getPlayer()).getHandle().connection.connection.channel;
-        c.eventLoop().submit(() -> c.pipeline().remove("UNC_PacketHandler#" + event.getPlayer().getName()));
+        c.eventLoop().submit(() -> c.pipeline().remove(PacketManager.getPacketHandlerName(event.getPlayer().getName())));
+    }
+
+    private static String getPacketHandlerName(String playerName) {
+        return PACKET_HANDLER_NAME_FORMAT.replace("%player%", playerName);
     }
 }
