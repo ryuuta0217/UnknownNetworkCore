@@ -122,7 +122,7 @@ public class PlayerData extends ConfigurationBase {
 
     public static void gc() {
         PLAYER_DATA_MAP.entrySet().removeIf(e -> {
-            if (Bukkit.getPlayer(e.getKey()) == null) {
+            if (!e.getValue().isOnline()) {
                 e.getValue().save();
                 return true;
             }
