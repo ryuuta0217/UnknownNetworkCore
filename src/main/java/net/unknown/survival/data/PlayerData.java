@@ -175,6 +175,7 @@ public class PlayerData extends ConfigurationBase {
     public synchronized void save() {
         this.homeData.save(this.getConfig());
         this.chatData.save(this.getConfig());
+        this.registries.save(this.getConfig());
         super.save();
     }
 
