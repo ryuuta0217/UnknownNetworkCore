@@ -121,7 +121,13 @@ public class PlayerData extends ConfigurationBase {
     }
 
     public static void gc() {
-        PLAYER_DATA_MAP.entrySet().removeIf(e -> Bukkit.getPlayer(e.getKey()) == null);
+        PLAYER_DATA_MAP.entrySet().removeIf(e -> {
+            if (Bukkit.getPlayer(e.getKey()) == null) {
+                e.getValue().save();
+                return true;
+            }
+            return false;
+        });
         System.gc();
     }
 
