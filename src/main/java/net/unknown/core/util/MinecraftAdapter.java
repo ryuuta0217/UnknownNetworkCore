@@ -130,6 +130,10 @@ public class MinecraftAdapter {
         return ((CraftWorld) world).getHandle();
     }
 
+    public static World world(Level level) {
+        return level.getWorld();
+    }
+
     public static net.minecraft.world.level.block.state.BlockState blockState(Block block) {
         return level(block.getLocation().getWorld()).getBlockState(blockPos(block.getLocation()));
     }
