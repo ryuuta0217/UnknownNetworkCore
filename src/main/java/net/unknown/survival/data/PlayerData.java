@@ -57,6 +57,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PlayerData extends ConfigurationBase {
+    static {
+        RunnableManager.runAsyncRepeating(PlayerData::gc, (20 * 60) * 30, (20 * 60) * 30); // Run gc() every 30 minutes
+    }
     private static final int VERSION = 3;
     private static final Map<UUID, PlayerData> PLAYER_DATA_MAP = new HashMap<>();
     private final UUID uniqueId;
@@ -83,11 +86,14 @@ public class PlayerData extends ConfigurationBase {
     }
 
     public static PlayerData of(UUID uniqueId) {
+        PlayerData pd;
         if (!PLAYER_DATA_MAP.containsKey(uniqueId)) {
-            PlayerData pd = new PlayerData(uniqueId);
+            pd = new PlayerData(uniqueId);
             PLAYER_DATA_MAP.put(uniqueId, pd);
+        } else {
+            pd = PLAYER_DATA_MAP.get(uniqueId);
         }
-        return PLAYER_DATA_MAP.get(uniqueId);
+        return pd;
     }
 
     public static Map<UUID, PlayerData> getAll() {
@@ -112,6 +118,11 @@ public class PlayerData extends ConfigurationBase {
             UUID uniqueId = UUID.fromString(file.getName().replace(".yml", ""));
             PLAYER_DATA_MAP.put(uniqueId, new PlayerData(uniqueId));
         }
+    }
+
+    public static void gc() {
+        PLAYER_DATA_MAP.entrySet().removeIf(e -> Bukkit.getPlayer(e.getKey()) == null);
+        System.gc();
     }
 
     private static UUID extractUniqueIdFromFileName(String fileName) {

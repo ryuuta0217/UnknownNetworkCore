@@ -96,7 +96,7 @@ public class UnknownNetworkSurvival {
         VOTIFIER_ENABLED = Bukkit.getPluginManager().getPlugin("Votifier") != null && Bukkit.getPluginManager().isPluginEnabled("Votifier");
 
         Warps.load();
-        PlayerData.loadExists();
+        //PlayerData.loadExists();
         CustomChannels.load();
         AntiVillagerLag.startLoopTask();
         PlayerDeathListener.load();
