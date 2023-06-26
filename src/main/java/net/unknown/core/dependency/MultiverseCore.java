@@ -29,7 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.dependency;
+package net.unknown.core.dependency;
 
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;

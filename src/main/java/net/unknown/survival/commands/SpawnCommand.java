@@ -47,7 +47,7 @@ import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.PlayerData;
-import net.unknown.survival.dependency.MultiverseCore;
+import net.unknown.core.dependency.MultiverseCore;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
