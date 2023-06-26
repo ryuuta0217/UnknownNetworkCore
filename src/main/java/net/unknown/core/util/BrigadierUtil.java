@@ -73,7 +73,7 @@ public class BrigadierUtil {
         }
     }
 
-    @Nonnull
+    
     public static <S, I, O> O getArgumentOrDefault(@Nonnull CommandContext<S> context, @Nonnull BiFunction<I, O, O> processor, @Nonnull Class<I> inArgType, @Nonnull String argName, O def) {
         if (isArgumentKeyExists(context, argName)) {
             try {
