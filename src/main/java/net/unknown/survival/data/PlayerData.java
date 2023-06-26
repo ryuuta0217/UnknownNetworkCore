@@ -128,7 +128,6 @@ public class PlayerData extends ConfigurationBase {
             }
             return false;
         });
-        System.gc();
     }
 
     private static UUID extractUniqueIdFromFileName(String fileName) {
