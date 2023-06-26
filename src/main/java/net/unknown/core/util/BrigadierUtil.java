@@ -78,8 +78,7 @@ public class BrigadierUtil {
         if (isArgumentKeyExists(context, argName)) {
             try {
                 I in = context.getArgument(argName, inArgType);
-                O out = processor.apply(in, def);
-                if (out != null) return out;
+                return processor.apply(in, def);
             } catch (IllegalArgumentException ignored) {}
         }
         return def;
