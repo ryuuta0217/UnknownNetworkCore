@@ -31,15 +31,16 @@
 
 package net.unknown.core.util;
 
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.LiteralContents;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
+import net.unknown.core.define.DefinedTextColor;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.spigotmc.SpigotConfig;
@@ -286,16 +287,16 @@ public class NewMessageUtil {
         }
     }
 
-    private static Component getPrefix(boolean lastSpace) {
-        return Component.empty()
-                .append(Component.literal("[").withStyle(ChatFormatting.GRAY))
-                .append(Component.literal("U.N.").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
-                .append(Component.literal("]").withStyle(ChatFormatting.GRAY))
-                .append(lastSpace ? Component.literal(" ") : Component.empty());
+    private static Component getPrefix(boolean lastSpace, boolean firstNewLine) {
+        return convertAdventure2Minecraft(getPrefixAdventure(lastSpace, firstNewLine));
     }
 
-    private static net.kyori.adventure.text.Component getPrefixAdventure(boolean lastSpace) {
-        return convertMinecraft2Adventure(getPrefix(lastSpace));
+    private static net.kyori.adventure.text.Component getPrefixAdventure(boolean lastSpace, boolean firstNewLine) {
+        return (firstNewLine ? net.kyori.adventure.text.Component.newline() : net.kyori.adventure.text.Component.empty())
+                .append(net.kyori.adventure.text.Component.text("[", DefinedTextColor.GRAY))
+                .append(net.kyori.adventure.text.Component.text("U.N.", DefinedTextColor.GOLD, TextDecoration.BOLD))
+                .append(net.kyori.adventure.text.Component.text("]", DefinedTextColor.GRAY))
+                .append(lastSpace ? net.kyori.adventure.text.Component.space() : net.kyori.adventure.text.Component.empty());
     }
 
     private static Component format(Component component) {
@@ -305,8 +306,10 @@ public class NewMessageUtil {
     // Root for format() method
     private static net.kyori.adventure.text.Component format(net.kyori.adventure.text.Component component) {
         return net.kyori.adventure.text.Component.empty()
-                .append(getPrefixAdventure(true))
-                .append(component.replaceText((builder) -> builder.match("\n").replacement(getPrefixAdventure(true))));
+                .append(getPrefixAdventure(true, false))
+                .append(component.replaceText((builder) -> {
+                    builder.matchLiteral("\n").replacement(getPrefixAdventure(true, true));
+                }));
     }
 
     public static Component convertAdventure2Minecraft(net.kyori.adventure.text.Component component) {
