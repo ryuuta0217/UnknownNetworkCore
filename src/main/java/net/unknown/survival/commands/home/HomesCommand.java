@@ -126,14 +126,10 @@ public class HomesCommand {
         });
 
         Component toShowMessage = Component.empty()
-                .append(MessageUtil.getMessagePrefixComponent())
-                .append(DefinedComponents.SPACE)
                 .append(header);
 
         for (Component content : contents) {
             toShowMessage = toShowMessage.append(DefinedComponents.NEW_LINE)
-                    .append(MessageUtil.getMessagePrefixComponent())
-                    .append(DefinedComponents.SPACE)
                     .append(content);
         }
 
