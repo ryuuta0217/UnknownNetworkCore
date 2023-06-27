@@ -40,6 +40,7 @@ import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
+import net.unknown.survival.commands.SuppressRaidCommand;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
@@ -121,6 +122,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new ProtectedAreaTestStick());
         ListenerManager.registerListener(new PlayerJoinListener());
         ListenerManager.registerListener(new MinecraftToDiscordMessageListener());
+        SuppressRaidCommand.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");
