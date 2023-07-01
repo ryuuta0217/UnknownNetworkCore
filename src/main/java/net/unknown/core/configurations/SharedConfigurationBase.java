@@ -29,17 +29,22 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.data;
+package net.unknown.core.configurations;
 
-import net.unknown.core.configurations.ConfigurationBase;
+import net.unknown.shared.SharedConstants;
 
-public class ProtectionGroups extends ConfigurationBase {
-    public ProtectionGroups() {
-        super("protection_groups.yml", false, "ProtectionGroups");
+import java.io.File;
+
+public abstract class SharedConfigurationBase extends ConfigurationBase {
+    public SharedConfigurationBase(String fileName, String loggerName) {
+        this(fileName, loggerName, '.');
     }
 
-    @Override
-    public void onLoad() {
+    public SharedConfigurationBase(String fileName, String loggerName, char configurationPathSeparator) {
+        this(new File(SharedConstants.DATA_FOLDER, fileName), loggerName, configurationPathSeparator);
+    }
 
+    public SharedConfigurationBase(File file, String loggerName, char configurationPathSeparator) {
+        super(file, false, loggerName, configurationPathSeparator);
     }
 }

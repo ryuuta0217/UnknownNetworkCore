@@ -66,5 +66,7 @@ public class Commands {
         FlyCommand.register(UnknownNetworkCore.getBrigadier());
 
         MenuCommand.register(UnknownNetworkCore.getBrigadier());
+
+        SuppressRaidCommand.register(UnknownNetworkCore.getBrigadier());
     }
 }

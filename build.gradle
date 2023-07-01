@@ -53,6 +53,7 @@ repositories {
     maven { url = "https://maven.enginehub.org/repo/" }
     maven { url = "https://jitpack.io" }
     maven { url = "https://repo.yncrypt.net/repository/unknown-network/" }
+    maven { url = "https://repo.onarandombox.com/content/groups/public/" } // Multiverse-(Core|Inventories|Portals|NetherPortals) repo
 }
 
 dependencies {
@@ -67,6 +68,7 @@ dependencies {
     compileOnly group: 'com.github.NuVotifier', name: 'NuVotifier', version: '+'
     implementation group: 'net.dv8tion', name: 'JDA', version: '+'
     implementation group: 'org.json', name: 'json', version: '+'
+    compileOnly group: 'com.onarandombox.multiversecore', name: 'Multiverse-Core', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
 }

@@ -47,6 +47,7 @@ import net.minecraft.world.phys.Vec3;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.dependency.MultiverseCore;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -89,7 +90,7 @@ public class TeleportWorldCommand {
             MessageUtil.sendErrorMessage(ctx.getSource(), "ワールド " + levelName + " は見つかりませんでした");
             return -1;
         }
-        Location spawnLoc = bukkitWorld.getSpawnLocation();
+        Location spawnLoc = MultiverseCore.getSpawnLocation(bukkitWorld);
         Vec3 position = BrigadierUtil.isArgumentKeyExists(ctx, "座標") ? Vec3Argument.getVec3(ctx, "座標") : new Vec3(spawnLoc.getX(), spawnLoc.getY(), spawnLoc.getZ());
         Vec2 rotation = BrigadierUtil.isArgumentKeyExists(ctx, "向き") ? RotationArgument.getRotation(ctx, "向き").getRotation(ctx.getSource()) : new Vec2(spawnLoc.getYaw(), spawnLoc.getPitch());
 
