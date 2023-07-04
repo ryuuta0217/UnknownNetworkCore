@@ -194,7 +194,7 @@ public class SkinCommand {
 
         PlayerSkinRepository skinRepository = SkinManager.getPlayerSkinRepository(executorPlayer.getUUID());
         if (skinRepository != null) {
-            if (!skinRepository.getRemoteSkin().equals(skinRepository.getOriginalSkin())) {
+            if (!skinRepository.getOriginalSkin().equals(skinRepository.getRemoteSkin())) { // 比較元をOriginalSkinにする。これは、RemoteSkinを取得した時に、強制的にOriginalSkinが書き換えられてしまうため。
                 skinRepository.setCustomSkin(null);
                 if (executorEntity.equals(ctx.getSource().getEntity())) {
                     NewMessageUtil.sendMessage(ctx.getSource(), "スキンを再読み込みしました");
