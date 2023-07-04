@@ -86,10 +86,10 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
     @Override
     public synchronized void save() {
         this.getConfig().set("last-seen-remote-skin", null);
-        this.lastSeenOriginalSkin.asConfig(this.getConfig().createSection("last-seen-remote-skin"));
+        if (this.lastSeenOriginalSkin != null) this.lastSeenOriginalSkin.asConfig(this.getConfig().createSection("last-seen-remote-skin"));
 
         this.getConfig().set("custom-skin", null);
-        this.customSkin.asConfig(this.getConfig().createSection("custom-skin"));
+        if (this.customSkin != null) this.customSkin.asConfig(this.getConfig().createSection("custom-skin"));
 
         this.getConfig().set("skin-history", null);
         this.skinHistory.forEach((timestamp, skin) -> skin.asConfig(this.getConfig().createSection("skin-history." + timestamp)));
