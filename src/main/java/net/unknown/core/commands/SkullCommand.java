@@ -31,6 +31,7 @@
 
 package net.unknown.core.commands;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -42,6 +43,9 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.enums.Permissions;
+import net.unknown.core.skin.PlayerSkinRepository;
+import net.unknown.core.skin.Skin;
+import net.unknown.core.skin.SkinManager;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Bukkit;
@@ -69,21 +73,25 @@ public class SkullCommand {
         String id = StringArgumentType.getString(ctx, "名前");
         int count = BrigadierUtil.getArgumentOrDefault(ctx, int.class, "個数", 1);
 
-        UUID uniqueId = Bukkit.getPlayerUniqueId(id);
-        if (uniqueId == null) {
-            NewMessageUtil.sendErrorMessage(ctx.getSource(), Component.text("プレイヤー " + id + " は見つかりませんでした"));
-            return 1;
-        }
-        OfflinePlayer player = Bukkit.getOfflinePlayer(uniqueId);
+        OfflinePlayer player = Bukkit.getOfflinePlayer(id);
+        PlayerSkinRepository skinRepository = SkinManager.getPlayerSkinReposiyory(player.getUniqueId());
 
         ItemStack playerHead = new ItemStackBuilder(Material.PLAYER_HEAD)
                 .custom(is -> {
                     is.setAmount(count);
                     SkullMeta meta = (SkullMeta) is.getItemMeta();
-                    meta.setOwningPlayer(player);
+                    if (skinRepository != null) {
+                        Skin lastOriginalSkin = skinRepository.getOriginalSkin();
+                        if (lastOriginalSkin != null) {
+                            PlayerProfile profile = player.getPlayerProfile();
+                            profile.setProperty(lastOriginalSkin.asProfileProperty());
+                            meta.setPlayerProfile(profile);
+                        }
+                    }
+
+                    if (!meta.hasOwner()) meta.setOwningPlayer(player);
                     is.setItemMeta(meta);
                 }).build();
-
 
         Inventory inv = ctx.getSource().getPlayerOrException().getBukkitEntity().getInventory();
         if (inv.firstEmpty() != -1) {

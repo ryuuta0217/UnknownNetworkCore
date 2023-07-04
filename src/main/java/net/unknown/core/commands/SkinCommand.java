@@ -34,103 +34,187 @@ package net.unknown.core.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
-import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.biome.BiomeManager;
-import net.unknown.UnknownNetworkCore;
+import net.minecraft.world.entity.Entity;
 import net.unknown.core.enums.Permissions;
-import net.unknown.core.managers.SkinManager;
-import net.unknown.core.util.MessageUtil;
+import net.unknown.core.skin.PlayerSkinRepository;
+import net.unknown.core.skin.Skin;
+import net.unknown.core.skin.SkinManager;
+import net.unknown.core.skin.SkinSource;
+import net.unknown.core.util.BrigadierUtil;
+import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Bukkit;
-
-import java.util.HashSet;
-import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import org.bukkit.OfflinePlayer;
 
 public class SkinCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("skin");
-        builder.requires(Permissions.COMMAND_SKIN::checkAndIsPlayer);
-        builder.then(Commands.argument("skinPlayerName", StringArgumentType.word())
-                .suggests(Suggestions.ALL_PLAYER_SUGGEST)
-                .executes(ctx -> {
-                    if (!(ctx.getSource().getEntity() instanceof ServerPlayer)) {
-                        MessageUtil.sendErrorMessage(ctx.getSource(), "プレイヤーが実行する必要があります。");
-                        return 1;
-                    }
-
-                    String skinPlayerName = StringArgumentType.getString(ctx, "skinPlayerName");
-                    UUID skinPlayerUniqueId = Bukkit.getPlayerUniqueId(skinPlayerName);
-                    if (skinPlayerUniqueId == null) {
-                        MessageUtil.sendErrorMessage(ctx.getSource(), "プレイヤー " + skinPlayerName + " は見つかりませんでした");
-                        return -1;
-                    }
-
-                    ServerPlayer player = ctx.getSource().getPlayerOrException();
-                    SkinManager.Skin skinData = SkinManager.getSkin(skinPlayerUniqueId);
-                    if (skinData == null) {
-                        MessageUtil.sendErrorMessage(ctx.getSource(), "データの取得中にエラーが発生しました");
-                        return -2;
-                    }
-
-                    SkinManager.setSkin(player.getBukkitEntity(), skinData);
-
-                    /*sendSelfUpdatePackets(player);
-                    sendOtherUpdatePackets(player);*/
-
-                    MessageUtil.sendMessage(ctx.getSource(), "スキンを変更しました");
-                    return 0;
-                }));
+        builder.requires(Permissions.COMMAND_SKIN::check);
+        builder.then(Commands.literal("set")
+                        .then(Commands.literal("from")
+                                .then(Commands.literal("player")
+                                        .then(Commands.argument("プレイヤー名", StringArgumentType.word())
+                                                .suggests(Suggestions.ALL_PLAYER_SUGGEST)
+                                                .requires(Permissions.COMMAND_SKIN::checkAndIsPlayer)
+                                                .executes(SkinCommand::setCustomSkinFromPlayer)
+                                                .then(Commands.literal("to")
+                                                        .requires(Permissions.COMMAND_SKIN::check)
+                                                        .then(Commands.argument("対象", EntityArgument.player())
+                                                                .executes(SkinCommand::setCustomSkinFromPlayer)))))
+                                .then(Commands.literal("string")
+                                        .then(Commands.argument("base64", StringArgumentType.string())
+                                                .then(Commands.argument("signature", StringArgumentType.string())
+                                                        .requires(Permissions.COMMAND_SKIN::checkAndIsPlayer)
+                                                        .executes(SkinCommand::setCustomSkinFromString)
+                                                        .then(Commands.literal("to")
+                                                                .requires(Permissions.COMMAND_SKIN::check)
+                                                                .then(Commands.argument("対象", EntityArgument.player())
+                                                                        .executes(SkinCommand::setCustomSkinFromString))))))))
+                .then(Commands.literal("reset")
+                        .requires(Permissions.COMMAND_SKIN::checkAndIsPlayer)
+                        .executes(SkinCommand::resetSkin)
+                        .then(Commands.literal("to")
+                                .requires(Permissions.COMMAND_SKIN::check)
+                                .then(Commands.argument("対象", EntityArgument.player())
+                                        .executes(SkinCommand::resetSkin))))
+                .then(Commands.literal("reload")
+                        .executes(SkinCommand::reloadSkin)
+                        .then(Commands.literal("to")
+                                .requires(Permissions.COMMAND_SKIN::check)
+                                .then(Commands.argument("対象", EntityArgument.player())
+                                        .executes(SkinCommand::reloadSkin))));
         dispatcher.register(builder);
     }
 
-    public static void sendSelfUpdatePackets(ServerPlayer player) {
-        ClientboundPlayerInfoRemovePacket toRemove = new ClientboundPlayerInfoRemovePacket(Stream.of(player).map(ServerPlayer::getUUID).collect(Collectors.toList()));
-        ClientboundPlayerInfoUpdatePacket toAdd = new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, player);
-        //this.connection.send(new ClientboundRespawnPacket(
-        // worldserver.dimensionTypeId(),
-        // worldserver.dimension(),
-        // BiomeManager.obfuscateSeed(worldserver.getSeed()),
-        // this.gameMode.getGameModeForPlayer(),
-        // this.gameMode.getPreviousGameModeForPlayer(),
-        // worldserver.isDebug(), worldserver.isFlat(), true, this.getLastDeathLocation()));
-        ClientboundRespawnPacket respawn = new ClientboundRespawnPacket(
-                player.serverLevel().dimensionTypeId(),
-                player.serverLevel().dimension(),
-                BiomeManager.obfuscateSeed(player.serverLevel().getSeed()),
-                player.gameMode.getGameModeForPlayer(),
-                player.gameMode.getPreviousGameModeForPlayer(),
-                player.serverLevel().isDebug(),
-                player.serverLevel().isFlat(),
-                (byte) 3,
-                player.getLastDeathLocation(),
-                player.getPortalCooldown());
-        ClientboundPlayerPositionPacket teleport = new ClientboundPlayerPositionPacket(
-                player.position().x(),
-                player.position().y(),
-                player.position().z(),
-                player.getRotationVector().y,
-                player.getRotationVector().x,
-                new HashSet<>(),
-                -1);
+    private static int setCustomSkinFromPlayer(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Entity executorEntity = BrigadierUtil.isArgumentKeyExists(ctx, "対象") ? EntityArgument.getPlayer(ctx, "対象") : ctx.getSource().getEntity();
+        if (!(executorEntity instanceof ServerPlayer executorPlayer)) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "プレイヤーが実行する必要があります。");
+            return 1;
+        }
 
-        player.connection.send(toRemove);
-        player.connection.send(toAdd);
-        player.connection.send(respawn);
-        player.connection.send(teleport);
+        String skinPlayerName = StringArgumentType.getString(ctx, "プレイヤー名");
+        OfflinePlayer skinPlayer = Bukkit.getOfflinePlayer(skinPlayerName);
+
+        PlayerSkinRepository skinData = SkinManager.getPlayerSkinReposiyory(skinPlayer.getUniqueId());
+        if (skinData == null) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "データの取得中にエラーが発生しました");
+            return 2;
+        }
+        Skin skin = skinData.getOriginalSkin();
+        if (skin != null) {
+            SkinManager.getPlayerSkinReposiyory(executorPlayer.getUUID()).setCustomSkin(skin);
+            if (executorEntity.equals(ctx.getSource().getEntity())) {
+                NewMessageUtil.sendMessage(ctx.getSource(), skinPlayerName + " のスキンに変更しました");
+                return 0;
+            } else {
+                NewMessageUtil.sendMessage(ctx.getSource(), executorPlayer.getName().getString() + " のスキンを " + skinPlayerName + " のスキンに変更しました");
+                NewMessageUtil.sendMessage(executorPlayer, ctx.getSource().getDisplayName().getString() + " によってスキンが " + skinPlayerName + " のスキンが変更されました");
+                return 0;
+            }
+        } else {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "スキンを変更できませんでした");
+            return 3;
+        }
     }
 
-    public static void sendOtherUpdatePackets(ServerPlayer updateTarget) {
-        Bukkit.getOnlinePlayers().forEach(p -> {
-            if (p.getUniqueId().equals(updateTarget.getUUID())) return;
-            p.hidePlayer(UnknownNetworkCore.getInstance(), updateTarget.getBukkitEntity());
-            p.showPlayer(UnknownNetworkCore.getInstance(), updateTarget.getBukkitEntity());
-        });
+    private static int setCustomSkinFromString(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Entity executorEntity = BrigadierUtil.isArgumentKeyExists(ctx, "対象") ? EntityArgument.getPlayer(ctx, "対象") : ctx.getSource().getEntity();
+        if (!(executorEntity instanceof ServerPlayer executorPlayer)) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "プレイヤーが実行する必要があります。");
+            return 1;
+        }
+
+        String base64 = StringArgumentType.getString(ctx, "base64");
+        String signature = StringArgumentType.getString(ctx, "signature");
+
+        Skin skin = new Skin(SkinSource.CUSTOM, base64, signature);
+        PlayerSkinRepository executorSkinRepository = SkinManager.getPlayerSkinReposiyory(executorPlayer.getUUID());
+        if (executorSkinRepository != null) {
+            executorSkinRepository.setCustomSkin(skin);
+            if (executorEntity.equals(ctx.getSource().getEntity())) {
+                NewMessageUtil.sendMessage(ctx.getSource(), "スキンを変更しました");
+                return 0;
+            } else {
+                NewMessageUtil.sendMessage(ctx.getSource(), executorPlayer.getName().getString() + " のスキンを変更しました");
+                NewMessageUtil.sendMessage(executorPlayer, ctx.getSource().getDisplayName().getString() + " によってスキンが変更されました");
+                return 0;
+            }
+        } else {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "スキンを変更できませんでした");
+            return 2;
+        }
+    }
+
+    private static int resetSkin(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Entity executorEntity = BrigadierUtil.isArgumentKeyExists(ctx, "対象") ? EntityArgument.getPlayer(ctx, "対象") : ctx.getSource().getEntity();
+        if (!(executorEntity instanceof ServerPlayer executorPlayer)) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "プレイヤーが実行する必要があります。");
+            return 1;
+        }
+
+        PlayerSkinRepository skinRepository = SkinManager.getPlayerSkinReposiyory(executorPlayer.getUUID());
+        if (skinRepository != null) {
+            if (skinRepository.getCustomSkin() != null) {
+                skinRepository.setCustomSkin(null);
+                if (executorEntity.equals(ctx.getSource().getEntity())) {
+                    NewMessageUtil.sendMessage(ctx.getSource(), "スキンをリセットしました");
+                    return 0;
+                } else {
+                    NewMessageUtil.sendMessage(ctx.getSource(), executorPlayer.getName().getString() + " のスキンをリセットしました");
+                    NewMessageUtil.sendMessage(executorPlayer, ctx.getSource().getDisplayName().getString() + " によってスキンがリセットされました");
+                    return 0;
+                }
+            } else {
+                if (executorEntity.equals(ctx.getSource().getEntity())) {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), "スキンはすでにオリジナルのものに設定されています");
+                    return 2;
+                } else {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), executorPlayer.getName().getString() + " のスキンはすでにオリジナルのものに設定されています");
+                    return 2;
+                }
+            }
+        } else {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "データの取得に失敗しました");
+            return 3;
+        }
+    }
+
+    private static int reloadSkin(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Entity executorEntity = BrigadierUtil.isArgumentKeyExists(ctx, "対象") ? EntityArgument.getPlayer(ctx, "対象") : ctx.getSource().getEntity();
+        if (!(executorEntity instanceof ServerPlayer executorPlayer)) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "プレイヤーが実行する必要があります。");
+            return 1;
+        }
+
+        PlayerSkinRepository skinRepository = SkinManager.getPlayerSkinReposiyory(executorPlayer.getUUID());
+        if (skinRepository != null) {
+            if (skinRepository.getRemoteSkin().equals(skinRepository.getOriginalSkin())) {
+                if (executorEntity.equals(ctx.getSource().getEntity())) {
+                    NewMessageUtil.sendMessage(ctx.getSource(), "スキンを再読み込みしました");
+                    return 0;
+                } else {
+                    NewMessageUtil.sendMessage(ctx.getSource(), executorPlayer.getName().getString() + " のスキンを再読み込みしました");
+                    NewMessageUtil.sendMessage(executorPlayer, ctx.getSource().getDisplayName().getString() + " によってスキンが再読み込みされました");
+                    return 0;
+                }
+            } else {
+                if (executorEntity.equals(ctx.getSource().getEntity())) {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), "すでに最新のスキンを使用しています。");
+                    return 2;
+                } else {
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), executorPlayer.getName().getString() + " はすでに最新のスキンを使用しています。");
+                    return 2;
+                }
+            }
+        } else {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "データの取得に失敗しました");
+            return 2;
+        }
     }
 }
