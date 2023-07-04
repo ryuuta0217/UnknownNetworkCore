@@ -52,86 +52,9 @@ import java.util.logging.Logger;
 public class SkinManager implements Listener {
     private static final Logger LOGGER = Logger.getLogger("UNC/SkinManager");
     public static final SkinManager INSTANCE = new SkinManager();
-    private static final Map<UUID, TreeMap<Long, Skin>> SKIN_HISTORIES = new HashMap<>(); // Only online players contained.
-    private static final Map<UUID, Map<String, Skin>> SAVED_SKINS = new HashMap<>();
-    private static final Map<UUID, Skin> CACHED_SKINS = new HashMap<>(); // Player's original (in Remote) skin cache.
-    private static final Map<UUID, Skin> CURRENT_SKINS = new HashMap<>(); // Player's current skins.
-
     private static final Map<UUID, PlayerSkinRepository> PLAYER_SKIN_REPOSITORIES = new HashMap<>();
 
     private SkinManager() {}
-
-    @Deprecated
-    public static void setSkin(Player player, Skin data) {
-        PlayerProfile profile = player.getPlayerProfile();
-        profile.getProperties().forEach(property -> {
-            if (property.getName().equals("textures")) {
-                cacheSkinData(player.getUniqueId(), new Skin(SkinSource.PLAYER_PROFILE, property.getValue(), property.getSignature()));
-            }
-        });
-        profile.setProperty(data.asProfileProperty());
-        player.setPlayerProfile(profile);
-        CURRENT_SKINS.put(player.getUniqueId(), data);
-    }
-
-    public static void setCustomSkin(Player player, Skin data) {
-        getPlayerSkinRepository(player.getUniqueId()).setCustomSkin(data);
-    }
-
-    @Deprecated
-    public static void resetSkin(Player player) {
-        PlayerProfile profile = player.getPlayerProfile();
-        profile.setProperty(SkinManager.getSkinInRemote(player.getUniqueId()).asProfileProperty());
-        player.setPlayerProfile(profile);
-        CURRENT_SKINS.remove(player.getUniqueId());
-    }
-
-    public static Skin getSkin(UUID uniqueId) {
-        return CACHED_SKINS.getOrDefault(uniqueId, SkinManager.getSkinInRemote(uniqueId));
-    }
-
-    @Deprecated
-    @Nullable
-    public static Skin getSkinInRemote(UUID uniqueId) {
-        HTTPUtil profileInfo = new HTTPUtil("GET", "https://sessionserver.mojang.com/session/minecraft/profile/" + uniqueId + "?unsigned=false");
-        try {
-            JSONObject profileData = (JSONObject) UnknownNetworkCore.getJsonParser().parse(profileInfo.request());
-            if (profileData.containsKey("properties")) {
-                JSONArray properties = (JSONArray) profileData.get("properties");
-                if (properties.size() > 0) {
-                    JSONObject property = (JSONObject) properties.get(0);
-                    String base64 = property.containsKey("value") ? property.get("value").toString() : "";
-                    String signature = property.containsKey("signature") ? property.get("signature").toString() : null;
-                    return cacheSkinData(uniqueId, new Skin(SkinSource.OFFICIAL, base64, signature));
-                }
-            }
-            return null;
-        } catch (ParseException e) {
-            LOGGER.warning("Failed to parse retrieved profile data: " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static void cacheSkinFromPlayerProfile(PlayerProfile profile) {
-        profile.getProperties().forEach(property -> {
-            if (property.getName().equals("textures")) {
-                cacheSkinData(profile.getId(), new Skin(SkinSource.PLAYER_PROFILE, property.getValue(), property.getSignature()));
-            }
-        });
-    }
-
-    private static Skin cacheSkinData(UUID uniqueId, Skin data) {
-        CACHED_SKINS.put(uniqueId, data);
-        return data;
-    }
-
-    public static boolean isSkinUpdated(UUID uniqueId, Skin skin) {
-        // When not contains skin in SKIN_HISTORIES, put skin.
-        if (!SKIN_HISTORIES.containsKey(uniqueId)) SKIN_HISTORIES.put(uniqueId, new TreeMap<>(Comparator.comparingLong(o -> o)));
-        TreeMap<Long, Skin> skinHistories = SKIN_HISTORIES.get(uniqueId);
-        return skinHistories.lastEntry().getValue().equals(skin);
-    }
 
     public synchronized static PlayerSkinRepository getPlayerSkinRepository(UUID uniqueId) {
         return PLAYER_SKIN_REPOSITORIES.computeIfAbsent(uniqueId, PlayerSkinRepository::new);
