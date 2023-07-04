@@ -205,7 +205,11 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
             ListenerManager.waitForEvent(PlayerJoinEvent.class, false, EventPriority.MONITOR, (e) -> {
                 return e.getPlayer().getUniqueId().equals(event.getUniqueId());
             }, (e) -> {
-                RunnableManager.runAsyncDelayed(() -> NewMessageUtil.sendMessage(e.getPlayer(), "スキンを変更しましたか？スキンが変更履歴に追加されました。"), 5);
+                if (e.getPlayer().hasPlayedBefore()) {
+                    RunnableManager.runAsyncDelayed(() -> NewMessageUtil.sendMessage(e.getPlayer(), "スキンが変更履歴に追加されました", false), 5);
+                } else {
+                    // Newbie is newer data.
+                }
             }, 3, ListenerManager.TimeType.SECONDS, () -> {
                 // nothing to do
             });
