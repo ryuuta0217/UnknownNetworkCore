@@ -56,6 +56,7 @@ public class CheckRun {
     @Nullable
     private final Conclusion conclusion;
     private final ZonedDateTime startedAt;
+    @Nullable
     private final ZonedDateTime completedAt;
     private final Output output;
     private final String name;
@@ -75,7 +76,7 @@ public class CheckRun {
         this.url = data.getString("url");
         this.conclusion = data.has("conclusion") && !data.isNull("conclusion") ? Conclusion.valueOf(data.getString("conclusion").toUpperCase()) : null;
         this.output = new Output(api, this, data.getJSONObject("output"));
-        this.completedAt = ZonedDateTime.parse(data.getString("completed_at"));
+        this.completedAt = data.has("completed_at") ? ZonedDateTime.parse(data.getString("completed_at")) : null;
         this.pullRequests = data.getJSONArray("pull_requests").toList()
                 .stream()
                 .filter(raw -> raw instanceof Map<?, ?>)
