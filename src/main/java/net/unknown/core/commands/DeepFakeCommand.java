@@ -71,7 +71,7 @@ public class DeepFakeCommand {
                                 return preLoginEvent.getUniqueId().equals(source.getUniqueId());
                             }, (preLoginEvent) -> {
                                 PlayerProfile profile = new CraftPlayerProfile(playerUniqueId, playerName);
-                                Skin skinData = SkinManager.getSkinInRemote(playerUniqueId);
+                                Skin skinData = SkinManager.getPlayerSkinRepository(playerUniqueId).getRemoteSkin();
                                 profile.setProperty(skinData.asProfileProperty());
                                 preLoginEvent.setPlayerProfile(profile);
                                 ListenerManager.waitForEvent(PlayerJoinEvent.class, false, EventPriority.MONITOR, (joinEvent) -> {
