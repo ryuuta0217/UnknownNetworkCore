@@ -60,20 +60,34 @@ import java.util.stream.Stream;
 public class PlayerSkinRepository extends SharedConfigurationBase {
     private final UUID ownerUniqueId;
     private Player owner;
-    private Skin lastSeenOriginalSkin = null;
-    private Skin customSkin = null;
+    private Skin lastSeenOriginalSkin;
+    private Skin customSkin;
     private TreeMap<Long, Skin> skinHistory;
 
     public PlayerSkinRepository(UUID owner) {
-        super("skins/" + owner.toString() + ".yml", "PlayerSkinRepository");
+        super("skins/" + owner + ".yml", "SkinRepository/" + owner);
         this.ownerUniqueId = owner;
         this.owner = Bukkit.getPlayer(this.ownerUniqueId);
     }
 
     @Override
     public void onLoad() {
-        if (this.getConfig().contains("last-seen-remote-skin")) this.lastSeenOriginalSkin = Skin.readFromConfig(this.getConfig().getConfigurationSection("last-seen-remote-skin"));
-        if (this.getConfig().contains("custom-skin")) this.customSkin = Skin.readFromConfig(this.getConfig().getConfigurationSection("custom-skin"));
+        long start = System.currentTimeMillis();
+        this.getLogger().info("Loading skin repository");
+
+        if (this.getConfig().contains("last-seen-remote-skin")) {
+            this.getLogger().info("Loading last seen remote skin...");
+            this.lastSeenOriginalSkin = Skin.readFromConfig(this.getConfig().getConfigurationSection("last-seen-remote-skin"));
+            this.getLogger().info("Loaded last seen remote skin! (" + this.lastSeenOriginalSkin + ")");
+        }
+
+        if (this.getConfig().contains("custom-skin")) {
+            this.getLogger().info("Loading custom skin...");
+            this.customSkin = Skin.readFromConfig(this.getConfig().getConfigurationSection("custom-skin"));
+            this.getLogger().info("Loaded custom skin! (" + this.customSkin + ")");
+        }
+
+        this.getLogger().info("Loading skin history...");
         if (this.skinHistory != null) this.skinHistory.clear();
         else this.skinHistory = new TreeMap<>(Comparator.comparingLong(t -> t));
         if (this.getConfig().contains("skin-history")) {
@@ -81,6 +95,10 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
                 this.skinHistory.put(Long.parseLong(timestamp), Skin.readFromConfig(this.getConfig().getConfigurationSection("skin-history." + timestamp)));
             });
         }
+        this.getLogger().info("Loaded skin history! (" + this.skinHistory.size() + " entries)");
+
+        long end = System.currentTimeMillis();
+        this.getLogger().info("Loaded skin repository! (" + (end - start) + "ms)");
     }
 
     @Override
@@ -209,14 +227,13 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
                 if (e.getPlayer().hasPlayedBefore()) {
                     RunnableManager.runAsyncDelayed(() -> NewMessageUtil.sendMessage(e.getPlayer(), "スキンが変更履歴に追加されました", false), 5);
                 } else {
-                    // Newbie is newer data.
+                    // Newbie is ignored - no need to notify, its no data is stored
                 }
             }, 3, ListenerManager.TimeType.SECONDS, () -> {
                 // nothing to do
             });
-            this.customSkin = null;
-        } else {
-            // If updated original skin, reset custom skin.
+            this.customSkin = null; // if skin updated, remove custom skin to proceed with the latest skin
+        } else if (this.customSkin != null) { // if not skin updated, custom skin is set, apply custom skin
             event.setPlayerProfile(this.applySkin(event.getPlayerProfile(), false));
         }
 
