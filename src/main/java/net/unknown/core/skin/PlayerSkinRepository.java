@@ -196,6 +196,7 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
     }
 
     public boolean isLatestSkinUsing(Skin skin) {
+        if (this.skinHistory.lastEntry() == null) return false;
         return this.skinHistory.lastEntry().getValue().equals(skin);
     }
 
