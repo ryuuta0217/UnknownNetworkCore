@@ -114,7 +114,7 @@ public class SkinCommand {
                 return 0;
             } else {
                 NewMessageUtil.sendMessage(ctx.getSource(), executorPlayer.getName().getString() + " のスキンを " + skinPlayerName + " のスキンに変更しました");
-                NewMessageUtil.sendMessage(executorPlayer, ctx.getSource().getDisplayName().getString() + " によってスキンが " + skinPlayerName + " のスキンが変更されました");
+                NewMessageUtil.sendMessage(executorPlayer, ctx.getSource().getDisplayName().getString() + " によってスキンが " + skinPlayerName + " のスキンに変更されました");
                 return 0;
             }
         } else {
