@@ -29,32 +29,36 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.managers;
+package net.unknown.core.skin;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
-import com.destroystokyo.paper.profile.ProfileProperty;
 import com.ryuuta0217.util.HTTPUtil;
 import net.unknown.UnknownNetworkCore;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.ParseException;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class SkinManager implements Listener {
     private static final Logger LOGGER = Logger.getLogger("UNC/SkinManager");
+    private static final Map<UUID, TreeMap<Long, Skin>> SKIN_HISTORIES = new HashMap<>(); // Only online players contained.
     private static final Map<UUID, Map<String, Skin>> SAVED_SKINS = new HashMap<>();
-    private static final Map<UUID, Skin> CACHED_SKINS = new HashMap<>();
-    private static final Map<UUID, Skin> CURRENT_SKINS = new HashMap<>();
+    private static final Map<UUID, Skin> CACHED_SKINS = new HashMap<>(); // Player's original (in Remote) skin cache.
+    private static final Map<UUID, Skin> CURRENT_SKINS = new HashMap<>(); // Player's current skins.
 
+    private static final Map<UUID, PlayerSkinRepository> PLAYER_SKIN_REPOSITORIES = new HashMap<>();
+
+    @Deprecated
     public static void setSkin(Player player, Skin data) {
         PlayerProfile profile = player.getPlayerProfile();
         profile.getProperties().forEach(property -> {
@@ -67,6 +71,11 @@ public class SkinManager implements Listener {
         CURRENT_SKINS.put(player.getUniqueId(), data);
     }
 
+    public static void setCustomSkin(Player player, Skin data) {
+        getPlayerSkinReposiyory(player.getUniqueId()).setCustomSkin(data);
+    }
+
+    @Deprecated
     public static void resetSkin(Player player) {
         PlayerProfile profile = player.getPlayerProfile();
         profile.setProperty(SkinManager.getSkinInRemote(player.getUniqueId()).asProfileProperty());
@@ -78,6 +87,7 @@ public class SkinManager implements Listener {
         return CACHED_SKINS.getOrDefault(uniqueId, SkinManager.getSkinInRemote(uniqueId));
     }
 
+    @Deprecated
     @Nullable
     public static Skin getSkinInRemote(UUID uniqueId) {
         HTTPUtil profileInfo = new HTTPUtil("GET", "https://sessionserver.mojang.com/session/minecraft/profile/" + uniqueId + "?unsigned=false");
@@ -113,25 +123,28 @@ public class SkinManager implements Listener {
         return data;
     }
 
-    @EventHandler
-    public void onLogin(AsyncPlayerPreLoginEvent event) {
-        if (CURRENT_SKINS.containsKey(event.getUniqueId())) {
-            PlayerProfile profile = event.getPlayerProfile();
-            profile.setProperty(CURRENT_SKINS.get(event.getUniqueId()).asProfileProperty());
-            event.setPlayerProfile(profile);
-        }
+    public static boolean isSkinUpdated(UUID uniqueId, Skin skin) {
+        // When not contains skin in SKIN_HISTORIES, put skin.
+        if (!SKIN_HISTORIES.containsKey(uniqueId)) SKIN_HISTORIES.put(uniqueId, new TreeMap<>(Comparator.comparingLong(o -> o)));
+        TreeMap<Long, Skin> skinHistories = SKIN_HISTORIES.get(uniqueId);
+        return skinHistories.lastEntry().getValue().equals(skin);
     }
 
-    public enum SkinSource {
-        OFFICIAL,
-        PLAYER_PROFILE,
-        LOCAL,
-        CUSTOM
+    public static PlayerSkinRepository getPlayerSkinReposiyory(UUID uniqueId) {
+        return PLAYER_SKIN_REPOSITORIES.computeIfAbsent(uniqueId, PlayerSkinRepository::new);
     }
 
-    public record Skin(SkinSource source, String base64, String signature) {
-        public ProfileProperty asProfileProperty() {
-            return new ProfileProperty("textures", base64, signature);
-        }
+    public static void gc() {
+        PLAYER_SKIN_REPOSITORIES.entrySet().removeIf(e -> Bukkit.getPlayer(e.getKey()) == null);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST) // Very early call needed, set LOWEST.
+    public void onPreLogin(AsyncPlayerPreLoginEvent event) {
+        SkinManager.getPlayerSkinReposiyory(event.getUniqueId()).onPlayerPreLogin(event);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        PLAYER_SKIN_REPOSITORIES.remove(event.getPlayer().getUniqueId());
     }
 }
