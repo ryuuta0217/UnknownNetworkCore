@@ -165,7 +165,7 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
 
     private PlayerProfile applySkin(PlayerProfile profile, boolean applyOriginalSkinAsFallback) {
         if (this.customSkin != null) {
-            profile.setProperty(this.lastSeenOriginalSkin.asProfileProperty());
+            profile.setProperty(this.customSkin.asProfileProperty());
         } else if (applyOriginalSkinAsFallback) {
             if (this.lastSeenOriginalSkin != null) {
                 profile.setProperty(this.lastSeenOriginalSkin.asProfileProperty());
