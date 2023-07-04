@@ -220,6 +220,8 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
     }
 
     public void onPlayerPreLogin(AsyncPlayerPreLoginEvent event) {
+        this.setLastSeenOriginalSkin(event.getPlayerProfile()); // Earlier saving of the original skin
+
         if (this.addSkinHistoryIfUpdated(event.getPlayerProfile())) { // if skin updated, add skin history
             ListenerManager.waitForEvent(PlayerJoinEvent.class, false, EventPriority.MONITOR, (e) -> {
                 return e.getPlayer().getUniqueId().equals(event.getUniqueId());
@@ -237,7 +239,6 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
             event.setPlayerProfile(this.applySkin(event.getPlayerProfile(), false));
         }
 
-        this.setLastSeenOriginalSkin(event.getPlayerProfile());
         RunnableManager.runAsync(this::save);
     }
 
