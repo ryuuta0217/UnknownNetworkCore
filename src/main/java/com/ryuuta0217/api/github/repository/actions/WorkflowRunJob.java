@@ -86,7 +86,7 @@ public class WorkflowRunJob {
         this.status = Status.valueOf(data.getString("status").toUpperCase());
         this.conclusion = data.has("conclusion") ? Conclusion.valueOf(data.getString("conclusion").toUpperCase()) : null;
         this.startedAt = ZonedDateTime.parse(data.getString("started_at"));
-        this.completedAt = ZonedDateTime.parse(data.getString("completed_at"));
+        this.completedAt = data.has("completed_at") ? ZonedDateTime.parse(data.getString("completed_at")) : null;
         this.checkRunUrl = data.getString("check_run_url");
         this.labels = data.getJSONArray("labels").toList()
                 .stream()
