@@ -60,10 +60,6 @@ public class SkinManager implements Listener {
         return PLAYER_SKIN_REPOSITORIES.computeIfAbsent(uniqueId, PlayerSkinRepository::new);
     }
 
-    public static void gc() {
-        PLAYER_SKIN_REPOSITORIES.entrySet().removeIf(e -> Bukkit.getPlayer(e.getKey()) == null);
-    }
-
     @EventHandler(priority = EventPriority.LOWEST) // Very early call needed, set LOWEST.
     public void onPreLogin(AsyncPlayerPreLoginEvent event) {
         SkinManager.getPlayerSkinRepository(event.getUniqueId()).onPlayerPreLogin(event);
