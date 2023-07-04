@@ -62,7 +62,7 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
     private Player owner;
     private Skin lastSeenOriginalSkin = null;
     private Skin customSkin = null;
-    private final TreeMap<Long, Skin> skinHistory = new TreeMap<>(Comparator.comparingLong(t -> t));
+    private TreeMap<Long, Skin> skinHistory;
 
     public PlayerSkinRepository(UUID owner) {
         super("skins/" + owner.toString() + ".yml", "PlayerSkinRepository");
@@ -74,7 +74,8 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
     public void onLoad() {
         if (this.getConfig().contains("last-seen-remote-skin")) this.lastSeenOriginalSkin = Skin.readFromConfig(this.getConfig().getConfigurationSection("last-seen-remote-skin"));
         if (this.getConfig().contains("custom-skin")) this.customSkin = Skin.readFromConfig(this.getConfig().getConfigurationSection("custom-skin"));
-        this.skinHistory.clear();
+        if (this.skinHistory != null) this.skinHistory.clear();
+        else this.skinHistory = new TreeMap<>(Comparator.comparingLong(t -> t));
         if (this.getConfig().contains("skin-history")) {
             this.getConfig().getConfigurationSection("skin-history").getKeys(false).forEach(timestamp -> {
                 this.skinHistory.put(Long.parseLong(timestamp), Skin.readFromConfig(this.getConfig().getConfigurationSection("skin-history." + timestamp)));
