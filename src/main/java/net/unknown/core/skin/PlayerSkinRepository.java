@@ -136,7 +136,7 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
                             .orElse(null);
                 }
             }
-        } catch(IOException | ParseException ignored) {}
+        } catch(IOException | ParseException | IllegalStateException ignored) {}
         if (remoteSkin != null) {
             this.lastSeenOriginalSkin = remoteSkin;
             this.addSkinHistoryIfUpdated(remoteSkin);
