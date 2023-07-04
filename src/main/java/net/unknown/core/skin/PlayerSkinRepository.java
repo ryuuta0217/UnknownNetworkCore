@@ -155,6 +155,7 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
     public void setCustomSkin(Skin skin) {
         this.customSkin = skin;
         this.applySkin();
+        RunnableManager.runAsync(this::save);
     }
 
     private void applySkin() {
@@ -214,13 +215,13 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
                 // nothing to do
             });
             this.customSkin = null;
-            RunnableManager.runAsyncDelayed(this::save, 20L * 3);
         } else {
             // If updated original skin, reset custom skin.
             event.setPlayerProfile(this.applySkin(event.getPlayerProfile(), false));
         }
 
         this.setLastSeenOriginalSkin(event.getPlayerProfile());
+        RunnableManager.runAsync(this::save);
     }
 
     private static Skin extractSkinFromProfile(PlayerProfile profile) {
