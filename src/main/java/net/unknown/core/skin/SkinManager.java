@@ -148,6 +148,7 @@ public class SkinManager implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerQuit(PlayerQuitEvent event) {
+        SkinManager.getPlayerSkinRepository(event.getPlayer().getUniqueId()).save();
         PLAYER_SKIN_REPOSITORIES.remove(event.getPlayer().getUniqueId());
     }
 }
