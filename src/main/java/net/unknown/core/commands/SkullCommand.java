@@ -55,8 +55,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SkullMeta;
 
-import java.util.UUID;
-
 public class SkullCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("skull");
@@ -74,7 +72,7 @@ public class SkullCommand {
         int count = BrigadierUtil.getArgumentOrDefault(ctx, int.class, "個数", 1);
 
         OfflinePlayer player = Bukkit.getOfflinePlayer(id);
-        PlayerSkinRepository skinRepository = SkinManager.getPlayerSkinReposiyory(player.getUniqueId());
+        PlayerSkinRepository skinRepository = SkinManager.getPlayerSkinRepository(player.getUniqueId());
 
         ItemStack playerHead = new ItemStackBuilder(Material.PLAYER_HEAD)
                 .custom(is -> {

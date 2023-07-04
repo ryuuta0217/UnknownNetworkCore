@@ -75,7 +75,7 @@ public class SkinManager implements Listener {
     }
 
     public static void setCustomSkin(Player player, Skin data) {
-        getPlayerSkinReposiyory(player.getUniqueId()).setCustomSkin(data);
+        getPlayerSkinRepository(player.getUniqueId()).setCustomSkin(data);
     }
 
     @Deprecated
@@ -133,7 +133,7 @@ public class SkinManager implements Listener {
         return skinHistories.lastEntry().getValue().equals(skin);
     }
 
-    public static PlayerSkinRepository getPlayerSkinReposiyory(UUID uniqueId) {
+    public synchronized static PlayerSkinRepository getPlayerSkinRepository(UUID uniqueId) {
         return PLAYER_SKIN_REPOSITORIES.computeIfAbsent(uniqueId, PlayerSkinRepository::new);
     }
 
@@ -143,7 +143,7 @@ public class SkinManager implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST) // Very early call needed, set LOWEST.
     public void onPreLogin(AsyncPlayerPreLoginEvent event) {
-        SkinManager.getPlayerSkinReposiyory(event.getUniqueId()).onPlayerPreLogin(event);
+        SkinManager.getPlayerSkinRepository(event.getUniqueId()).onPlayerPreLogin(event);
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

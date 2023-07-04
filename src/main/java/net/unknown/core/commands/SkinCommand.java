@@ -101,14 +101,14 @@ public class SkinCommand {
         String skinPlayerName = StringArgumentType.getString(ctx, "プレイヤー名");
         OfflinePlayer skinPlayer = Bukkit.getOfflinePlayer(skinPlayerName);
 
-        PlayerSkinRepository skinData = SkinManager.getPlayerSkinReposiyory(skinPlayer.getUniqueId());
+        PlayerSkinRepository skinData = SkinManager.getPlayerSkinRepository(skinPlayer.getUniqueId());
         if (skinData == null) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "データの取得中にエラーが発生しました");
             return 2;
         }
         Skin skin = skinData.getOriginalSkin();
         if (skin != null) {
-            SkinManager.getPlayerSkinReposiyory(executorPlayer.getUUID()).setCustomSkin(skin);
+            SkinManager.getPlayerSkinRepository(executorPlayer.getUUID()).setCustomSkin(skin);
             if (executorEntity.equals(ctx.getSource().getEntity())) {
                 NewMessageUtil.sendMessage(ctx.getSource(), skinPlayerName + " のスキンに変更しました");
                 return 0;
@@ -134,7 +134,7 @@ public class SkinCommand {
         String signature = StringArgumentType.getString(ctx, "signature");
 
         Skin skin = new Skin(SkinSource.CUSTOM, base64, signature);
-        PlayerSkinRepository executorSkinRepository = SkinManager.getPlayerSkinReposiyory(executorPlayer.getUUID());
+        PlayerSkinRepository executorSkinRepository = SkinManager.getPlayerSkinRepository(executorPlayer.getUUID());
         if (executorSkinRepository != null) {
             executorSkinRepository.setCustomSkin(skin);
             if (executorEntity.equals(ctx.getSource().getEntity())) {
@@ -158,7 +158,7 @@ public class SkinCommand {
             return 1;
         }
 
-        PlayerSkinRepository skinRepository = SkinManager.getPlayerSkinReposiyory(executorPlayer.getUUID());
+        PlayerSkinRepository skinRepository = SkinManager.getPlayerSkinRepository(executorPlayer.getUUID());
         if (skinRepository != null) {
             if (skinRepository.getCustomSkin() != null) {
                 skinRepository.setCustomSkin(null);
@@ -192,7 +192,7 @@ public class SkinCommand {
             return 1;
         }
 
-        PlayerSkinRepository skinRepository = SkinManager.getPlayerSkinReposiyory(executorPlayer.getUUID());
+        PlayerSkinRepository skinRepository = SkinManager.getPlayerSkinRepository(executorPlayer.getUUID());
         if (skinRepository != null) {
             if (skinRepository.getRemoteSkin().equals(skinRepository.getOriginalSkin())) {
                 if (executorEntity.equals(ctx.getSource().getEntity())) {
