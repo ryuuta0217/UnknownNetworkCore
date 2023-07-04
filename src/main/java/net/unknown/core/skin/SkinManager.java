@@ -51,12 +51,15 @@ import java.util.logging.Logger;
 
 public class SkinManager implements Listener {
     private static final Logger LOGGER = Logger.getLogger("UNC/SkinManager");
+    public static final SkinManager INSTANCE = new SkinManager();
     private static final Map<UUID, TreeMap<Long, Skin>> SKIN_HISTORIES = new HashMap<>(); // Only online players contained.
     private static final Map<UUID, Map<String, Skin>> SAVED_SKINS = new HashMap<>();
     private static final Map<UUID, Skin> CACHED_SKINS = new HashMap<>(); // Player's original (in Remote) skin cache.
     private static final Map<UUID, Skin> CURRENT_SKINS = new HashMap<>(); // Player's current skins.
 
     private static final Map<UUID, PlayerSkinRepository> PLAYER_SKIN_REPOSITORIES = new HashMap<>();
+
+    private SkinManager() {}
 
     @Deprecated
     public static void setSkin(Player player, Skin data) {

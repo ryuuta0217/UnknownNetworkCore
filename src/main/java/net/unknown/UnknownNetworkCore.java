@@ -45,6 +45,7 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.packet.PacketManager;
 import net.unknown.core.managers.TrashManager;
 import net.unknown.core.prefix.PlayerPrefixes;
+import net.unknown.core.skin.SkinManager;
 import net.unknown.core.tab.TabListPingManager;
 import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.shared.VersionInfo;
@@ -124,6 +125,7 @@ public class UnknownNetworkCore extends JavaPlugin {
         ListenerManager.registerListener(new TabListPingManager());
         ListenerManager.registerListener(new Athletics.Listener());
         ListenerManager.registerListener(new MultiPageChest.Listener());
+        ListenerManager.registerListener(SkinManager.INSTANCE);
         TPSBar.initialize();
         TabListPingManager.startTask();
         PlayerPrefixes.loadAll();
