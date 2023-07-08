@@ -110,7 +110,7 @@ public class ChatManager implements Listener {
 
         // MiniMessage Support
         if (PlayerData.of(event.getPlayer()).getChatData().isUseMiniMessage()) {
-            event.message(MiniMessage.miniMessage().deserialize(LegacyComponentSerializer.legacySection().serialize(event.message())));
+            event.message(MiniMessage.miniMessage().deserialize(PlainTextComponentSerializer.plainText().serialize(event.message())));
         }
 
         // URL to Clickable-Link
