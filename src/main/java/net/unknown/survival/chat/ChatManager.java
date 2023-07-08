@@ -85,7 +85,7 @@ public class ChatManager implements Listener {
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onChat(AsyncChatEvent event) {
-        if (!event.signedMessage().canDelete()) {
+        if (!event.getPlayer().getName().startsWith("BE_") && !event.signedMessage().canDelete()) {
             NewMessageUtil.sendErrorMessage(event.getPlayer(), "チャットメッセージは送信されませんでした");
             event.setCancelled(true);
         }
