@@ -478,12 +478,14 @@ public class PlayerData extends ConfigurationBase {
         private UUID replyTarget;
         private String forceGlobalChatPrefix = "g.";
         private boolean useKanaConvert = false;
+        private boolean useMiniMessage = false;
 
-        public ChatData(PlayerData parent, String replyTargetStr, String forceGlobalChatPrefix, boolean useKanaConvert) {
+        public ChatData(PlayerData parent, String replyTargetStr, String forceGlobalChatPrefix, boolean useKanaConvert, boolean useMiniMessage) {
             this.parent = parent;
             this.replyTarget = replyTargetStr != null ? UUID.fromString(replyTargetStr) : null;
             this.forceGlobalChatPrefix = forceGlobalChatPrefix;
             this.useKanaConvert = useKanaConvert;
+            this.useMiniMessage = useMiniMessage;
         }
 
         public PlayerData getPlayerData() {
@@ -517,17 +519,28 @@ public class PlayerData extends ConfigurationBase {
             RunnableManager.runAsync(this.parent::save);
         }
 
+        public boolean isUseMiniMessage() {
+            return this.useMiniMessage;
+        }
+
+        public void setUseMiniMessage(boolean useMiniMessage) {
+            this.useMiniMessage = useMiniMessage;
+            RunnableManager.runAsync(this.parent::save);
+        }
+
         public static ChatData load(PlayerData parent) {
             return new ChatData(parent,
                     parent.getConfig().getString("reply-target", null),
                     parent.getConfig().getString("force-global-chat-prefix", "g."),
-                    parent.getConfig().getBoolean("use-kana-convert", false));
+                    parent.getConfig().getBoolean("use-kana-convert", false),
+                    parent.getConfig().getBoolean("use-minimessage", false));
         }
 
         public void save(FileConfiguration config) {
             if (this.replyTarget != null) config.set("reply-target", this.replyTarget.toString());
             config.set("force-global-chat-prefix", this.forceGlobalChatPrefix);
             config.set("use-kana-convert", this.useKanaConvert);
+            config.set("use-minimessage", this.useMiniMessage);
         }
     }
 

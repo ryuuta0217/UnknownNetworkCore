@@ -37,6 +37,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.define.DefinedTextColor;
@@ -107,6 +108,11 @@ public class ChatManager implements Listener {
             event.message(LegacyComponentSerializer.legacyAmpersand().deserialize(PlainTextComponentSerializer.plainText().serialize(event.message())));
         }
 
+        // MiniMessage Support
+        if (PlayerData.of(event.getPlayer()).getChatData().isUseMiniMessage()) {
+            event.message(MiniMessage.miniMessage().deserialize(LegacyComponentSerializer.legacySection().serialize(event.message())));
+        }
+
         // URL to Clickable-Link
         event.message(event.message().replaceText((b) -> {
             b.match(Pattern.compile("https?://\\S+")).replacement((r, b2) -> Component.text(b2.content(), Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl(b2.content())));
@@ -121,8 +127,8 @@ public class ChatManager implements Listener {
                     Component msg = PlainTextComponentSerializer.plainText().deserialize(kanaMsgStr);
                     return baseRenderer.render(source, displayName, Component.empty()
                             .append(msg)
-                            .append(Component.text(" (" + msgStr + ")",
-                                    Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC.withState(true)))), viewer);
+                            .append(Component.space().append(Component.text("(" + msgStr + ")",
+                                    Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC.withState(true))))), viewer);
                 }
                 return baseRenderer.render(source, displayName, message, viewer);
             });
@@ -134,7 +140,7 @@ public class ChatManager implements Listener {
             }));
             GlobalChannel.getInstance().processChat(event);
         } else {
-            getCurrentChannel(event.getPlayer().getUniqueId()).processChat(event);
+            ChatManager.getCurrentChannel(event.getPlayer().getUniqueId()).processChat(event);
         }
     }
 }
