@@ -122,6 +122,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new ProtectedAreaTestStick());
         ListenerManager.registerListener(new PlayerJoinListener());
         ListenerManager.registerListener(new MinecraftToDiscordMessageListener());
+        ListenerManager.registerListener(new LocalLoginListener());
         SuppressRaidCommand.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
