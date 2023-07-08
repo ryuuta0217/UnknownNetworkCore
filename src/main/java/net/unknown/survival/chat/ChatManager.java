@@ -43,6 +43,7 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.prefix.Prefix;
+import net.unknown.core.util.NewMessageUtil;
 import net.unknown.core.util.YukiKanaConverter;
 import net.unknown.survival.UnknownNetworkSurvival;
 import net.unknown.survival.chat.channels.ChannelType;
@@ -83,6 +84,10 @@ public class ChatManager implements Listener {
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onChat(AsyncChatEvent event) {
+        if (!event.signedMessage().canDelete()) {
+            NewMessageUtil.sendErrorMessage(event.getPlayer(), "チャットメッセージは送信されませんでした");
+            event.setCancelled(true);
+        }
         event.renderer((source, sourceDisplayName, message, viewer) -> {
             Component base = Component.empty();
 
