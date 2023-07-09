@@ -7,7 +7,7 @@
 job("Build") {
   container(displayName = "Run gradle build", image = "openjdk:17") {
     kotlinScript { api ->
-      env["CI"] = true
+      env["CI"] = "true"
       api.gradlew("clean downloadWaterfall reCompressWaterfall compileJava jar shadowJar reobfJar")
   	}
   }
