@@ -5,6 +5,10 @@
 */
 
 job("Build") {
-  env["CI"] = true
-  gradlew("openjdk:17", "clean downloadWaterfall reCompressWaterfall compileJava jar shadowJar reobfJar")
+  container(displayName = "Run gradle build", image = "openjdk:17") {
+    kotlinScript { api ->
+      env["CI"] = true
+      api.gradlew("clean downloadWaterfall reCompressWaterfall compileJava jar shadowJar reobfJar")
+  	}
+  }
 }
