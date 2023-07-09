@@ -10,10 +10,9 @@ job("Build") {
       enabled = true
     }
   }
-  container(displayName = "Run gradle build", image = "amazoncorretto:17") { // Using Amazon Corretto 17 to avoids the xargs not present error.
-    env["CI"] = "true" // for paperweight, do not decompile re-mapped minecraft jar, to increase performance (execution time --;) and reduce memory usage
-    kotlinScript { api ->
-      api.gradlew("clean downloadWaterfall reCompressWaterfall compileJava jar shadowJar reobfJar")
-  	}
-  }
+
+  // Use Amazon Corretto 17 to avoids the "xargs not present" error.
+  gradlew("amazoncorretto:17", "clean downloadWaterfall reCompressWaterfall compileJava jar shadowJar reobfJar", init = {
+    env["CI"] = "true"
+  })
 }
