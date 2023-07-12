@@ -64,6 +64,10 @@ public class UnknownNetworkCore extends JavaPlugin {
         INSTANCE = this;
     }
 
+    public static boolean isProductionVersion() {
+        return UnknownNetworkCore.getVersion().gitBranch().equals("production");
+    }
+
     public static CommandDispatcher<CommandSourceStack> getBrigadier() {
         return getDedicatedServer().vanillaCommandDispatcher.getDispatcher();
     }
