@@ -55,6 +55,26 @@ public class ConfigurationSerializer {
     }
 
     @Nullable
+    public static String getWorldNameByConfig(ConfigurationSection config, String path) {
+        return config.isSet(path + ".world") ? config.getString(path + ".world") : null;
+    }
+
+    @Nullable
+    public static double[] getPositionByConfig(ConfigurationSection config, String path) {
+        if (config.isSet(path + ".x") && config.isSet(path + ".y") && config.isSet(path + ".z")) {
+            return new double[] {config.getDouble(path + ".x"), config.getDouble(path + ".y"), config.getDouble(path + ".z")};
+        }
+        return null;
+    }
+
+    public static float[] getRotationByConfig(ConfigurationSection config, String path) {
+        if (config.isSet(path + ".yaw") && config.isSet(path + ".pitch")) {
+            return new float[] {(float) config.getDouble(path + ".yaw"), (float) config.getDouble(path + ".pitch")};
+        }
+        return null;
+    }
+
+    @Nullable
     public static Location getLocationData(ConfigurationSection config, String path) {
         String worldName = "world";
         double x = 0.0D, y = 0.0D, z = 0.0D;
