@@ -118,7 +118,7 @@ public class AddHomeCommand {
         }
 
         Location loc = MinecraftAdapter.location(MinecraftAdapter.level(world), location, rotation);
-        defaultGroup.addHome(new Home(name, loc), overwrite);
+        defaultGroup.addHome(new Home(name, loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()), overwrite);
         MessageUtil.sendAdminMessage(ctx.getSource(), "プレイヤー " + targetName + " のグループ " + defaultGroup.getName() + " にホーム " + name + " を設定しました");
         return 0;
     }

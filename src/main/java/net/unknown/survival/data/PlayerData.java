@@ -286,12 +286,14 @@ public class PlayerData extends ConfigurationBase {
         private String defaultGroupName;
         private int homeBaseCount;
         private int homeAdditionalCount;
+        private final Logger logger;
 
         public HomeData(PlayerData parent, String defaultGroupName, int homeBaseCount, int homeAdditionalCount) {
             this.parent = parent;
             this.defaultGroupName = defaultGroupName;
             this.homeBaseCount = homeBaseCount;
             this.homeAdditionalCount = homeAdditionalCount;
+            this.logger = Logger.getLogger(parent.getLogger().getName() + "/Home");
         }
 
         private void setGroups(LinkedHashMap<String, HomeGroup> homeGroups) {
@@ -375,6 +377,10 @@ public class PlayerData extends ConfigurationBase {
             return this.homeBaseCount + this.homeAdditionalCount;
         }
 
+        public Logger getLogger() {
+            return this.logger;
+        }
+
         public static HomeData load(PlayerData data) {
             String defaultGroup = data.getConfig().getString("home-default-group", "default");
             int homeBaseCount = data.getConfig().getInt("home-base-count", DEFAULT_MAX_HOME_COUNT);
@@ -388,16 +394,19 @@ public class PlayerData extends ConfigurationBase {
             if (homeGroupsSection != null) {
                 homeGroupsSection.getKeys(false).forEach(groupName -> {
                     ConfigurationSection groupSection = homeGroupsSection.getConfigurationSection(groupName);
-                    HomeGroup group = HomeGroup.load(homeData, groupName, groupSection, groupItemsSection);
-                    groups.put(group.getName(), group);
+                    if (groupSection != null) {
+                        HomeGroup group = HomeGroup.load(homeData, groupName, groupSection, groupItemsSection);
+                        groups.put(group.getName(), group);
+                    } else {
+                        homeData.getLogger().warning("到達することのない条件分岐に到達しました: ホームグループが見つかりませんでした");
+                    }
                 });
             } else { // when not found any home groups, Create new.
-                HomeGroup group = new HomeGroup(homeData, "default", null, new LinkedHashMap<>());
+                HomeGroup group = new HomeGroup(homeData, defaultGroup, null, new LinkedHashMap<>());
                 groups.put(group.getName(), group);
             }
 
             homeData.setGroups(groups);
-
             return homeData;
         }
 
@@ -561,10 +570,14 @@ public class PlayerData extends ConfigurationBase {
                             Map<String, Home> oldHomeMap = new LinkedHashMap<>(); // 登録順が崩れないようにLinkedを使う
                             section.getKeys(false).forEach(homeName -> {
                                 LOGGER.info("Migrating: homes." + homeName + " -> homes.uncategorized." + homeName);
-                                Location loc = ConfigurationSerializer.getLocationData(section, homeName);
-                                if (loc != null) {
-                                    oldHomeMap.put(homeName, new Home(homeName, loc));
-                                } else LOGGER.warning("Home " + homeName + " was *removed* because world is null.");
+                                String worldName = ConfigurationSerializer.getWorldNameByConfig(section, homeName);
+                                double[] position = ConfigurationSerializer.getPositionByConfig(section, homeName);
+                                float[] rotation = ConfigurationSerializer.getRotationByConfig(section, homeName);
+                                if (worldName != null && position != null) {
+                                    oldHomeMap.put(homeName, new Home(homeName, worldName, position[0], position[1], position[2], (rotation != null ? rotation[0] : 0.0f), (rotation != null ? rotation[1] : 0.0f)));
+                                } else {
+                                    LOGGER.warning("Home " + homeName + " was *removed* because invalid data provided. data=(world:" + worldName + ", position:(" + (position != null ? "x: " + position[0] + ", y: " + position[1] + ", z: " + position[2] : "null") + ", " + (rotation != null ? "yaw: " + rotation[0] + ", pitch: " + rotation[1] : "null") + "), rotation:(" + (rotation != null ? "yaw: " + rotation[0] + ", pitch: " + rotation[1] : "null") + "))");
+                                }
                             });
 
                             /* CLEAR OLD HOMES */

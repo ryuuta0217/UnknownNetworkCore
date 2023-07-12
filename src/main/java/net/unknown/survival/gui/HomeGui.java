@@ -279,7 +279,7 @@ public class HomeGui extends GuiBase {
             this.slot2HomeMap.put(this.inventory.firstEmpty(), home);
             this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(dimension2Material(home.location()))
                     .displayName(Component.text(home.name(), Style.style(dimension2TextColor(home.location()), TextDecoration.ITALIC.withState(false))))
-                    .lore(Component.text("ワールド: " + MessageUtil.getWorldNameDisplay(home.getWorld()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
+                    .lore(Component.text("ワールド: " + MessageUtil.getWorldNameDisplay(home.world()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
                             Component.text("座標: " + getCoordinateAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
                             Component.text("向き: " + getRotationAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
                             Component.text(""),
