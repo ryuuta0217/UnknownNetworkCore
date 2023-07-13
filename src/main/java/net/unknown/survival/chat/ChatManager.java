@@ -91,6 +91,7 @@ public class ChatManager implements Listener {
                     .append(Component.text("(あなたの送信したチャットは認証されていません。ランチャーの再起動をお試しください。)", DefinedTextColor.GRAY, TextDecoration.ITALIC)));
             event.setCancelled(true);
         }
+        
         event.renderer((source, sourceDisplayName, message, viewer) -> {
             Component base = Component.empty();
 
