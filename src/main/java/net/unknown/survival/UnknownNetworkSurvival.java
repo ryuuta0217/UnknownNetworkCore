@@ -58,6 +58,8 @@ import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import net.unknown.survival.listeners.*;
 import net.unknown.survival.update.UNCUpdateCheckTask;
+import net.unknown.survival.util.ItemGiveQueue;
+import net.unknown.survival.vote.VoteManager;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -110,6 +112,7 @@ public class UnknownNetworkSurvival {
 
         Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
 
+        if (ItemGiveQueue.getInstance() != null) LOGGER.warning("Failed to initialize ItemGiveQueue, but proceed to enable.");
         ListenerManager.registerListener(new MainGuiOpenListener());
         ListenerManager.registerListener(new ChatManager());
         ListenerManager.registerListener(new ColorCodeListener());
@@ -152,7 +155,7 @@ public class UnknownNetworkSurvival {
         }
 
         if (isVotifierEnbaled()) {
-            ListenerManager.registerListener(new VoteListener());
+            ListenerManager.registerListener(VoteManager.getInstance());
         }
         LOGGER.info("Plugin enabled - Running as Survival mode.");
     }
