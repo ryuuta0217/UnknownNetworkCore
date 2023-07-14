@@ -27,6 +27,7 @@ import java.util.UUID;
 
 public class VoteManager implements Listener {
     private static final Component TICKET_ITEM_NAME = Component.text("投票チケット", DefinedTextColor.GOLD).decorate(TextDecoration.BOLD);
+    private static final NamespacedKey TICKET_VOTED_PLAYER_KEY = NamespacedKey.fromString("unknown-network:voted_player");
     private static final VoteManager INSTANCE = new VoteManager();
 
     private VoteManager() {}
@@ -49,7 +50,7 @@ public class VoteManager implements Listener {
 
         RunnableManager.runAsync(() -> { // REST APIコールは遅延を引き起こす可能性があるので非同期で実行する
             UUID uuid = MojangApi.getUUID(event.getVote().getUsername());
-            ItemGiveQueue.queue(uuid, VoteManager.buildTicket(event.getVote().getUsername(), uuid, event.getVote().getServiceName(), event.getVote().getTimeStamp()));
+            ItemGiveQueue.queue(uuid, VoteManager.buildTicket(event.getVote().getUsername(), uuid));
         });
     }
 
@@ -61,6 +62,10 @@ public class VoteManager implements Listener {
         return TICKET_ITEM_NAME;
     }
 
+    public static NamespacedKey getTicketVotedPlayerKey() {
+        return TICKET_VOTED_PLAYER_KEY;
+    }
+
     public static ItemStackBuilder ticketBuilder() {
         return new ItemStackBuilder(Material.PAPER)
                 .displayName(VoteManager.getTicketItemName())
@@ -68,17 +73,15 @@ public class VoteManager implements Listener {
                 .addItemFlag(ItemFlag.HIDE_ENCHANTS);
     }
 
-    public static ItemStack buildTicket(String name, UUID uuid, String issuedService, String timestamp) {
+    public static ItemStack buildTicket(String name, UUID uuid) {
         return VoteManager.ticketBuilder()
                 .lore(Component.text("投票でもらえるチケット", DefinedTextColor.AQUA).decorate(TextDecoration.BOLD),
                         Component.empty(),
                         Component.empty(),
-                        Component.text("投票者: " + name, DefinedTextColor.GRAY),
-                        Component.text("投票サイト: " + issuedService, DefinedTextColor.GRAY),
-                        Component.text("投票日時: " + timestamp, DefinedTextColor.GRAY))
+                        Component.text("投票者: " + name, DefinedTextColor.GRAY))
                 .custom(stack -> {
                     ItemMeta meta = stack.getItemMeta();
-                    meta.getPersistentDataContainer().set(NamespacedKey.fromString("unknown-network:voted_player"), PersistentDataType.STRING, uuid.toString());
+                    meta.getPersistentDataContainer().set(TICKET_VOTED_PLAYER_KEY, PersistentDataType.STRING, uuid.toString());
                     stack.setItemMeta(meta);
                 })
                 .build();
