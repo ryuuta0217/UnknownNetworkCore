@@ -235,7 +235,7 @@ public class PaginationView<T, G extends GuiBase> implements View {
         return this.currentPage;
     }
 
-    protected G getGui() {
+    public G getGui() {
         return this.gui;
     }
 
