@@ -113,7 +113,7 @@ runServer {
 
 task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
     classpath(configurations.launchwrapper)
-    args("--nogui", "--add-plugin=../build/libs/UnknownNetworkCore.jar", "--forceUpgrade")
+    args("--nogui", "--add-plugin=../build/libs/UnknownNetworkCore.jar")
     workingDir(project.file("testServer"))
     systemProperty "UnknownNetworkMagic", "1.20"
     systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
