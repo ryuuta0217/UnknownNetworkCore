@@ -1,0 +1,19 @@
+exchange-items:
+  overstack-test-2:
+    type: SIMPLE
+    item: '{Count:127b,id:"minecraft:stick"}'
+    price: 1
+  overstack-test:
+    type: SIMPLE
+    item: '{Count:0b,id:"minecraft:stick"}'
+    price: 1
+  example-1:
+    type: SIMPLE
+    item: '{Count:1b,id:"minecraft:paper"}'
+    price: 1
+  example-2:
+    type: CONTAINER
+    item: '{Count:64b,id:"minecraft:stick"}'
+    price: 1
+    container-type: SHULKER_BOX
+    stacks: 27
