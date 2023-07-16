@@ -48,6 +48,10 @@ import java.util.stream.Stream;
 public class ItemStackBuilder {
     private final ItemStack original;
 
+    public ItemStackBuilder(ItemStack stack) {
+        this.original = stack.clone();
+    }
+
     public ItemStackBuilder(Material material) {
         this.original = new ItemStack(material);
     }
