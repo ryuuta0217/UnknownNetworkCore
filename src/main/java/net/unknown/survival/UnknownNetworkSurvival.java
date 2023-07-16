@@ -112,7 +112,7 @@ public class UnknownNetworkSurvival {
 
         Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
 
-        if (ItemGiveQueue.getInstance() != null) LOGGER.warning("Failed to initialize ItemGiveQueue, but proceed to enable.");
+        if (ItemGiveQueue.getInstance() == null) LOGGER.warning("Failed to initialize ItemGiveQueue, but proceed to enable.");
         ListenerManager.registerListener(new MainGuiOpenListener());
         ListenerManager.registerListener(new ChatManager());
         ListenerManager.registerListener(new ColorCodeListener());
