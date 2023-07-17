@@ -91,7 +91,7 @@ public class ItemStackBuilder {
 
     public ItemStackBuilder displayName(Component displayName) {
         ItemMeta meta = this.original.getItemMeta();
-        displayName = displayName.style(displayName.style().decoration(TextDecoration.ITALIC, false));
+        if (displayName.decoration(TextDecoration.ITALIC) == TextDecoration.State.NOT_SET) displayName = displayName.decoration(TextDecoration.ITALIC, false);
         meta.displayName(displayName);
         this.original.setItemMeta(meta);
         return this;
