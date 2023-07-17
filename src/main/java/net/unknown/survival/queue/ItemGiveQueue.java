@@ -29,7 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.util;
+package net.unknown.survival.queue;
 
 import net.kyori.adventure.text.Component;
 import net.unknown.core.configurations.ConfigurationBase;
