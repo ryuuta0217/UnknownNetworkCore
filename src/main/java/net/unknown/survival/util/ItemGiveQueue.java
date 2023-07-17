@@ -85,7 +85,7 @@ public class ItemGiveQueue extends ConfigurationBase implements Listener {
                     .append(Component.text((inventoryHasSpace ? "インベントリに " : "足元に ")))
                     .append(item.displayName())
                     .appendSpace()
-                    .append(Component.text(" x" + item.getAmount()))
+                    .append(Component.text("x" + item.getAmount()))
                     .appendSpace()
                     .append(Component.text((inventoryHasSpace ? "が追加されました" : "が落とされました"))));
             return true;
