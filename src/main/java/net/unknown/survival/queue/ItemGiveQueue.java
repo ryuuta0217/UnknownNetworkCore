@@ -52,7 +52,7 @@ public class ItemGiveQueue extends ConfigurationBase implements Listener {
     private Map<UUID, Set<ItemStack>> queue;
 
     private ItemGiveQueue() {
-        super("vote-give-item-queue.yml", false, "VoteManager/GiveItemQueue");
+        super("give-item-queue.yml", false, "VoteManager/GiveItemQueue");
     }
 
     @Override
