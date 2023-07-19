@@ -34,7 +34,6 @@ package net.unknown.core.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -44,17 +43,9 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
-import net.unknown.UnknownNetworkCore;
-import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
-import net.unknown.core.managers.RunnableManager;
+import net.unknown.core.managers.EvalManager;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.core.util.MinecraftAdapter;
-import net.unknown.core.util.NewMessageUtil;
-import net.unknown.survival.data.PlayerData;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.mozilla.javascript.*;
 
@@ -62,28 +53,6 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 public class EvalCommand {
-    public static final Map<String, Object> GLOBAL_STORAGE = new HashMap<>();
-    private static final ContextFactory RHINO_CONTEXT_FACTORY = new ContextFactory();
-    private static final Context RHINO_CONTEXT = RHINO_CONTEXT_FACTORY.enterContext();
-    private static final ScriptableObject GLOBAL_SCOPE = RHINO_CONTEXT.initStandardObjects();
-
-    static {
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "Bukkit", Bukkit.getServer());
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "plugin", UnknownNetworkCore.getInstance());
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "RunnableManager", new NativeJavaClass(GLOBAL_SCOPE, RunnableManager.class));
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "NewMessageUtil", new NativeJavaClass(GLOBAL_SCOPE, NewMessageUtil.class));
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "PlayerData", new NativeJavaClass(GLOBAL_SCOPE, PlayerData.class));
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "Storage", GLOBAL_STORAGE);
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "Material", new NativeJavaClass(GLOBAL_SCOPE, org.bukkit.Material.class));
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "MinecraftAdapter", new NativeJavaClass(GLOBAL_SCOPE, MinecraftAdapter.class));
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "EntityType", new NativeJavaClass(GLOBAL_SCOPE, EntityType.class));
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "ChatColor", new NativeJavaClass(GLOBAL_SCOPE, ChatColor.class));
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "Component", new NativeJavaClass(GLOBAL_SCOPE, net.kyori.adventure.text.Component.class));
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "TextDecoration", new NativeJavaClass(GLOBAL_SCOPE, TextDecoration.class));
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "DefinedTextColor", new NativeJavaClass(GLOBAL_SCOPE, DefinedTextColor.class));
-        ScriptableObject.putProperty(GLOBAL_SCOPE, "Style", new NativeJavaClass(GLOBAL_SCOPE, net.kyori.adventure.text.format.Style.class));
-    }
-
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("eval");
         builder.requires(Permissions.COMMAND_EVAL::check);
@@ -91,8 +60,7 @@ public class EvalCommand {
         builder.then(Commands.argument("スクリプト", StringArgumentType.greedyString())
                 .executes(ctx -> {
                     String scriptIn = StringArgumentType.getString(ctx, "スクリプト");
-
-                    Scriptable scope = RHINO_CONTEXT.initStandardObjects(GLOBAL_SCOPE);
+                    Scriptable scope = EvalManager.getGlobalScope();
 
                     // <Variables>
                     // nmsPlayer, nmsEntity
@@ -115,8 +83,7 @@ public class EvalCommand {
                     ScriptableObject.putProperty(scope, "Util", new Util());
 
                     try {
-                        Script script = RHINO_CONTEXT.compileString(scriptIn, "eval", 1, null);
-                        Object result = script.exec(RHINO_CONTEXT, scope);
+                        Object result = EvalManager.execFromString("EvalCommand", scriptIn, scope);
                         if (result instanceof Undefined || result == null)
                             MessageUtil.sendAdminMessage(ctx.getSource(), "コードの実行が正常に完了しました", true);
                         else
