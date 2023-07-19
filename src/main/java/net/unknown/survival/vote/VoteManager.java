@@ -41,12 +41,12 @@ import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.NewMessageUtil;
-import net.unknown.survival.util.ItemGiveQueue;
+import net.unknown.survival.queue.ItemGiveQueue;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemFlag;
@@ -54,10 +54,12 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 
+import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class VoteManager implements Listener {
-    private static final Component TICKET_ITEM_NAME = Component.text("投票チケット", DefinedTextColor.GOLD).decorate(TextDecoration.BOLD);
+    private static final Component TICKET_ITEM_NAME = Component.text("投票チケット", DefinedTextColor.GOLD).decorate(TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false);
     private static final NamespacedKey TICKET_VOTED_PLAYER_KEY = NamespacedKey.fromString("unknown-network:voted_player");
     private static final VoteManager INSTANCE = new VoteManager();
 
@@ -116,5 +118,36 @@ public class VoteManager implements Listener {
                     stack.setItemMeta(meta);
                 })
                 .build();
+    }
+
+    public static int getPlayerTicketAmount(HumanEntity player) {
+        AtomicInteger carriedTickets = new AtomicInteger(0);
+        player.getInventory().forEach(item -> {
+            if (!isValidTicket(player, item)) return;
+            carriedTickets.addAndGet(item.getAmount());
+        });
+        return carriedTickets.get();
+    }
+
+    public static void removePlayerTickets(HumanEntity player, int amount) {
+        if (getPlayerTicketAmount(player) < amount) return;
+        for (ItemStack item : player.getInventory().getContents()) {
+            if (!isValidTicket(player, item)) continue;
+            if (amount >= item.getAmount()) {
+                amount -= item.getAmount();
+                item.setAmount(0);
+            } else {
+                item.setAmount(item.getAmount() - amount);
+                amount = 0;
+            }
+            if (amount <= 0) break;
+        }
+    }
+
+    public static boolean isValidTicket(HumanEntity player, ItemStack item) {
+        if (item != null && item.getType() == Material.PAPER && item.getItemMeta().hasDisplayName() && item.getItemMeta().displayName().equals(getTicketItemName())) {
+            return Objects.equals(item.getItemMeta().getPersistentDataContainer().get(getTicketVotedPlayerKey(), PersistentDataType.STRING), player.getUniqueId().toString());
+        }
+        return false;
     }
 }
