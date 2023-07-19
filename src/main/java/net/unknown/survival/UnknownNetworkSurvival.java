@@ -58,7 +58,7 @@ import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import net.unknown.survival.listeners.*;
 import net.unknown.survival.update.UNCUpdateCheckTask;
-import net.unknown.survival.util.ItemGiveQueue;
+import net.unknown.survival.queue.ItemGiveQueue;
 import net.unknown.survival.vote.VoteManager;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
