@@ -46,10 +46,11 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ItemGiveQueue extends ConfigurationBase implements Listener {
     private static final ItemGiveQueue INSTANCE = new ItemGiveQueue();
-    private Map<UUID, Set<ItemStack>> queue;
+    private Map<UUID, Map<Long, ItemStack>> queue;
 
     private ItemGiveQueue() {
         super("give-item-queue.yml", false, "VoteManager/GiveItemQueue");
@@ -63,9 +64,12 @@ public class ItemGiveQueue extends ConfigurationBase implements Listener {
             ConfigurationSection queuesSection = this.getConfig().getConfigurationSection("queues");
             queuesSection.getKeys(false).forEach(uuidStr -> {
                 UUID uuid = UUID.fromString(uuidStr);
-                this.queue.put(uuid, new HashSet<>());
-                queuesSection.getStringList(uuidStr).forEach(json -> {
-                    this.queue.get(uuid).add(MinecraftAdapter.ItemStack.itemStack(MinecraftAdapter.ItemStack.json(json)));
+                this.queue.put(uuid, new HashMap<>());
+                queuesSection.getValues(false).forEach((k, v) -> {
+                    if (v instanceof String json) {
+                        long timestamp = Long.parseLong(k);
+                        this.queue.get(uuid).put(timestamp, MinecraftAdapter.ItemStack.itemStack(MinecraftAdapter.ItemStack.json(json)));
+                    }
                 });
             });
         }
@@ -91,17 +95,17 @@ public class ItemGiveQueue extends ConfigurationBase implements Listener {
             return true;
         }
 
-        INSTANCE.queue.computeIfAbsent(uuid, k -> new HashSet<>()).add(item);
+        INSTANCE.queue.computeIfAbsent(uuid, k -> new HashMap<>()).put(System.currentTimeMillis(), item);
         RunnableManager.runAsync(INSTANCE::save);
         return false;
     }
 
-    public static Set<ItemStack> get(UUID uuid) {
-        return INSTANCE.queue.getOrDefault(uuid, Collections.emptySet());
+    public static Map<Long, ItemStack> get(UUID uuid) {
+        return INSTANCE.queue.getOrDefault(uuid, Collections.emptyMap());
     }
 
-    public static Set<ItemStack> remove(UUID uuid) {
-        Set<ItemStack> removed = INSTANCE.queue.remove(uuid);
+    public static Map<Long, ItemStack> remove(UUID uuid) {
+        Map<Long, ItemStack> removed = INSTANCE.queue.remove(uuid);
         if (removed != null) RunnableManager.runAsync(INSTANCE::save);
         return removed;
     }
@@ -111,17 +115,17 @@ public class ItemGiveQueue extends ConfigurationBase implements Listener {
         this.getConfig().set("queues", null);
         ConfigurationSection queuesSection = this.getConfig().createSection("queues");
         this.queue.forEach((uuid, items) -> {
-            queuesSection.set(uuid.toString(), items.stream()
-                    .map(MinecraftAdapter.ItemStack::itemStack)
-                    .map(MinecraftAdapter.ItemStack::json)
-                    .toList());
+            queuesSection.set(uuid.toString(), items.entrySet().stream()
+                    .map(e -> Map.entry(e.getKey(), MinecraftAdapter.ItemStack.itemStack(e.getValue())))
+                    .map(e -> Map.entry(e.getKey(), MinecraftAdapter.ItemStack.json(e.getValue())))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
         });
         super.save();
     }
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
-        ItemGiveQueue.get(event.getPlayer().getUniqueId()).removeIf(queuedItem -> ItemGiveQueue.queue(event.getPlayer().getUniqueId(), queuedItem));
+        ItemGiveQueue.get(event.getPlayer().getUniqueId()).entrySet().removeIf(e -> ItemGiveQueue.queue(event.getPlayer().getUniqueId(), e.getValue()));
     }
 
     public static ItemGiveQueue getInstance() {
