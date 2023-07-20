@@ -258,7 +258,7 @@ public class NewMessageUtil {
     /* VERBOSE MESSAGES */
     /* START - Minecraft Components */
     public static void sendVerboseMessage(CommandSourceStack source, Component component, boolean broadcastToOps) {
-        if (source.hasPermission(2, "unknown.core.verbose")) sendErrorMessage(source, component, broadcastToOps);
+        if (source.hasPermission(2, "unknown.core.verbose")) sendMessage(source, component, broadcastToOps);
     }
 
     public static void sendVerboseMessage(CommandSourceStack source, Component component) {
