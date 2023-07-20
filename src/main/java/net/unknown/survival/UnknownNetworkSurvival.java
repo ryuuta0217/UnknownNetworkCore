@@ -41,7 +41,6 @@ import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
 import net.unknown.survival.commands.SuppressRaidCommand;
-import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.discord.MinecraftToDiscordMessageListener;
@@ -113,7 +112,8 @@ public class UnknownNetworkSurvival {
         Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
 
         if (ItemGiveQueue.getInstance() == null) LOGGER.warning("Failed to initialize ItemGiveQueue, but proceed to enable.");
-        ListenerManager.registerListener(new MainGuiOpenListener());
+        MainGuiOpenListener guiOpenListener = new MainGuiOpenListener();
+        ListenerManager.registerListener(guiOpenListener);
         ListenerManager.registerListener(new ChatManager());
         ListenerManager.registerListener(new ColorCodeListener());
         ListenerManager.registerListener(new ModdedPlayerManager());
@@ -137,6 +137,7 @@ public class UnknownNetworkSurvival {
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());
+        Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unc_survival:open_gui", guiOpenListener);
 
         DemolitionGun.BowPullIndicator.boot();
 
