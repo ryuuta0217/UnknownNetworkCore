@@ -60,7 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class VoteManager implements Listener {
     private static final Component TICKET_ITEM_NAME = Component.text("投票チケット", DefinedTextColor.GOLD).decorate(TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false);
-    private static final NamespacedKey TICKET_VOTED_PLAYER_KEY = NamespacedKey.fromString("unknown-network:voted_player");
+    private static final NamespacedKey TICKET_VOTED_PLAYER_KEY = NamespacedKey.fromString("unknown-network:voter");
     private static final VoteManager INSTANCE = new VoteManager();
 
     private VoteManager() {}
