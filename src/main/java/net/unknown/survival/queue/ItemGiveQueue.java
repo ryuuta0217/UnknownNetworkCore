@@ -115,10 +115,12 @@ public class ItemGiveQueue extends ConfigurationBase implements Listener {
         this.getConfig().set("queues", null);
         ConfigurationSection queuesSection = this.getConfig().createSection("queues");
         this.queue.forEach((uuid, items) -> {
-            queuesSection.set(uuid.toString(), items.entrySet().stream()
-                    .map(e -> Map.entry(e.getKey(), MinecraftAdapter.ItemStack.itemStack(e.getValue())))
-                    .map(e -> Map.entry(e.getKey(), MinecraftAdapter.ItemStack.json(e.getValue())))
-                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            if (items.entrySet().size() > 0) {
+                queuesSection.set(uuid.toString(), items.entrySet().stream()
+                        .map(e -> Map.entry(e.getKey(), MinecraftAdapter.ItemStack.itemStack(e.getValue())))
+                        .map(e -> Map.entry(e.getKey(), MinecraftAdapter.ItemStack.json(e.getValue())))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+            }
         });
         super.save();
     }
@@ -126,6 +128,7 @@ public class ItemGiveQueue extends ConfigurationBase implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         ItemGiveQueue.get(event.getPlayer().getUniqueId()).entrySet().removeIf(e -> ItemGiveQueue.queue(event.getPlayer().getUniqueId(), e.getValue()));
+        RunnableManager.runAsync(this::save);
     }
 
     public static ItemGiveQueue getInstance() {
