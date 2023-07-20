@@ -41,7 +41,10 @@ import net.unknown.survival.UnknownNetworkSurvival;
 import net.unknown.survival.gui.home.HomeGui;
 import net.unknown.survival.gui.prefix.PrefixGui;
 import net.unknown.survival.gui.warp.WarpGui;
+import net.unknown.survival.vote.gui.VoteTicketExchangeGui;
 import org.bukkit.Material;
+import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHumanEntity;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -54,6 +57,13 @@ public class MainGui extends GuiBase {
     public MainGui() {
         super(null, 27, Component.text("メインGUI"),
                 (inv) -> {
+                    inv.setItem(11, new ItemStackBuilder(Material.PAPER)
+                            .displayName(Component.text("投票チケットの交換", DefinedTextColor.AQUA))
+                            .lore(Component.text("投票で得られたチケットを物品と交換できます", DefinedTextColor.YELLOW))
+                            .addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1)
+                            .addItemFlag(ItemFlag.HIDE_ENCHANTS)
+                            .build());
+
                     inv.setItem(12, new ItemStackBuilder(Material.RESPAWN_ANCHOR)
                             .displayName(Component.text("Home", DefinedTextColor.GOLD))
                             .lore(Component.text("ホームを追加したり", DefinedTextColor.GREEN),
@@ -102,6 +112,7 @@ public class MainGui extends GuiBase {
     @Override
     public void onClick(InventoryClickEvent event) {
         switch (event.getSlot()) {
+            case 11 -> new VoteTicketExchangeGui(this, ((Player) event.getWhoClicked())).open();
             case 12 -> new HomeGui((Player) event.getWhoClicked()).open(event.getWhoClicked());
             case 13 -> {
                 if (UnknownNetworkSurvival.isWorldGuardEnabled()) {

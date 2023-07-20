@@ -41,6 +41,7 @@ import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
 import net.unknown.survival.commands.SuppressRaidCommand;
+import net.unknown.survival.data.VoteTicketExchangeItems;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.discord.MinecraftToDiscordMessageListener;
@@ -112,6 +113,7 @@ public class UnknownNetworkSurvival {
         Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
 
         if (ItemGiveQueue.getInstance() == null) LOGGER.warning("Failed to initialize ItemGiveQueue, but proceed to enable.");
+        if (VoteTicketExchangeItems.getInstance() == null) LOGGER.warning("Failed to initialize VoteTicketExchangeItems, but proceed to enable.");
         MainGuiOpenListener guiOpenListener = new MainGuiOpenListener();
         ListenerManager.registerListener(guiOpenListener);
         ListenerManager.registerListener(new ChatManager());
