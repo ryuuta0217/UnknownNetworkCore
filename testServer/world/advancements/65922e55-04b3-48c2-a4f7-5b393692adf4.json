@@ -1503,5 +1503,17 @@
     },
     "done": true
   },
+  "minecraft:recipes/building_blocks/acacia_wood": {
+    "criteria": {
+      "has_log": "2023-07-20 21:00:17 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/building_blocks/acacia_planks": {
+    "criteria": {
+      "has_log": "2023-07-20 21:00:17 +0900"
+    },
+    "done": true
+  },
   "DataVersion": 3465
 }
