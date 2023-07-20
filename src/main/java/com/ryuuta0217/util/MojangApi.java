@@ -52,7 +52,7 @@ public class MojangApi {
     public static UUID getUUID(String name) {
         try {
             return UUID.fromString(new JSONObject(HTTPFetch.fetchGet("https://api.mojang.com/users/profiles/minecraft/" + name)
-                    .sentAndReadAsString()).getString("id"));
+                    .sentAndReadAsString()).getString("id").replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }

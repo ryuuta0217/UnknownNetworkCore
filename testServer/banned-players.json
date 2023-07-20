@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "uuid": "a1ae37e0-5280-4b86-91b3-58bdefd88eaf",
+    "name": "LMJCraft",
+    "created": "2023-07-20 23:00:39 +0900",
+    "source": "Yncryption",
+    "expires": "forever",
+    "reason": "Banned by an operator."
+  }
+]

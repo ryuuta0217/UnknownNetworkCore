@@ -33,12 +33,14 @@ package net.unknown.survival.listeners;
 
 import net.kyori.adventure.text.Component;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.dependency.MultiverseCore;
+import net.unknown.core.managers.RunnableManager;
+import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +61,13 @@ public class PlayerJoinListener implements Listener {
     public void onPlayerJoined(PlayerJoinEvent event) {
         if (!event.getPlayer().hasPlayedBefore()) {
             event.joinMessage(Component.text(event.getPlayer().getName() + " が初めてゲームに参加しました", DefinedTextColor.YELLOW));
+            if (Bukkit.getWorld("tutorial") != null) {
+                RunnableManager.runDelayed(() -> {
+                    if (event.getPlayer().teleport(MultiverseCore.getSpawnLocation(Bukkit.getWorld("tutorial")))) {
+                        NewMessageUtil.sendMessage(event.getPlayer(), "自動的にチュートリアルに転送されました");
+                    }
+                }, 5L);
+            }
         } else {
             long lastLogin = LAST_SEEN.getOrDefault(event.getPlayer().getUniqueId(), 0L);
             long now = System.currentTimeMillis();

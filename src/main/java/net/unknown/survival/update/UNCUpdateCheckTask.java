@@ -85,13 +85,15 @@ public class UNCUpdateCheckTask extends BukkitRunnable implements Listener {
         if (UpdateUtil.GITHUB_API == null) {
             LOGGER.warning("GitHub APIが利用できません。APIトークンの設定を忘れましたか？");
             this.cancel();
+            ListenerManager.unregisterListener(this);
             return;
         }
 
         VersionInfo current = UnknownNetworkCore.getVersion();
         if (current == null) {
-            LOGGER.warning("現在実行中のUnknownNetworkCoreのバージョンを取得できませんでした。自家製、またはGitのセットアップを完了してください。");
+            LOGGER.warning("現在実行中のUnknownNetworkCoreのバージョンを取得できませんでした。Gitのセットアップを完了してください。");
             this.cancel();
+            ListenerManager.unregisterListener(this);
             return;
         }
 
@@ -99,6 +101,7 @@ public class UNCUpdateCheckTask extends BukkitRunnable implements Listener {
         if (latest == null) {
             LOGGER.warning("最新のUnknownNetworkCoreのバージョンを取得できませんでした。リポジトリが消去されているか、アクセス権がありません。(またはブランチ名が変わりましたか？)");
             this.cancel();
+            ListenerManager.unregisterListener(this);
             return;
         }
 
@@ -125,6 +128,8 @@ public class UNCUpdateCheckTask extends BukkitRunnable implements Listener {
             }
         } else {
             LOGGER.warning("productionブランチ以外のバージョンのようです。自家製、または開発中ですか？");
+            this.cancel();
+            ListenerManager.unregisterListener(this);
         }
     }
 

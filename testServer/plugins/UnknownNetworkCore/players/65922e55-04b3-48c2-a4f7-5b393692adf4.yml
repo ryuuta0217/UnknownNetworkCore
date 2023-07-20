@@ -197,3 +197,5 @@ homes:
   test: {}
   helloworld: {}
   testw: {}
+use-minimessage: true
+registries: {}

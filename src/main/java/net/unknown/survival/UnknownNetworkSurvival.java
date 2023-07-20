@@ -41,7 +41,7 @@ import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
 import net.unknown.survival.commands.SuppressRaidCommand;
-import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.data.VoteTicketExchangeItems;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.discord.MinecraftToDiscordMessageListener;
@@ -58,6 +58,8 @@ import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import net.unknown.survival.listeners.*;
 import net.unknown.survival.update.UNCUpdateCheckTask;
+import net.unknown.survival.queue.ItemGiveQueue;
+import net.unknown.survival.vote.VoteManager;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -110,7 +112,10 @@ public class UnknownNetworkSurvival {
 
         Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
 
-        ListenerManager.registerListener(new MainGuiOpenListener());
+        if (ItemGiveQueue.getInstance() == null) LOGGER.warning("Failed to initialize ItemGiveQueue, but proceed to enable.");
+        if (VoteTicketExchangeItems.getInstance() == null) LOGGER.warning("Failed to initialize VoteTicketExchangeItems, but proceed to enable.");
+        MainGuiOpenListener guiOpenListener = new MainGuiOpenListener();
+        ListenerManager.registerListener(guiOpenListener);
         ListenerManager.registerListener(new ChatManager());
         ListenerManager.registerListener(new ColorCodeListener());
         ListenerManager.registerListener(new ModdedPlayerManager());
@@ -134,6 +139,7 @@ public class UnknownNetworkSurvival {
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());
+        Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unc_survival:open_gui", guiOpenListener);
 
         DemolitionGun.BowPullIndicator.boot();
 
@@ -152,7 +158,7 @@ public class UnknownNetworkSurvival {
         }
 
         if (isVotifierEnbaled()) {
-            ListenerManager.registerListener(new VoteListener());
+            ListenerManager.registerListener(VoteManager.getInstance());
         }
         LOGGER.info("Plugin enabled - Running as Survival mode.");
     }

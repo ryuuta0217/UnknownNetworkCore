@@ -31,7 +31,11 @@
 
 package net.unknown.survival.commands;
 
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.server.MinecraftServer;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.util.ObfuscationUtil;
+import net.unknown.core.util.ReflectionUtil;
 import net.unknown.survival.commands.admin.LastTpCommand;
 import net.unknown.survival.commands.home.DelHomeCommand;
 import net.unknown.survival.commands.home.HomeCommand;
@@ -39,8 +43,17 @@ import net.unknown.survival.commands.home.HomesCommand;
 import net.unknown.survival.commands.home.SetHomeCommand;
 import net.unknown.survival.commands.home.admin.*;
 
+import java.lang.reflect.Field;
+
 public class Commands {
     public static void init() {
+        CommandBuildContext buildContext = null;
+        try {
+            Field f = ObfuscationUtil.getClassByMojangName("net.minecraft.server.ReloadableServerResources").getFieldByMojangName("commandBuildContext").getField();
+            f.trySetAccessible();
+            buildContext = (CommandBuildContext) f.get(MinecraftServer.getServer().resources.managers());
+        } catch(Throwable t) { t.printStackTrace(); }
+
         /* HOMES */
         DelHomeCommand.register(UnknownNetworkCore.getBrigadier());
         HomeCommand.register(UnknownNetworkCore.getBrigadier());
@@ -68,5 +81,7 @@ public class Commands {
         MenuCommand.register(UnknownNetworkCore.getBrigadier());
 
         SuppressRaidCommand.register(UnknownNetworkCore.getBrigadier());
+
+        VoteCommand.register(UnknownNetworkCore.getBrigadier(), buildContext);
     }
 }
