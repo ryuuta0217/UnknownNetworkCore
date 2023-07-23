@@ -35,7 +35,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.unknown.core.gui.view.PaginationView;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
@@ -45,10 +44,13 @@ import net.unknown.launchwrapper.hopper.TagFilter;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import org.bukkit.event.inventory.InventoryClickEvent;
 
-import java.util.Iterator;
+import java.util.*;
 
 public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> {
+    private static final int UPDATE_COOLDOWN_DEFAULT = 10;
+
     private final ConfigureHopperViewBase parentView;
+    private int displayUpdateCooldown = UPDATE_COOLDOWN_DEFAULT;
 
     public FiltersView(ConfigureHopperViewBase parentView) {
         super(parentView.getGui(), parentView.getGui().getMixinHopper().getFilters(), (filter) -> {
@@ -57,10 +59,14 @@ public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> {
                 viewItem = new ItemStack(itemFilter.getItem());
                 if (itemFilter.getNbt() != null) viewItem.setTag(itemFilter.getNbt());
             } else if (filter instanceof TagFilter tagFilter) {
-                Holder<Item> taggedFirstItem = BuiltInRegistries.ITEM.wrapAsHolder(Items.AIR);
                 Iterable<Holder<Item>> taggedItems = BuiltInRegistries.ITEM.getTagOrEmpty(tagFilter.getTag());
-                Iterator<Holder<Item>> taggedItemsIterator = taggedItems.iterator();
-                if (taggedItemsIterator.hasNext()) taggedFirstItem = taggedItemsIterator.next();
+
+                List<Holder<Item>> taggedItemsList = new ArrayList<>();
+                taggedItems.forEach(taggedItemsList::add);
+                Collections.shuffle(taggedItemsList);
+                int randomIndex = new Random().nextInt(taggedItemsList.size() - 1);
+
+                Holder<Item> taggedFirstItem = taggedItemsList.get(randomIndex);
                 viewItem = new ItemStack(taggedFirstItem);
                 if (tagFilter.getNbt() != null) viewItem.setTag(tagFilter.getNbt());
             }
@@ -89,6 +95,15 @@ public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> {
     @Override
     public void onCreateNewButtonClicked(InventoryClickEvent event) {
         NewMessageUtil.sendErrorMessage(event.getWhoClicked(), "まだなんも作れねーよボケ");
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (this.displayUpdateCooldown-- == 0) {
+            this.showPage(this.getCurrentPage());
+            this.displayUpdateCooldown = UPDATE_COOLDOWN_DEFAULT;
+        }
     }
 
     public ConfigureHopperViewBase getParentView() {
