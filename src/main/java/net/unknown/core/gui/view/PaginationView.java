@@ -36,8 +36,10 @@ import net.kyori.adventure.text.Component;
 import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
+import net.unknown.core.managers.RunnableManager;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -55,6 +57,8 @@ public class PaginationView<T, G extends GuiBase> implements View {
     private boolean compact = false; // TODO: Support compact mode
 
     private int currentPage = 1;
+
+    private BukkitTask ticker;
 
     /*
      * Compact mode
@@ -89,6 +93,7 @@ public class PaginationView<T, G extends GuiBase> implements View {
         this.clearInventory();
         this.showPage(1);
         this.placeActionButtons();
+        this.ticker = RunnableManager.runRepeating(this::tick, 1L, 1L);
     }
 
     public void placeActionButtons() {
@@ -227,6 +232,7 @@ public class PaginationView<T, G extends GuiBase> implements View {
 
     @Override
     public void clearInventory() {
+        if (this.ticker != null) this.ticker.cancel();
         this.clearElements();
         this.clearActions();
     }
@@ -248,6 +254,10 @@ public class PaginationView<T, G extends GuiBase> implements View {
     }
 
     public void onCreateNewButtonClicked(InventoryClickEvent event) {
+
+    }
+
+    public void tick() {
 
     }
 }
