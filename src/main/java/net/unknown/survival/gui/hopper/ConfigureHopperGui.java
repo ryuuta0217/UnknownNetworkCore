@@ -34,23 +34,22 @@ package net.unknown.survival.gui.hopper;
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import net.unknown.core.define.DefinedTextColor;
-import net.unknown.core.gui.GuiBase;
+import net.unknown.core.gui.ViewedGuiBase;
 import net.unknown.core.gui.view.View;
 import net.unknown.launchwrapper.hopper.IMixinHopperBlockEntity;
+import net.unknown.survival.gui.hopper.view.ConfigureHopperView;
+import net.unknown.survival.gui.hopper.view.ConfigureHopperViewBase;
 import net.unknown.survival.gui.hopper.view.ManageHopperView;
 import org.bukkit.craftbukkit.v1_20_R1.block.CraftHopper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 
-public class ConfigureHopperGui extends GuiBase {
+public class ConfigureHopperGui extends ViewedGuiBase<ConfigureHopperView> {
     private final HopperBlockEntity hopper;
     private final IMixinHopperBlockEntity mixinHopper;
-    private View view = new ManageHopperView(this);
 
     /*
      *  0  1  2  3  4  5  6  7  8
@@ -61,19 +60,10 @@ public class ConfigureHopperGui extends GuiBase {
      * 45 46 47 48 49 50 51 52 53
      */
     public ConfigureHopperGui(Player opener, HopperBlockEntity hopper, IMixinHopperBlockEntity mixinHopper) {
-        super(opener, 54, Component.text("ホッパーの設定", DefinedTextColor.BLUE), true);
+        super(opener, 54, Component.text("ホッパーの設定", DefinedTextColor.BLUE), true, null);
         this.hopper = hopper;
         this.mixinHopper = mixinHopper;
-    }
-
-    @Override
-    public void onOpen(InventoryOpenEvent event) {
-        this.view.initialize();
-    }
-
-    @Override
-    public void onClick(InventoryClickEvent event) {
-        this.view.onClick(event);
+        this.setView(new ManageHopperView(this));
     }
 
     public HopperBlockEntity getHopper() {
@@ -82,16 +72,6 @@ public class ConfigureHopperGui extends GuiBase {
 
     public IMixinHopperBlockEntity getMixinHopper() {
         return this.mixinHopper;
-    }
-
-    public View getView() {
-        return this.view;
-    }
-
-    public void setView(View newView) {
-        this.view.clearInventory();
-        this.view = newView;
-        this.view.initialize();
     }
 
     public static class Listener implements org.bukkit.event.Listener {

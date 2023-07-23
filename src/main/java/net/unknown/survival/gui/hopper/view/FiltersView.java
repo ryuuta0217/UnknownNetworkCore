@@ -46,7 +46,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 
 import java.util.*;
 
-public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> {
+public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> implements ConfigureHopperView {
     private static final int UPDATE_COOLDOWN_DEFAULT = 10;
 
     private final ConfigureHopperViewBase parentView;
