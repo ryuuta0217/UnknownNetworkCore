@@ -38,6 +38,7 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.managers.RunnableManager;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -216,6 +217,11 @@ public class PaginationView<T, G extends GuiBase> implements View {
                 }
             }
         }
+    }
+
+    @Override
+    public void onUnregistering() {
+        if (this.ticker != null) this.ticker.cancel();
     }
 
     public void clearElements() {
