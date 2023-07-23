@@ -37,6 +37,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSource;
@@ -53,6 +55,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.Entity;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.chat.CustomChatTypes;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.events.PrivateMessageEvent;
 import net.unknown.core.util.BrigadierUtil;
@@ -69,6 +72,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class MsgCommand {
@@ -125,6 +129,12 @@ public class MsgCommand {
 
         MessageArgument.resolveChatMessage(ctx, "メッセージ", (message) -> {
             ChatType.Bound incomingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_INCOMING, ctx.getSource());
+
+            net.kyori.adventure.text.Component adventureMessage = message.requireResult().message().component();
+            adventureMessage = adventureMessage.replaceText((b) -> { // URL Support
+                b.match(Pattern.compile("https?://\\S+")).replacement((r, b2) -> net.kyori.adventure.text.Component.text(b2.content(), net.kyori.adventure.text.format.Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl(b2.content())));
+            });
+            message = message.withUnsignedContent(NewMessageUtil.convertAdventure2Minecraft(adventureMessage));
             OutgoingChatMessage outMessage = OutgoingChatMessage.create(message);
 
             PrivateMessageEvent pEvent = new PrivateMessageEvent(ctx.getSource(), receivers, message);
