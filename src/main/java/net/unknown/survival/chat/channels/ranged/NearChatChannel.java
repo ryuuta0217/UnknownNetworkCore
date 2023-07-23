@@ -48,8 +48,11 @@ public class NearChatChannel extends RangedChatChannel {
 
     @Override
     public void processRangedChat(AsyncChatEvent event, Collection<? extends Player> receivers) {
-        event.viewers().removeIf(audience -> !(audience instanceof Player) || !receivers.contains(audience) && !(audience instanceof ConsoleCommandSender));
-        ChatRenderer currentRenderer = event.renderer();
-        event.renderer(((source, sourceDisplayName, message, viewer) -> currentRenderer.render(source, Component.empty().append(sourceDisplayName).append(Component.text("[" + this.getRange() + "]")), message, viewer)));
+        event.viewers().removeIf(audience -> !(audience instanceof Player) || (!receivers.contains(audience) && !(audience instanceof ConsoleCommandSender)));
+
+        Component originalMessage = event.message();
+        event.message(Component.empty()); // チャットメッセージを遮蔽する
+        ChatRenderer parentRenderer = event.renderer();
+        event.renderer(((source, displayName, message, viewer) -> parentRenderer.render(source, Component.empty().append(displayName).append(Component.text("[" + this.getRange() + "]")), originalMessage, viewer)));
     }
 }
