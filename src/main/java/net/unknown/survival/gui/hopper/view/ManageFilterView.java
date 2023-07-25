@@ -48,7 +48,7 @@ public class ManageFilterView extends ConfigureHopperViewBase {
     public void initialize() {
         FilterType filterMode = this.getGui().getMixinHopper().getFilterMode();
         boolean isFilterEnabled = this.getGui().getMixinHopper().isFilterEnabled();
-        this.getGui().getInventory().setItem(21, new ItemStackBuilder(isFilterEnabled ? Material.LIME_WOOL : Material.RED_WOOL)
+        this.getGui().getInventory().setItem(21, new ItemStackBuilder(isFilterEnabled ? (filterMode == FilterType.WHITELIST ? Material.WHITE_WOOL : Material.BLACK_WOOL) : Material.RED_WOOL)
                 .displayName(isFilterEnabled ? Component.text("フィルター: 有効 (モード: " + filterMode.getLocalizedName() + ")", DefinedTextColor.GREEN) : Component.text("フィルター: 無効", DefinedTextColor.RED))
                 .build());
 
