@@ -31,10 +31,13 @@
 
 package net.unknown.survival.gui.hopper.view;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.view.PaginationView;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
@@ -43,6 +46,7 @@ import net.unknown.launchwrapper.hopper.ItemFilter;
 import net.unknown.launchwrapper.hopper.TagFilter;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.*;
 
@@ -70,6 +74,17 @@ public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> impl
                 viewItem = new ItemStack(taggedFirstItem);
                 if (tagFilter.getNbt() != null) viewItem.setTag(tagFilter.getNbt());
             }
+
+            org.bukkit.inventory.ItemStack bukkitViewItem = MinecraftAdapter.ItemStack.itemStack(viewItem);
+            ItemMeta bukkitViewItemMeta = bukkitViewItem.getItemMeta();
+            List<Component> lore = new ArrayList<>();
+            if (bukkitViewItemMeta.hasLore()) {
+                lore.addAll(bukkitViewItemMeta.lore());
+                lore.add(Component.empty());
+            }
+            lore.add(Component.text("Shift+右クリックで削除", DefinedTextColor.RED, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false));
+            bukkitViewItemMeta.lore(lore);
+            bukkitViewItem.setItemMeta(bukkitViewItemMeta);
             return MinecraftAdapter.ItemStack.itemStack(viewItem);
         }, true, true);
         this.parentView = parentView;
@@ -94,7 +109,7 @@ public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> impl
 
     @Override
     public void onCreateNewButtonClicked(InventoryClickEvent event) {
-        NewMessageUtil.sendErrorMessage(event.getWhoClicked(), "まだなんも作れねーよボケ");
+        this.getGui().setView(new CreateItemFilterView(this));
     }
 
     @Override

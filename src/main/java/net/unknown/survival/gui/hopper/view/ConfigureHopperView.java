@@ -37,5 +37,5 @@ import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 public interface ConfigureHopperView extends View {
     ConfigureHopperGui getGui();
 
-    ConfigureHopperViewBase getParentView();
+    ConfigureHopperView getParentView();
 }

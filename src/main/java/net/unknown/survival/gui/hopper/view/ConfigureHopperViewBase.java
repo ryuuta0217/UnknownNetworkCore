@@ -36,14 +36,14 @@ import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 
 public abstract class ConfigureHopperViewBase implements ConfigureHopperView {
     private final ConfigureHopperGui gui;
-    private final ConfigureHopperViewBase parentView;
+    private final ConfigureHopperView parentView;
 
     public ConfigureHopperViewBase(ConfigureHopperGui gui) {
         this.gui = gui;
         this.parentView = null;
     }
 
-    public ConfigureHopperViewBase(ConfigureHopperViewBase parentView) {
+    public ConfigureHopperViewBase(ConfigureHopperView parentView) {
         this.gui = parentView.getGui();
         this.parentView = parentView;
     }
@@ -54,7 +54,7 @@ public abstract class ConfigureHopperViewBase implements ConfigureHopperView {
     }
 
     @Override
-    public ConfigureHopperViewBase getParentView() {
+    public ConfigureHopperView getParentView() {
         return this.parentView;
     }
 }
