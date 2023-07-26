@@ -34,25 +34,27 @@ package net.unknown.survival.gui.hopper.view;
 import net.unknown.core.gui.view.View;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 
-public abstract class ConfigureHopperViewBase implements View {
+public abstract class ConfigureHopperViewBase implements ConfigureHopperView {
     private final ConfigureHopperGui gui;
-    private final ConfigureHopperViewBase parentView;
+    private final ConfigureHopperView parentView;
 
     public ConfigureHopperViewBase(ConfigureHopperGui gui) {
         this.gui = gui;
         this.parentView = null;
     }
 
-    public ConfigureHopperViewBase(ConfigureHopperViewBase parentView) {
+    public ConfigureHopperViewBase(ConfigureHopperView parentView) {
         this.gui = parentView.getGui();
         this.parentView = parentView;
     }
 
+    @Override
     public ConfigureHopperGui getGui() {
         return this.gui;
     }
 
-    public ConfigureHopperViewBase getParentView() {
+    @Override
+    public ConfigureHopperView getParentView() {
         return this.parentView;
     }
 }

@@ -42,6 +42,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -99,7 +100,7 @@ public class ItemStackBuilder {
 
     public ItemStackBuilder lore(Component... lore) {
         ItemMeta meta = this.original.getItemMeta();
-        meta.lore(Stream.of(lore).map(c -> {
+        meta.lore(Stream.of(lore).filter(Objects::nonNull).map(c -> {
             Style style = c.style();
             if (style.color() == null) style = style.color(DefinedTextColor.WHITE);
             if (!style.hasDecoration(TextDecoration.ITALIC)) style = style.decoration(TextDecoration.ITALIC, false);

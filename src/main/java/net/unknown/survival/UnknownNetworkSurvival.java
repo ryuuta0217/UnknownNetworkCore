@@ -101,7 +101,7 @@ public class UnknownNetworkSurvival {
         Warps.load();
         //PlayerData.loadExists();
         CustomChannels.load();
-        AntiVillagerLag.startLoopTask();
+        //AntiVillagerLag.startLoopTask();
         PlayerDeathListener.load();
 
         CustomEnchantments.initialize();
@@ -113,7 +113,6 @@ public class UnknownNetworkSurvival {
         Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
 
         if (ItemGiveQueue.getInstance() == null) LOGGER.warning("Failed to initialize ItemGiveQueue, but proceed to enable.");
-        if (VoteTicketExchangeItems.getInstance() == null) LOGGER.warning("Failed to initialize VoteTicketExchangeItems, but proceed to enable.");
         MainGuiOpenListener guiOpenListener = new MainGuiOpenListener();
         ListenerManager.registerListener(guiOpenListener);
         ListenerManager.registerListener(new ChatManager());
@@ -158,6 +157,7 @@ public class UnknownNetworkSurvival {
         }
 
         if (isVotifierEnbaled()) {
+            if (VoteTicketExchangeItems.getInstance() == null) LOGGER.warning("Failed to initialize VoteTicketExchangeItems, but proceed to enable.");
             ListenerManager.registerListener(VoteManager.getInstance());
         }
         LOGGER.info("Plugin enabled - Running as Survival mode.");
