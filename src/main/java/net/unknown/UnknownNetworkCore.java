@@ -39,6 +39,7 @@ import net.unknown.core.block.MultiPageChest;
 import net.unknown.core.bossbar.TPSBar;
 import net.unknown.core.chat.CustomChatTypes;
 import net.unknown.core.commands.Commands;
+import net.unknown.core.feature.PrivateMessageListener;
 import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.managers.ListenerManager;
@@ -130,6 +131,7 @@ public class UnknownNetworkCore extends JavaPlugin {
         ListenerManager.registerListener(new Athletics.Listener());
         ListenerManager.registerListener(new MultiPageChest.Listener());
         ListenerManager.registerListener(SkinManager.INSTANCE);
+        ListenerManager.registerListener(new PrivateMessageListener());
         TPSBar.initialize();
         TabListPingManager.startTask();
         PlayerPrefixes.loadAll();
