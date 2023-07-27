@@ -130,7 +130,7 @@ public class MsgCommand {
         MessageArgument.resolveChatMessage(ctx, "メッセージ", (message) -> {
             ChatType.Bound incomingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_INCOMING, ctx.getSource());
 
-            net.kyori.adventure.text.Component adventureMessage = message.requireResult().message().component();
+            net.kyori.adventure.text.Component adventureMessage = NewMessageUtil.convertMinecraft2Adventure(message.decoratedContent());
             adventureMessage = adventureMessage.replaceText((b) -> { // URL Support
                 b.match(Pattern.compile("https?://\\S+")).replacement((r, b2) -> net.kyori.adventure.text.Component.text(b2.content(), net.kyori.adventure.text.format.Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl(b2.content())));
             });
