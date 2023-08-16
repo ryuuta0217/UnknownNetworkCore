@@ -39,6 +39,7 @@ import net.unknown.core.commands.*;
 import net.unknown.core.commands.vanilla.GamemodeCommand;
 import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.commands.vanilla.TimeCommand;
+import net.unknown.core.fireworks.ProgrammedFireworksCommand;
 
 public enum Permissions {
     COMMAND_CRASH("unknown.core.command.crash", "minecraft.command.crash", 4, CrashCommand.class),
@@ -54,6 +55,7 @@ public enum Permissions {
     COMMAND_REPLY("unknown.core.command.reply", 0, MsgCommand.class),
     COMMAND_TELEPORTWORLD("unknown.core.command.teleportworld", 2, TeleportWorldCommand.class),
     COMMAND_TRASH("unknown.core.command.trash", "minecraft.command.trash", 0, TrashCommand.class),
+    COMMAND_PROGRAMMEDFIREWORKS("unknown.core.command.programmedfireworks", "minecraft.command.programmedfireworks", 2, ProgrammedFireworksCommand.class),
 
     FEATURE_USE_COLOR_CODE("unknown.feature.use_color_code", 2, null),
     FEATURE_SEE_VANISHED_PLAYERS("unknown.feature.see_vanished_players", 2, null);

@@ -29,30 +29,55 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.commands;
+package net.unknown.core.fireworks.ref;
 
-import net.unknown.UnknownNetworkCore;
-import net.unknown.core.commands.vanilla.GamemodeCommand;
-import net.unknown.core.commands.vanilla.MsgCommand;
-import net.unknown.core.commands.vanilla.TimeCommand;
-import net.unknown.core.fireworks.ProgrammedFireworksCommand;
+import net.unknown.core.fireworks.ProgrammedFireworks;
+import net.unknown.core.fireworks.model.Program;
+import org.bukkit.Color;
 
-public class Commands {
-    public static void init() {
-        CrashCommand.register(UnknownNetworkCore.getBrigadier());
-        EvalCommand.register(UnknownNetworkCore.getBrigadier());
-        PacketCommand.register(UnknownNetworkCore.getBrigadier());
-        SkinCommand.register(UnknownNetworkCore.getBrigadier());
-        NickCommand.register(UnknownNetworkCore.getBrigadier());
-        SetPoseCommand.register(UnknownNetworkCore.getBrigadier());
-        GamemodeCommand.register(UnknownNetworkCore.getBrigadier());
-        MsgCommand.register(UnknownNetworkCore.getBrigadier());
-        TeleportWorldCommand.register(UnknownNetworkCore.getBrigadier());
-        DeepFakeCommand.register(UnknownNetworkCore.getBrigadier());
-        SkullCommand.register(UnknownNetworkCore.getBrigadier());
-        TrashCommand.register(UnknownNetworkCore.getBrigadier());
-        TimeCommand.register(UnknownNetworkCore.getBrigadier());
-        SwapLocationCommand.register(UnknownNetworkCore.getBrigadier());
-        ProgrammedFireworksCommand.register(UnknownNetworkCore.getBrigadier());
+import javax.annotation.Nullable;
+
+public record ColorReference(@Nullable String programId, String id) {
+    @Nullable
+    public Color get() {
+        if (this.programId != null) {
+            // Program defined color
+            if (!ProgrammedFireworks.hasProgram(this.programId)) return null;
+            Program program = ProgrammedFireworks.getProgram(this.programId);
+            if (!program.hasColor(this.id)) return null;
+            return program.getColor(this.id);
+        } else {
+            // Globally defined color
+            if (!ProgrammedFireworks.hasColor(this.id)) return null;
+            return ProgrammedFireworks.getColor(this.id);
+        }
+    }
+
+    public static ColorReference ofProgramDefined(Program program, String id) {
+        return new ColorReference(program.getId(), id);
+    }
+
+    public static ColorReference ofGloballyDefined(String id) {
+        return new ColorReference(null, id);
+    }
+
+    public String toString() {
+        if (this.programId != null) {
+            return this.programId + ":" + this.id;
+        }
+
+        return this.id;
+    }
+
+    public static ColorReference parse(@Nullable String input) {
+        if (input == null) return null;
+
+        if (input.contains(":")) {
+            String[] split = input.split(":");
+            if (split.length != 2) return null;
+            return ofProgramDefined(ProgrammedFireworks.getProgram(split[0]), split[1]);
+        } else {
+            return ofGloballyDefined(input);
+        }
     }
 }
