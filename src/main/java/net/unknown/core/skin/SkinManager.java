@@ -60,7 +60,7 @@ public class SkinManager implements Listener {
         return PLAYER_SKIN_REPOSITORIES.computeIfAbsent(uniqueId, PlayerSkinRepository::new);
     }
 
-    @EventHandler(priority = EventPriority.LOWEST) // Very early call needed, set LOWEST.
+    @EventHandler(priority = EventPriority.MONITOR) // Floodgate applies Bedrock skin on under MONITOR priority, so we need to apply our skin after that.
     public void onPreLogin(AsyncPlayerPreLoginEvent event) {
         SkinManager.getPlayerSkinRepository(event.getUniqueId()).onPlayerPreLogin(event);
     }
