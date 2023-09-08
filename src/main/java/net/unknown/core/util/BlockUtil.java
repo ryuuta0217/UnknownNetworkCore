@@ -49,20 +49,25 @@ import org.bukkit.craftbukkit.v1_20_R1.event.CraftEventFactory;
 import org.bukkit.event.block.BlockBreakEvent;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 public class BlockUtil {
     public static void searchBlock(BlockPos center, int maxBlockCount, Level level, Block searchTarget, Set<BlockPos> data) {
         if (searchTarget == Blocks.AIR) return;
+        Set<BlockPos> foundPositions = new HashSet<>();
         BlockPos.withinManhattan(center, 1, 1, 1).forEach(pos -> {
             BlockPos immPos = pos.immutable();
             BlockState state = level.getBlockState(immPos);
             if (state.is(searchTarget) && !data.contains(immPos) && data.size() <= maxBlockCount && !center.equals(immPos)) {
                 data.add(immPos);
-                searchBlock(immPos, maxBlockCount, level, searchTarget, data);
+                foundPositions.add(immPos);
             }
         });
+
+        // 周囲ブロックの捜索が全て終了したあと、さらに捜索を続行する(forEachのなかで行ってしまうと、同じ方向ばかりを捜索してしまうため。)
+        foundPositions.forEach(foundPos -> searchBlock(foundPos, maxBlockCount, level, searchTarget, data));
     }
 
     public static void searchBlockWithinManhattan(BlockPos center, int rangeX, int rangeY, int rangeZ, Level level, Block searchTarget, Set<BlockPos> data) {
