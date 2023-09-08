@@ -123,7 +123,11 @@ public class RangedMining implements Listener {
             int durabilityRemaining = handItem.getMaxDamage() - handItem.getDamageValue();
             if(durabilityRemaining != 1) {
                 IGNORE_EVENT.get(player.getUniqueId()).add(blockPos);
-                BlockUtil.destroyBlock(MinecraftAdapter.player(player), MinecraftAdapter.level(event.getBlock().getWorld()), blockPos, MinecraftAdapter.ItemStack.itemStack(player.getInventory().getItemInMainHand()));
+                try {
+                    MinecraftAdapter.player(player).gameMode.destroyBlock(blockPos);
+                } finally {
+                    IGNORE_EVENT.getOrDefault(player.getUniqueId(), Collections.emptySet()).remove(blockPos);
+                }
             } else {
                 player.sendActionBar(Component.text("耐久値が無くなりました", DefinedTextColor.RED));
             }
