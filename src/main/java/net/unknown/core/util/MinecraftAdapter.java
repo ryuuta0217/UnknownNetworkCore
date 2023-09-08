@@ -100,8 +100,8 @@ public class MinecraftAdapter {
         return new Location(level.getWorld(), coordinates.x(), coordinates.y(), coordinates.z(), rotation.y, rotation.x);
     }
 
-    @Nullable
-    public static net.minecraft.server.level.ServerPlayer player(Player bukkit) {
+    @Contract("null -> null")
+    public static net.minecraft.server.level.ServerPlayer player(@Nullable Player bukkit) {
         if (bukkit instanceof CraftPlayer craft) {
             if (craft.getHandle() != null) return craft.getHandle();
         }
