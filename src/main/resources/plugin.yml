@@ -38,6 +38,7 @@ permissions:
       minecraft.command.delhome: true
       minecraft.command.tppet: true
       minecraft.command.fly: true
+      minecraft.command.vote: true
       unknown.survival.command.spawn: true
       unknown.survival.command.home: true
       unknown.survival.command.homes: true
@@ -45,6 +46,7 @@ permissions:
       unknown.survival.command.delhome: true
       unknown.survival.command.tppet: true
       unknown.survival.command.fly: true
+      unknown.survival.command.vote: true
       unknown.survival.open_gui: true
   unknown.survival.admin:
     default: op
@@ -61,4 +63,5 @@ permissions:
       unknown.survival.command.ahomes: true
       unknown.survival.command.findhome: true
       unknown.survival.command.sethomecount: true
+      unknown.survival.command.vote.manage: true
       unknown.survival.notify.mod: true
