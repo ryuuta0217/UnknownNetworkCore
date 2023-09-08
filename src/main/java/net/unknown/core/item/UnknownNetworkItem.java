@@ -11,7 +11,12 @@ import org.bukkit.persistence.PersistentDataType;
 
 public abstract class UnknownNetworkItem {
     public static final NamespacedKey ID_CONTAINER_ID = new NamespacedKey(UnknownNetworkCore.getInstance(), "custom_item_id");
-    public static final UnknownNetworkItem EMPTY = new UnknownNetworkItem(new NamespacedKey("core", "air"));
+    public static final UnknownNetworkItem EMPTY = new UnknownNetworkItem(new NamespacedKey("core", "air")) {
+        @Override
+        public ItemStack createItemStack() {
+            return new ItemStack(Material.AIR);
+        }
+    };
 
     private final NamespacedKey id;
 
