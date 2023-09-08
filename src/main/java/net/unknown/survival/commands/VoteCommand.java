@@ -306,7 +306,7 @@ public class VoteCommand {
         return 0;
     }
 
-    private static int addScriptExchangeItem(CommandContext<CommandSourceStack> ctx, String id, String getItem, String getDisplayItem, String getPrice) {
+    private static int addScriptExchangeItem(CommandContext<CommandSourceStack> ctx, String id, String getItem, String getDisplayItem, String getPrice, String onExchanged) {
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("ID " + id + " が存在するか調べています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         if (VoteTicketExchangeItems.has(id)) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "ID " + id + " は既に使用されています");
@@ -355,8 +355,21 @@ public class VoteCommand {
             return 4;
         }
 
+        NewMessageUtil.sendVerboseMessage(ctx.getSource(), MiniMessage.miniMessage().deserialize("<color:gray><italic><color:#CAD69A>onExchanged</color><color:#FFD00B>(player, choice)</color> をコンパイルしています...</italic></color>"));
+        Function onExchangedFunctionCompiled;
+        try {
+            onExchangedFunctionCompiled = EvalManager.compileFunction("VoteCommand#new", onExchanged);
+        } catch(RuntimeException e) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), Component.empty()
+                    .append(MiniMessage.miniMessage().deserialize("<color:#CAD69A>onExchanged<color:#FFD00B>(player, choice)</color>"))
+                    .appendSpace()
+                    .append(Component.text("のスクリプトをコンパイル中にエラーが発生しました: ")
+                            .append(Component.text(e.getMessage()))));
+            return 5;
+        }
+
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItem.ofScript(getItem, getDisplayItem, getPrice);
+        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItem.ofScript(getItem, getDisplayItem, getPrice, onExchanged);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたインスタンス(" + exchangeItem.hashCode() + ")を追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         VoteTicketExchangeItems.add(id, exchangeItem);

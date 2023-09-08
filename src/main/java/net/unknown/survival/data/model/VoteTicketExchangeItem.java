@@ -85,8 +85,8 @@ public class VoteTicketExchangeItem {
         return new VoteTicketExchangeItem(ItemType.SELECTABLE_CONTAINER, displayItem, price, container, stacks, choices);
     }
 
-    public static VoteTicketExchangeItem ofScript(String getItemScript, String getDisplayItemScript, String getPriceScript) {
-        return new VoteTicketExchangeItem(ItemType.SCRIPT, null, -1, null, null, null, getItemScript, EvalManager.compileFunction("VoteTicketExchangeItem", getItemScript), getDisplayItemScript, EvalManager.compileFunction("VoteTicketExchangeItem", getDisplayItemScript), getPriceScript, EvalManager.compileFunction("VoteTicketExchangeItem", getPriceScript));
+    public static VoteTicketExchangeItem ofScript(String getItemScript, String getDisplayItemScript, String getPriceScript, String onExchangedScript) {
+        return new VoteTicketExchangeItem(ItemType.SCRIPT, null, -1, null, null, null, getItemScript, EvalManager.compileFunction("VoteTicketExchangeItem", getItemScript), getDisplayItemScript, EvalManager.compileFunction("VoteTicketExchangeItem", getDisplayItemScript), getPriceScript, EvalManager.compileFunction("VoteTicketExchangeItem", getPriceScript), onExchangedScript, EvalManager.compileFunction("VoteTicketExchangeItem", onExchangedScript));
     }
 
     public ItemType getType() {
