@@ -1,13 +1,15 @@
 package net.unknown.core.item;
 
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.builder.ItemStackBuilder;
+import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 
 
-public class UnknownNetworkItem {
+public abstract class UnknownNetworkItem {
     public static final NamespacedKey ID_CONTAINER_ID = new NamespacedKey(UnknownNetworkCore.getInstance(), "custom_item_id");
     public static final UnknownNetworkItem EMPTY = new UnknownNetworkItem(new NamespacedKey("core", "air"));
 
@@ -22,6 +24,13 @@ public class UnknownNetworkItem {
         return this.id;
     }
 
+    public abstract ItemStack createItemStack();
+
+    protected ItemStackBuilder createItemStackBuilder(Material type) {
+        return new ItemStackBuilder(type)
+                .custom(is -> is.editMeta(meta -> meta.getPersistentDataContainer().set(ID_CONTAINER_ID, PersistentDataType.STRING, this.getId().asString())));
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (obj == null) return false;
@@ -33,7 +42,7 @@ public class UnknownNetworkItem {
     }
 
     public boolean equals(String str) {
-        return this.equals(NamespacedKey.fromString(str));
+        return this.equals(NamespacedKey.fromString(str != null ? str : ""));
     }
 
     public boolean equals(NamespacedKey key) {
@@ -45,7 +54,7 @@ public class UnknownNetworkItem {
     }
 
     public boolean equals(ItemStack stack) {
-        if (stack.getItemMeta() != null) {
+        if (stack != null && stack.getItemMeta() != null) {
             PersistentDataContainer dataContainer = stack.getItemMeta().getPersistentDataContainer();
             if (dataContainer.has(ID_CONTAINER_ID)) {
                 return this.equals(NamespacedKey.fromString(dataContainer.getOrDefault(ID_CONTAINER_ID, PersistentDataType.STRING, "")));
