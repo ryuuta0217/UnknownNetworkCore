@@ -44,6 +44,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.item.ItemInput;
 import net.minecraft.world.item.ItemStack;
@@ -99,14 +100,12 @@ public class VoteCommand {
                                                 .then(Commands.argument("getItem", StringArgumentType.string())
                                                         .then(Commands.argument("getDisplayItem", StringArgumentType.string())
                                                                 .then(Commands.argument("getPrice", StringArgumentType.string())
-                                                                        .executes(ctx -> addScriptExchangeItem(ctx, StringArgumentType.getString(ctx, "id"), StringArgumentType.getString(ctx, "getItem"), StringArgumentType.getString(ctx, "getDisplayItem"), StringArgumentType.getString(ctx, "getPrice")))))))))
+                                                                        .then(Commands.argument("onExchanged", StringArgumentType.string())
+                                                                                .executes(ctx -> addScriptExchangeItem(ctx, StringArgumentType.getString(ctx, "id"), StringArgumentType.getString(ctx, "getItem"), StringArgumentType.getString(ctx, "getDisplayItem"), StringArgumentType.getString(ctx, "getPrice"), StringArgumentType.getString(ctx, "onExchanged"))))))))))
                         .then(Commands.literal("modify")
                                 .requires(Permissions.COMMAND_VOTE_MANAGE::check)
                                 .then(Commands.argument("id", StringArgumentType.word())
-                                        .suggests((ctx, suggestionsBuilder) -> {
-                                            VoteTicketExchangeItems.getExchangeItems().keySet().forEach(suggestionsBuilder::suggest);
-                                            return suggestionsBuilder.buildFuture();
-                                        })
+                                        .suggests((ctx, suggestionsBuilder) -> SharedSuggestionProvider.suggest(VoteTicketExchangeItems.getExchangeItems().keySet(), suggestionsBuilder))
                                         .then(Commands.literal("item")
                                                 .then(Commands.argument("item", ItemArgument.item(buildContext))
                                                         .then(Commands.argument("count", IntegerArgumentType.integer(1))
@@ -306,7 +305,7 @@ public class VoteCommand {
         return 0;
     }
 
-    private static int addScriptExchangeItem(CommandContext<CommandSourceStack> ctx, String id, String getItem, String getDisplayItem, String getPrice) {
+    private static int addScriptExchangeItem(CommandContext<CommandSourceStack> ctx, String id, String getItem, String getDisplayItem, String getPrice, String onExchanged) {
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("ID " + id + " が存在するか調べています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         if (VoteTicketExchangeItems.has(id)) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "ID " + id + " は既に使用されています");
@@ -314,10 +313,9 @@ public class VoteCommand {
         }
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), MiniMessage.miniMessage().deserialize("<color:gray><italic><color:#CAD69A>getItem</color><color:#FFD00B>(player, choice)</color> をコンパイルしています...</italic></color>"));
-        Function getItemFunctionCompiled;
         try {
             if (!getItem.contains("return")) throw new RuntimeException("return 文がありません");
-            getItemFunctionCompiled = EvalManager.compileFunction("VoteCommand#new", getItem);
+            EvalManager.compileFunction("VoteCommand#new", getItem);
         } catch(RuntimeException e) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), Component.empty()
                     .append(MiniMessage.miniMessage().deserialize("<color:#CAD69A>getItem<color:#FFD00B>(player, choice)</color>"))
@@ -328,10 +326,9 @@ public class VoteCommand {
         }
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), MiniMessage.miniMessage().deserialize("<color:gray><italic><color:#CAD69A>getDisplayItem</color><color:#FFD00B>(player)</color> をコンパイルしています...</italic></color>"));
-        Function getDisplayItemFunctionCompiled;
         try {
             if (!getDisplayItem.contains("return")) throw new RuntimeException("return 文がありません");
-            getDisplayItemFunctionCompiled = EvalManager.compileFunction("VoteCommand#new", getDisplayItem);
+            EvalManager.compileFunction("VoteCommand#new", getDisplayItem);
         } catch(RuntimeException e) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), Component.empty()
                     .append(MiniMessage.miniMessage().deserialize("<color:#CAD69A>getDisplayItem<color:#FFD00B>(player)</color>"))
@@ -342,10 +339,9 @@ public class VoteCommand {
         }
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), MiniMessage.miniMessage().deserialize("<color:gray><italic><color:#CAD69A>getPrice</color><color:#FFD00B>(player)</color> をコンパイルしています...</italic></color>"));
-        Function getPriceFunctionCompiled;
         try {
             if (!getPrice.contains("return")) throw new RuntimeException("return 文がありません");
-            getPriceFunctionCompiled = EvalManager.compileFunction("VoteCommand#new", getPrice);
+            EvalManager.compileFunction("VoteCommand#new", getPrice);
         } catch(RuntimeException e) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), Component.empty()
                     .append(MiniMessage.miniMessage().deserialize("<color:#CAD69A>getPrice<color:#FFD00B>(player)</color>"))
@@ -355,8 +351,20 @@ public class VoteCommand {
             return 4;
         }
 
+        NewMessageUtil.sendVerboseMessage(ctx.getSource(), MiniMessage.miniMessage().deserialize("<color:gray><italic><color:#CAD69A>onExchanged</color><color:#FFD00B>(player, choice)</color> をコンパイルしています...</italic></color>"));
+        try {
+            EvalManager.compileFunction("VoteCommand#new", onExchanged);
+        } catch(RuntimeException e) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), Component.empty()
+                    .append(MiniMessage.miniMessage().deserialize("<color:#CAD69A>onExchanged<color:#FFD00B>(player, choice)</color>"))
+                    .appendSpace()
+                    .append(Component.text("のスクリプトをコンパイル中にエラーが発生しました: ")
+                            .append(Component.text(e.getMessage()))));
+            return 5;
+        }
+
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItem.ofScript(getItem, getDisplayItem, getPrice);
+        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItem.ofScript(getItem, getDisplayItem, getPrice, onExchanged);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたインスタンス(" + exchangeItem.hashCode() + ")を追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         VoteTicketExchangeItems.add(id, exchangeItem);

@@ -102,9 +102,13 @@ public class ChooseExchangeItemView extends PaginationView<VoteTicketExchangeIte
     }
 
     public void exchangeItem(VoteTicketExchangeItem item, @Nullable ItemStack choice) {
-        ItemStack exchangeItem;
+        boolean isScriptMode = item.getType() == VoteTicketExchangeItem.ItemType.SCRIPT && !item.getOnExchangedScript().isEmpty() && item.getOnExchangedFunction() != null;
+
+        ItemStack exchangeItem = null;
         if (item.getType() != VoteTicketExchangeItem.ItemType.SELECTABLE_CONTAINER) {
-            exchangeItem = item.getItem().clone();
+            if (!isScriptMode) {
+                exchangeItem = item.getItem().clone();
+            }
         } else {
             if (choice != null) {
                 exchangeItem = item.getItem(this.getGui().getPlayer(), choice);
@@ -114,9 +118,14 @@ public class ChooseExchangeItemView extends PaginationView<VoteTicketExchangeIte
             }
         }
 
-        if (exchangeItem == null) throw new IllegalStateException("Invalid exchange item - " + item.getType());
+        if (exchangeItem == null && !isScriptMode) throw new IllegalStateException("Invalid exchange item - " + item.getType());
 
-        ItemGiveQueue.queue(this.getGui().getPlayer().getUniqueId(), exchangeItem);
+        if (!isScriptMode) {
+            item.execOnExchangedFunction(this.getGui().getPlayer(), choice);
+        } else {
+            ItemGiveQueue.queue(this.getGui().getPlayer().getUniqueId(), exchangeItem);
+        }
+
         int price = item.getType() == VoteTicketExchangeItem.ItemType.SCRIPT ? item.execGetPriceFunction(this.getGui().getPlayer()) : item.getPrice();
         VoteManager.removePlayerTickets(this.getGui().getPlayer(), price);
         NewMessageUtil.sendMessage(this.getGui().getPlayer(), Component.empty()

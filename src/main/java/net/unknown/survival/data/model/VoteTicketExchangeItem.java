@@ -85,8 +85,8 @@ public class VoteTicketExchangeItem {
         return new VoteTicketExchangeItem(ItemType.SELECTABLE_CONTAINER, displayItem, price, container, stacks, choices);
     }
 
-    public static VoteTicketExchangeItem ofScript(String getItemScript, String getDisplayItemScript, String getPriceScript) {
-        return new VoteTicketExchangeItem(ItemType.SCRIPT, null, -1, null, null, null, getItemScript, EvalManager.compileFunction("VoteTicketExchangeItem", getItemScript), getDisplayItemScript, EvalManager.compileFunction("VoteTicketExchangeItem", getDisplayItemScript), getPriceScript, EvalManager.compileFunction("VoteTicketExchangeItem", getPriceScript));
+    public static VoteTicketExchangeItem ofScript(String getItemScript, String getDisplayItemScript, String getPriceScript, String onExchangedScript) {
+        return new VoteTicketExchangeItem(ItemType.SCRIPT, null, -1, null, null, null, getItemScript, EvalManager.compileFunction("VoteTicketExchangeItem", getItemScript), getDisplayItemScript, EvalManager.compileFunction("VoteTicketExchangeItem", getDisplayItemScript), getPriceScript, EvalManager.compileFunction("VoteTicketExchangeItem", getPriceScript), onExchangedScript, EvalManager.compileFunction("VoteTicketExchangeItem", onExchangedScript));
     }
 
     public ItemType getType() {
@@ -200,6 +200,7 @@ public class VoteTicketExchangeItem {
         ScriptableObject.putConstProperty(globalCopy, "getItem", this.getGetItemFunction());
         ScriptableObject.putConstProperty(globalCopy, "getDisplayItem", this.getGetDisplayItemFunction());
         ScriptableObject.putConstProperty(globalCopy, "getPrice", this.getGetPriceFunction());
+        ScriptableObject.putConstProperty(globalCopy, "onExchanged", this.getOnExchangedFunction());
         return globalCopy;
     }
 
@@ -269,6 +270,26 @@ public class VoteTicketExchangeItem {
         return price;
     }
 
+    public String getOnExchangedScript() {
+        return this.additionalData[9] instanceof String script ? script : null;
+    }
+
+    public void setOnExchangedScript(String script) {
+        if (this.type != ItemType.SCRIPT) throw new IllegalStateException("Cannot set function for non-script item!");
+        this.additionalData[9] = script;
+        this.additionalData[10] = EvalManager.compileFunction("VoteTicketExchangeItemScript", script);
+        RunnableManager.runAsync(VoteTicketExchangeItems.getInstance()::save);
+    }
+
+    public Function getOnExchangedFunction() {
+        return this.additionalData[10] instanceof Function function ? function : null;
+    }
+
+    public void execOnExchangedFunction(HumanEntity player, @Nullable ItemStack choice) {
+        if (this.type != ItemType.SCRIPT) throw new IllegalStateException("Cannot execute function for non-script item!");
+        this.getOnExchangedFunction().call(EvalManager.getRhinoContext(), this.getExecutionScope(), null, new Object[]{player, choice});
+    }
+
     @Nullable
     public static VoteTicketExchangeItem load(ConfigurationSection config) {
         if (!config.isSet("type")) return null;
@@ -304,6 +325,9 @@ public class VoteTicketExchangeItem {
         String getPrice = config.isSet("getPrice") ? config.getString("getPrice") : null;
         Function getPriceFunction = getPrice != null ? EvalManager.compileFunction("VoteTicketExchangeItem", getPrice) : null;
 
+        String onExchanged = config.isSet("onExchanged") ? config.getString("onExchanged") : null;
+        Function onExchangedFunction = onExchanged != null ? EvalManager.compileFunction("VoteTicketExchangeItem", onExchanged) : null;
+
 
         // Validate
         if (type == ItemType.SIMPLE && (item == null)) return null;
@@ -313,7 +337,7 @@ public class VoteTicketExchangeItem {
         if (type == ItemType.SCRIPT && (getItem == null || getDisplayItem == null || getPrice == null)) return null;
         // End of validate
 
-        return new VoteTicketExchangeItem(type, item, price, container, stacks, choices, getItem, getItemFunction, getDisplayItem, getDisplayItemFunction, getPrice, getPriceFunction);
+        return new VoteTicketExchangeItem(type, item, price, container, stacks, choices, getItem, getItemFunction, getDisplayItem, getDisplayItemFunction, getPrice, getPriceFunction, onExchanged, onExchangedFunction);
     }
 
     public void save(ConfigurationSection config) {
@@ -333,6 +357,7 @@ public class VoteTicketExchangeItem {
             config.set("getItem", this.additionalData[3]);
             config.set("getDisplayItem", this.additionalData[5]);
             config.set("getPrice", this.additionalData[7]);
+            config.set("onExchanged", this.additionalData[9]);
         }
     }
 
