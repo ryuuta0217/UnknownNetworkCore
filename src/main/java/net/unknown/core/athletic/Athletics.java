@@ -467,6 +467,7 @@ public class Athletics {
                 Player player = (Player) event.getEntity();
                 PlayerProgress playerProgress = Athletics.getProgress(player);
                 if (playerProgress != null && playerProgress.isActive()) {
+                    player.setGliding(false);
                     event.setCancelled(true);
                 }
             }
