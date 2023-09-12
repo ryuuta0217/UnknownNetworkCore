@@ -405,9 +405,11 @@ public class Athletics {
                 root.set("diff-time", this.diffTime);
 
                 ConfigurationSection savedInventorySection = root.createSection("saved-inventory");
-                this.inventory.forEach((slot, item) -> {
-                    savedInventorySection.set(String.valueOf(slot), item);
-                });
+                if (this.isActive()) {
+                    this.inventory.forEach((slot, item) -> {
+                        savedInventorySection.set(String.valueOf(slot), item);
+                    });
+                }
             }
 
             try {
