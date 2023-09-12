@@ -33,13 +33,9 @@ package net.unknown.core.athletic;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.Util;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
-import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
@@ -58,7 +54,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.player.*;
 
