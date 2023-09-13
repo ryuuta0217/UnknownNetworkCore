@@ -35,17 +35,17 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
 public class UnknownNetworkItemStack {
-    private final ItemStack stack;
+    private final ItemStack handle;
     private final UnknownNetworkItem item;
 
-    public UnknownNetworkItemStack(ItemStack stack, UnknownNetworkItem item) {
-        if (!item.equals(stack)) throw new IllegalArgumentException("Item mismatch (expected: " + item.getId() + ", actual: " + stack.getItemMeta().getPersistentDataContainer().getOrDefault(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, "unknown (vanilla?)") + ")");
-        this.stack = stack;
+    public UnknownNetworkItemStack(ItemStack handle, UnknownNetworkItem item) {
+        if (!item.equals(handle)) throw new IllegalArgumentException("Item mismatch (expected: " + item.getId() + ", actual: " + handle.getItemMeta().getPersistentDataContainer().getOrDefault(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, "unknown (vanilla?)") + ")");
+        this.handle = handle;
         this.item = item;
     }
 
-    public ItemStack getBukkitStack() {
-        return this.stack;
+    public ItemStack getHandle() {
+        return this.handle;
     }
 
     public UnknownNetworkItem getItem() {
