@@ -44,8 +44,8 @@ public abstract class UnknownNetworkItem {
     public static final NamespacedKey ID_CONTAINER_ID = new NamespacedKey(UnknownNetworkCore.getInstance(), "custom_item_id");
     public static final UnknownNetworkItem EMPTY = new UnknownNetworkItem(new NamespacedKey("core", "air")) {
         @Override
-        public ItemStack createItemStack() {
-            return new ItemStack(Material.AIR);
+        public UnknownNetworkItemStack<? extends UnknownNetworkItem> createItemStack() {
+            return new UnknownNetworkItemStack<>(new ItemStack(Material.AIR), this);
         }
     };
 
@@ -60,7 +60,7 @@ public abstract class UnknownNetworkItem {
         return this.id;
     }
 
-    public abstract ItemStack createItemStack();
+    public abstract UnknownNetworkItemStack<? extends UnknownNetworkItem> createItemStack();
 
     protected ItemStackBuilder createItemStackBuilder(Material type) {
         return new ItemStackBuilder(type)
