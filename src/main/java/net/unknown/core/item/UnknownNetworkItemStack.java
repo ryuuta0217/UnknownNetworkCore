@@ -34,11 +34,11 @@ package net.unknown.core.item;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-public class UnknownNetworkItemStack {
+public class UnknownNetworkItemStack<T extends UnknownNetworkItem> {
     private final ItemStack handle;
-    private final UnknownNetworkItem item;
+    private final T item;
 
-    public UnknownNetworkItemStack(ItemStack handle, UnknownNetworkItem item) {
+    public UnknownNetworkItemStack(ItemStack handle, T item) {
         if (!item.equals(handle)) throw new IllegalArgumentException("Item mismatch (expected: " + item.getId() + ", actual: " + handle.getItemMeta().getPersistentDataContainer().getOrDefault(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, "unknown (vanilla?)") + ")");
         this.handle = handle;
         this.item = item;
