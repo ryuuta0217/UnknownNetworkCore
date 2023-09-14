@@ -32,8 +32,10 @@
 package net.unknown.survival.item;
 
 import net.unknown.core.item.UnknownNetworkItem;
+import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.feature.MendingSupportStick;
 import org.bukkit.NamespacedKey;
+import org.bukkit.event.Listener;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -59,6 +61,9 @@ public class Items {
         }
         if (!id.equals(item.getId())) throw new IllegalArgumentException("Item id mismatch (expected: " + id + ", actual: " + item.getId() + ")");
         REGISTRY.put(id, item);
+        if (item instanceof Listener itemListener) {
+            ListenerManager.registerListener(itemListener);
+        }
         return item;
     }
 
