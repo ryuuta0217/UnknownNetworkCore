@@ -34,6 +34,7 @@ package net.unknown.survival.wrapper.economy;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.unknown.survival.UnknownNetworkSurvival;
+import net.unknown.survival.wrapper.economy.event.PlayerDepositEvent;
 import net.unknown.survival.wrapper.economy.event.PlayerWithdrawEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -169,7 +170,12 @@ public class WrappedEconomy implements Economy {
 
     @Override
     public EconomyResponse withdrawPlayer(OfflinePlayer player, double amount) {
-        return this.original.withdrawPlayer(player, amount);
+        double before = this.getBalance(player);
+        EconomyResponse response = this.original.withdrawPlayer(player, amount);
+        if (response.type == EconomyResponse.ResponseType.SUCCESS) {
+            new PlayerWithdrawEvent(player, amount, before, response.balance).callEvent();
+        }
+        return response;
     }
 
     @Override
@@ -186,12 +192,22 @@ public class WrappedEconomy implements Economy {
     @Override
     @Deprecated
     public EconomyResponse depositPlayer(String playerName, double amount) {
-        return this.original.depositPlayer(playerName, amount);
+        double before = this.getBalance(playerName);
+        EconomyResponse response = this.original.depositPlayer(playerName, amount);
+        if (response.type == EconomyResponse.ResponseType.SUCCESS) {
+            new PlayerDepositEvent(Bukkit.getOfflinePlayer(playerName), amount, before, response.balance).callEvent();
+        }
+        return response;
     }
 
     @Override
     public EconomyResponse depositPlayer(OfflinePlayer player, double amount) {
-        return this.original.depositPlayer(player, amount);
+        double before = this.getBalance(player);
+        EconomyResponse response = this.original.depositPlayer(player, amount);
+        if (response.type == EconomyResponse.ResponseType.SUCCESS) {
+            new PlayerDepositEvent(player, amount, before, response.balance).callEvent();
+        }
+        return response;
     }
 
     @Override
