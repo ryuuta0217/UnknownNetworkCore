@@ -1,0 +1,50 @@
+SURVIVAL:
+  athletic: 009a7240-bd01-407e-b342-c8c3791e72f0
+  started-at: 1694515074432
+  laps: {}
+  last-logout-time: -1
+  diff-time: 0
+  saved-inventory:
+    '0': '{Count:1b,id:"minecraft:dirt"}'
+    '1': '{Count:0b,id:"minecraft:air"}'
+    '2': '{Count:0b,id:"minecraft:air"}'
+    '3': '{Count:0b,id:"minecraft:air"}'
+    '4': '{Count:0b,id:"minecraft:air"}'
+    '5': '{Count:0b,id:"minecraft:air"}'
+    '6': '{Count:0b,id:"minecraft:air"}'
+    '7': '{Count:0b,id:"minecraft:air"}'
+    '8': '{Count:0b,id:"minecraft:air"}'
+    '9': '{Count:32b,id:"minecraft:egg",tag:{display:{Name:''{"text":"モンスターボール", "color":"red",
+      "bold":"true", "italic":"false"}''}}}'
+    '10': '{Count:1b,id:"minecraft:redstone"}'
+    '11': '{Count:1b,id:"minecraft:lever"}'
+    '12': '{Count:28b,id:"minecraft:oak_log"}'
+    '13': '{Count:1b,id:"minecraft:chicken_spawn_egg",tag:{EntityTag:{AbsorptionAmount:0.0f,Age:0,AgeLocked:0b,Air:300s,ArmorDropChances:[0.085f,0.085f,0.085f,0.085f],ArmorItems:[{},{},{},{}],Attributes:[{Base:0.25d,Name:"minecraft:generic.movement_speed"},{Base:4.0d,Name:"minecraft:generic.max_health"}],Brain:{memories:{}},Bukkit.Aware:1b,Bukkit.updateLevel:2,CanPickUpLoot:0b,DeathTime:0s,EggLayTime:2113,FallDistance:0.0f,FallFlying:0b,Fire:0s,ForcedAge:0,HandDropChances:[0.085f,0.085f],HandItems:[{},{}],Health:4.0f,HurtByTimestamp:32988,HurtTime:0s,InLove:0,Invulnerable:0b,IsChickenJockey:0b,LeftHanded:0b,NoAI:1b,OnGround:0b,Paper.Origin:[6.5d,-59.5d,-26.5d],Paper.OriginWorld:[I;149866841,1696153611,-1197888602,-1452313054],Paper.SpawnReason:"NATURAL",PersistenceRequired:0b,PortalCooldown:0,Spigot.ticksLived:33018,UUID:[I;1566999445,-724876152,-1725394952,-337620437],WorldUUIDLeast:-5144892366998505950L,WorldUUIDMost:643673182545985547L,id:"minecraft:chicken"}}}'
+    '14': '{Count:2b,id:"minecraft:beef"}'
+    '15': '{Count:1b,id:"minecraft:shulker_box",tag:{BlockEntityTag:{Items:[{Count:32b,Slot:0b,id:"minecraft:stick"}],id:"minecraft:shulker_box",x:0,y:0,z:0}}}'
+    '16': '{Count:3b,id:"minecraft:paper",tag:{Enchantments:[{id:"minecraft:protection",lvl:1s}],HideFlags:1,PublicBukkitValues:{"unknown-network:voted_player":"65922e55-04b3-48c2-a4f7-5b393692adf4"},display:{Lore:[''{"bold":true,"italic":false,"color":"aqua","text":"投票でもらえるチケット"}'',''{"italic":false,"color":"white","text":""}'',''{"italic":false,"color":"white","text":""}'',''{"italic":false,"color":"gray","text":"投票者:
+      Yncryption"}''],Name:''{"bold":true,"italic":false,"color":"gold","text":"投票チケット"}''}}}'
+    '17': '{Count:0b,id:"minecraft:air"}'
+    '18': '{Count:0b,id:"minecraft:air"}'
+    '19': '{Count:0b,id:"minecraft:air"}'
+    '20': '{Count:0b,id:"minecraft:air"}'
+    '21': '{Count:0b,id:"minecraft:air"}'
+    '22': '{Count:0b,id:"minecraft:air"}'
+    '23': '{Count:0b,id:"minecraft:air"}'
+    '24': '{Count:0b,id:"minecraft:air"}'
+    '25': '{Count:0b,id:"minecraft:air"}'
+    '26': '{Count:0b,id:"minecraft:air"}'
+    '27': '{Count:0b,id:"minecraft:air"}'
+    '28': '{Count:0b,id:"minecraft:air"}'
+    '29': '{Count:0b,id:"minecraft:air"}'
+    '30': '{Count:0b,id:"minecraft:air"}'
+    '31': '{Count:0b,id:"minecraft:air"}'
+    '32': '{Count:0b,id:"minecraft:air"}'
+    '33': '{Count:0b,id:"minecraft:air"}'
+    '34': '{Count:0b,id:"minecraft:air"}'
+    '35': '{Count:0b,id:"minecraft:air"}'
+    '36': '{Count:0b,id:"minecraft:air"}'
+    '37': '{Count:0b,id:"minecraft:air"}'
+    '38': '{Count:0b,id:"minecraft:air"}'
+    '39': '{Count:0b,id:"minecraft:air"}'
+    '40': '{Count:0b,id:"minecraft:air"}'

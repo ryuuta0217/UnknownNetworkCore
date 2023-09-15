@@ -120,7 +120,7 @@ public class ChooseExchangeItemView extends PaginationView<VoteTicketExchangeIte
 
         if (exchangeItem == null && !isScriptMode) throw new IllegalStateException("Invalid exchange item - " + item.getType());
 
-        if (!isScriptMode) {
+        if (isScriptMode) {
             item.execOnExchangedFunction(this.getGui().getPlayer(), choice);
         } else {
             ItemGiveQueue.queue(this.getGui().getPlayer().getUniqueId(), exchangeItem);

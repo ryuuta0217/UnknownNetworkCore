@@ -33,13 +33,9 @@ package net.unknown.core.athletic;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.Util;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
-import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
@@ -58,7 +54,6 @@ import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityToggleGlideEvent;
 import org.bukkit.event.player.*;
 
@@ -405,9 +400,11 @@ public class Athletics {
                 root.set("diff-time", this.diffTime);
 
                 ConfigurationSection savedInventorySection = root.createSection("saved-inventory");
-                this.inventory.forEach((slot, item) -> {
-                    savedInventorySection.set(String.valueOf(slot), item);
-                });
+                if (this.isActive()) {
+                    this.inventory.forEach((slot, item) -> {
+                        savedInventorySection.set(String.valueOf(slot), item);
+                    });
+                }
             }
 
             try {
@@ -467,6 +464,7 @@ public class Athletics {
                 Player player = (Player) event.getEntity();
                 PlayerProgress playerProgress = Athletics.getProgress(player);
                 if (playerProgress != null && playerProgress.isActive()) {
+                    player.setGliding(false);
                     event.setCancelled(true);
                 }
             }
