@@ -163,7 +163,7 @@ public class WrappedEconomy implements Economy {
         double before = this.getBalance(playerName);
         EconomyResponse response = this.original.withdrawPlayer(playerName, amount);
         if (response.type == EconomyResponse.ResponseType.SUCCESS) {
-            new PlayerWithdrawEvent(Bukkit.getOfflinePlayer(playerName), amount, before, response.balance).callEvent();
+            new PlayerWithdrawEvent(!Bukkit.isPrimaryThread(), Bukkit.getOfflinePlayer(playerName), amount, before, response.balance).callEvent();
         }
         return response;
     }
@@ -173,7 +173,7 @@ public class WrappedEconomy implements Economy {
         double before = this.getBalance(player);
         EconomyResponse response = this.original.withdrawPlayer(player, amount);
         if (response.type == EconomyResponse.ResponseType.SUCCESS) {
-            new PlayerWithdrawEvent(player, amount, before, response.balance).callEvent();
+            new PlayerWithdrawEvent(!Bukkit.isPrimaryThread(), player, amount, before, response.balance).callEvent();
         }
         return response;
     }
@@ -195,7 +195,7 @@ public class WrappedEconomy implements Economy {
         double before = this.getBalance(playerName);
         EconomyResponse response = this.original.depositPlayer(playerName, amount);
         if (response.type == EconomyResponse.ResponseType.SUCCESS) {
-            new PlayerDepositEvent(Bukkit.getOfflinePlayer(playerName), amount, before, response.balance).callEvent();
+            new PlayerDepositEvent(!Bukkit.isPrimaryThread(), Bukkit.getOfflinePlayer(playerName), amount, before, response.balance).callEvent();
         }
         return response;
     }
@@ -205,7 +205,7 @@ public class WrappedEconomy implements Economy {
         double before = this.getBalance(player);
         EconomyResponse response = this.original.depositPlayer(player, amount);
         if (response.type == EconomyResponse.ResponseType.SUCCESS) {
-            new PlayerDepositEvent(player, amount, before, response.balance).callEvent();
+            new PlayerDepositEvent(!Bukkit.isPrimaryThread(), player, amount, before, response.balance).callEvent();
         }
         return response;
     }
