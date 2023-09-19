@@ -33,7 +33,12 @@ package net.unknown.survival.feature;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.item.Items;
 import net.unknown.core.item.UnknownNetworkItem;
@@ -41,18 +46,18 @@ import net.unknown.core.item.UnknownNetworkItemStack;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.craftbukkit.v1_20_R1.event.CraftEventFactory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerItemMendEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import javax.annotation.Nullable;
+import java.util.*;
 
 public class MendingSupportStick extends UnknownNetworkItem implements Listener {
     public MendingSupportStick() {
@@ -74,7 +79,7 @@ public class MendingSupportStick extends UnknownNetworkItem implements Listener 
         event.setCancelled(true);
 
         Stack stack = new Stack(event.getItem());
-        int result = this.applyMending(event.getPlayer(), stack);
+        int result = this.processMending(event.getPlayer(), stack);
 
         if (result == 0) {
             NewMessageUtil.sendMessage(event.getPlayer(), Component.text("修繕が適用されました。", DefinedTextColor.GREEN));
@@ -94,14 +99,14 @@ public class MendingSupportStick extends UnknownNetworkItem implements Listener 
      * @param stack 修繕棒
      * @return 0 の場合は修繕が適用されたことを表します。<br />1 の場合は修繕棒が使用できないことを表します。<br />2 の場合は経験値レベルが足りないことを表します。<br />3 の場合は所持金が足りないことを表します。
      */
-    private int applyMending(Player player, Stack stack) {
+    private int processMending(Player player, Stack stack) {
         if (!stack.canUse()) return 1;
         if (player.getLevel() == 0) return 2;
         if (!WrappedEconomy.INSTANCE.has(player, 1000)) return 3;
 
         int usesExp = getXpNeededForNextLevel(player.getLevel() - 1);
         player.setLevel(player.getLevel() - 1);
-        int remainExp = player.applyMending(usesExp);
+        int remainExp = this.applyMending(player, usesExp, true);
         player.giveExp(remainExp, false);
         float expUseRate = (float) remainExp / (float) usesExp;
 
@@ -110,6 +115,63 @@ public class MendingSupportStick extends UnknownNetworkItem implements Listener 
 
         stack.setUses(stack.getUses() + 1); // 使用回数++
         return 0;
+    }
+
+    private int applyMending(Player player, int amount, boolean useAllExperience) {
+        return applyMending0(player, amount, useAllExperience, null);
+    }
+
+    // Copied from net.minecraft.world.entity.ExperienceOrb#repairPlayerItems(Player, int) and modified
+    private int applyMending0(Player player, int amount, boolean useAll, @Nullable ExperienceOrb dummyExpOrb) {
+        Map.Entry<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack> mendingTargetItemEntry = EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, MinecraftAdapter.player(player), net.minecraft.world.item.ItemStack::isDamaged);
+
+        if (mendingTargetItemEntry != null) {
+            net.minecraft.world.item.ItemStack mendingTargetItem = mendingTargetItemEntry.getValue();
+
+            // Unknown Network start
+            if (dummyExpOrb == null) { // if provided dummyExpOrb is null (first call, maybe?), create new orb.
+                dummyExpOrb = EntityType.EXPERIENCE_ORB.create(MinecraftAdapter.level(player.getWorld()));
+            }
+
+            if (dummyExpOrb != null) { // if dummyExpOrb is still null, something went wrong.
+                // ExperienceOrb Initialization
+                dummyExpOrb.value = amount;
+                dummyExpOrb.spawnReason = org.bukkit.entity.ExperienceOrb.SpawnReason.CUSTOM;
+                dummyExpOrb.setPosRaw(player.getX(), player.getY(), player.getZ());
+                // ExperienceOrb Initialization
+                // Unknown Network end
+
+                int repairAmount = Math.min(dummyExpOrb.xpToDurability(amount), mendingTargetItem.getDamageValue()); // デフォルトでは経験値ポイントの2倍の値が耐久値の回復量になる。耐久値の回復量がダメージ量を上回る場合は、ダメージを全て回復する。
+
+                // CraftBukkit start
+                PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(MinecraftAdapter.player(player), dummyExpOrb, mendingTargetItem, mendingTargetItemEntry.getKey(), repairAmount, dummyExpOrb::durabilityToXp);
+                repairAmount = event.getRepairAmount();
+                if (event.isCancelled()) {
+                    return amount;
+                }
+                // CraftBukkit end
+
+                mendingTargetItem.setDamageValue(mendingTargetItem.getDamageValue() - repairAmount);
+
+                int remainingAmount = amount - event.getDurabilityToXpOperation().applyAsInt(repairAmount); // Paper
+
+                // Paper start
+                if (repairAmount == 0 && amount == remainingAmount) { // if repair amount is 0 and no xp was removed, don't do recursion; treat as cancelled
+                    return remainingAmount;
+                }
+                // Paper end
+
+                // dummyExpOrb.value = remainingAmount; // CraftBukkit - update exp value of orb for PlayerItemMendEvent calls // Unknown Network - disabled, because it's not needed. if recursive called, it will be updated in next call.
+
+                // Unknown Network start
+                amount -= event.getDurabilityToXpOperation().applyAsInt(repairAmount); // Unknown Network - update amount for recursion
+            }
+            // Unknown Network end
+
+            return amount > 0 && useAll ? this.applyMending0(player, amount, useAll, dummyExpOrb) : amount;
+        } else {
+            return amount;
+        }
     }
 
     public static int getXpNeededForNextLevel(int level) {
