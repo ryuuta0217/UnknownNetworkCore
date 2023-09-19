@@ -39,7 +39,8 @@ public abstract class PlayerBalanceChangedEvent extends Event {
     private final double beforeBalance;
     private final double afterBalance;
 
-    public PlayerBalanceChangedEvent(OfflinePlayer player, double beforeBalance, double afterBalance) {
+    public PlayerBalanceChangedEvent(boolean isAsync, OfflinePlayer player, double beforeBalance, double afterBalance) {
+        super(isAsync);
         this.player = player;
         this.beforeBalance = beforeBalance;
         this.afterBalance = afterBalance;
