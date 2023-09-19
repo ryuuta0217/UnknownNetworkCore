@@ -31,11 +31,9 @@
 
 package com.ryuuta0217.util;
 
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
+import org.json.JSONObject;
 
-import java.util.Map;
+import java.io.IOException;
 import java.util.UUID;
 
 // See: https://wiki.vg/Mojang_API
@@ -43,26 +41,20 @@ public class MojangApi {
     // GET https://sessionserver.mojang.com/session/minecraft/profile/<uuid>
     // response json: {"id":"<profile identifier>","name":"<player name>","properties":[{"name":"textures","value":"<base64 string>","signature":"<base64 string; signed data using Yggdrasil's private key>"}]}
     public static String getName(UUID uniqueId) {
-        HTTPUtil request = new HTTPUtil("GET", "https://sessionserver.mojang.com/session/minecraft/profile/" + uniqueId.toString());
-        String responseRaw = request.request();
-        JSONObject response = null;
         try {
-            response = (JSONObject) new JSONParser().parse(responseRaw);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+            return new JSONObject(HTTPFetch.fetchGet("https://sessionserver.mojang.com/session/minecraft/profile/" + uniqueId.toString())
+                    .sentAndReadAsString()).getString("name");
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
-        return (String) response.get("name");
     }
 
     public static UUID getUUID(String name) {
-        HTTPUtil request = new HTTPUtil("GET", "https://api.mojang.com/users/profiles/minecraft/" + name);
-        String responseRaw = request.request();
-        JSONObject response = null;
         try {
-            response = (JSONObject) new JSONParser().parse(responseRaw);
-        } catch (ParseException e) {
-            throw new RuntimeException(e);
+            return UUID.fromString(new JSONObject(HTTPFetch.fetchGet("https://api.mojang.com/users/profiles/minecraft/" + name)
+                    .sentAndReadAsString()).getString("id").replaceAll("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
+        } catch (IOException e) {
+            throw new IllegalStateException(e);
         }
-        return UUID.fromString((String) response.get("id"));
     }
 }

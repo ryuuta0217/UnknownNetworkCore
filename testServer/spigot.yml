@@ -63,6 +63,7 @@ stats:
   forced-stats: {}
 world-settings:
   default:
+    seed-trailruins: 83469867
     seed-ancientcity: 20083232
     seed-buriedtreasure: 10387320
     seed-mineshaft: default

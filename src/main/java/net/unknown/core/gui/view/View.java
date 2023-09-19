@@ -32,11 +32,18 @@
 package net.unknown.core.gui.view;
 
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 
 public interface View {
     void initialize();
 
     void onClick(InventoryClickEvent event);
+
+    default void onClose(InventoryCloseEvent event) {}
+
+    default void onUnregistering() {}
+
+    default void onUnregistered() {}
 
     void clearInventory();
 }

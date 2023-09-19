@@ -84,7 +84,7 @@ public class ListenerManager {
         }, timeType.toTick(timeout));
 
         registerEventListener(eventClass, dummyListener, priority, ignoreCancelled, (listener, event) -> {
-            if (condition.test((T) event)) {
+            if (eventClass.isInstance(event) && condition.test((T) event)) {
                 timeoutTask.cancel();
                 HandlerList.unregisterAll(listener);
                 action.accept((T) event);

@@ -32,14 +32,14 @@
 package net.unknown.core.commands.vanilla;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
-import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -50,9 +50,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.entity.Entity;
-import net.unknown.UnknownNetworkCore;
 import net.unknown.core.chat.CustomChatTypes;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.events.PrivateMessageEvent;
 import net.unknown.core.util.BrigadierUtil;
@@ -62,14 +61,12 @@ import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.EntityType;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.regex.Pattern;
 
 public class MsgCommand {
     //public static final Set<UUID> MESSAGE_SPY_DISABLED_PLAYERS = new HashSet<>();
@@ -125,6 +122,12 @@ public class MsgCommand {
 
         MessageArgument.resolveChatMessage(ctx, "メッセージ", (message) -> {
             ChatType.Bound incomingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_INCOMING, ctx.getSource());
+
+            net.kyori.adventure.text.Component adventureMessage = NewMessageUtil.convertMinecraft2Adventure(message.decoratedContent());
+            adventureMessage = adventureMessage.replaceText((b) -> { // URL Support
+                b.match(Pattern.compile("https?://\\S+")).replacement((r, b2) -> net.kyori.adventure.text.Component.text(b2.content(), net.kyori.adventure.text.format.Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl(b2.content())));
+            });
+            message = message.withUnsignedContent(NewMessageUtil.convertAdventure2Minecraft(adventureMessage));
             OutgoingChatMessage outMessage = OutgoingChatMessage.create(message);
 
             PrivateMessageEvent pEvent = new PrivateMessageEvent(ctx.getSource(), receivers, message);
@@ -138,7 +141,6 @@ public class MsgCommand {
                 source.sendChatMessage(outMessage, false, outgoingBound);
                 boolean filterMask = source.shouldFilterMessageTo(receiver);
                 receiver.sendChatMessage(outMessage, filterMask, incomingBound);
-                receiver.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.5f, 1);
                 PlayerData.of(receiver.getUUID()).getChatData().setPrivateMessageReplyTarget(source.getEntity() != null ? source.getEntity().getUUID() : SERVER_UUID);
                 filtered |= filterMask && message.isFullyFiltered();
             }

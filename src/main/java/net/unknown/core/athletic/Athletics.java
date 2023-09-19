@@ -33,28 +33,29 @@ package net.unknown.core.athletic;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.Util;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.ShulkerBoxBlock;
-import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
 import net.unknown.UnknownNetworkCore;
+import net.unknown.core.builder.ItemStackBuilder;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.shared.SharedConstants;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftInventoryPlayer;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.entity.EntityToggleGlideEvent;
+import org.bukkit.event.player.*;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -189,6 +190,7 @@ public class Athletics {
 
         private final UUID playerUniqueId;
         private Athletic active;
+        private boolean isActive;
         private long startedAt = -1L;
         private Athletic.Checkpoint checkpoint;
         private Map<Athletic.Checkpoint, Long> laps = new HashMap<>();
@@ -212,7 +214,7 @@ public class Athletics {
         }
 
         public boolean isActive() {
-            return this.active != null;
+            return isActive;
         }
 
         @Nullable
@@ -248,6 +250,7 @@ public class Athletics {
         public void startAthletic(Athletic athletic) {
             if (Bukkit.getOfflinePlayer(this.playerUniqueId).isOnline()) {
                 this.active = athletic;
+                this.isActive = true;
                 this.startedAt = System.currentTimeMillis();
                 this.checkpoint = null;
                 this.laps.clear();
@@ -263,6 +266,16 @@ public class Athletics {
                     }
                     this.save();
                     playerInventory.clearContent();
+
+                    if (!this.active.getCheckpoints().isEmpty()) {
+                        player.getInventory().setItem(0, new ItemStackBuilder(Material.LIME_WOOL)
+                                .displayName(Component.text("チェックポイントに戻る", DefinedTextColor.YELLOW))
+                                .build());
+                    }
+
+                    player.getInventory().setItem(8, new ItemStackBuilder(Material.RED_WOOL)
+                            .displayName(Component.text("諦める", DefinedTextColor.RED))
+                            .build());
                 }
             }
         }
@@ -305,13 +318,7 @@ public class Athletics {
                                 player.getInventory().setItem(slot, itemStack);
                             }
                         });
-                        this.inventory.clear();
-                        this.active = null;
-                        this.startedAt = -1L;
-                        this.checkpoint = null;
-                        this.laps.clear();
-                        this.lastLogoutTime = -1L;
-                        this.diffTime = 0L;
+                        this.isActive = false;
                         this.save();
                         return elapsedTime;
                     }
@@ -393,9 +400,11 @@ public class Athletics {
                 root.set("diff-time", this.diffTime);
 
                 ConfigurationSection savedInventorySection = root.createSection("saved-inventory");
-                this.inventory.forEach((slot, item) -> {
-                    savedInventorySection.set(String.valueOf(slot), item);
-                });
+                if (this.isActive()) {
+                    this.inventory.forEach((slot, item) -> {
+                        savedInventorySection.set(String.valueOf(slot), item);
+                    });
+                }
             }
 
             try {
@@ -408,7 +417,77 @@ public class Athletics {
     }
 
     public static class Listener implements org.bukkit.event.Listener {
-        @EventHandler
+        /*
+         * プレイヤーがアスレチック中にアイテムを拾うのを禁止する
+         */
+        @EventHandler(priority = EventPriority.LOWEST)
+        public void onPickupItem(PlayerAttemptPickupItemEvent event) {
+            Player player = event.getPlayer();
+            PlayerProgress playerProgress = Athletics.getProgress(player);
+            if (playerProgress != null && playerProgress.isActive()) {
+                event.setCancelled(true);
+            }
+        }
+
+        /*
+         * プレイヤーがアスレチック中にアイテムを捨てるのを禁止する
+         */
+        @EventHandler(priority = EventPriority.LOWEST)
+        public void onThrowItem(PlayerDropItemEvent event) {
+            Player player = event.getPlayer();
+            PlayerProgress playerProgress = Athletics.getProgress(player);
+            if (playerProgress != null && playerProgress.isActive()) {
+                event.setCancelled(true);
+            }
+        }
+
+        /*
+         * プレイヤーがアスレチック中にエンダーパール/コーラスフルーツを使うのを禁止する
+         */
+        @EventHandler(priority = EventPriority.LOWEST)
+        public void onAttemptTeleportWithUseItem(PlayerTeleportEvent event) {
+            Player player = event.getPlayer();
+            PlayerProgress playerProgress = Athletics.getProgress(player);
+            if (playerProgress != null && playerProgress.isActive()) {
+                if (event.getCause() == PlayerTeleportEvent.TeleportCause.ENDER_PEARL || event.getCause() == PlayerTeleportEvent.TeleportCause.CHORUS_FRUIT) {
+                    event.setCancelled(true);
+                }
+            }
+        }
+
+        /*
+         * プレイヤーがアスレチック中にエリトラを使うのを禁止する
+         */
+        @EventHandler(priority = EventPriority.LOWEST)
+        public void onAttemptGlide(EntityToggleGlideEvent event) {
+            if (event.isGliding() && event.getEntityType() == EntityType.PLAYER) {
+                Player player = (Player) event.getEntity();
+                PlayerProgress playerProgress = Athletics.getProgress(player);
+                if (playerProgress != null && playerProgress.isActive()) {
+                    player.setGliding(false);
+                    event.setCancelled(true);
+                }
+            }
+        }
+
+        @EventHandler(priority = EventPriority.LOWEST)
+        public void onUseItem(PlayerInteractEvent event) {
+            Player player = event.getPlayer();
+            PlayerProgress playerProgress = Athletics.getProgress(player);
+            if (playerProgress != null && playerProgress.isActive()) {
+                if (event.getItem() != null) {
+                    if (event.getItem().getType() == Material.LIME_WOOL) {
+                        player.teleportAsync(playerProgress.getCheckpoint().getLocation());
+                        event.setCancelled(true);
+                    } else if (event.getItem().getType() == Material.RED_WOOL) {
+                        playerProgress.finish();
+                        event.setCancelled(true);
+                    }
+                }
+            }
+        }
+
+        @EventHandler(priority = EventPriority.LOWEST)
         public void onPlayerQuit(PlayerQuitEvent event) {
             Player player = event.getPlayer();
             PlayerProgress playerProgress = Athletics.getProgress(player);
@@ -417,7 +496,7 @@ public class Athletics {
             }
         }
 
-        @EventHandler
+        @EventHandler(priority = EventPriority.LOWEST)
         public void onPlayerJoin(PlayerJoinEvent event) {
             Player player = event.getPlayer();
             PlayerProgress playerProgress = Athletics.getProgress(player);

@@ -43,14 +43,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.core.Vec3i;
-import net.unknown.core.events.PacketReceivedEvent;
-import net.unknown.core.events.interfaces.PacketListener;
-import net.unknown.core.managers.PacketManager;
+import net.unknown.core.packet.event.PacketReceivedEvent;
+import net.unknown.core.packet.listener.IncomingPacketListener;
+import net.unknown.core.packet.PacketManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.core.util.MinecraftAdapter;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
@@ -156,9 +153,9 @@ public class SignGui {
                 .toArray(net.minecraft.network.chat.Component[]::new);
     }
 
-    public static class Listener extends PacketListener<ServerboundSignUpdatePacket> implements org.bukkit.event.Listener {
+    public static class Listener extends IncomingPacketListener<ServerboundSignUpdatePacket> implements org.bukkit.event.Listener {
         public Listener() {
-            PacketManager.getInstance().registerListener(ServerboundSignUpdatePacket.class, this);
+            PacketManager.getInstance().registerIncomingC2SListener(ServerboundSignUpdatePacket.class, this);
         }
 
         @Override

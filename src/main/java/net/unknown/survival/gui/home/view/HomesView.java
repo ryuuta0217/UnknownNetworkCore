@@ -55,7 +55,7 @@ public class HomesView extends PaginationView<Home, HomeGui> {
                 homeGroup.getHomes().values(),
                 (home) -> new ItemStackBuilder(dimension2Material(home.location()))
                         .displayName(Component.text(home.name(), Style.style(dimension2TextColor(home.location()))))
-                        .lore(Component.text("ワールド: " + MessageUtil.getWorldNameDisplay(home.getWorld()), Style.style(TextColor.color(0, 255, 0))),
+                        .lore(Component.text("ワールド: " + MessageUtil.getWorldNameDisplay(home.world()), Style.style(TextColor.color(0, 255, 0))),
                                 Component.text("座標: " + getCoordinateAsString(home.location()), Style.style(TextColor.color(0, 255, 0))),
                                 Component.text("向き: " + getRotationAsString(home.location()), Style.style(TextColor.color(0, 255, 0))),
                                 Component.text(""),

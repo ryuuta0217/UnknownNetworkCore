@@ -178,6 +178,8 @@ public class HTTPFetch {
         if (this.connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
             return this.connection.getInputStream();
         }
+
+        // Error Handling
         StringBuilder errorMessageBuilder = new StringBuilder();
         if (this.connection.getInputStream() != null) {
             InputStream responseStream = this.connection.getInputStream();

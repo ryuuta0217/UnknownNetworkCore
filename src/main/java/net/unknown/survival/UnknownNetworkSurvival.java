@@ -40,7 +40,8 @@ import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.commands.Commands;
-import net.unknown.survival.data.PlayerData;
+import net.unknown.survival.commands.SuppressRaidCommand;
+import net.unknown.survival.data.VoteTicketExchangeItems;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.discord.MinecraftToDiscordMessageListener;
@@ -55,8 +56,11 @@ import net.unknown.survival.fun.DemolitionGun;
 import net.unknown.survival.fun.MonsterBall;
 import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
+import net.unknown.survival.item.Items;
 import net.unknown.survival.listeners.*;
 import net.unknown.survival.update.UNCUpdateCheckTask;
+import net.unknown.survival.queue.ItemGiveQueue;
+import net.unknown.survival.vote.VoteManager;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -88,6 +92,8 @@ public class UnknownNetworkSurvival {
     }
 
     public static void onEnable() {
+        Items.init(); // Custom item initialization
+
         HOLOGRAPHIC_DISPLAYS_ENABLED = Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null && Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays");
         WORLD_GUARD_ENABLED = Bukkit.getPluginManager().getPlugin("WorldGuard") != null && Bukkit.getPluginManager().isPluginEnabled("WorldGuard");
         VAULT_ENABLED = Bukkit.getPluginManager().getPlugin("Vault") != null && Bukkit.getPluginManager().isPluginEnabled("Vault");
@@ -96,9 +102,9 @@ public class UnknownNetworkSurvival {
         VOTIFIER_ENABLED = Bukkit.getPluginManager().getPlugin("Votifier") != null && Bukkit.getPluginManager().isPluginEnabled("Votifier");
 
         Warps.load();
-        PlayerData.loadExists();
+        //PlayerData.loadExists();
         CustomChannels.load();
-        AntiVillagerLag.startLoopTask();
+        //AntiVillagerLag.startLoopTask();
         PlayerDeathListener.load();
 
         CustomEnchantments.initialize();
@@ -109,7 +115,9 @@ public class UnknownNetworkSurvival {
 
         Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
 
-        ListenerManager.registerListener(new MainGuiOpenListener());
+        if (ItemGiveQueue.getInstance() == null) LOGGER.warning("Failed to initialize ItemGiveQueue, but proceed to enable.");
+        MainGuiOpenListener guiOpenListener = new MainGuiOpenListener();
+        ListenerManager.registerListener(guiOpenListener);
         ListenerManager.registerListener(new ChatManager());
         ListenerManager.registerListener(new ColorCodeListener());
         ListenerManager.registerListener(new ModdedPlayerManager());
@@ -121,6 +129,8 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new ProtectedAreaTestStick());
         ListenerManager.registerListener(new PlayerJoinListener());
         ListenerManager.registerListener(new MinecraftToDiscordMessageListener());
+        ListenerManager.registerListener(new LocalLoginListener());
+        SuppressRaidCommand.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");
@@ -131,6 +141,7 @@ public class UnknownNetworkSurvival {
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());
+        Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unc_survival:open_gui", guiOpenListener);
 
         DemolitionGun.BowPullIndicator.boot();
 
@@ -149,7 +160,8 @@ public class UnknownNetworkSurvival {
         }
 
         if (isVotifierEnbaled()) {
-            ListenerManager.registerListener(new VoteListener());
+            if (VoteTicketExchangeItems.getInstance() == null) LOGGER.warning("Failed to initialize VoteTicketExchangeItems, but proceed to enable.");
+            ListenerManager.registerListener(VoteManager.getInstance());
         }
         LOGGER.info("Plugin enabled - Running as Survival mode.");
     }

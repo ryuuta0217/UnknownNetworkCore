@@ -31,15 +31,15 @@
 
 package net.unknown.core.util;
 
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.contents.LiteralContents;
-import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
+import net.unknown.core.define.DefinedTextColor;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.spigotmc.SpigotConfig;
@@ -117,7 +117,7 @@ public class NewMessageUtil {
 
     /* START - Plain Texts */
     public static void sendMessage(CommandSourceStack source, String message, boolean broadcastToOps) {
-        sendMessage(source, MutableComponent.create(new LiteralContents(message)), broadcastToOps);
+        sendMessage(source, Component.literal(message), broadcastToOps);
     }
 
     public static void sendMessage(CommandSourceStack source, String message) {
@@ -222,7 +222,7 @@ public class NewMessageUtil {
 
     /* START - Plain Texts */
     public static void sendErrorMessage(CommandSourceStack source, String message, boolean broadcastToOps) {
-        sendErrorMessage(source, MutableComponent.create(new LiteralContents(message)), broadcastToOps);
+        sendErrorMessage(source, Component.literal(message), broadcastToOps);
     }
 
     public static void sendErrorMessage(CommandSourceStack source, String message) {
@@ -255,6 +255,111 @@ public class NewMessageUtil {
     /* END - Plain Texts*/
     /* ERROR MESSAGES END */
 
+    /* VERBOSE MESSAGES */
+    /* START - Minecraft Components */
+    public static void sendVerboseMessage(CommandSourceStack source, Component component, boolean broadcastToOps) {
+        if (source.hasPermission(2, "unknown.core.verbose")) sendMessage(source, component, broadcastToOps);
+    }
+
+    public static void sendVerboseMessage(CommandSourceStack source, Component component) {
+        sendVerboseMessage(source, component, false);
+    }
+
+    public static void sendVerboseMessage(Player player, Component component, boolean broadcastToOps) {
+        sendVerboseMessage(player.createCommandSourceStack(), component, broadcastToOps);
+    }
+
+    public static void sendVerboseMessage(Player player, Component component) {
+        sendVerboseMessage(player, component, false);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.Player player, Component component, boolean broadcastToOps) {
+        sendVerboseMessage(((CraftPlayer) player).getHandle(), component, broadcastToOps);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.Player player, Component component) {
+        sendVerboseMessage(player, component, false);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.HumanEntity human, Component component, boolean broadcastToOps) {
+        sendVerboseMessage(((CraftHumanEntity) human).getHandle(), component, false);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.HumanEntity human, Component component) {
+        sendVerboseMessage(human, component, false);
+    }
+    /* END - Minecraft Components */
+
+    /* START - Adventure Components */
+    public static void sendVerboseMessage(CommandSourceStack source, net.kyori.adventure.text.Component component, boolean broadcastToOps) {
+        sendVerboseMessage(source, convertAdventure2Minecraft(component), broadcastToOps);
+    }
+
+    public static void sendVerboseMessage(CommandSourceStack source, net.kyori.adventure.text.Component component) {
+        sendVerboseMessage(source, component, false);
+    }
+
+    public static void sendVerboseMessage(Player player, net.kyori.adventure.text.Component component, boolean broadcastToOps) {
+        sendVerboseMessage(player.createCommandSourceStack(), component, broadcastToOps);
+    }
+
+    public static void sendVerboseMessage(Player player, net.kyori.adventure.text.Component component) {
+        sendVerboseMessage(player, component, false);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.Player player, net.kyori.adventure.text.Component component, boolean broadcastToOps) {
+        sendVerboseMessage(((CraftPlayer) player).getHandle(), component, broadcastToOps);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.Player player, net.kyori.adventure.text.Component component) {
+        sendVerboseMessage(player, component, false);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.HumanEntity human, net.kyori.adventure.text.Component component, boolean broadcastToOps) {
+        sendVerboseMessage(((CraftHumanEntity) human).getHandle(), component, broadcastToOps);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.HumanEntity human, net.kyori.adventure.text.Component component) {
+        sendVerboseMessage(human, component, false);
+    }
+    /* END - Adventure Components */
+
+    /* START - Plain Texts */
+
+    public static void sendVerboseMessage(CommandSourceStack source, String message, boolean broadcastToOps) {
+        sendVerboseMessage(source, Component.literal(message), broadcastToOps);
+    }
+
+    public static void sendVerboseMessage(CommandSourceStack source, String message) {
+        sendVerboseMessage(source, message, false);
+    }
+
+    public static void sendVerboseMessage(Player player, String message, boolean broadcastToOps) {
+        sendVerboseMessage(player.createCommandSourceStack(), message, broadcastToOps);
+    }
+
+    public static void sendVerboseMessage(Player player, String message) {
+        sendVerboseMessage(player, message, false);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.Player player, String message, boolean broadcastToOps) {
+        sendVerboseMessage(((CraftPlayer) player).getHandle(), message, broadcastToOps);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.Player player, String message) {
+        sendVerboseMessage(player, message, false);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.HumanEntity human, String message, boolean broadcastToOps) {
+        sendVerboseMessage(((CraftHumanEntity) human).getHandle(), message, broadcastToOps);
+    }
+
+    public static void sendVerboseMessage(org.bukkit.entity.HumanEntity human, String message) {
+        sendVerboseMessage(human, message, false);
+    }
+    /* END - Plain Texts */
+    /* VERBOSE MESSAGES END */
+
     //public static void broadcast(Component message, UUID sender, ChatType type, String permission) {
     //CraftServer bukkit = (CraftServer) Bukkit.getServer();
     //bukkit.getServer().getPlayerList().broadcastMessage();
@@ -284,23 +389,29 @@ public class NewMessageUtil {
         }
     }
 
-    private static Component format(Component component) {
-        return MutableComponent.create(new LiteralContents(""))
-                .append(MutableComponent.create(new LiteralContents("[")).withStyle(ChatFormatting.GRAY))
-                .append(MutableComponent.create(new LiteralContents("U.N.")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
-                .append(MutableComponent.create(new LiteralContents("]")).withStyle(ChatFormatting.GRAY))
-                .append(MutableComponent.create(new LiteralContents(" ")))
-                .append(component);
+    private static Component getPrefix(boolean lastSpace, boolean firstNewLine) {
+        return convertAdventure2Minecraft(getPrefixAdventure(lastSpace, firstNewLine));
     }
 
-    private static net.kyori.adventure.text.Component format(net.kyori.adventure.text.Component component) {
-        return convertMinecraft2Adventure(format(convertAdventure2Minecraft(component)));
-        /*return net.kyori.adventure.text.Component.empty()
+    private static net.kyori.adventure.text.Component getPrefixAdventure(boolean lastSpace, boolean firstNewLine) {
+        return (firstNewLine ? net.kyori.adventure.text.Component.newline() : net.kyori.adventure.text.Component.empty())
                 .append(net.kyori.adventure.text.Component.text("[", DefinedTextColor.GRAY))
-                .append(net.kyori.adventure.text.Component.text("U.N.", net.kyori.adventure.text.format.Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD.withState(true))))
+                .append(net.kyori.adventure.text.Component.text("U.N.", DefinedTextColor.GOLD, TextDecoration.BOLD))
                 .append(net.kyori.adventure.text.Component.text("]", DefinedTextColor.GRAY))
-                .append(net.kyori.adventure.text.Component.text(" "))
-                .append(component);*/
+                .append(lastSpace ? net.kyori.adventure.text.Component.space() : net.kyori.adventure.text.Component.empty());
+    }
+
+    private static Component format(Component component) {
+        return convertAdventure2Minecraft(format(convertMinecraft2Adventure(component)));
+    }
+
+    // Root for format() method
+    private static net.kyori.adventure.text.Component format(net.kyori.adventure.text.Component component) {
+        return net.kyori.adventure.text.Component.empty()
+                .append(getPrefixAdventure(true, false))
+                .append(component.replaceText((builder) -> {
+                    builder.matchLiteral("\n").replacement(getPrefixAdventure(true, true));
+                }));
     }
 
     public static Component convertAdventure2Minecraft(net.kyori.adventure.text.Component component) {

@@ -35,6 +35,7 @@ import net.unknown.UnknownNetworkCore;
 import net.unknown.core.commands.vanilla.GamemodeCommand;
 import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.commands.vanilla.TimeCommand;
+import net.unknown.core.fireworks.ProgrammedFireworksCommand;
 
 public class Commands {
     public static void init() {
@@ -52,5 +53,6 @@ public class Commands {
         TrashCommand.register(UnknownNetworkCore.getBrigadier());
         TimeCommand.register(UnknownNetworkCore.getBrigadier());
         SwapLocationCommand.register(UnknownNetworkCore.getBrigadier());
+        ProgrammedFireworksCommand.register(UnknownNetworkCore.getBrigadier());
     }
 }

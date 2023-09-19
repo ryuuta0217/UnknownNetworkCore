@@ -42,11 +42,16 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class ItemStackBuilder {
     private final ItemStack original;
+
+    public ItemStackBuilder(ItemStack stack) {
+        this.original = stack.clone();
+    }
 
     public ItemStackBuilder(Material material) {
         this.original = new ItemStack(material);
@@ -87,7 +92,7 @@ public class ItemStackBuilder {
 
     public ItemStackBuilder displayName(Component displayName) {
         ItemMeta meta = this.original.getItemMeta();
-        displayName = displayName.style(displayName.style().decoration(TextDecoration.ITALIC, false));
+        if (!displayName.style().hasDecoration(TextDecoration.ITALIC)) displayName = displayName.decoration(TextDecoration.ITALIC, false);
         meta.displayName(displayName);
         this.original.setItemMeta(meta);
         return this;
@@ -95,7 +100,7 @@ public class ItemStackBuilder {
 
     public ItemStackBuilder lore(Component... lore) {
         ItemMeta meta = this.original.getItemMeta();
-        meta.lore(Stream.of(lore).map(c -> {
+        meta.lore(Stream.of(lore).filter(Objects::nonNull).map(c -> {
             Style style = c.style();
             if (style.color() == null) style = style.color(DefinedTextColor.WHITE);
             if (!style.hasDecoration(TextDecoration.ITALIC)) style = style.decoration(TextDecoration.ITALIC, false);

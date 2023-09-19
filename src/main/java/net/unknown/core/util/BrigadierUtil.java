@@ -43,6 +43,7 @@ import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 public class BrigadierUtil {
     @SuppressWarnings("unchecked")
@@ -70,6 +71,16 @@ public class BrigadierUtil {
         } catch (IllegalArgumentException ignored) {
             return def;
         }
+    }
+
+    public static <S, I, O> O getArgumentOrDefault(@Nonnull CommandContext<S> context, @Nonnull BiFunction<I, O, O> processor, @Nonnull Class<I> inArgType, @Nonnull String argName, O def) {
+        if (isArgumentKeyExists(context, argName)) {
+            try {
+                I in = context.getArgument(argName, inArgType);
+                return processor.apply(in, def);
+            } catch (IllegalArgumentException ignored) {}
+        }
+        return def;
     }
 
     public static void forceUnregisterCommand(String commandName) {

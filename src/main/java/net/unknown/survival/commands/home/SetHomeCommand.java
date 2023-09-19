@@ -98,7 +98,7 @@ public class SetHomeCommand {
 
         if (!isHomeExists || overwrite) {
             Location loc = MinecraftAdapter.location(ctx.getSource().getLevel(), ctx.getSource().getPosition(), ctx.getSource().getRotation());;
-            group.addHome(new Home(newHomeName, loc), overwrite);
+            group.addHome(new Home(newHomeName, loc.getWorld().getName(), loc.getX(), loc.getY(), loc.getZ(), loc.getYaw(), loc.getPitch()), overwrite);
             MessageUtil.sendMessage(ctx.getSource(), "グループ " + data.getDefaultGroup().getName() + " にホーム " + newHomeName + " を設定しました");
         } else {
             MessageUtil.sendErrorMessage(ctx.getSource(), "ホーム " + newHomeName + " はグループ " + data.getDefaultGroup() + " に既に設定されています。\n" +

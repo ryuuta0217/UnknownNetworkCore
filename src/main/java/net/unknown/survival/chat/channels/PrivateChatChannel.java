@@ -31,28 +31,28 @@
 
 package net.unknown.survival.chat.channels;
 
-import io.papermc.paper.adventure.PaperAdventure;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.minecraft.network.chat.ChatType;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.OutgoingChatMessage;
+import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.chat.CustomChatTypes;
-import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.events.PrivateMessageEvent;
-import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class PrivateChatChannel extends ChatChannel {
     private UUID target;
@@ -75,7 +75,7 @@ public class PrivateChatChannel extends ChatChannel {
         //event.setCancelled(true);
         OfflinePlayer player = Bukkit.getOfflinePlayer(this.target);
         if (!player.isOnline()) {
-            MessageUtil.sendErrorMessage(event.getPlayer(), player.getName() + " はオフラインです。");
+            NewMessageUtil.sendErrorMessage(event.getPlayer(), player.getName() + " はオフラインです。");
             event.setCancelled(true);
             return;
         }
@@ -84,13 +84,13 @@ public class PrivateChatChannel extends ChatChannel {
         ServerPlayer receiver = ((CraftPlayer) player).getHandle();
         PrivateMessageEvent pEvent = new PrivateMessageEvent(sender.getBukkitEntity(), Collections.singleton(receiver.getBukkitEntity()), event.signedMessage());
         try {
-            Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> {
-                Bukkit.getPluginManager().callEvent(pEvent);
-                return null;
-            }).get();
-        } catch (InterruptedException | ExecutionException ignored) {
-        }
-        if (pEvent.isCancelled()) {
+            Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), pEvent::callEvent).get(1, TimeUnit.SECONDS);
+            if (pEvent.isCancelled()) {
+                event.setCancelled(true);
+                return;
+            }
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            NewMessageUtil.sendErrorMessage(event.getPlayer(), "チャットメッセージの処理中にエラーが発生しました: " + e.getLocalizedMessage());
             event.setCancelled(true);
             return;
         }
@@ -98,28 +98,23 @@ public class PrivateChatChannel extends ChatChannel {
         //Component message = MessageUtil.convertAdventure2NMS(pEvent.message());
         if (pEvent.isDirty()) event.message(pEvent.message());
 
-        event.viewers().removeIf(viewer -> !viewer.equals(sender.getBukkitEntity()) && !viewer.equals(receiver.getBukkitEntity()) && !(viewer instanceof ConsoleCommandSender));
+        event.viewers().removeIf(viewer -> !viewer.equals(receiver.getBukkitEntity()));
 
-        // TODO 最終手段
-        //ServerPlayer minecraft = MinecraftAdapter.player(Bukkit.getPlayer("Yncryption")); // メッセージの送信先
-        //minecraft.sendChatMessage(OutgoingChatMessage.create(MinecraftAdapter.Adventure.playerChatMessage(event.signedMessage())), false, ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, minecraft));
-        //event.setCancelled(true); // TODO 本来のチャットの処理を止める必要があるので注意する
+        PlayerChatMessage originalMessage = MinecraftAdapter.Adventure.playerChatMessage(event.signedMessage());
+        boolean isNotModifiedMessage = Objects.equals(originalMessage.requireResult().message().component(), event.message());
+        OutgoingChatMessage message = OutgoingChatMessage.create(isNotModifiedMessage ? originalMessage : originalMessage.withUnsignedContent(NewMessageUtil.convertAdventure2Minecraft(event.message())));
 
-        // TODO event.message(Component.empty()) して、rendererにはコピーのメッセージを直接渡す (ref: CustomChannel#processChat), DiscordSRV対策
-        event.renderer(((source, sourceDisplayName, message, viewer) -> {
-            ChatType.Bound incomingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_INCOMING, MinecraftAdapter.player(source));
-            ChatType.Bound outgoingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, receiver).withTargetName(receiver.getDisplayName());
-            if (viewer.equals(receiver.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(incomingBound.decorate(NewMessageUtil.convertAdventure2Minecraft(message)));
-            else if (viewer.equals(sender.getBukkitEntity())) return NewMessageUtil.convertMinecraft2Adventure(outgoingBound.decorate(NewMessageUtil.convertAdventure2Minecraft(message)));
-            else if (viewer instanceof ConsoleCommandSender) return NewMessageUtil.convertMinecraft2Adventure(MsgCommand.spyMessage(NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName), receiver.getName(), NewMessageUtil.convertAdventure2Minecraft(message)));
-            return net.kyori.adventure.text.Component.empty();
-        }));
+        event.viewers().forEach(viewer -> {
+            if (viewer instanceof Player bukkitViewerPlayer) {
+                ServerPlayer minecraftViewerPlayer = MinecraftAdapter.player(bukkitViewerPlayer);
+                if (minecraftViewerPlayer != null) {
+                    sender.sendChatMessage(message, sender.shouldFilterMessageTo(minecraftViewerPlayer), ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, minecraftViewerPlayer));
+                    minecraftViewerPlayer.sendChatMessage(message, minecraftViewerPlayer.shouldFilterMessageTo(sender), ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_INCOMING, sender));
+                }
+            }
+        });
+        event.setCancelled(true);
 
-        //sender.sendSystemMessage(MsgCommand.senderMessage(receiver.getDisplayName(), message));
-        //pEvent.getReceivers()
-        //        .stream()
-        //        .map(r -> ((CraftPlayer) r).getHandle())
-        //        .forEach(r -> r.sendSystemMessage(MsgCommand.receiverMessage(sender.getName(), message)));
         PlayerData.of(receiver.getUUID()).getChatData().setPrivateMessageReplyTarget(sender.getUUID());
     }
 }

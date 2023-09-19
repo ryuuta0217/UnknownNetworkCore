@@ -36,16 +36,29 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
 import java.lang.ref.Reference;
 import java.lang.reflect.Field;
 
-public record Home(String name, Location location) {
-    public World getWorld() {
-        if (this.location().isWorldLoaded()) return this.location().getWorld();
+public record Home(String name, String worldName, double x, double y, double z, float yaw, float pitch) {
+    @Nullable
+    public Location location() {
+        if (Bukkit.getWorld(this.worldName()) == null) return null;
+        return new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+    }
+
+    public boolean isAvailable() {
+        return this.location() != null;
+    }
+
+    public World world() {
+        Location location = this.location();
+        if (location == null) return null;
+        if (location.isWorldLoaded()) return location.getWorld();
         try {
             Field worldField = Location.class.getDeclaredField("world");
             if (worldField.trySetAccessible()) {
-                Reference<World> oldWorldRef = (Reference<World>) worldField.get(this.location());
+                Reference<World> oldWorldRef = (Reference<World>) worldField.get(location);
                 if (oldWorldRef.get() != null) {
                     World oldWorld = oldWorldRef.get();
                     World newWorld = Bukkit.getWorld(oldWorld.getName());

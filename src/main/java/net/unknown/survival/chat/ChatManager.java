@@ -37,12 +37,14 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.prefix.Prefix;
+import net.unknown.core.util.NewMessageUtil;
 import net.unknown.core.util.YukiKanaConverter;
 import net.unknown.survival.UnknownNetworkSurvival;
 import net.unknown.survival.chat.channels.ChannelType;
@@ -83,6 +85,13 @@ public class ChatManager implements Listener {
 
     @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
     public void onChat(AsyncChatEvent event) {
+        if (!event.getPlayer().getName().startsWith("BE_") && !event.signedMessage().canDelete()) {
+            NewMessageUtil.sendErrorMessage(event.getPlayer(), Component.text("チャットメッセージは送信されませんでした", DefinedTextColor.RED)
+                    .appendNewline()
+                    .append(Component.text("(あなたの送信したチャットは認証されていません。ランチャーの再起動をお試しください。)", DefinedTextColor.GRAY, TextDecoration.ITALIC)));
+            event.setCancelled(true);
+        }
+        
         event.renderer((source, sourceDisplayName, message, viewer) -> {
             Component base = Component.empty();
 
@@ -102,6 +111,11 @@ public class ChatManager implements Listener {
             event.message(LegacyComponentSerializer.legacyAmpersand().deserialize(PlainTextComponentSerializer.plainText().serialize(event.message())));
         }
 
+        // MiniMessage Support
+        if (PlayerData.of(event.getPlayer()).getChatData().isUseMiniMessage()) {
+            event.message(MiniMessage.miniMessage().deserialize(PlainTextComponentSerializer.plainText().serialize(event.message())));
+        }
+
         // URL to Clickable-Link
         event.message(event.message().replaceText((b) -> {
             b.match(Pattern.compile("https?://\\S+")).replacement((r, b2) -> Component.text(b2.content(), Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl(b2.content())));
@@ -116,8 +130,8 @@ public class ChatManager implements Listener {
                     Component msg = PlainTextComponentSerializer.plainText().deserialize(kanaMsgStr);
                     return baseRenderer.render(source, displayName, Component.empty()
                             .append(msg)
-                            .append(Component.text(" (" + msgStr + ")",
-                                    Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC.withState(true)))), viewer);
+                            .append(Component.space().append(Component.text("(" + msgStr + ")",
+                                    Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC.withState(true))))), viewer);
                 }
                 return baseRenderer.render(source, displayName, message, viewer);
             });
@@ -129,7 +143,7 @@ public class ChatManager implements Listener {
             }));
             GlobalChannel.getInstance().processChat(event);
         } else {
-            getCurrentChannel(event.getPlayer().getUniqueId()).processChat(event);
+            ChatManager.getCurrentChannel(event.getPlayer().getUniqueId()).processChat(event);
         }
     }
 }

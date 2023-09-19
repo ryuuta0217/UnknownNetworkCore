@@ -34,9 +34,7 @@ package net.unknown.survival.enums;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.world.entity.player.Player;
-import net.unknown.survival.commands.FlyCommand;
-import net.unknown.survival.commands.SpawnCommand;
-import net.unknown.survival.commands.TeleportPetCommand;
+import net.unknown.survival.commands.*;
 import net.unknown.survival.commands.admin.LastTpCommand;
 import net.unknown.survival.commands.home.DelHomeCommand;
 import net.unknown.survival.commands.home.HomeCommand;
@@ -64,6 +62,9 @@ public enum Permissions {
     COMMAND_LASTTP("unknown.survival.command.lasttp", "minecraft.command.lasttp", 2, LastTpCommand.class),
     COMMAND_SPAWN("unknown.survival.command.spawn", "minecraft.command.spawn", 0, SpawnCommand.class),
     COMMAND_FLY("unknown.survival.command.fly", "minecraft.command.fly", 0, FlyCommand.class),
+    COMMAND_SUPPRESSRAID("unknown.survival.command.suppressraid", "minecraft.command.suppressraid", 4, SuppressRaidCommand.class),
+    COMMAND_VOTE("unknown.survival.command.vote", "minecraft.command.vote", 0, VoteCommand.class),
+    COMMAND_VOTE_MANAGE("unknown.survival.command.vote.manage", 2, VoteCommand.class),
 
     NOTIFY_MODDED_PLAYER("unknown.survival.notify.mod", 2, null),
     ENTITY_EDITOR("unknown.survival.entity_editor", 2, null),

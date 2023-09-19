@@ -100,7 +100,7 @@ public class WorkflowRun {
         this.displayTitle = data.getString("display_title");
         this.event = data.getString("event");
         this.status = data.has("status") ? Status.valueOf(data.getString("status").toUpperCase()) : null;
-        this.conclusion = data.has("conclusion") ? Conclusion.valueOf(data.getString("conclusion").toUpperCase()) : null;
+        this.conclusion = data.has("conclusion") ? (!data.isNull("conclusion") ? Conclusion.valueOf(data.getString("conclusion").toUpperCase()) : null) : null;
         this.headSha = data.getString("head_sha");
         this.path = data.getString("path");
         this.workflowId = data.getLong("workflow_id");

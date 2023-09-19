@@ -33,9 +33,9 @@ package net.unknown.survival.managers;
 
 import net.minecraft.Util;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.unknown.core.events.PacketReceivedEvent;
-import net.unknown.core.events.interfaces.PacketListener;
-import net.unknown.core.managers.PacketManager;
+import net.unknown.core.packet.event.PacketReceivedEvent;
+import net.unknown.core.packet.listener.IncomingPacketListener;
+import net.unknown.core.packet.PacketManager;
 import net.unknown.survival.data.PlayerData;
 
 public class AFKManager {
@@ -54,10 +54,10 @@ public class AFKManager {
     private final MoveListener moveListener = new MoveListener();
 
     public AFKManager() {
-        PacketManager.getInstance().registerListener(ServerboundMovePlayerPacket.class, this.moveListener);
+        PacketManager.getInstance().registerIncomingC2SListener(ServerboundMovePlayerPacket.class, this.moveListener);
     }
 
-    public static class MoveListener extends PacketListener<ServerboundMovePlayerPacket> {
+    public static class MoveListener extends IncomingPacketListener<ServerboundMovePlayerPacket> {
         public MoveListener() {
             super(false);
         }

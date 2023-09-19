@@ -49,6 +49,13 @@ public class MeChatChannel extends RangedChatChannel {
     @Override
     public void processRangedChat(AsyncChatEvent event, Collection<? extends Player> receivers) {
         event.viewers().removeIf(audience -> !(audience instanceof Player) || !receivers.contains(audience) && !(audience instanceof ConsoleCommandSender));
-        event.renderer(((source, sourceDisplayName, message, viewer) -> Component.translatable("chat.type.emote").args(Component.empty().append(sourceDisplayName).append(Component.text("[" + this.getRange() + "]")), message)));
+
+        Component originalMessage = event.message();
+        event.message(Component.empty()); // チャットメッセージを遮蔽する
+
+        event.renderer(((source, displayName, message, viewer) -> {
+            displayName = Component.empty().append(displayName).append(Component.text("[" + this.getRange() + "]"));
+            return Component.translatable("chat.type.emote").args(displayName, originalMessage);
+        }));
     }
 }

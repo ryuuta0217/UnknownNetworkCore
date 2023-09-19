@@ -40,7 +40,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.world.entity.player.Player;
 import net.unknown.core.managers.ListenerManager;
-import net.unknown.core.managers.SkinManager;
+import net.unknown.core.skin.Skin;
+import net.unknown.core.skin.SkinManager;
 import net.unknown.core.util.MessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventPriority;
@@ -70,7 +71,7 @@ public class DeepFakeCommand {
                                 return preLoginEvent.getUniqueId().equals(source.getUniqueId());
                             }, (preLoginEvent) -> {
                                 PlayerProfile profile = new CraftPlayerProfile(playerUniqueId, playerName);
-                                SkinManager.Skin skinData = SkinManager.getSkinInRemote(playerUniqueId);
+                                Skin skinData = SkinManager.getPlayerSkinRepository(playerUniqueId).getRemoteSkin();
                                 profile.setProperty(skinData.asProfileProperty());
                                 preLoginEvent.setPlayerProfile(profile);
                                 ListenerManager.waitForEvent(PlayerJoinEvent.class, false, EventPriority.MONITOR, (joinEvent) -> {

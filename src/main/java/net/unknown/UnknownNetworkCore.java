@@ -39,12 +39,14 @@ import net.unknown.core.block.MultiPageChest;
 import net.unknown.core.bossbar.TPSBar;
 import net.unknown.core.chat.CustomChatTypes;
 import net.unknown.core.commands.Commands;
+import net.unknown.core.feature.PrivateMessageListener;
 import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.managers.ListenerManager;
-import net.unknown.core.managers.PacketManager;
+import net.unknown.core.packet.PacketManager;
 import net.unknown.core.managers.TrashManager;
 import net.unknown.core.prefix.PlayerPrefixes;
+import net.unknown.core.skin.SkinManager;
 import net.unknown.core.tab.TabListPingManager;
 import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.shared.VersionInfo;
@@ -61,6 +63,10 @@ public class UnknownNetworkCore extends JavaPlugin {
 
     public UnknownNetworkCore() {
         INSTANCE = this;
+    }
+
+    public static boolean isProductionVersion() {
+        return UnknownNetworkCore.getVersion().gitBranch().equals("production");
     }
 
     public static CommandDispatcher<CommandSourceStack> getBrigadier() {
@@ -124,6 +130,8 @@ public class UnknownNetworkCore extends JavaPlugin {
         ListenerManager.registerListener(new TabListPingManager());
         ListenerManager.registerListener(new Athletics.Listener());
         ListenerManager.registerListener(new MultiPageChest.Listener());
+        ListenerManager.registerListener(SkinManager.INSTANCE);
+        ListenerManager.registerListener(new PrivateMessageListener());
         TPSBar.initialize();
         TabListPingManager.startTask();
         PlayerPrefixes.loadAll();

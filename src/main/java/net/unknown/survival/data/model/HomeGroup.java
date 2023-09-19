@@ -40,6 +40,7 @@ import org.bukkit.configuration.ConfigurationSection;
 
 import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
+import java.util.logging.Logger;
 
 public class HomeGroup {
     private final PlayerData.HomeData homeData;
@@ -112,12 +113,20 @@ public class HomeGroup {
     }
 
     public static HomeGroup load(PlayerData.HomeData homeData, String groupName, ConfigurationSection groupSection, @Nullable ConfigurationSection itemsSection) {
+        Logger logger = Logger.getLogger(homeData.getLogger().getName() + "/LoadGroup");
         Material icon = itemsSection != null ? Material.getMaterial(itemsSection.getString(groupName, "WHITE_WOOL")) : Material.WHITE_WOOL;
         LinkedHashMap<String, Home> homes = new LinkedHashMap<>();
         groupSection.getKeys(false).forEach(homeName -> {
-            Location location = ConfigurationSerializer.getLocationData(groupSection, homeName);
-            Home home = new Home(homeName, location);
-            homes.put(homeName, home);
+            String worldName = ConfigurationSerializer.getWorldNameByConfig(groupSection, homeName);
+            double[] position = ConfigurationSerializer.getPositionByConfig(groupSection, homeName);
+            float[] rotation = ConfigurationSerializer.getRotationByConfig(groupSection, homeName);
+            if (worldName != null && position != null && position.length == 3) {
+                Home home = new Home(homeName, worldName, position[0], position[1], position[2], (rotation != null ? rotation[0] : 0.0f), (rotation != null ? rotation[1] : 0.0f));
+                if (rotation == null) logger.warning("Home " + homeName + " does not have a rotation, using default rotation (yaw: 0.0, pitch: 0.0)");
+                homes.put(homeName, home);
+            } else {
+                logger.severe("Failed to load home " + homeName + ", invalid data provided. data=(world=" + worldName + ", position=(" + (position != null ? "x: " + position[0] + ", y: " + position[1] + ", z: " + position[2] : "null") + "), rotation=(" + (rotation != null ? "yaw: " + rotation[0] + ", pitch: " + rotation[1] : "null") + "))");
+            }
         });
         return new HomeGroup(homeData, groupName, icon, homes);
     }

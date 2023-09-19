@@ -71,11 +71,13 @@ public class SimpleCommitImpl implements SimpleCommit {
         }
         this.author = author;
 
-        GitUser committer;
-        try {
-            committer = data.has("committer") ? new SimpleUserImpl(api, data.getJSONObject("committer")) : null;
-        } catch (JSONException e) {
-            committer = data.has("committer") ? new GitUserImpl(api, data.getJSONObject("committer")) : null;
+        GitUser committer = null;
+        if (data.has("committer") && !data.isNull("committer")) {
+            try {
+                committer = data.has("committer") ? new SimpleUserImpl(api, data.getJSONObject("committer")) : null;
+            } catch (JSONException e) {
+                committer = data.has("committer") ? new GitUserImpl(api, data.getJSONObject("committer")) : null;
+            }
         }
         this.committer = committer;
     }

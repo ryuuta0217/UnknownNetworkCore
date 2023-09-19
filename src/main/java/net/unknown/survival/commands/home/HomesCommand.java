@@ -40,9 +40,12 @@ import com.ryuuta0217.util.ListUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.md_5.bungee.api.ChatColor;
+import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.define.DefinedComponents;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.BrigadierUtil;
@@ -52,13 +55,12 @@ import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.enums.Permissions;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 // /minecraft:homes [optional: int<page>] - send homes list
 public class HomesCommand {
@@ -78,15 +80,20 @@ public class HomesCommand {
     }
 
     public static int sendHomeList(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        CraftPlayer player = (CraftPlayer) ctx.getSource().getBukkitEntity();
-        PlayerData data = PlayerData.of(player);
+        return sendHomeList(ctx, ctx.getSource().getPlayerOrException().getUUID());
+    }
+
+    public static int sendHomeList(CommandContext<CommandSourceStack> ctx, UUID target) throws CommandSyntaxException {
+        UUID executor = ctx.getSource().source instanceof ServerPlayer sourcePlayer ? sourcePlayer.getUUID() : Util.NIL_UUID;
+
+        PlayerData data = PlayerData.of(target);
         PlayerData.HomeData homeData = data.getHomeData();
         HomeGroup homeGroup = homeData.getDefaultGroup();
 
         Component header = Component.empty()
                 .append(PREFIX)
                 .append(DefinedComponents.SPACE)
-                .append(Component.text("グループ " + homeGroup.getName() + " のホーム一覧(" + homeGroup.getHomes().size() + "/" + homeData.getMaxHomeCount(), DefinedTextColor.GREEN))
+                .append(Component.text((Objects.equals(executor, target) ? "" : Bukkit.getOfflinePlayer(target).getName() + "の") + "グループ " + homeGroup.getName() + " のホーム一覧(" + homeGroup.getHomes().size() + "/" + homeData.getMaxHomeCount() + ")", DefinedTextColor.GREEN))
                 .append(DefinedComponents.SPACE)
                 .append(PREFIX);
 
@@ -105,35 +112,30 @@ public class HomesCommand {
         List<Component> contents = new ArrayList<>();
 
         toShowHomes.forEach((home) -> {
-            Location loc = home.location();
-            Component element = Component.empty()
+            Component element = Component.empty().decoration(TextDecoration.STRIKETHROUGH, !home.isAvailable())
                     .append(Component.text(home.name(), DefinedTextColor.AQUA))
                     .append(DefinedComponents.SPACE)
                     .append(Component.text("-", DefinedTextColor.GOLD))
                     .append(DefinedComponents.SPACE)
-                    .append(Component.text(MessageUtil.getWorldNameDisplay(loc.getWorld())))
+                    .append(Component.text(MessageUtil.getWorldName(home.worldName())))
                     .append(DELIMITER)
-                    .append(Component.text(loc.getBlockX(), DefinedTextColor.GREEN))
+                    .append(Component.text(home.x(), DefinedTextColor.GREEN))
                     .append(DELIMITER)
-                    .append(Component.text(loc.getBlockY(), DefinedTextColor.GREEN))
+                    .append(Component.text(home.y(), DefinedTextColor.GREEN))
                     .append(DELIMITER)
-                    .append(Component.text(loc.getBlockZ(), DefinedTextColor.GREEN))
+                    .append(Component.text(home.z(), DefinedTextColor.GREEN))
                     .append(DELIMITER)
-                    .append(Component.text(loc.getYaw(), DefinedTextColor.LIGHT_PURPLE))
+                    .append(Component.text(home.yaw(), DefinedTextColor.LIGHT_PURPLE))
                     .append(DELIMITER)
-                    .append(Component.text(loc.getPitch(), DefinedTextColor.LIGHT_PURPLE));
+                    .append(Component.text(home.pitch(), DefinedTextColor.LIGHT_PURPLE));
             contents.add(element);
         });
 
         Component toShowMessage = Component.empty()
-                .append(MessageUtil.getMessagePrefixComponent())
-                .append(DefinedComponents.SPACE)
                 .append(header);
 
         for (Component content : contents) {
             toShowMessage = toShowMessage.append(DefinedComponents.NEW_LINE)
-                    .append(MessageUtil.getMessagePrefixComponent())
-                    .append(DefinedComponents.SPACE)
                     .append(content);
         }
 

@@ -43,9 +43,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class PingListener implements Listener {
-    private static final int BASE_SUPPORTED_PROTOCOL_NUMBER = 762;
+    private static final int BASE_SUPPORTED_PROTOCOL_NUMBER = 762; // 1.19.4
     private static final Set<Integer> SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>() {{
-        add(763);
+        add(763); // 1.20, 1.20.1
     }};
 
     @EventHandler
@@ -57,7 +57,7 @@ public class PingListener implements Listener {
         if (SUPPORTED_PROTOCOL_NUMBERS.contains(playerProtocolVersion)) {
             protocolVersion = playerProtocolVersion;
         }
-        sp.setVersion(new ServerPing.Protocol("Minecraft 1.19.4 / 1.20", protocolVersion));
+        sp.setVersion(new ServerPing.Protocol("Minecraft 1.19.4 / 1.20.x", protocolVersion));
 
         event.setResponse(sp);
     }

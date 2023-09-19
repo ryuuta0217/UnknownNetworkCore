@@ -248,7 +248,7 @@ public class Athletic {
                     UUID uniqueId = UUID.fromString(rawUniqueId);
                     String name = checkpointSection.getString("name");
                     Component displayName = GsonComponentSerializer.gson().deserialize(checkpointSection.getString("display_name", "{}"));
-                    Location location = ConfigurationSerializer.getLocationData(checkpointSection," location");
+                    Location location = ConfigurationSerializer.getLocationData(checkpointSection,"location");
                     return new Checkpoint(uniqueId, name, displayName, location);
                 } else {
                     throw new IllegalArgumentException("Failed to parse configuration: Invalid configuration format (require name, display_name, location)");

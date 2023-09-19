@@ -33,16 +33,13 @@ package net.unknown.survival.data;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCore;
-import net.unknown.core.configurations.Config;
+import net.unknown.core.configurations.ConfigurationBase;
 import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.model.HomeGroup;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
+import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -59,13 +56,17 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PlayerData extends Config {
+public class PlayerData extends ConfigurationBase {
+    static {
+        RunnableManager.runAsyncRepeating(PlayerData::gc, (20 * 60) * 30, (20 * 60) * 30); // Run gc() every 30 minutes
+    }
     private static final int VERSION = 3;
     private static final Map<UUID, PlayerData> PLAYER_DATA_MAP = new HashMap<>();
     private final UUID uniqueId;
     private HomeData homeData;
     private final SessionData sessionData = new SessionData(this);
     private ChatData chatData;
+    private PlayerRegistry registries;
 
     public PlayerData(UUID uniqueId) {
         super("players/" + uniqueId + ".yml", false, "UNC/PlayerData/" + Bukkit.getOfflinePlayer(uniqueId).getName());
@@ -85,11 +86,14 @@ public class PlayerData extends Config {
     }
 
     public static PlayerData of(UUID uniqueId) {
+        PlayerData pd;
         if (!PLAYER_DATA_MAP.containsKey(uniqueId)) {
-            PlayerData pd = new PlayerData(uniqueId);
+            pd = new PlayerData(uniqueId);
             PLAYER_DATA_MAP.put(uniqueId, pd);
+        } else {
+            pd = PLAYER_DATA_MAP.get(uniqueId);
         }
-        return PLAYER_DATA_MAP.get(uniqueId);
+        return pd;
     }
 
     public static Map<UUID, PlayerData> getAll() {
@@ -114,6 +118,16 @@ public class PlayerData extends Config {
             UUID uniqueId = UUID.fromString(file.getName().replace(".yml", ""));
             PLAYER_DATA_MAP.put(uniqueId, new PlayerData(uniqueId));
         }
+    }
+
+    public static void gc() {
+        PLAYER_DATA_MAP.entrySet().removeIf(e -> {
+            if (!e.getValue().isOnline()) {
+                e.getValue().save();
+                return true;
+            }
+            return false;
+        });
     }
 
     private static UUID extractUniqueIdFromFileName(String fileName) {
@@ -153,12 +167,14 @@ public class PlayerData extends Config {
 
         this.homeData = HomeData.load(this);
         this.chatData = ChatData.load(this);
+        this.registries = PlayerRegistry.load(this);
     }
 
     @Override
     public synchronized void save() {
         this.homeData.save(this.getConfig());
         this.chatData.save(this.getConfig());
+        this.registries.save(this.getConfig());
         super.save();
     }
 
@@ -183,6 +199,85 @@ public class PlayerData extends Config {
         return this.chatData;
     }
 
+    public PlayerRegistry getRegistries() {
+        return this.registries;
+    }
+
+    public static class PlayerRegistry {
+        public static final String REGISTRY_ROOT_CONFIG_KEY = "registries";
+
+        private final PlayerData parent;
+        private final Map<NamespacedKey, Map<String, String>> registry;
+
+        public PlayerRegistry(PlayerData parent, Map<NamespacedKey, Map<String, String>> registry) {
+            this.parent = parent;
+            this.registry = new HashMap<>(registry);
+        }
+
+        public PlayerData getPlayerData() {
+            return this.parent;
+        }
+
+        public Map<String, String> getRegistry(NamespacedKey namespace) {
+            return new HashMap<>(this.registry.getOrDefault(namespace, new HashMap<>(0)));
+        }
+
+        @Nullable
+        public String put(NamespacedKey namespace, String key, String value) {
+            if (!this.registry.containsKey(namespace)) this.registry.put(namespace, new HashMap<>());
+            return this.registry.get(namespace).put(key, value);
+        }
+
+        public boolean containsKey(NamespacedKey namespace, String key) {
+            return this.registry.containsKey(namespace) && this.registry.get(namespace).containsKey(key);
+        }
+
+        @Nullable
+        public String get(NamespacedKey namespace, String key) {
+            if (!this.containsKey(namespace, key)) return null;
+            return this.registry.get(namespace).get(key);
+        }
+
+        /*
+         * Example file:
+         * "unknown-network:spawn_configuration":
+         *     default-mode: "FORCE_TO_MAIN"
+         */
+        public static PlayerRegistry load(PlayerData data) {
+            if (!data.getConfig().contains(REGISTRY_ROOT_CONFIG_KEY)) return new PlayerRegistry(data, new HashMap<>());
+            ConfigurationSection registrySection = data.getConfig().getConfigurationSection(REGISTRY_ROOT_CONFIG_KEY);
+
+            Map<NamespacedKey, Map<String, String>> registry = new HashMap<>();
+
+            registrySection.getKeys(false).forEach(namespaceStr -> {
+                NamespacedKey namespace = NamespacedKey.fromString(namespaceStr);
+                ConfigurationSection namespaceSection = registrySection.contains(namespaceStr) ? registrySection.getConfigurationSection(namespaceStr) : null;
+                if (namespaceSection != null) {
+                    Map<String, String> namespacedRegistry = new HashMap<>();
+                    namespaceSection.getKeys(false).forEach(registryKey -> {
+                        String registryValue = namespaceSection.getString(registryKey);
+                        namespacedRegistry.put(registryKey, registryValue);
+                    });
+                    registry.put(namespace, namespacedRegistry);
+                }
+            });
+            return new PlayerRegistry(data, registry);
+        }
+
+        public void save(FileConfiguration config) {
+            config.set(REGISTRY_ROOT_CONFIG_KEY, null);
+            ConfigurationSection section = config.createSection(REGISTRY_ROOT_CONFIG_KEY);
+            this.registry.forEach((namespace, registries) -> {
+                if (registries.size() > 0) {
+                    ConfigurationSection namespacedSection = section.createSection(namespace.toString());
+                    registries.forEach(namespacedSection::set);
+                    section.set(namespace.toString(), namespacedSection);
+                }
+            });
+            config.set(REGISTRY_ROOT_CONFIG_KEY, section);
+        }
+    }
+
     public static class HomeData {
         public static final int DEFAULT_MAX_HOME_COUNT = 5;
 
@@ -191,12 +286,14 @@ public class PlayerData extends Config {
         private String defaultGroupName;
         private int homeBaseCount;
         private int homeAdditionalCount;
+        private final Logger logger;
 
         public HomeData(PlayerData parent, String defaultGroupName, int homeBaseCount, int homeAdditionalCount) {
             this.parent = parent;
             this.defaultGroupName = defaultGroupName;
             this.homeBaseCount = homeBaseCount;
             this.homeAdditionalCount = homeAdditionalCount;
+            this.logger = Logger.getLogger(parent.getLogger().getName() + "/Home");
         }
 
         private void setGroups(LinkedHashMap<String, HomeGroup> homeGroups) {
@@ -280,6 +377,10 @@ public class PlayerData extends Config {
             return this.homeBaseCount + this.homeAdditionalCount;
         }
 
+        public Logger getLogger() {
+            return this.logger;
+        }
+
         public static HomeData load(PlayerData data) {
             String defaultGroup = data.getConfig().getString("home-default-group", "default");
             int homeBaseCount = data.getConfig().getInt("home-base-count", DEFAULT_MAX_HOME_COUNT);
@@ -293,16 +394,19 @@ public class PlayerData extends Config {
             if (homeGroupsSection != null) {
                 homeGroupsSection.getKeys(false).forEach(groupName -> {
                     ConfigurationSection groupSection = homeGroupsSection.getConfigurationSection(groupName);
-                    HomeGroup group = HomeGroup.load(homeData, groupName, groupSection, groupItemsSection);
-                    groups.put(group.getName(), group);
+                    if (groupSection != null) {
+                        HomeGroup group = HomeGroup.load(homeData, groupName, groupSection, groupItemsSection);
+                        groups.put(group.getName(), group);
+                    } else {
+                        homeData.getLogger().warning("到達することのない条件分岐に到達しました: ホームグループが見つかりませんでした");
+                    }
                 });
             } else { // when not found any home groups, Create new.
-                HomeGroup group = new HomeGroup(homeData, "default", null, new LinkedHashMap<>());
+                HomeGroup group = new HomeGroup(homeData, defaultGroup, null, new LinkedHashMap<>());
                 groups.put(group.getName(), group);
             }
 
             homeData.setGroups(groups);
-
             return homeData;
         }
 
@@ -383,12 +487,14 @@ public class PlayerData extends Config {
         private UUID replyTarget;
         private String forceGlobalChatPrefix = "g.";
         private boolean useKanaConvert = false;
+        private boolean useMiniMessage = false;
 
-        public ChatData(PlayerData parent, String replyTargetStr, String forceGlobalChatPrefix, boolean useKanaConvert) {
+        public ChatData(PlayerData parent, String replyTargetStr, String forceGlobalChatPrefix, boolean useKanaConvert, boolean useMiniMessage) {
             this.parent = parent;
             this.replyTarget = replyTargetStr != null ? UUID.fromString(replyTargetStr) : null;
             this.forceGlobalChatPrefix = forceGlobalChatPrefix;
             this.useKanaConvert = useKanaConvert;
+            this.useMiniMessage = useMiniMessage;
         }
 
         public PlayerData getPlayerData() {
@@ -422,17 +528,28 @@ public class PlayerData extends Config {
             RunnableManager.runAsync(this.parent::save);
         }
 
+        public boolean isUseMiniMessage() {
+            return this.useMiniMessage;
+        }
+
+        public void setUseMiniMessage(boolean useMiniMessage) {
+            this.useMiniMessage = useMiniMessage;
+            RunnableManager.runAsync(this.parent::save);
+        }
+
         public static ChatData load(PlayerData parent) {
             return new ChatData(parent,
                     parent.getConfig().getString("reply-target", null),
                     parent.getConfig().getString("force-global-chat-prefix", "g."),
-                    parent.getConfig().getBoolean("use-kana-convert", false));
+                    parent.getConfig().getBoolean("use-kana-convert", false),
+                    parent.getConfig().getBoolean("use-minimessage", false));
         }
 
         public void save(FileConfiguration config) {
             if (this.replyTarget != null) config.set("reply-target", this.replyTarget.toString());
             config.set("force-global-chat-prefix", this.forceGlobalChatPrefix);
             config.set("use-kana-convert", this.useKanaConvert);
+            config.set("use-minimessage", this.useMiniMessage);
         }
     }
 
@@ -453,10 +570,14 @@ public class PlayerData extends Config {
                             Map<String, Home> oldHomeMap = new LinkedHashMap<>(); // 登録順が崩れないようにLinkedを使う
                             section.getKeys(false).forEach(homeName -> {
                                 LOGGER.info("Migrating: homes." + homeName + " -> homes.uncategorized." + homeName);
-                                Location loc = ConfigurationSerializer.getLocationData(section, homeName);
-                                if (loc != null) {
-                                    oldHomeMap.put(homeName, new Home(homeName, loc));
-                                } else LOGGER.warning("Home " + homeName + " was *removed* because world is null.");
+                                String worldName = ConfigurationSerializer.getWorldNameByConfig(section, homeName);
+                                double[] position = ConfigurationSerializer.getPositionByConfig(section, homeName);
+                                float[] rotation = ConfigurationSerializer.getRotationByConfig(section, homeName);
+                                if (worldName != null && position != null) {
+                                    oldHomeMap.put(homeName, new Home(homeName, worldName, position[0], position[1], position[2], (rotation != null ? rotation[0] : 0.0f), (rotation != null ? rotation[1] : 0.0f)));
+                                } else {
+                                    LOGGER.warning("Home " + homeName + " was *removed* because invalid data provided. data=(world:" + worldName + ", position:(" + (position != null ? "x: " + position[0] + ", y: " + position[1] + ", z: " + position[2] : "null") + ", " + (rotation != null ? "yaw: " + rotation[0] + ", pitch: " + rotation[1] : "null") + "), rotation:(" + (rotation != null ? "yaw: " + rotation[0] + ", pitch: " + rotation[1] : "null") + "))");
+                                }
                             });
 
                             /* CLEAR OLD HOMES */
