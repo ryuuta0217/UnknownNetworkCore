@@ -79,16 +79,21 @@ public class MendingSupportStick extends UnknownNetworkItem implements Listener 
         event.setCancelled(true);
 
         Stack stack = new Stack(event.getItem());
-        int result = this.processMending(event.getPlayer(), stack);
 
-        if (result == 0) {
-            NewMessageUtil.sendMessage(event.getPlayer(), Component.text("修繕が適用されました。", DefinedTextColor.GREEN));
-        } else if (result == 1) {
-            NewMessageUtil.sendMessage(event.getPlayer(), Component.text("この修繕棒はもう使用できません。", DefinedTextColor.RED));
-        } else if (result == 2) {
-            NewMessageUtil.sendMessage(event.getPlayer(), Component.text("経験値が足りません。", DefinedTextColor.RED));
-        } else if (result == 3) {
-            NewMessageUtil.sendMessage(event.getPlayer(), Component.text("所持金が足りません。", DefinedTextColor.RED));
+        if (isAvailableToMendItem(event.getPlayer())) {
+            int result = this.processMending(event.getPlayer(), stack);
+
+            if (result == 0) {
+                NewMessageUtil.sendMessage(event.getPlayer(), Component.text("修繕が適用されました。", DefinedTextColor.GREEN), false);
+            } else if (result == 1) {
+                NewMessageUtil.sendErrorMessage(event.getPlayer(), "この修繕棒はもう使用できません");
+            } else if (result == 2) {
+                NewMessageUtil.sendErrorMessage(event.getPlayer(), "経験値レベルが最低でも1レベル必要です");
+            } else if (result == 3) {
+                NewMessageUtil.sendErrorMessage(event.getPlayer(), "所持金が足りません");
+            }
+        } else {
+            NewMessageUtil.sendErrorMessage(event.getPlayer(), "修繕できるアイテムは見つかりませんでした");
         }
     }
 
@@ -177,6 +182,10 @@ public class MendingSupportStick extends UnknownNetworkItem implements Listener 
         } else {
             return amount;
         }
+    }
+
+    private static boolean isAvailableToMendItem(Player player) {
+        return EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, MinecraftAdapter.player(player), net.minecraft.world.item.ItemStack::isDamaged) != null;
     }
 
     public static int getXpNeededForNextLevel(int level) {
