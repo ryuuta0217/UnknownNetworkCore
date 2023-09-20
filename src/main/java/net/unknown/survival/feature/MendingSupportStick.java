@@ -79,16 +79,21 @@ public class MendingSupportStick extends UnknownNetworkItem implements Listener 
         event.setCancelled(true);
 
         Stack stack = new Stack(event.getItem());
-        int result = this.processMending(event.getPlayer(), stack);
 
-        if (result == 0) {
-            NewMessageUtil.sendMessage(event.getPlayer(), Component.text("修繕が適用されました。", DefinedTextColor.GREEN));
-        } else if (result == 1) {
-            NewMessageUtil.sendMessage(event.getPlayer(), Component.text("この修繕棒はもう使用できません。", DefinedTextColor.RED));
-        } else if (result == 2) {
-            NewMessageUtil.sendMessage(event.getPlayer(), Component.text("経験値が足りません。", DefinedTextColor.RED));
-        } else if (result == 3) {
-            NewMessageUtil.sendMessage(event.getPlayer(), Component.text("所持金が足りません。", DefinedTextColor.RED));
+        if (isAvailableToMendItem(event.getPlayer())) {
+            int result = this.processMending(event.getPlayer(), stack);
+
+            if (result == 0) {
+                NewMessageUtil.sendMessage(event.getPlayer(), Component.text("修繕が適用されました。", DefinedTextColor.GREEN), false);
+            } else if (result == 1) {
+                NewMessageUtil.sendErrorMessage(event.getPlayer(), "この修繕棒はもう使用できません");
+            } else if (result == 2) {
+                NewMessageUtil.sendErrorMessage(event.getPlayer(), "経験値レベルが最低でも1レベル必要です");
+            } else if (result == 3) {
+                NewMessageUtil.sendErrorMessage(event.getPlayer(), "所持金が足りません");
+            }
+        } else {
+            NewMessageUtil.sendErrorMessage(event.getPlayer(), "修繕できるアイテムは見つかりませんでした");
         }
     }
 
@@ -104,14 +109,19 @@ public class MendingSupportStick extends UnknownNetworkItem implements Listener 
         if (player.getLevel() == 0) return 2;
         if (!WrappedEconomy.INSTANCE.has(player, 1000)) return 3;
 
-        int usesExp = getXpNeededForNextLevel(player.getLevel() - 1);
+        int toUseExp = getXpNeededForNextLevel(player.getLevel() - 1);
         player.setLevel(player.getLevel() - 1);
-        int remainExp = this.applyMending(player, usesExp, true);
-        player.giveExp(remainExp, false);
-        float expUseRate = (float) remainExp / (float) usesExp;
+        if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, "修繕のために経験値を " + toUseExp + " ポイント(1レベル分)確保しました");
+        int remainingExp = this.applyMending(player, toUseExp, true);
+        int usedExp = toUseExp - remainingExp;
+        player.giveExp(remainingExp, false);
+        if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, "修繕処理が終了しました。余剰経験値 " + remainingExp + " ポイントを返却しました");
+        float expUseRate = (float) usedExp / (float) toUseExp;
+        if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, "経験値の使用率は " + expUseRate + " です");
 
-        int price = expUseRate > 0.5 ? 1000 : 500;
+        int price = expUseRate > 0.5 ? 500 : 1000;
         WrappedEconomy.INSTANCE.withdrawPlayer(player, price);
+        if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, price + " 円を支払いました");
 
         stack.setUses(stack.getUses() + 1); // 使用回数++
         return 0;
@@ -172,6 +182,10 @@ public class MendingSupportStick extends UnknownNetworkItem implements Listener 
         } else {
             return amount;
         }
+    }
+
+    private static boolean isAvailableToMendItem(Player player) {
+        return EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, MinecraftAdapter.player(player), net.minecraft.world.item.ItemStack::isDamaged) != null;
     }
 
     public static int getXpNeededForNextLevel(int level) {
