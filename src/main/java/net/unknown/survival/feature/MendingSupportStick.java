@@ -104,14 +104,19 @@ public class MendingSupportStick extends UnknownNetworkItem implements Listener 
         if (player.getLevel() == 0) return 2;
         if (!WrappedEconomy.INSTANCE.has(player, 1000)) return 3;
 
-        int usesExp = getXpNeededForNextLevel(player.getLevel() - 1);
+        int toUseExp = getXpNeededForNextLevel(player.getLevel() - 1);
         player.setLevel(player.getLevel() - 1);
-        int remainExp = this.applyMending(player, usesExp, true);
-        player.giveExp(remainExp, false);
-        float expUseRate = (float) remainExp / (float) usesExp;
+        if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, "修繕のために経験値を " + toUseExp + " ポイント(1レベル分)確保しました");
+        int remainingExp = this.applyMending(player, toUseExp, true);
+        int usedExp = toUseExp - remainingExp;
+        player.giveExp(remainingExp, false);
+        if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, "修繕処理が終了しました。余剰経験値 " + remainingExp + " ポイントを返却しました");
+        float expUseRate = (float) usedExp / (float) toUseExp;
+        if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, "経験値の使用率は " + expUseRate + " です");
 
-        int price = expUseRate > 0.5 ? 1000 : 500;
+        int price = expUseRate > 0.5 ? 500 : 1000;
         WrappedEconomy.INSTANCE.withdrawPlayer(player, price);
+        if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, price + " 円を支払いました");
 
         stack.setUses(stack.getUses() + 1); // 使用回数++
         return 0;
