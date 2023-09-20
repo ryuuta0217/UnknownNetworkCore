@@ -114,10 +114,11 @@ public class MendingSupportStick extends UnknownNetworkItem implements Listener 
         if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, "修繕のために経験値を " + toUseExp + " ポイント(1レベル分)確保しました");
         int remainingExp = this.applyMending(player, toUseExp, true);
         int usedExp = toUseExp - remainingExp;
+        if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, "修繕に経験値を " + usedExp + " ポイント使用しました (耐久値 約" + (usedExp * 2) + " に相当, 経験値ポイント*2=耐久値)");
         player.giveExp(remainingExp, false);
         if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, "修繕処理が終了しました。余剰経験値 " + remainingExp + " ポイントを返却しました");
         float expUseRate = (float) usedExp / (float) toUseExp;
-        if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, "経験値の使用率は " + expUseRate + " です");
+        if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, "経験値の使用率は " + expUseRate + "(" + (expUseRate * 100) + "%) です");
 
         int price = expUseRate > 0.5 ? 500 : 1000;
         WrappedEconomy.INSTANCE.withdrawPlayer(player, price);
