@@ -63,6 +63,13 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
         super(new NamespacedKey("survival", "mending_support_stick"));
     }
 
+    public Stack createItemStack(int uses, int maxUses) {
+        Stack stack = this.createItemStack();
+        stack.setUses(uses);
+        stack.setMaxUses(maxUses);
+        return stack;
+    }
+
     @Override
     public Stack createItemStack() {
         return new Stack(this.createItemStackBuilder(Material.STICK)
