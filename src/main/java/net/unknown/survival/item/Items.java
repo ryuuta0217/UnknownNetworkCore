@@ -33,7 +33,6 @@ package net.unknown.survival.item;
 
 import net.unknown.core.item.UnknownNetworkItem;
 import net.unknown.core.managers.ListenerManager;
-import net.unknown.survival.feature.MendingSupportStick;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Listener;
 
@@ -46,11 +45,11 @@ public class Items {
     private static final Map<NamespacedKey, UnknownNetworkItem> REGISTRY = new HashMap<>();
     private static boolean FROZEN = false;
 
-    public static MendingSupportStick MENDING_SUPPORT_STICK;
+    public static MendingSupportStickItem MENDING_SUPPORT_STICK;
 
     public static void init() {
         if (FROZEN && !REGISTRY.isEmpty()) throw new IllegalStateException("Can't init items twice!");
-        MENDING_SUPPORT_STICK = register(new MendingSupportStick());
+        MENDING_SUPPORT_STICK = register(new MendingSupportStickItem());
         FROZEN = true;
     }
 

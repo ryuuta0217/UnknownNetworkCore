@@ -29,7 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.feature;
+package net.unknown.survival.item;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -40,7 +40,6 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
-import net.unknown.survival.item.Items;
 import net.unknown.core.item.UnknownNetworkItem;
 import net.unknown.core.item.UnknownNetworkItemStack;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
@@ -59,8 +58,8 @@ import org.bukkit.persistence.PersistentDataType;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class MendingSupportStick extends UnknownNetworkItem implements Listener {
-    public MendingSupportStick() {
+public class MendingSupportStickItem extends UnknownNetworkItem implements Listener {
+    public MendingSupportStickItem() {
         super(new NamespacedKey("survival", "mending_support_stick"));
     }
 
@@ -193,7 +192,7 @@ public class MendingSupportStick extends UnknownNetworkItem implements Listener 
         return level >= 30 ? 112 + (level - 30) * 9 : (level >= 15 ? 37 + (level - 15) * 5 : 7 + level * 2);
     }
 
-    public static class Stack extends UnknownNetworkItemStack<MendingSupportStick> {
+    public static class Stack extends UnknownNetworkItemStack<MendingSupportStickItem> {
         private static final NamespacedKey USES_KEY = new NamespacedKey("survival", "uses");
         private static final NamespacedKey MAX_USES_KEY = new NamespacedKey("survival", "max-uses");
 
