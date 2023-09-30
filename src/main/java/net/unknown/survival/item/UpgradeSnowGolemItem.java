@@ -32,6 +32,8 @@
 package net.unknown.survival.item;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -41,6 +43,7 @@ import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.item.UnknownNetworkItem;
 import net.unknown.core.item.UnknownNetworkItemStack;
 import net.unknown.core.util.MinecraftAdapter;
@@ -271,6 +274,9 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
     public Stack createItemStack() {
         Stack item = new Stack(this.createItemStackBuilder(Material.IRON_BLOCK)
                 .displayName(Component.text("スノーゴーレムアップグレード"))
+                .lore(Component.text("スノーゴーレムをアップグレードすることができます。", DefinedTextColor.GREEN),
+                        Component.empty(),
+                        Component.text("スノーゴーレムに向かって右クリックで使用", DefinedTextColor.YELLOW))
                 .build());
         item.setTargetUpgradeLevel(1);
         return item;
@@ -290,11 +296,25 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             if (this.getHandle().getItemMeta().getPersistentDataContainer().has(TARGET_UPGRADE_LEVEL_KEY, PersistentDataType.INTEGER)) {
                 Integer level = getHandle().getItemMeta().getPersistentDataContainer().get(TARGET_UPGRADE_LEVEL_KEY, PersistentDataType.INTEGER);
                 this.targetUpgradeLevel = level != null ? level : 0;
+            } else {
+                this.targetUpgradeLevel = 1;
+                this.save();
             }
+            this.updateName();
         }
 
         private void save() {
             this.getHandle().editMeta(meta -> meta.getPersistentDataContainer().set(TARGET_UPGRADE_LEVEL_KEY, PersistentDataType.INTEGER, targetUpgradeLevel));
+        }
+
+        private String buildName() {
+            return "スノウゴーレムアップグレード (Lv" + this.targetUpgradeLevel + ")";
+        }
+
+        private void updateName() {
+            if (!this.getHandle().getItemMeta().hasDisplayName() || !PlainTextComponentSerializer.plainText().serialize(this.getHandle().getItemMeta().displayName()).equals(this.buildName())) {
+                this.getHandle().editMeta(meta -> meta.displayName(Component.text(this.buildName()).decoration(TextDecoration.ITALIC, false)));
+            }
         }
 
         public int getTargetUpgradeLevel() {
