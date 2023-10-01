@@ -168,6 +168,7 @@
   "minecraft:husbandry/balanced_diet": {
     "criteria": {
       "cooked_beef": "2023-06-09 18:35:32 +0900",
+      "rotten_flesh": "2023-09-28 02:46:05 +0900",
       "enchanted_golden_apple": "2022-03-13 18:54:40 +0900",
       "carrot": "2023-04-11 02:54:02 +0900"
     },
@@ -1536,6 +1537,54 @@
   "minecraft:end/elytra": {
     "criteria": {
       "elytra": "2023-09-12 19:34:35 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/cherry_boat": {
+    "criteria": {
+      "in_water": "2023-09-25 21:01:11 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/transportation/bamboo_raft": {
+    "criteria": {
+      "in_water": "2023-09-25 21:01:11 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/iron_ingot_from_iron_block": {
+    "criteria": {
+      "has_iron_block": "2023-09-28 01:44:42 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/anvil": {
+    "criteria": {
+      "has_iron_block": "2023-09-28 01:44:42 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/snow": {
+    "criteria": {
+      "has_snowball": "2023-09-28 01:53:23 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/building_blocks/snow_block": {
+    "criteria": {
+      "has_snowball": "2023-09-28 01:53:23 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/misc/bone_meal": {
+    "criteria": {
+      "has_bone": "2023-09-28 02:01:31 +0900"
+    },
+    "done": true
+  },
+  "minecraft:story/deflect_arrow": {
+    "criteria": {
+      "deflected_projectile": "2023-09-28 02:45:55 +0900"
     },
     "done": true
   },
