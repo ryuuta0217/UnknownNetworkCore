@@ -43,7 +43,7 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftEntity;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Mob;
 import org.bukkit.entity.Pig;

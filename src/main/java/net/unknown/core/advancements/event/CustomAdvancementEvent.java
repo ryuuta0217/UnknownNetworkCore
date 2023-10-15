@@ -31,7 +31,7 @@
 
 package net.unknown.core.advancements.event;
 
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.entity.Player;
@@ -44,10 +44,10 @@ import org.bukkit.event.Event;
  */
 public abstract class CustomAdvancementEvent extends Event {
     private final ServerPlayer player;
-    private final Advancement advancement;
+    private final AdvancementHolder advancement;
     private final AdvancementProgress progress;
 
-    public CustomAdvancementEvent(boolean isAsync, ServerPlayer player, Advancement advancement, AdvancementProgress progress) {
+    public CustomAdvancementEvent(boolean isAsync, ServerPlayer player, AdvancementHolder advancement, AdvancementProgress progress) {
         super(isAsync);
         this.player = player;
         this.advancement = advancement;
@@ -62,7 +62,7 @@ public abstract class CustomAdvancementEvent extends Event {
         return this.player.getBukkitEntity();
     }
 
-    public Advancement getAdvancement() {
+    public AdvancementHolder getAdvancement() {
         return this.advancement;
     }
 

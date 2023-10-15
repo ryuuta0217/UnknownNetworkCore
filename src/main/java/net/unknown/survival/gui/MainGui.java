@@ -43,7 +43,7 @@ import net.unknown.survival.gui.prefix.PrefixGui;
 import net.unknown.survival.gui.warp.WarpGui;
 import net.unknown.survival.vote.gui.VoteTicketExchangeGui;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftHumanEntity;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;

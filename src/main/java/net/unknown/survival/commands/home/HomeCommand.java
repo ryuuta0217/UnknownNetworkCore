@@ -43,7 +43,7 @@ import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.enums.Permissions;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
 
 // /minecraft:home - send homes list
 // /minecraft:home <String: homeName> - teleport to home

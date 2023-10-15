@@ -36,13 +36,14 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -55,7 +56,7 @@ public class OpenInv {
         if (offline.isOnline()) return Bukkit.getPlayer(offline.getUniqueId());
 
         GameProfile dummyProfile = new GameProfile(offline.getUniqueId(), (offline.getName() != null ? offline.getName() : offline.getUniqueId().toString()));
-        ServerPlayer dummyPlayer = new ServerPlayer(MinecraftServer.getServer(), MinecraftServer.getServer().getLevel(Level.OVERWORLD), dummyProfile);
+        ServerPlayer dummyPlayer = new ServerPlayer(MinecraftServer.getServer(), MinecraftServer.getServer().getLevel(Level.OVERWORLD), dummyProfile, ClientInformation.createDefault());
         dummyPlayer.getAdvancements().stopListening(); // 進捗のトリガーリスナーを停止する, メモリリークを防ぐ
 
         CraftPlayer dummyBukkitEntity = new CraftPlayer(dummyPlayer.server.server, dummyPlayer) {

@@ -31,7 +31,7 @@
 
 package net.unknown.core.advancements.event;
 
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.event.HandlerList;
@@ -43,7 +43,7 @@ import org.jetbrains.annotations.NotNull;
 public class CustomAdvancementCompletedEvent extends CustomAdvancementEvent {
     private static final HandlerList HANDLERS = new HandlerList();
 
-    public CustomAdvancementCompletedEvent(boolean isAsync, ServerPlayer player, Advancement advancement, AdvancementProgress progress) {
+    public CustomAdvancementCompletedEvent(boolean isAsync, ServerPlayer player, AdvancementHolder advancement, AdvancementProgress progress) {
         super(isAsync, player, advancement, progress);
     }
 

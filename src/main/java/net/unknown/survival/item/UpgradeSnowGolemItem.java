@@ -325,6 +325,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             if (targetUpgradeLevel < 0) throw new IllegalArgumentException("Level can't be lower than 0!");
             this.targetUpgradeLevel = targetUpgradeLevel;
             this.save();
+            this.updateName();
         }
     }
 }

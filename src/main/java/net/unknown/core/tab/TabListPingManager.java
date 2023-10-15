@@ -39,11 +39,12 @@ import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.managers.RunnableManager;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -66,7 +67,7 @@ public class TabListPingManager implements Listener {
     );
 
     public static final ClientboundSetObjectivePacket CREATE_OBJECTIVE = new ClientboundSetObjectivePacket(OBJECTIVE, ClientboundSetObjectivePacket.METHOD_ADD);
-    public static final ClientboundSetDisplayObjectivePacket DISPLAY_OBJECTIVE = new ClientboundSetDisplayObjectivePacket(0, OBJECTIVE);
+    public static final ClientboundSetDisplayObjectivePacket DISPLAY_OBJECTIVE = new ClientboundSetDisplayObjectivePacket(DisplaySlot.LIST, OBJECTIVE);
     public static final ClientboundSetObjectivePacket REMOVE_OBJECTIVE = new ClientboundSetObjectivePacket(OBJECTIVE, ClientboundSetObjectivePacket.METHOD_REMOVE);
 
     private static BukkitTask UPDATE_TASK;
@@ -107,7 +108,7 @@ public class TabListPingManager implements Listener {
                 .getPlayerList()
                 .getPlayers()
                 .stream()
-                .collect(Collectors.toMap(p -> p.getScoreboardName(), p -> p.latency));
+                .collect(Collectors.toMap(p -> p.getScoreboardName(), p -> p.connection.latency()));
 
         UnknownNetworkCore.getDedicatedServer()
                 .getPlayerList()

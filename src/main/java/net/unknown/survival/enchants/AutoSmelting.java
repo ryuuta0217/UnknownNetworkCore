@@ -41,6 +41,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.GameRules;
@@ -91,9 +92,9 @@ public class AutoSmelting implements Listener {
         List<ItemStack> newDrops = Block.getDrops(blockState, level, blockPos, blockEntity).stream()
                 .map(minecraftDropStack -> {
                     dummyFurnace.setItem(0, minecraftDropStack);
-                    List<SmeltingRecipe> recipes = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, dummyFurnace, level);
+                    List<RecipeHolder<SmeltingRecipe>> recipes = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, dummyFurnace, level);
                     if (recipes.size() > 0) {
-                        ItemStack smeltingResult = recipes.get(0).getResultItem(level.registryAccess());
+                        ItemStack smeltingResult = recipes.get(0).value().getResultItem(level.registryAccess());
                         smeltingResult.setCount(minecraftDropStack.getCount());
                         return smeltingResult;
                     }
