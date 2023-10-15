@@ -25,15 +25,15 @@
   },
   "minecraft:adventure/adventuring_time": {
     "criteria": {
+      "minecraft:deep_cold_ocean": "2023-05-25 23:15:38 +0900",
+      "minecraft:cold_ocean": "2023-05-25 23:01:35 +0900",
+      "minecraft:desert": "2023-05-25 22:39:00 +0900",
+      "minecraft:forest": "2023-05-25 22:42:39 +0900",
       "minecraft:taiga": "2023-05-25 22:42:48 +0900",
+      "minecraft:deep_dark": "2023-05-25 22:39:52 +0900",
       "minecraft:deep_ocean": "2023-05-25 23:23:25 +0900",
       "minecraft:river": "2023-05-25 22:42:56 +0900",
       "minecraft:stony_shore": "2023-05-25 22:42:43 +0900",
-      "minecraft:cold_ocean": "2023-05-25 23:01:35 +0900",
-      "minecraft:forest": "2023-05-25 22:42:39 +0900",
-      "minecraft:deep_cold_ocean": "2023-05-25 23:15:38 +0900",
-      "minecraft:desert": "2023-05-25 22:39:00 +0900",
-      "minecraft:deep_dark": "2023-05-25 22:39:52 +0900",
       "minecraft:savanna": "2023-05-25 22:40:01 +0900",
       "minecraft:plains": "2022-03-13 11:50:07 +0900"
     },
@@ -167,9 +167,9 @@
   },
   "minecraft:husbandry/balanced_diet": {
     "criteria": {
-      "cooked_beef": "2023-06-09 18:35:32 +0900",
       "rotten_flesh": "2023-09-28 02:46:05 +0900",
       "enchanted_golden_apple": "2022-03-13 18:54:40 +0900",
+      "cooked_beef": "2023-06-09 18:35:32 +0900",
       "carrot": "2023-04-11 02:54:02 +0900"
     },
     "done": false
@@ -1049,8 +1049,8 @@
   },
   "minecraft:adventure/kill_all_mobs": {
     "criteria": {
-      "minecraft:ender_dragon": "2023-05-20 22:34:26 +0900",
-      "minecraft:zombie": "2023-05-25 10:40:43 +0900"
+      "minecraft:zombie": "2023-05-25 10:40:43 +0900",
+      "minecraft:ender_dragon": "2023-05-20 22:34:26 +0900"
     },
     "done": false
   },
@@ -1588,5 +1588,5 @@
     },
     "done": true
   },
-  "DataVersion": 3465
+  "DataVersion": 3578
 }
