@@ -29,7 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.economy.repository;
+package net.unknown.survival.economy.repository;
 
 import net.unknown.shared.SharedConstants;
 import org.bukkit.configuration.file.FileConfiguration;

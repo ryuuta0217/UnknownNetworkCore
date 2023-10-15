@@ -29,12 +29,12 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.economy;
+package net.unknown.survival.economy;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.unknown.UnknownNetworkCore;
-import net.unknown.core.economy.repository.PlayerRepository;
+import net.unknown.survival.economy.repository.PlayerRepository;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.ServicePriority;
@@ -78,7 +78,7 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public boolean hasBankSupport() {
-        return false;
+        return true;
     }
 
     /**

@@ -29,7 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.economy;
+package net.unknown.survival.economy;
 
 public class UnknownNetworkEconomy {
 }
