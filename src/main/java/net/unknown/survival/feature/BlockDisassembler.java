@@ -34,6 +34,7 @@ package net.unknown.survival.feature;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
@@ -54,7 +55,8 @@ import java.util.Objects;
 public class BlockDisassembler implements Listener {
     @EventHandler
     public void onDispenserShoot(BlockDispenseBeforeEvent event) {
-        if (event.getBlockSource().getBlockState().getBlock() == Blocks.DISPENSER && event.getBlockSource().getEntity() instanceof DispenserBlockEntity dispenser) {
+        if (event.getBlockSource().state().getBlock() == Blocks.DISPENSER) {
+            DispenserBlockEntity dispenser = event.getBlockSource().blockEntity();
             if (dispenser.getDisplayName().contains(Component.literal("Block Disassembler").withStyle(ChatFormatting.RED, ChatFormatting.BOLD))) {
                 event.setCancelled(true);
 

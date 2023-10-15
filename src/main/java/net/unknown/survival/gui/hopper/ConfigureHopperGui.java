@@ -40,7 +40,7 @@ import net.unknown.launchwrapper.hopper.IMixinHopperBlockEntity;
 import net.unknown.survival.gui.hopper.view.ConfigureHopperView;
 import net.unknown.survival.gui.hopper.view.ConfigureHopperViewBase;
 import net.unknown.survival.gui.hopper.view.ManageHopperView;
-import org.bukkit.craftbukkit.v1_20_R1.block.CraftHopper;
+import org.bukkit.craftbukkit.v1_20_R2.block.CraftHopper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;

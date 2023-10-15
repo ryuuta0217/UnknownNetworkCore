@@ -57,7 +57,7 @@ import net.unknown.core.commands.brigadier.CustomBrigadierExceptions;
 import net.unknown.core.managers.RunnableManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.world.TimeSkipEvent;
