@@ -34,8 +34,8 @@ package net.unknown.survival;
 import net.milkbowl.vault.economy.Economy;
 import net.unknown.UnknownNetworkCore;
 import net.unknown.core.discord.UnknownNetworkDiscordBot;
+import net.unknown.survival.economy.VaultEconomy;
 import net.unknown.core.managers.ListenerManager;
-import net.unknown.survival.antivillagerlag.AntiVillagerLag;
 import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
@@ -46,7 +46,6 @@ import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.discord.MinecraftToDiscordMessageListener;
 import net.unknown.survival.enchants.*;
-import net.unknown.survival.enchants.nms.DamageEnchant;
 import net.unknown.survival.events.ModifiableBlockBreakEvent;
 import net.unknown.survival.feature.*;
 import net.unknown.survival.feature.gnarms.GNArms;
@@ -144,6 +143,10 @@ public class UnknownNetworkSurvival {
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unc_survival:open_gui", guiOpenListener);
 
         DemolitionGun.BowPullIndicator.boot();
+
+        if (isVaultEnabled() && !isJeconEnabled()) {
+            VaultEconomy.hookVault();
+        }
 
         if (isVaultEnabled() && isJeconEnabled()) {
             Optional<RegisteredServiceProvider<Economy>> optionalEconomyServiceProvider = Optional.ofNullable(Bukkit.getServicesManager().getRegistration(Economy.class));
