@@ -81,7 +81,7 @@ public class UnknownNetworkSurvival {
 
     public static void onLoad() {
         Commands.init();
-        DamageEnchant.register();
+        //DamageEnchant.register();
         try {
             Class.forName("net.unknown.launchwrapper.Main");
             BOOTSTRAPPED = true;
