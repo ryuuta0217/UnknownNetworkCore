@@ -90,7 +90,7 @@ public class MonsterBall implements Listener {
                 }
                 event.setCancelled(true);
                 ListenerManager.waitForEvent(CreatureSpawnEvent.class, false, EventPriority.NORMAL, (e) -> {
-                    return e.getLocation().distance(event.getEntity().getLocation()) < 15 && e.getEntityType() == org.bukkit.entity.EntityType.CHICKEN && e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.EGG;
+                    return e.getLocation().getWorld().equals(event.getEntity().getLocation().getWorld()) && e.getLocation().distance(event.getEntity().getLocation()) < 15 && e.getEntityType() == org.bukkit.entity.EntityType.CHICKEN && e.getSpawnReason() == CreatureSpawnEvent.SpawnReason.EGG;
                 }, (e) -> {
                     e.setCancelled(true);
                 }, 1, ListenerManager.TimeType.SECONDS, () -> {});
