@@ -6,6 +6,7 @@
 
 plugins {
     id 'java'
+    id 'application'
     id 'maven-publish'
     id 'io.papermc.paperweight.userdev' version '+' // Enable Development of using Mojang Mapping.
     id 'xyz.jpenilla.run-paper' version '+' // Run Mojang Mapped or Spigot Mapped Server
@@ -82,6 +83,10 @@ processResources {
         duplicatesStrategy(DuplicatesStrategy.INCLUDE)
         filter ReplaceTokens, tokens: [version: "git-" + project.name + "-" + (versionDetails().branchName != null ? versionDetails().branchName : System.getenv("BRANCH_NAME")) + "-" + versionDetails().gitHash[0..7]]
     }
+}
+
+application {
+    mainClass = 'net.unknown.UnknownNetworkCore'
 }
 
 jar {
