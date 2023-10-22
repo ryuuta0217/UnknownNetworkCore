@@ -36,7 +36,7 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.chat.CustomChatTypes;
 import net.unknown.core.events.PrivateMessageEvent;
 import net.unknown.core.util.MinecraftAdapter;
@@ -84,7 +84,7 @@ public class PrivateChatChannel extends ChatChannel {
         ServerPlayer receiver = ((CraftPlayer) player).getHandle();
         PrivateMessageEvent pEvent = new PrivateMessageEvent(sender.getBukkitEntity(), Collections.singleton(receiver.getBukkitEntity()), event.signedMessage());
         try {
-            Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), pEvent::callEvent).get(1, TimeUnit.SECONDS);
+            Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), pEvent::callEvent).get(1, TimeUnit.SECONDS);
             if (pEvent.isCancelled()) {
                 event.setCancelled(true);
                 return;

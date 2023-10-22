@@ -31,7 +31,7 @@
 
 package net.unknown.core.commands;
 
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.commands.vanilla.GamemodeCommand;
 import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.commands.vanilla.TimeCommand;
@@ -39,20 +39,20 @@ import net.unknown.core.fireworks.ProgrammedFireworksCommand;
 
 public class Commands {
     public static void init() {
-        CrashCommand.register(UnknownNetworkCore.getBrigadier());
-        EvalCommand.register(UnknownNetworkCore.getBrigadier());
-        PacketCommand.register(UnknownNetworkCore.getBrigadier());
-        SkinCommand.register(UnknownNetworkCore.getBrigadier());
-        NickCommand.register(UnknownNetworkCore.getBrigadier());
-        SetPoseCommand.register(UnknownNetworkCore.getBrigadier());
-        GamemodeCommand.register(UnknownNetworkCore.getBrigadier());
-        MsgCommand.register(UnknownNetworkCore.getBrigadier());
-        TeleportWorldCommand.register(UnknownNetworkCore.getBrigadier());
-        DeepFakeCommand.register(UnknownNetworkCore.getBrigadier());
-        SkullCommand.register(UnknownNetworkCore.getBrigadier());
-        TrashCommand.register(UnknownNetworkCore.getBrigadier());
-        TimeCommand.register(UnknownNetworkCore.getBrigadier());
-        SwapLocationCommand.register(UnknownNetworkCore.getBrigadier());
-        ProgrammedFireworksCommand.register(UnknownNetworkCore.getBrigadier());
+        CrashCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        EvalCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        PacketCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        SkinCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        NickCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        SetPoseCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        GamemodeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        MsgCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        TeleportWorldCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        DeepFakeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        SkullCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        TrashCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        TimeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        SwapLocationCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        ProgrammedFireworksCommand.register(UnknownNetworkCorePlugin.getBrigadier());
     }
 }

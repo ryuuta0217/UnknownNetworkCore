@@ -32,7 +32,7 @@
 package net.unknown.survival.chat.channels.ranged;
 
 import io.papermc.paper.event.player.AsyncChatEvent;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.chat.channels.ChannelType;
 import net.unknown.survival.chat.channels.ChatChannel;
@@ -65,7 +65,7 @@ public abstract class RangedChatChannel extends ChatChannel {
     public void processChat(AsyncChatEvent event) {
         try {
             if (this.range > 0) {
-                processRangedChat(event, Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> {
+                processRangedChat(event, Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
                     List<Entity> entities = new ArrayList<>();
                     entities.add(event.getPlayer());
                     entities.addAll(event.getPlayer().getNearbyEntities(this.range, this.range, this.range));

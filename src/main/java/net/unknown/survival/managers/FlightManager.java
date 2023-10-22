@@ -36,7 +36,7 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.server.level.ServerPlayer;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
@@ -205,7 +205,7 @@ public class FlightManager {
                             }
                         }
                     }
-                }, UnknownNetworkCore.getInstance());
+                }, UnknownNetworkCorePlugin.getInstance());
                 /* 最大 10秒 */
                 RunnableManager.runAsyncDelayed(() -> HandlerList.unregisterAll(dummyListener), 20 * 10);
 

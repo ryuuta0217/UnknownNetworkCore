@@ -32,7 +32,7 @@
 package net.unknown.survival;
 
 import net.milkbowl.vault.economy.Economy;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.discord.UnknownNetworkDiscordBot;
 import net.unknown.survival.economy.VaultEconomy;
 import net.unknown.core.managers.ListenerManager;
@@ -112,7 +112,7 @@ public class UnknownNetworkSurvival {
         UNCUpdateCheckTask.start();
         DebugStickEntityEditor.Listener.register();
 
-        Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
+        Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCorePlugin.getInstance());
 
         if (ItemGiveQueue.getInstance() == null) LOGGER.warning("Failed to initialize ItemGiveQueue, but proceed to enable.");
         MainGuiOpenListener guiOpenListener = new MainGuiOpenListener();
@@ -138,9 +138,9 @@ public class UnknownNetworkSurvival {
             ListenerManager.registerListener(new ChestLink());
         }
 
-        Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");
-        Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());
-        Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unc_survival:open_gui", guiOpenListener);
+        Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "BungeeCord");
+        Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "unknown:forge", new FMLConnectionListener());
+        Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "unc_survival:open_gui", guiOpenListener);
 
         DemolitionGun.BowPullIndicator.boot();
 
@@ -154,7 +154,7 @@ public class UnknownNetworkSurvival {
                 Economy economyService = optionalEconomyServiceProvider.get().getProvider();
                 Bukkit.getServicesManager().unregister(Economy.class, economyService);
                 WrappedEconomy wrapped = new WrappedEconomy(economyService);
-                Bukkit.getServicesManager().register(Economy.class, wrapped, UnknownNetworkCore.getInstance(), ServicePriority.Highest);
+                Bukkit.getServicesManager().register(Economy.class, wrapped, UnknownNetworkCorePlugin.getInstance(), ServicePriority.Highest);
             }
         }
 

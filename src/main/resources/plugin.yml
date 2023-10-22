@@ -1,7 +1,7 @@
 name: UnknownNetworkCore
 version: "@version@"
 api-version: 1.20
-main: net.unknown.UnknownNetworkCore
+main: net.unknown.UnknownNetworkCorePlugin
 softdepend: ["WorldGuard", "Multiverse-Core", "HolographicDisplays", "Vault", "Jecon", "BlueMap", "Votifier", "CoreProtect"]
 permissions:
   unknown.core.default:

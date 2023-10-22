@@ -35,12 +35,11 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -92,7 +91,7 @@ public class VanishManager {
 
     private static void setHidden(ServerPlayer hideTarget, Player target) {
         if (target.hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) return;
-        target.hidePlayer(UnknownNetworkCore.getInstance(), hideTarget.getBukkitEntity());
+        target.hidePlayer(UnknownNetworkCorePlugin.getInstance(), hideTarget.getBukkitEntity());
     }
 
     private static void setShowing(ServerPlayer showTarget) {
@@ -100,6 +99,6 @@ public class VanishManager {
     }
 
     private static void setShowing(ServerPlayer showTarget, Player target) {
-        target.showPlayer(UnknownNetworkCore.getInstance(), showTarget.getBukkitEntity());
+        target.showPlayer(UnknownNetworkCorePlugin.getInstance(), showTarget.getBukkitEntity());
     }
 }

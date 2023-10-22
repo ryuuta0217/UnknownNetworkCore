@@ -38,7 +38,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R2.CraftWorld;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
@@ -62,7 +62,7 @@ public class CustomFallingBlockEntity extends FallingBlockEntity {
     }
 
     public static String spawnTest(Player player) {
-        Bukkit.getOnlinePlayers().forEach(p -> p.hidePlayer(UnknownNetworkCore.getInstance(), player)); //
+        Bukkit.getOnlinePlayers().forEach(p -> p.hidePlayer(UnknownNetworkCorePlugin.getInstance(), player)); //
 
         CraftWorld cW = (CraftWorld) player.getWorld();
         Level level = cW.getHandle();

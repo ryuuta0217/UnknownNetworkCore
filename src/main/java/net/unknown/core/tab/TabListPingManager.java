@@ -32,8 +32,6 @@
 package net.unknown.core.tab;
 
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
@@ -42,7 +40,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.managers.RunnableManager;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
@@ -75,7 +73,7 @@ public class TabListPingManager implements Listener {
     public static BukkitTask startTask() {
         stopTask();
 
-        UnknownNetworkCore.getDedicatedServer()
+        UnknownNetworkCorePlugin.getDedicatedServer()
                 .getPlayerList()
                 .getPlayers()
                 .forEach(TabListPingManager::createDummyObjective);
@@ -88,7 +86,7 @@ public class TabListPingManager implements Listener {
     public static void stopTask() {
         if (UPDATE_TASK != null && !UPDATE_TASK.isCancelled()) UPDATE_TASK.cancel();
 
-        UnknownNetworkCore.getDedicatedServer()
+        UnknownNetworkCorePlugin.getDedicatedServer()
                 .getPlayerList()
                 .getPlayers()
                 .forEach(TabListPingManager::removeDummyObjective);
@@ -104,13 +102,13 @@ public class TabListPingManager implements Listener {
     }
 
     private static void sendLatencies() {
-        Map<String, Integer> latencies = UnknownNetworkCore.getDedicatedServer()
+        Map<String, Integer> latencies = UnknownNetworkCorePlugin.getDedicatedServer()
                 .getPlayerList()
                 .getPlayers()
                 .stream()
                 .collect(Collectors.toMap(p -> p.getScoreboardName(), p -> p.connection.latency()));
 
-        UnknownNetworkCore.getDedicatedServer()
+        UnknownNetworkCorePlugin.getDedicatedServer()
                 .getPlayerList()
                 .getPlayers()
                 .forEach(player -> {

@@ -31,33 +31,33 @@
 
 package net.unknown.core.managers;
 
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 public final class RunnableManager {
     public static void runSync(Runnable runnable) {
-        createBukkitRunnable(runnable).runTask(UnknownNetworkCore.getInstance());
+        createBukkitRunnable(runnable).runTask(UnknownNetworkCorePlugin.getInstance());
     }
 
     public static BukkitTask runDelayed(Runnable runnable, long delay) {
-        return createBukkitRunnable(runnable).runTaskLater(UnknownNetworkCore.getInstance(), delay);
+        return createBukkitRunnable(runnable).runTaskLater(UnknownNetworkCorePlugin.getInstance(), delay);
     }
 
     public static BukkitTask runRepeating(Runnable runnable, long delay, long interval) {
-        return createBukkitRunnable(runnable).runTaskTimer(UnknownNetworkCore.getInstance(), delay, interval);
+        return createBukkitRunnable(runnable).runTaskTimer(UnknownNetworkCorePlugin.getInstance(), delay, interval);
     }
 
     public static BukkitTask runAsync(Runnable runnable) {
-        return createBukkitRunnable(runnable).runTaskAsynchronously(UnknownNetworkCore.getInstance());
+        return createBukkitRunnable(runnable).runTaskAsynchronously(UnknownNetworkCorePlugin.getInstance());
     }
 
     public static BukkitTask runAsyncDelayed(Runnable runnable, long delay) {
-        return createBukkitRunnable(runnable).runTaskLaterAsynchronously(UnknownNetworkCore.getInstance(), delay);
+        return createBukkitRunnable(runnable).runTaskLaterAsynchronously(UnknownNetworkCorePlugin.getInstance(), delay);
     }
 
     public static BukkitTask runAsyncRepeating(Runnable runnable, long delay, long interval) {
-        return createBukkitRunnable(runnable).runTaskTimerAsynchronously(UnknownNetworkCore.getInstance(), delay, interval);
+        return createBukkitRunnable(runnable).runTaskTimerAsynchronously(UnknownNetworkCorePlugin.getInstance(), delay, interval);
     }
 
     private static BukkitRunnable createBukkitRunnable(Runnable runnable) {

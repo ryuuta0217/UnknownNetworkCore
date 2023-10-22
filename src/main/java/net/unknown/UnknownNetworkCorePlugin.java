@@ -56,17 +56,16 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
 
-public class UnknownNetworkCore extends JavaPlugin {
+public class UnknownNetworkCorePlugin extends JavaPlugin {
     private static final JSONParser JSON_PARSER = new JSONParser();
-    private static final Environment ENV = Environment.valueOf(System.getProperty("un.env", "SURVIVAL"));
-    private static UnknownNetworkCore INSTANCE;
+    private static UnknownNetworkCorePlugin INSTANCE;
 
-    public UnknownNetworkCore() {
+    public UnknownNetworkCorePlugin() {
         INSTANCE = this;
     }
 
     public static boolean isProductionVersion() {
-        return UnknownNetworkCore.getVersion().gitBranch().equals("production");
+        return UnknownNetworkCorePlugin.getVersion().gitBranch().equals("production");
     }
 
     public static CommandDispatcher<CommandSourceStack> getBrigadier() {
@@ -77,7 +76,7 @@ public class UnknownNetworkCore extends JavaPlugin {
         return ((CraftServer) Bukkit.getServer()).getServer();
     }
 
-    public static UnknownNetworkCore getInstance() {
+    public static UnknownNetworkCorePlugin getInstance() {
         return INSTANCE;
     }
 
@@ -85,14 +84,10 @@ public class UnknownNetworkCore extends JavaPlugin {
         return JSON_PARSER;
     }
 
-    public static Environment getEnvironment() {
-        return ENV;
-    }
-
     @Override
     public void onLoad() {
         long start = System.nanoTime();
-        getLogger().info("Plugin was loaded with environment: " + ENV.name());
+        getLogger().info("Plugin was loaded with environment: " + UnknownNetworkCore.getEnvironment().name());
         if (!this.getDataFolder().exists() && this.getDataFolder().mkdir()) {
             getLogger().info("Plugin folder created.");
         }
@@ -117,7 +112,7 @@ public class UnknownNetworkCore extends JavaPlugin {
         });*/
         CustomChatTypes.bootstrap();
         Commands.init();
-        ENV.onLoad();
+        UnknownNetworkCore.getEnvironment().onLoad();
         long end = System.nanoTime();
         getLogger().info("Plugin was loaded in " + (end - start) / 1000000 + "ms");
     }
@@ -162,7 +157,7 @@ public class UnknownNetworkCore extends JavaPlugin {
         getLogger().info("");
         getLogger().info("");
         getLogger().info("");
-        ENV.onEnable();
+        UnknownNetworkCore.getEnvironment().onEnable();
         long end = System.nanoTime();
         getLogger().info("Plugin was enabled in " + (end - start) / 1000000 + "ms");
     }
@@ -170,7 +165,7 @@ public class UnknownNetworkCore extends JavaPlugin {
     @Override
     public void onDisable() {
         HandlerList.unregisterAll(this);
-        ENV.onDisable();
+        UnknownNetworkCore.getEnvironment().onDisable();
     }
 
     public static VersionInfo getVersion() {

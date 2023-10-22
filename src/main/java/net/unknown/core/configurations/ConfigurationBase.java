@@ -31,7 +31,7 @@
 
 package net.unknown.core.configurations;
 
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -50,7 +50,7 @@ public abstract class ConfigurationBase {
     }
 
     public ConfigurationBase(String fileName, boolean ifNotExistsExtractFromJar, String loggerName, char pathSeparator) {
-        this(new File(UnknownNetworkCore.getInstance().getDataFolder(), fileName), ifNotExistsExtractFromJar, loggerName, pathSeparator);
+        this(new File(UnknownNetworkCorePlugin.getInstance().getDataFolder(), fileName), ifNotExistsExtractFromJar, loggerName, pathSeparator);
     }
 
 
@@ -60,7 +60,7 @@ public abstract class ConfigurationBase {
         this.logger = Logger.getLogger(loggerName);
 
         if (!configurationFile.exists()) {
-            if (ifNotExistsExtractFromJar) UnknownNetworkCore.getInstance().saveResource(configurationFileName, false);
+            if (ifNotExistsExtractFromJar) UnknownNetworkCorePlugin.getInstance().saveResource(configurationFileName, false);
             else {
                 if (!configurationFile.getParentFile().exists()) {
                     if (!configurationFile.getParentFile().mkdirs())

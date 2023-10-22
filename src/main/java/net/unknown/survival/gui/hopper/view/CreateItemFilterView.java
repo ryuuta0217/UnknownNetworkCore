@@ -39,7 +39,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.nbt.TextComponentTagVisitor;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.define.DefinedTextColor;
@@ -163,13 +163,13 @@ public class CreateItemFilterView extends ConfigureHopperViewBase {
                         // Unreachable in here, already checked before.
                     }
                     e.setCancelled(true);
-                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> { // this event is asynchronous event, use callSyncMethod to open gui.
+                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> { // this event is asynchronous event, use callSyncMethod to open gui.
                         this.checkInput();
                         this.getGui().open(event.getWhoClicked());
                         return null;
                     });
                 }, 1, ListenerManager.TimeType.MINUTES, () -> {
-                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> { // TODO: check waitForEvent is asynchronous?
+                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> { // TODO: check waitForEvent is asynchronous?
                         this.getGui().open(event.getWhoClicked());
                         return null;
                     }); // When timed out, open again this gui.

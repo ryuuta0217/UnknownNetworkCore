@@ -36,7 +36,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
@@ -87,7 +87,7 @@ public class EvalManager {
         importClassGlobally(ChatColor.class);
 
         // Unknown Network
-        importClassGlobally(UnknownNetworkCore.class);
+        importClassGlobally(UnknownNetworkCorePlugin.class);
         importClassGlobally(RunnableManager.class);
         importClassGlobally(NewMessageUtil.class);
         importClassGlobally(PlayerData.class);
@@ -105,7 +105,7 @@ public class EvalManager {
         importClassGlobally(NamedTextColor.class);
         importClassGlobally(Style.class);
 
-        putProperty("plugin", UnknownNetworkCore.getInstance());
+        putProperty("plugin", UnknownNetworkCorePlugin.getInstance());
         putProperty("Storage", GLOBAL_STORAGE);
     }
 

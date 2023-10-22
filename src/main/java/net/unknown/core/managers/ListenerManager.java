@@ -31,7 +31,7 @@
 
 package net.unknown.core.managers;
 
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventPriority;
@@ -49,7 +49,7 @@ public class ListenerManager {
     private static final Set<Listener> REGISTERED_LISTENERS = new HashSet<>();
 
     public static void registerListener(Listener listener) {
-        Bukkit.getPluginManager().registerEvents(listener, UnknownNetworkCore.getInstance());
+        Bukkit.getPluginManager().registerEvents(listener, UnknownNetworkCorePlugin.getInstance());
         REGISTERED_LISTENERS.add(listener);
     }
 
@@ -67,7 +67,7 @@ public class ListenerManager {
     public static Listener registerEventListener(Class<? extends Event> eventClass, Listener listener, EventPriority priority, boolean ignoreCancelled, EventExecutor eventExecutor) {
         if (listener == null) listener = new Listener() {
         };
-        Bukkit.getPluginManager().registerEvent(eventClass, listener, priority, eventExecutor, UnknownNetworkCore.getInstance(), ignoreCancelled);
+        Bukkit.getPluginManager().registerEvent(eventClass, listener, priority, eventExecutor, UnknownNetworkCorePlugin.getInstance(), ignoreCancelled);
         REGISTERED_LISTENERS.add(listener);
         return listener;
     }

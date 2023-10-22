@@ -40,6 +40,7 @@ public enum Environment {
     LOBBY,
     MINIGAME,
     SURVIVAL,
+    STANDALONE,
     UNKNOWN;
 
     public void onLoad() {

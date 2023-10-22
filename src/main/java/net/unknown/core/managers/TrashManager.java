@@ -33,7 +33,6 @@ package net.unknown.core.managers;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.unknown.UnknownNetworkCore;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.shared.SharedConstants;
 import org.bukkit.configuration.ConfigurationSection;

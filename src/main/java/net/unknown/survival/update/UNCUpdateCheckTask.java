@@ -31,7 +31,6 @@
 
 package net.unknown.survival.update;
 
-import com.ryuuta0217.api.github.repository.commit.CommitImpl;
 import com.ryuuta0217.api.github.repository.commit.CompareResult;
 import com.ryuuta0217.api.github.repository.commit.CompareStatus;
 import com.ryuuta0217.api.github.repository.commit.Stats;
@@ -40,7 +39,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
@@ -73,7 +72,7 @@ public class UNCUpdateCheckTask extends BukkitRunnable implements Listener {
         }
 
         if (UpdateUtil.GITHUB_API == null) return;
-        TASK = INSTANCE.runTaskTimerAsynchronously(UnknownNetworkCore.getInstance(), 20 * 60, 20 * 60);
+        TASK = INSTANCE.runTaskTimerAsynchronously(UnknownNetworkCorePlugin.getInstance(), 20 * 60, 20 * 60);
         ListenerManager.registerListener(INSTANCE);
     }
 
@@ -89,7 +88,7 @@ public class UNCUpdateCheckTask extends BukkitRunnable implements Listener {
             return;
         }
 
-        VersionInfo current = UnknownNetworkCore.getVersion();
+        VersionInfo current = UnknownNetworkCorePlugin.getVersion();
         if (current == null) {
             LOGGER.warning("現在実行中のUnknownNetworkCoreのバージョンを取得できませんでした。Gitのセットアップを完了してください。");
             this.cancel();

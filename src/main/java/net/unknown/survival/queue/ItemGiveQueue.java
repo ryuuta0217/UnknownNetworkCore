@@ -32,7 +32,7 @@
 package net.unknown.survival.queue;
 
 import net.kyori.adventure.text.Component;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.configurations.ConfigurationBase;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
@@ -85,7 +85,7 @@ public class ItemGiveQueue extends ConfigurationBase implements Listener {
                 player.getInventory().addItem(item).forEach((slot, overflowItem) -> player.getWorld().dropItem(player.getLocation(), overflowItem));
             } else {
                 if (Bukkit.isPrimaryThread()) player.getWorld().dropItem(player.getLocation(), item);
-                else Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> player.getWorld().dropItem(player.getLocation(), item)); // Synchronized call with Server thread
+                else Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> player.getWorld().dropItem(player.getLocation(), item)); // Synchronized call with Server thread
             }
             NewMessageUtil.sendMessage(player, Component.empty()
                     .append(Component.text((inventoryHasSpace ? "インベントリに " : "足元に ")))
