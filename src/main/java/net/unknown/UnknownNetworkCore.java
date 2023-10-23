@@ -31,149 +31,59 @@
 
 package net.unknown;
 
-import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.dedicated.DedicatedServer;
-import net.unknown.core.athletic.Athletics;
-import net.unknown.core.block.MultiPageChest;
-import net.unknown.core.bossbar.TPSBar;
-import net.unknown.core.chat.CustomChatTypes;
-import net.unknown.core.commands.Commands;
-import net.unknown.core.feature.PrivateMessageListener;
-import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
-import net.unknown.core.gui.SignGui;
-import net.unknown.core.managers.ListenerManager;
-import net.unknown.core.packet.PacketManager;
-import net.unknown.core.managers.TrashManager;
-import net.unknown.core.prefix.PlayerPrefixes;
-import net.unknown.core.skin.SkinManager;
-import net.unknown.core.tab.TabListPingManager;
-import net.unknown.core.util.ObfuscationUtil;
-import net.unknown.shared.VersionInfo;
-import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_20_R2.CraftServer;
-import org.bukkit.event.HandlerList;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.json.simple.parser.JSONParser;
+import javax.swing.*;
+import java.util.Locale;
 
-public class UnknownNetworkCore extends JavaPlugin {
-    private static final JSONParser JSON_PARSER = new JSONParser();
-    private static final Environment ENV = Environment.valueOf(System.getProperty("un.env", "SURVIVAL"));
-    private static UnknownNetworkCore INSTANCE;
+public class UnknownNetworkCore {
+    private static final Environment ENV;
 
-    public UnknownNetworkCore() {
-        INSTANCE = this;
-    }
+    static {
+        Environment environment = Environment.valueOf(System.getProperty("un.env", "UNKNOWN").toUpperCase());
 
-    public static boolean isProductionVersion() {
-        return UnknownNetworkCore.getVersion().gitBranch().equals("production");
-    }
+        if (environment == Environment.UNKNOWN) {
+            // try to get environment
+            boolean isPlugin = false;
 
-    public static CommandDispatcher<CommandSourceStack> getBrigadier() {
-        return getDedicatedServer().vanillaCommandDispatcher.getDispatcher();
-    }
+            try {
+                Class.forName("org.bukkit.Bukkit");
+                isPlugin = true;
+            } catch(Throwable ignored) {}
 
-    public static DedicatedServer getDedicatedServer() {
-        return ((CraftServer) Bukkit.getServer()).getServer();
-    }
+            if (isPlugin) {
+                // if plugin, and not specified environment, is survival.
+                environment = Environment.SURVIVAL;
+            } else {
+                // we are standalone
+                environment = Environment.STANDALONE;
+            }
+        }
 
-    public static UnknownNetworkCore getInstance() {
-        return INSTANCE;
-    }
-
-    public static JSONParser getJsonParser() {
-        return JSON_PARSER;
+        ENV = environment;
     }
 
     public static Environment getEnvironment() {
         return ENV;
     }
 
-    @Override
-    public void onLoad() {
-        long start = System.nanoTime();
-        getLogger().info("Plugin was loaded with environment: " + ENV.name());
-        if (!this.getDataFolder().exists() && this.getDataFolder().mkdir()) {
-            getLogger().info("Plugin folder created.");
-        }
-        ObfuscationUtil.loadAllMappings();
-        getLogger().info("Server launched in " + ObfuscationUtil.OBF_STATE);
-        /*ObfuscationUtil.getMapping().forEach((mojangName, clazz) -> {
-            try {
-                Class<?> spigotClass = Class.forName(clazz.getEffectiveClassName());
-                Arrays.stream(spigotClass.getDeclaredFields()).forEach(field -> {
-                    if(clazz.getFields().stream().noneMatch(mappingField -> mappingField.obfuscatedFieldName().equals(field.getName()) || mappingField.fieldName().equals(field.getName()))) {
-                        getLogger().info(mojangName + "." + field.getName());
-                    }
-                });
-            } catch (Throwable t) {
-                if(clazz.hasSpigotName()) {
-                    getLogger().info("Unknown Class " + mojangName + "(" + clazz.getSpigotName() + ") found!");
-                } else {
-                    getLogger().info("Unknown Class " + mojangName + " found!");
-                }
-                t.printStackTrace();
+    public static void main(String[] args) {
+        if (UnknownNetworkCore.getEnvironment() == Environment.STANDALONE) {
+
+        } else {
+            String errorMessage;
+
+            if (Locale.getDefault() == Locale.JAPAN || Locale.getDefault() == Locale.JAPANESE) {
+                errorMessage = "UnknownNetworkCoreは、" + UnknownNetworkCore.getEnvironment() + "モードで、スタンドアロンで実行することはできません。-Dun.env=STANDALONEを指定するか、引数を削除してください。";
+            } else {
+                errorMessage = "UnknownNetworkCore can't run in " + UnknownNetworkCore.getEnvironment() + " mode as standalone. Please specify -Dun.env=STANDALONE or remove arguments.";
             }
-        });*/
-        CustomChatTypes.bootstrap();
-        Commands.init();
-        ENV.onLoad();
-        long end = System.nanoTime();
-        getLogger().info("Plugin was loaded in " + (end - start) / 1000000 + "ms");
-    }
 
-    @Override
-    public void onEnable() {
-        long start = System.nanoTime();
-        ListenerManager.registerListener(PacketManager.getInstance());
-        ListenerManager.registerListener(new SignGui.Listener());
-        ListenerManager.registerListener(new TabListPingManager());
-        ListenerManager.registerListener(new Athletics.Listener());
-        ListenerManager.registerListener(new MultiPageChest.Listener());
-        ListenerManager.registerListener(SkinManager.INSTANCE);
-        ListenerManager.registerListener(new PrivateMessageListener());
-        TPSBar.initialize();
-        TabListPingManager.startTask();
-        PlayerPrefixes.loadAll();
-        Athletics.load();
-        Athletics.loadProgresses();
-        TrashManager.loadExists();
-        ThirdPartyPluginPermissionsFixer.scheduleNextTick();
-        getLogger().info("");
-        getLogger().info("");
-        getLogger().info("""
-
-
-                ██╗   ██╗███╗   ██╗██╗  ██╗███╗   ██╗ ██████╗ ██╗    ██╗███╗   ██╗
-                ██║   ██║████╗  ██║██║ ██╔╝████╗  ██║██╔═══██╗██║    ██║████╗  ██║
-                ██║   ██║██╔██╗ ██║█████╔╝ ██╔██╗ ██║██║   ██║██║ █╗ ██║██╔██╗ ██║
-                ██║   ██║██║╚██╗██║██╔═██╗ ██║╚██╗██║██║   ██║██║███╗██║██║╚██╗██║
-                ╚██████╔╝██║ ╚████║██║  ██╗██║ ╚████║╚██████╔╝╚███╔███╔╝██║ ╚████║
-                 ╚═════╝ ╚═╝  ╚═══╝╚═╝  ╚═╝╚═╝  ╚═══╝ ╚═════╝  ╚══╝╚══╝ ╚═╝  ╚═══╝
-                 
-                ███╗   ██╗███████╗████████╗██╗    ██╗ ██████╗ ██████╗ ██╗  ██╗
-                ████╗  ██║██╔════╝╚══██╔══╝██║    ██║██╔═══██╗██╔══██╗██║ ██╔╝
-                ██╔██╗ ██║█████╗     ██║   ██║ █╗ ██║██║   ██║██████╔╝█████╔╝
-                ██║╚██╗██║██╔══╝     ██║   ██║███╗██║██║   ██║██╔══██╗██╔═██╗
-                ██║ ╚████║███████╗   ██║   ╚███╔███╔╝╚██████╔╝██║  ██║██║  ██╗
-                ╚═╝  ╚═══╝╚══════╝   ╚═╝    ╚══╝╚══╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝
-
-                """);
-        getLogger().info("");
-        getLogger().info("");
-        getLogger().info("");
-        ENV.onEnable();
-        long end = System.nanoTime();
-        getLogger().info("Plugin was enabled in " + (end - start) / 1000000 + "ms");
-    }
-
-    @Override
-    public void onDisable() {
-        HandlerList.unregisterAll(this);
-        ENV.onDisable();
-    }
-
-    public static VersionInfo getVersion() {
-        return VersionInfo.parseFromString(getInstance().getPluginMeta().getVersion());
+            try {
+                // Show error message as gui, use JPanel
+                UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+                JOptionPane.showMessageDialog(null, errorMessage, "UnknownNetworkCore", JOptionPane.ERROR_MESSAGE);
+            } catch(Throwable ignored) {
+                throw new RuntimeException(errorMessage);
+            }
+        }
     }
 }

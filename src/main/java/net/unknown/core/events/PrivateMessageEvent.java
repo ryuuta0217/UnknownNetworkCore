@@ -43,6 +43,7 @@ import net.minecraft.network.chat.SignedMessageLink;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
+import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R2.command.VanillaCommandWrapper;
 import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
@@ -65,7 +66,8 @@ public class PrivateMessageEvent extends Event implements Cancellable {
     private PlayerChatMessage message;
     private boolean isDirty = false;
 
-    public PrivateMessageEvent(Entity sender, Collection<Player> receivers, Component message) {
+    public PrivateMessageEvent(boolean async, Entity sender, Collection<Player> receivers, Component message) {
+        super(async);
         this.source = VanillaCommandWrapper.getListener(sender);
         this.receivers = receivers.stream().map(player -> (CraftPlayer) player).map(CraftPlayer::getHandle).collect(Collectors.toSet());
         this.message = new PlayerChatMessage(
@@ -76,16 +78,30 @@ public class PrivateMessageEvent extends Event implements Cancellable {
                 FilterMask.PASS_THROUGH);
     }
 
-    public PrivateMessageEvent(Entity sender, Collection<Player> receivers, SignedMessage adventureSignedMessage) {
+    public PrivateMessageEvent(Entity sender, Collection<Player> receivers, Component message) {
+        this(!Bukkit.isPrimaryThread(), sender, receivers, message);
+    }
+
+    public PrivateMessageEvent(boolean async, Entity sender, Collection<Player> receivers, SignedMessage adventureSignedMessage) {
+        super(async);
         this.source = VanillaCommandWrapper.getListener(sender);
         this.receivers = receivers.stream().map(player -> (CraftPlayer) player).map(CraftPlayer::getHandle).collect(Collectors.toSet());
         this.message = MinecraftAdapter.Adventure.playerChatMessage(adventureSignedMessage);
     }
 
-    public PrivateMessageEvent(CommandSourceStack source, Collection<ServerPlayer> receivers, PlayerChatMessage message) {
+    public PrivateMessageEvent(Entity sender, Collection<Player> receivers, SignedMessage adventureSignedMessage) {
+        this(!Bukkit.isPrimaryThread(), sender, receivers, adventureSignedMessage);
+    }
+
+    public PrivateMessageEvent(boolean async, CommandSourceStack source, Collection<ServerPlayer> receivers, PlayerChatMessage message) {
+        super(async);
         this.source = source;
         this.receivers = new HashSet<>(receivers);
         this.message = message;
+    }
+
+    public PrivateMessageEvent(CommandSourceStack source, Collection<ServerPlayer> receivers, PlayerChatMessage message) {
+        this(!Bukkit.isPrimaryThread(), source, receivers, message);
     }
 
     @NotNull

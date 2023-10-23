@@ -31,7 +31,6 @@
 
 package net.unknown.survival.enchants.nms;
 
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -45,8 +44,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.DamageEnchantment;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
-import net.minecraft.world.item.enchantment.Enchantments;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.util.RegistryUtil;
 
 public class DamageEnchant extends Enchantment {
@@ -66,7 +64,7 @@ public class DamageEnchant extends Enchantment {
 
     public static void register() {
         if (!RegistryUtil.forceReplace(BuiltInRegistries.ENCHANTMENT, ResourceLocation.of("minecraft:sharpness", ':'), new DamageEnchant(Rarity.COMMON, 0, EquipmentSlot.MAINHAND))) {
-            UnknownNetworkCore.getInstance().getLogger().warning("Failed to register \"Sharpness V -> Sharpness X\" enchantment.");
+            UnknownNetworkCorePlugin.getInstance().getLogger().warning("Failed to register \"Sharpness V -> Sharpness X\" enchantment.");
         };
     }
 

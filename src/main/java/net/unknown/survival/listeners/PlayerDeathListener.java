@@ -44,7 +44,7 @@ import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
@@ -61,7 +61,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -88,7 +87,7 @@ public class PlayerDeathListener implements Listener {
 
     private static final Map<Location, Hologram> HOLOGRAMS = new HashMap<>();
 
-    private static final File CONFIG_FILE = new File(UnknownNetworkCore.getInstance().getDataFolder(), "death-items.yml");
+    private static final File CONFIG_FILE = new File(UnknownNetworkCorePlugin.getInstance().getDataFolder(), "death-items.yml");
     private static YamlConfiguration CONFIG;
 
     private static BukkitTask getTask(UUID uniqueId, Location location, long delay) {

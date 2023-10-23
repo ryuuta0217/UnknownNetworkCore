@@ -33,9 +33,8 @@ package net.unknown.survival.commands;
 
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.server.MinecraftServer;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.util.ObfuscationUtil;
-import net.unknown.core.util.ReflectionUtil;
 import net.unknown.survival.commands.admin.LastTpCommand;
 import net.unknown.survival.commands.home.DelHomeCommand;
 import net.unknown.survival.commands.home.HomeCommand;
@@ -55,33 +54,33 @@ public class Commands {
         } catch(Throwable t) { t.printStackTrace(); }
 
         /* HOMES */
-        DelHomeCommand.register(UnknownNetworkCore.getBrigadier());
-        HomeCommand.register(UnknownNetworkCore.getBrigadier());
-        HomesCommand.register(UnknownNetworkCore.getBrigadier());
-        SetHomeCommand.register(UnknownNetworkCore.getBrigadier());
+        DelHomeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        HomeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        HomesCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        SetHomeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
         /* HOMES end*/
 
         /* HOMES / for op */
-        AddHomeCommand.register(UnknownNetworkCore.getBrigadier());
-        ADelHomeCommand.register(UnknownNetworkCore.getBrigadier());
-        AHomeCommand.register(UnknownNetworkCore.getBrigadier());
-        AHomesCommand.register(UnknownNetworkCore.getBrigadier());
-        FindHomeCommand.register(UnknownNetworkCore.getBrigadier());
-        SetHomeCountCommand.register(UnknownNetworkCore.getBrigadier());
+        AddHomeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        ADelHomeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        AHomeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        AHomesCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        FindHomeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        SetHomeCountCommand.register(UnknownNetworkCorePlugin.getBrigadier());
         /* HOMES / for op end */
 
-        TeleportPetCommand.register(UnknownNetworkCore.getBrigadier());
+        TeleportPetCommand.register(UnknownNetworkCorePlugin.getBrigadier());
 
-        ChannelCommand.register(UnknownNetworkCore.getBrigadier());
+        ChannelCommand.register(UnknownNetworkCorePlugin.getBrigadier());
 
-        SpawnCommand.register(UnknownNetworkCore.getBrigadier());
-        LastTpCommand.register(UnknownNetworkCore.getBrigadier());
-        FlyCommand.register(UnknownNetworkCore.getBrigadier());
+        SpawnCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        LastTpCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        FlyCommand.register(UnknownNetworkCorePlugin.getBrigadier());
 
-        MenuCommand.register(UnknownNetworkCore.getBrigadier());
+        MenuCommand.register(UnknownNetworkCorePlugin.getBrigadier());
 
-        SuppressRaidCommand.register(UnknownNetworkCore.getBrigadier());
+        SuppressRaidCommand.register(UnknownNetworkCorePlugin.getBrigadier());
 
-        VoteCommand.register(UnknownNetworkCore.getBrigadier(), buildContext);
+        VoteCommand.register(UnknownNetworkCorePlugin.getBrigadier(), buildContext);
     }
 }

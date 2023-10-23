@@ -32,7 +32,7 @@
 package net.unknown.survival.data;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.configurations.ConfigurationBase;
 import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.ListenerManager;
@@ -101,7 +101,7 @@ public class PlayerData extends ConfigurationBase {
     }
 
     public static void loadExists() {
-        File f = new File(UnknownNetworkCore.getInstance().getDataFolder(), "players");
+        File f = new File(UnknownNetworkCorePlugin.getInstance().getDataFolder(), "players");
         if (!f.exists()) return;
         File[] files = f.listFiles(p -> {
             if (p.getName().endsWith(".yml")) {

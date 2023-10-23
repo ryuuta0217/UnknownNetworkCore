@@ -33,7 +33,7 @@ package net.unknown.survival.economy;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.survival.economy.repository.PlayerRepository;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -47,8 +47,8 @@ public class VaultEconomy implements Economy {
     private static final VaultEconomy INSTANCE = new VaultEconomy();
 
     public static void hookVault() {
-        Bukkit.getServicesManager().register(Economy.class, INSTANCE, UnknownNetworkCore.getInstance(), ServicePriority.Normal);
-        UnknownNetworkCore.getInstance().getLogger().info("Successfully hooked Vault!");
+        Bukkit.getServicesManager().register(Economy.class, INSTANCE, UnknownNetworkCorePlugin.getInstance(), ServicePriority.Normal);
+        UnknownNetworkCorePlugin.getInstance().getLogger().info("Successfully hooked Vault!");
     }
 
     /**

@@ -35,7 +35,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.managers.ListenerManager;
@@ -54,7 +54,7 @@ public class UnknownNetworkLobby {
     }
 
     public static void onEnable() {
-        Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");
+        Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "BungeeCord");
         ListenerManager.registerListener(new Blocker());
         ListenerManager.registerListener(new PlayerJoinListener());
         ListenerManager.registerListener(new ServerSelector());

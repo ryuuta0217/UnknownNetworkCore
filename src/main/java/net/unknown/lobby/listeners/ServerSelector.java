@@ -34,7 +34,7 @@ package net.unknown.lobby.listeners;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import net.kyori.adventure.text.Component;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
@@ -80,7 +80,7 @@ public class ServerSelector implements Listener {
                     ByteArrayDataOutput out = ByteStreams.newDataOutput();
                     out.writeUTF("Connect");
                     out.writeUTF("survival");
-                    ((Player) event.getWhoClicked()).sendPluginMessage(UnknownNetworkCore.getInstance(), "BungeeCord", out.toByteArray());
+                    ((Player) event.getWhoClicked()).sendPluginMessage(UnknownNetworkCorePlugin.getInstance(), "BungeeCord", out.toByteArray());
                 }
 
                 if (slot == 14) {

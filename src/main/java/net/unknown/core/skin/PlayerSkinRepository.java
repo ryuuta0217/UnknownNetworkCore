@@ -34,8 +34,7 @@ package net.unknown.core.skin;
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.destroystokyo.paper.profile.ProfileProperty;
 import com.ryuuta0217.util.HTTPFetch;
-import com.ryuuta0217.util.HTTPUtil;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.configurations.SharedConfigurationBase;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
@@ -51,7 +50,6 @@ import org.json.simple.parser.ParseException;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.util.Comparator;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -142,7 +140,7 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
                     .addQueryParam("unsigned", "false")
                     .sentAndReadAsString();
             if (remoteDataRaw != null) {
-                JSONObject remoteData = (JSONObject) UnknownNetworkCore.getJsonParser().parse(remoteDataRaw);
+                JSONObject remoteData = (JSONObject) UnknownNetworkCorePlugin.getJsonParser().parse(remoteDataRaw);
                 if (remoteData.containsKey("properties")) {
                     JSONArray properties = (JSONArray) remoteData.get("properties");
                     remoteSkin = ((Stream<Object>) properties.stream())

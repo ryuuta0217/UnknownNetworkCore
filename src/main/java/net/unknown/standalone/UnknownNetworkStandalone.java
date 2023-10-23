@@ -29,43 +29,10 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.managers;
+package net.unknown.standalone;
 
-import net.unknown.UnknownNetworkCorePlugin;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
+public class UnknownNetworkStandalone {
+    public static void main(String[] args) {
 
-public final class RunnableManager {
-    public static void runSync(Runnable runnable) {
-        createBukkitRunnable(runnable).runTask(UnknownNetworkCorePlugin.getInstance());
-    }
-
-    public static BukkitTask runDelayed(Runnable runnable, long delay) {
-        return createBukkitRunnable(runnable).runTaskLater(UnknownNetworkCorePlugin.getInstance(), delay);
-    }
-
-    public static BukkitTask runRepeating(Runnable runnable, long delay, long interval) {
-        return createBukkitRunnable(runnable).runTaskTimer(UnknownNetworkCorePlugin.getInstance(), delay, interval);
-    }
-
-    public static BukkitTask runAsync(Runnable runnable) {
-        return createBukkitRunnable(runnable).runTaskAsynchronously(UnknownNetworkCorePlugin.getInstance());
-    }
-
-    public static BukkitTask runAsyncDelayed(Runnable runnable, long delay) {
-        return createBukkitRunnable(runnable).runTaskLaterAsynchronously(UnknownNetworkCorePlugin.getInstance(), delay);
-    }
-
-    public static BukkitTask runAsyncRepeating(Runnable runnable, long delay, long interval) {
-        return createBukkitRunnable(runnable).runTaskTimerAsynchronously(UnknownNetworkCorePlugin.getInstance(), delay, interval);
-    }
-
-    private static BukkitRunnable createBukkitRunnable(Runnable runnable) {
-        return new BukkitRunnable() {
-            @Override
-            public void run() {
-                runnable.run();
-            }
-        };
     }
 }

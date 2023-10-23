@@ -31,14 +31,12 @@
 
 package net.unknown.lobby.feature;
 
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.shared.util.TickUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitRunnable;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 
 public class RealTimeSynchronizer extends BukkitRunnable {
@@ -47,7 +45,7 @@ public class RealTimeSynchronizer extends BukkitRunnable {
     public static void start() {
         if (INSTANCE != null && !INSTANCE.isCancelled()) throw new IllegalStateException("Synchronize task is already running!");
         INSTANCE = new RealTimeSynchronizer();
-        INSTANCE.runTaskTimer(UnknownNetworkCore.getInstance(), 0, 20);
+        INSTANCE.runTaskTimer(UnknownNetworkCorePlugin.getInstance(), 0, 20);
     }
 
     public static void stop() {
