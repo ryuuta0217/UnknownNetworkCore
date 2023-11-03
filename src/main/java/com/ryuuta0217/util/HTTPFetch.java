@@ -142,15 +142,7 @@ public class HTTPFetch {
     }
 
     public String sentAndReadAsString() throws IOException {
-        StringBuilder responseBuilder = new StringBuilder();
-        InputStream responseStream = this.sent();
-        InputStreamReader streamReader = new InputStreamReader(responseStream, this.connection.getContentEncoding() == null ? "UTF-8" : this.connection.getContentEncoding());
-        BufferedReader reader = new BufferedReader(streamReader);
-        reader.lines().forEach(responseBuilder::append);
-        streamReader.close();
-        reader.close();
-        responseStream.close();
-        return responseBuilder.toString();
+        return readStream(this.sent(), this.connection.getContentEncoding() == null ? "UTF-8" : this.connection.getContentEncoding());
     }
 
     public InputStream sent() throws IOException {
@@ -180,19 +172,20 @@ public class HTTPFetch {
         }
 
         // Error Handling
-        StringBuilder errorMessageBuilder = new StringBuilder();
-        if (this.connection.getInputStream() != null) {
-            InputStream responseStream = this.connection.getInputStream();
-            InputStreamReader streamReader = new InputStreamReader(responseStream, this.connection.getContentEncoding() == null ? "UTF-8" : this.connection.getContentEncoding());
-            BufferedReader reader = new BufferedReader(streamReader);
-
-            reader.lines().forEach(errorMessageBuilder::append);
-            streamReader.close();
-            reader.close();
-            responseStream.close();
-        }
-        String errorMessage = errorMessageBuilder.toString();
+        String errorMessage = readStream(this.connection.getInputStream(), this.connection.getContentEncoding() == null ? "UTF-8" : this.connection.getContentEncoding());
         throw new IllegalStateException("HTTP " + this.connection.getResponseCode() + (!errorMessage.isEmpty() && !errorMessage.isBlank() ? errorMessage : ""));
+    }
+
+    private static String readStream(InputStream stream, String charsetName) throws IOException {
+        if (stream == null || charsetName == null || charsetName.isEmpty() || charsetName.isBlank()) return null;
+        StringBuilder sb = new StringBuilder();
+        InputStreamReader streamReader = new InputStreamReader(stream, charsetName);
+        BufferedReader reader = new BufferedReader(streamReader);
+        reader.lines().forEach(sb::append);
+        streamReader.close();
+        reader.close();
+        stream.close();
+        return sb.toString();
     }
 
     public void sentAsync() {
