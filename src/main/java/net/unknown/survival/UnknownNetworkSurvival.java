@@ -134,6 +134,7 @@ public class UnknownNetworkSurvival {
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");
             ListenerManager.registerListener(new BlockDisassembler());
+            ListenerManager.registerListener(new Crusher());
             ListenerManager.registerListener(new ConfigureHopperGui.Listener());
             ListenerManager.registerListener(new ChestLink());
         }
