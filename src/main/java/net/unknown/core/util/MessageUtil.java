@@ -54,7 +54,6 @@ import org.bukkit.permissions.Permissible;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
 
 @Deprecated(forRemoval = true)
 public class MessageUtil {
@@ -83,8 +82,6 @@ public class MessageUtil {
         put("resource_nether", "資源ネザー");
         put("resource_the_end", "資源エンド");
     }};
-
-    private static final Pattern UUID_PATTERN = Pattern.compile("(?i)^[\\dA-F]{8}-[\\dA-F]{4}-4[\\dA-F]{3}-[89AB][\\dA-F]{3}-[\\dA-F]{12}");
 
     public static void sendMessage(Player player, String msg) {
         sendMessage(((CraftPlayer) player).getHandle().createCommandSourceStack(), msg, true);
@@ -241,9 +238,5 @@ public class MessageUtil {
 
     public static net.minecraft.network.chat.Component convertAdventure2NMS(Component adventure) {
         return net.minecraft.network.chat.Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(adventure));
-    }
-
-    public static boolean isUUID(String s) {
-        return UUID_PATTERN.matcher(s).matches();
     }
 }

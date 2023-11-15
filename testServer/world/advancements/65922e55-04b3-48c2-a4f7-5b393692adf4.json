@@ -1050,6 +1050,7 @@
   "minecraft:adventure/kill_all_mobs": {
     "criteria": {
       "minecraft:zombie": "2023-05-25 10:40:43 +0900",
+      "minecraft:creeper": "2023-10-25 16:58:03 +0900",
       "minecraft:ender_dragon": "2023-05-20 22:34:26 +0900"
     },
     "done": false
@@ -1585,6 +1586,30 @@
   "minecraft:story/deflect_arrow": {
     "criteria": {
       "deflected_projectile": "2023-09-28 02:45:55 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/light_blue_bed": {
+    "criteria": {
+      "has_light_blue_wool": "2023-10-25 16:55:08 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/light_blue_carpet": {
+    "criteria": {
+      "has_light_blue_wool": "2023-10-25 16:55:08 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/light_blue_banner": {
+    "criteria": {
+      "has_light_blue_wool": "2023-10-25 16:55:08 +0900"
+    },
+    "done": true
+  },
+  "minecraft:recipes/decorations/armor_stand": {
+    "criteria": {
+      "has_stone_slab": "2023-10-25 18:06:18 +0900"
     },
     "done": true
   },
