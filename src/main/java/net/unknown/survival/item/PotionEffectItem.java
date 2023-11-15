@@ -118,7 +118,7 @@ public class PotionEffectItem extends UnknownNetworkItem implements Listener {
 
             if (effectsContainer != null) {
                 effectsContainer.getKeys().forEach(potionEffectKey -> {
-                    PotionEffectType type = PotionEffectType.getByName(potionEffectKey.getNamespace());
+                    PotionEffectType type = PotionEffectType.getByKey(potionEffectKey);
                     Integer level = effectsContainer.get(potionEffectKey, PersistentDataType.INTEGER);
 
                     if (level == null) {
