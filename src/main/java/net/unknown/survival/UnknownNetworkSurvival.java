@@ -56,6 +56,7 @@ import net.unknown.survival.fun.MonsterBall;
 import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import net.unknown.survival.item.Items;
+import net.unknown.survival.item.PotionEffectItem;
 import net.unknown.survival.listeners.*;
 import net.unknown.survival.update.UNCUpdateCheckTask;
 import net.unknown.survival.queue.ItemGiveQueue;
@@ -92,6 +93,7 @@ public class UnknownNetworkSurvival {
 
     public static void onEnable() {
         Items.init(); // Custom item initialization
+        PotionEffectItem.startTask();
 
         HOLOGRAPHIC_DISPLAYS_ENABLED = Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null && Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays");
         WORLD_GUARD_ENABLED = Bukkit.getPluginManager().getPlugin("WorldGuard") != null && Bukkit.getPluginManager().isPluginEnabled("WorldGuard");
