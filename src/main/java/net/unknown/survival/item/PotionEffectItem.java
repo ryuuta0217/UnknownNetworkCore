@@ -29,7 +29,7 @@ import java.util.*;
 public class PotionEffectItem extends UnknownNetworkItem implements Listener {
     private static BukkitTask TASK;
 
-    public PotionEffectItem(NamespacedKey id) {
+    public PotionEffectItem() {
         super(new NamespacedKey("survival", "potion_effect"));
     }
 
