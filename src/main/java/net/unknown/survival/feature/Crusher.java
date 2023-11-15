@@ -36,23 +36,27 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.launchwrapper.event.BlockDispenseBeforeEvent;
+import net.unknown.launchwrapper.mixininterfaces.IMixinBlockEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 // Code name: Tempest
 public class Crusher implements Listener {
@@ -64,13 +68,21 @@ public class Crusher implements Listener {
         if (!PlainTextComponentSerializer.plainText().serialize(NewMessageUtil.convertMinecraft2Adventure(dispenser.getCustomName())).equals("Crusher")) return;
         event.setCancelled(true);
 
+        UUID placer = ((IMixinBlockEntity) dispenser).getPlacer();
+
+        FakePlayer player = new FakePlayer(dispenser, placer == null ? UUID.randomUUID() : placer);
+        player.setItemInHand(InteractionHand.MAIN_HAND, event.getItem());
+        if (player.getMainHandItem().equals(event.getItem())) {
+            //System.out.println("Validation completed - Dispenser's shoot item is in player's hand.");
+        }
+
         List<LivingEntity> detectedEntities = getEntities(dispenser, 2, 2, 0, 2, 2);
         detectedEntities.forEach(entity -> {
             if (entity instanceof Player) return;
-            entity.silentDeath = true;
-            entity.kill();
-            int exp = entity.getExperienceReward();
-            ExperienceOrb.award(event.getBlockSource().level(), Vec3.atCenterOf(new Vec3i(pos.getX(), pos.getY(), pos.getZ())), exp, org.bukkit.entity.ExperienceOrb.SpawnReason.ENTITY_DEATH, entity);
+            player.attack(entity);
+            //entity.hurt(player.damageSources().playerAttack(player), Integer.MAX_VALUE);
+            //int exp = entity.getExperienceReward();
+            //ExperienceOrb.award(event.getBlockSource().level(), Vec3.atCenterOf(new Vec3i(pos.getX(), pos.getY(), pos.getZ())), exp, org.bukkit.entity.ExperienceOrb.SpawnReason.ENTITY_DEATH, entity);
         });
     }
 
@@ -135,5 +147,20 @@ public class Crusher implements Listener {
 
     private static Direction getRight(Direction direction) {
         return direction.getClockWise();
+    }
+
+    public static class FakePlayer extends net.unknown.core.entity.FakePlayer {
+        private final DispenserBlockEntity dispenser;
+
+        public FakePlayer(DispenserBlockEntity dispenser, @Nullable UUID uniqueId) {
+            super((ServerLevel) dispenser.getLevel(), dispenser.getName().getString(), uniqueId);
+            this.dispenser = dispenser;
+            this.moveTo(dispenser.getBlockPos(), 0.0f, 0.0f);
+        }
+
+        @Override
+        public void setLevel(Level world) {
+            this.dispenser.setLevel(world);
+        }
     }
 }
