@@ -53,6 +53,7 @@ public class Items {
         if (FROZEN && !REGISTRY.isEmpty()) throw new IllegalStateException("Can't init items twice!");
         MENDING_SUPPORT_STICK = register(new MendingSupportStickItem());
         UPGRADE_SNOW_GOLEM_ITEM = register(new UpgradeSnowGolemItem());
+        POTION_EFFECT_ITEM = register(new PotionEffectItem());
         FROZEN = true;
     }
 
