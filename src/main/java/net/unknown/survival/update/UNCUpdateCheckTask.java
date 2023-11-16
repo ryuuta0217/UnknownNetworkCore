@@ -61,19 +61,33 @@ import java.util.logging.Logger;
 public class UNCUpdateCheckTask extends BukkitRunnable implements Listener {
     private static final Logger LOGGER = Logger.getLogger("UNCUpdateCheckTask");
 
-    private static final UNCUpdateCheckTask INSTANCE = new UNCUpdateCheckTask();
+    private static UNCUpdateCheckTask INSTANCE = new UNCUpdateCheckTask();
     private static BukkitTask TASK;
+
+    public static UNCUpdateCheckTask getInstance() {
+        return INSTANCE;
+    }
 
     public static void start() {
         if (TASK != null && !TASK.isCancelled()) {
             LOGGER.info("Task is already running, cancel this.");
             TASK.cancel();
             ListenerManager.unregisterListener(INSTANCE);
+            INSTANCE = new UNCUpdateCheckTask();
         }
 
         if (UpdateUtil.GITHUB_API == null) return;
         TASK = INSTANCE.runTaskTimerAsynchronously(UnknownNetworkCorePlugin.getInstance(), 20 * 60, 20 * 60);
         ListenerManager.registerListener(INSTANCE);
+    }
+
+    public static void stop() {
+        if (TASK != null) {
+            TASK.cancel();
+            ListenerManager.unregisterListener(INSTANCE);
+            INSTANCE = new UNCUpdateCheckTask();
+            TASK = null;
+        }
     }
 
     private Component updateMessage = null;
