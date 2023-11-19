@@ -1,9 +1,42 @@
+/*
+ * Copyright (c) 2023 Unknown Network Developers and contributors.
+ *
+ * All rights reserved.
+ *
+ * NOTICE: This license is subject to change without prior notice.
+ *
+ * Redistribution and use in source and binary forms, *without modification*,
+ *     are permitted provided that the following conditions are met:
+ *
+ * I. Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
+ *
+ * II. Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * III. Neither the name of Unknown Network nor the names of its contributors may be used to
+ *     endorse or promote products derived from this software without specific prior written permission.
+ *
+ * IV. This source code and binaries is provided by the copyright holders and contributors "AS-IS" and
+ *     any express or implied warranties, including, but not limited to, the implied warranties of
+ *     merchantability and fitness for a particular purpose are disclaimed.
+ *     In not event shall the copyright owner or contributors be liable for
+ *     any direct, indirect, incidental, special, exemplary, or consequential damages
+ *     (including but not limited to procurement of substitute goods or services;
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
+ *     whether in contract, strict liability, or tort (including negligence or otherwise)
+ *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
+ */
+
 package net.unknown.survival.item;
 
 import net.kyori.adventure.text.Component;
 import net.unknown.core.builder.ItemStackBuilder;
+import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.ViewedGuiBase;
+import net.unknown.core.gui.view.PaginationView;
 import net.unknown.core.gui.view.View;
 import net.unknown.core.item.UnknownNetworkItem;
 import net.unknown.core.item.UnknownNetworkItemStack;
@@ -25,6 +58,8 @@ import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public class PotionEffectItem extends UnknownNetworkItem implements Listener {
     private static BukkitTask TASK;
@@ -95,13 +130,13 @@ public class PotionEffectItem extends UnknownNetworkItem implements Listener {
             return 20 * 15;
         }
 
-        return 20 * 10;
+        return 20 + 10;
     }
 
     public static class Stack extends UnknownNetworkItemStack<UnknownNetworkItem> {
         private static final NamespacedKey ACTIVE_SLOTS_KEY = new NamespacedKey("survival", "active_slots");
         private static final NamespacedKey EFFECTS_KEY = new NamespacedKey("survival", "potion_effects");
-        private final Set<EquipmentSlot> activeSlots = new HashSet<>(Arrays.asList(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.HAND, EquipmentSlot.OFF_HAND));
+        private final Set<EquipmentSlot> activeSlots = new HashSet<>();
         private final Map<PotionEffectType, Integer> effects = new HashMap<>();
 
         public Stack(ItemStack handle) {
@@ -129,7 +164,7 @@ public class PotionEffectItem extends UnknownNetworkItem implements Listener {
                 });
             }
 
-            if (dataContainer.has(ACTIVE_SLOTS_KEY, PersistentDataType.INTEGER_ARRAY)) {
+            if (dataContainer.has(ACTIVE_SLOTS_KEY, PersistentDataType.INTEGER_ARRAY) && dataContainer.get(ACTIVE_SLOTS_KEY, PersistentDataType.INTEGER_ARRAY).length > 0) {
                 int[] activeSlots = dataContainer.get(ACTIVE_SLOTS_KEY, PersistentDataType.INTEGER_ARRAY);
                 if (activeSlots != null) {
                     Arrays.stream(activeSlots)
@@ -137,6 +172,7 @@ public class PotionEffectItem extends UnknownNetworkItem implements Listener {
                             .forEach(this.activeSlots::add);
                 }
             } else {
+                this.activeSlots.addAll(Arrays.asList(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET, EquipmentSlot.HAND, EquipmentSlot.OFF_HAND));
                 this.save();
             }
         }
@@ -220,8 +256,15 @@ public class PotionEffectItem extends UnknownNetworkItem implements Listener {
     /*public static class Editor extends ViewedGuiBase<View> {
         protected final Stack stack;
 
+        // Gui size: 9 x 6
+        // 00 01 02 03 04 05 06 07 08
+        // 09 10 11 12 13 14 15 16 17
+        // 18 19 20 21 22 23 24 25 26
+        // 27 28 29 30 31 32 33 34 35
+        // 36 37 38 39 40 41 42 43 44
+        // 45 46 47 48 49 50 51 52 53
         public Editor(InventoryHolder owner, Stack stack) {
-            super(owner, 54, Component.text("アイテムエディター", DefinedTextColor.DARK_GREEN), true, null);
+            super(owner, 54, Component.text("アイテムエディター(P)", DefinedTextColor.DARK_PURPLE), true, null);
             this.setView(new Main(this));
             this.stack = stack;
         }
@@ -238,6 +281,7 @@ public class PotionEffectItem extends UnknownNetworkItem implements Listener {
             }
         }
 
+        // Choose action from [21: add, 22: remove, 23: clear, 31: edit_item]
         public static class Main extends ViewBase {
             public Main(Editor gui) {
                 super(gui);
@@ -245,16 +289,47 @@ public class PotionEffectItem extends UnknownNetworkItem implements Listener {
 
             @Override
             public void initialize() {
-
+                this.getGui().getInventory().setItem(21, DefinedItemStackBuilders.plus().displayName(Component.text("追加", DefinedTextColor.GREEN)).build());
+                this.getGui().getInventory().setItem(22, DefinedItemStackBuilders.minus().displayName(Component.text("削除", DefinedTextColor.RED)).build());
+                this.getGui().getInventory().setItem(23, DefinedItemStackBuilders.x().displayName(Component.text("全削除", DefinedTextColor.GOLD)).build());
+                //TODO: this.getGui().getInventory().setItem(31, new ItemStackBuilder(Material.BOOK).displayName(Component.text("アイテム編集", DefinedTextColor.AQUA)).build());
             }
 
             @Override
             public void onClick(InventoryClickEvent event) {
+                switch(event.getSlot()) {
+                    case 21 -> {
 
+                    }
+                    case 22 -> {
+
+                    }
+                    case 23 -> {
+
+                    }
+                    case 31 -> {
+                        // TODO: ItemEditor (type displayName in chat, lore, etc...)
+                    }
+                }
             }
 
             @Override
             public void clearInventory() {
+
+            }
+        }
+
+        public static class PotionEffectChooseView extends PaginationView<PotionEffectType, Editor> {
+
+            private PotionEffectChooseView(Editor gui, Collection<PotionEffectType> data, Function<PotionEffectType, ItemStack> processor, BiConsumer<InventoryClickEvent, PotionEffectType> onClick, BiConsumer<InventoryClickEvent, PaginationView<PotionEffectType, Editor>> createNewAction, BiConsumer<InventoryClickEvent, PaginationView<PotionEffectType, Editor>> previousAction) {
+                super(gui, data, processor, onClick, createNewAction, previousAction);
+            }
+
+            public static PotionEffectChooseView chooseToAdd() {
+
+            }
+
+            public static PotionEffectChooseView chooseToRemove() {
 
             }
         }
