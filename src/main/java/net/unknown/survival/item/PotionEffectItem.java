@@ -92,10 +92,12 @@ public class PotionEffectItem extends UnknownNetworkItem implements Listener {
                     ItemStack item = player.getInventory().getItem(slot);
                     if (Items.POTION_EFFECT_ITEM.equals(item)) {
                         Stack stack = new Stack(item);
-                        stack.getPotionEffects().forEach((type, level) -> {
-                            int duration = getEffectDuration(type, level);
-                            player.addPotionEffect(type.createEffect(duration, level));
-                        });
+                        if (stack.getActiveSlots().contains(slot)) {
+                            stack.getPotionEffects().forEach((type, level) -> {
+                                int duration = getEffectDuration(type, level);
+                                player.addPotionEffect(type.createEffect(duration, level));
+                            });
+                        }
                     }
                 }
             });
@@ -212,6 +214,10 @@ public class PotionEffectItem extends UnknownNetworkItem implements Listener {
 
         public Map<PotionEffectType, Integer> getPotionEffects() {
             return Collections.unmodifiableMap(this.effects);
+        }
+
+        public Set<EquipmentSlot> getActiveSlots() {
+            return Collections.unmodifiableSet(this.activeSlots);
         }
 
         public Builder asBuilder() {
