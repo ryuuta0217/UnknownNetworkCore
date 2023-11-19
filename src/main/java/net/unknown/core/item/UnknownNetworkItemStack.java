@@ -31,6 +31,7 @@
 
 package net.unknown.core.item;
 
+import net.unknown.core.builder.ItemStackBuilder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 
@@ -39,7 +40,7 @@ public class UnknownNetworkItemStack<T extends UnknownNetworkItem> {
     private final T item;
 
     public UnknownNetworkItemStack(ItemStack handle, T item) {
-        if (!item.equals(handle)) throw new IllegalArgumentException("Item mismatch (expected: " + item.getId() + ", actual: " + handle.getItemMeta().getPersistentDataContainer().getOrDefault(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, "unknown (vanilla?)") + ")");
+        if (!item.equals(handle)) this.insertUNStackInfo();
         this.handle = handle;
         this.item = item;
     }
@@ -50,5 +51,9 @@ public class UnknownNetworkItemStack<T extends UnknownNetworkItem> {
 
     public UnknownNetworkItem getItem() {
         return this.item;
+    }
+
+    public void insertUNStackInfo() {
+        this.handle.editMeta(meta -> meta.getPersistentDataContainer().set(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, this.item.getId().asString()));
     }
 }
