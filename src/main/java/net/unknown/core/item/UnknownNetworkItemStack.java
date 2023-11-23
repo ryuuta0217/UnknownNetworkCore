@@ -51,4 +51,8 @@ public class UnknownNetworkItemStack<T extends UnknownNetworkItem> {
     public UnknownNetworkItem getItem() {
         return this.item;
     }
+
+    public static void insertUNStackInfo(ItemStack handle, UnknownNetworkItem item) {
+        handle.editMeta(meta -> meta.getPersistentDataContainer().set(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, item.getId().asString()));
+    }
 }
