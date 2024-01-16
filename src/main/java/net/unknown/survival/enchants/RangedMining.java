@@ -44,6 +44,8 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.BlockUtil;
 import net.unknown.core.util.MinecraftAdapter;
@@ -61,6 +63,19 @@ import java.util.*;
 
 public class RangedMining implements Listener {
     private static final Map<UUID, BlockFace> FACING = new HashMap<>();
+
+    private static final Set<Block> UNDESTORYABLE_BLOCKS = new HashSet<>() {{
+        add(Blocks.BARRIER);
+        add(Blocks.BEDROCK);
+        add(Blocks.END_PORTAL);
+        add(Blocks.END_PORTAL_FRAME);
+        add(Blocks.END_GATEWAY);
+        add(Blocks.COMMAND_BLOCK);
+        add(Blocks.REPEATING_COMMAND_BLOCK);
+        add(Blocks.CHAIN_COMMAND_BLOCK);
+        add(Blocks.STRUCTURE_BLOCK);
+        add(Blocks.JIGSAW);
+    }};
 
     private static Iterable<BlockPos> withinManhattan(Direction direction, BlockPos center, int range) {
         int x = 0;
@@ -121,6 +136,10 @@ public class RangedMining implements Listener {
         Iterable<BlockPos> toBreak = withinManhattan(direction, MinecraftAdapter.blockPos(event.getBlock().getLocation()), level);
         toBreak.forEach(blockPos -> {
             int durabilityRemaining = handItem.getMaxDamage() - handItem.getDamageValue();
+
+            // 破壊不能ブロックを無視する完璧なコード
+            if (UNDESTORYABLE_BLOCKS.contains(MinecraftAdapter.player(player).level().getBlockState(blockPos).getBlock())) return;
+
             if(durabilityRemaining != 1) {
                 IGNORE_EVENT.get(player.getUniqueId()).add(blockPos);
                 try {

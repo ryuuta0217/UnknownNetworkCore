@@ -198,7 +198,7 @@ public class ObfuscationUtil {
             }
 
             MemoryMappingTree mapping = new MemoryMappingTree();
-            MappingReader.read(new InputStreamReader(mappingRaw, StandardCharsets.UTF_8), MappingFormat.TINY_2, mapping);
+            MappingReader.read(new InputStreamReader(mappingRaw, StandardCharsets.UTF_8), MappingFormat.TINY_2_FILE, mapping);
             for (MappingTree.ClassMapping classMapping : mapping.getClasses()) {
                 String mojangClassName = classMapping.getName(ObfHelper.MOJANG_PLUS_YARN_NAMESPACE).replace("/", ".");
                 String spigotClassName = classMapping.getName(ObfHelper.SPIGOT_NAMESPACE).replace("/", ".");
