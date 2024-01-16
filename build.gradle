@@ -71,6 +71,7 @@ dependencies {
     implementation group: 'net.dv8tion', name: 'JDA', version: '+'
     implementation group: 'org.json', name: 'json', version: '+'
     compileOnly group: 'com.onarandombox.multiversecore', name: 'Multiverse-Core', version: '+'
+    compileOnly group: 'com.onarandombox.multiverseinventories', name: 'Multiverse-Inventories', version: '+'
     compileOnly group: 'net.coreprotect', name: 'coreprotect', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
