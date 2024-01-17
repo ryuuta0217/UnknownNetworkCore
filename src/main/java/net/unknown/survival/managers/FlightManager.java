@@ -36,12 +36,10 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.server.level.ServerPlayer;
-import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.dependency.Vault;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -196,20 +194,11 @@ public class FlightManager {
 
             if (this.player.isFlying()) {
                 /* 落下ダメージを無効化する */
-                Listener dummyListener = new Listener() {
-                };
-                Bukkit.getPluginManager().registerEvent(EntityDamageEvent.class, dummyListener, EventPriority.MONITOR, (l, e) -> {
-                    if (e instanceof EntityDamageEvent event) {
-                        if (event.getEntity() == this.player) {
-                            if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
-                                event.setCancelled(true);
-                                HandlerList.unregisterAll(l);
-                            }
-                        }
-                    }
-                }, UnknownNetworkCorePlugin.getInstance());
-                /* 最大 10秒 */
-                RunnableManager.runAsyncDelayed(() -> HandlerList.unregisterAll(dummyListener), 20 * 10);
+                ListenerManager.waitForEvent(EntityDamageEvent.class, false, EventPriority.MONITOR, (e) -> {
+                    return e.getEntity().getUniqueId().equals(this.player.getUniqueId()) && e.getCause() == EntityDamageEvent.DamageCause.FALL;
+                }, (e) -> {
+                    e.setCancelled(true);
+                }, 10, ListenerManager.TimeType.SECONDS, () -> {});
 
                 this.player.setFlying(false); // 飛行オフ
             }
