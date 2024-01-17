@@ -49,6 +49,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
@@ -126,6 +127,7 @@ public class FlightManager {
         EMPTY_BALANCE("所持金が不足しているため"),
         GAME_MODE_CHANGED("ゲームモードが変更されたため"),
         QUIT("ログアウトしたため"),
+	    WORLD_CHANGED("別のワールドに移動したため"),
         IN_GROUND(MAX_ON_GROUND_MINUTES + "分間地上にいたため"),
         SIX_ENCOUNT_TOMATO("トマトと6回出会ったため"),
         SELF_END("");
@@ -278,6 +280,13 @@ public class FlightManager {
                 if (event.getNewGameMode() != GameMode.SURVIVAL && event.getNewGameMode() != GameMode.ADVENTURE) {
                     FlightManager.disableFlight(this.player, EndReason.GAME_MODE_CHANGED);
                 }
+            }
+        }
+
+        @EventHandler
+        public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
+            if (event.getPlayer().equals(this.player)) {
+                FlightManager.disableFlight(this.player, EndReason.WORLD_CHANGED);
             }
         }
 
