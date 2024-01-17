@@ -342,7 +342,7 @@ public class VoteTicketExchangeItem {
 
     public void save(ConfigurationSection config) {
         config.set("type", this.type.name());
-        if (this.type != ItemType.SELECTABLE_CONTAINER) config.set("item", MinecraftAdapter.ItemStack.json(MinecraftAdapter.ItemStack.itemStack(this.item)));
+        config.set("item", MinecraftAdapter.ItemStack.json(MinecraftAdapter.ItemStack.itemStack(this.item)));
         config.set("price", this.price);
         if (this.type == ItemType.CONTAINER || this.type == ItemType.SELECTABLE_CONTAINER) {
             config.set("container", MinecraftAdapter.ItemStack.json(MinecraftAdapter.ItemStack.itemStack(this.getContainer())));
