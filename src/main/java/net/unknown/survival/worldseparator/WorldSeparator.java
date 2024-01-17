@@ -52,6 +52,9 @@ import java.util.stream.IntStream;
  * 進捗・・・ ServerPlayer#getAdvancements, PlayerAdvancements#save, PlayerAdvancements#load(ServerAdvancementManager)
  */
 public class WorldSeparator implements Listener {
+    // TODO: インベントリのアイテムは、こちら側のitems, armor, offhand, compartmentsのListインスタンスを参照させる。Inventoryインスタンスに対してReflectionutilを使用して、参照インスタンスを変更する。
+    // TODO: エンダーチェストも同様に処理する。
+
     private static final Map<String, Set<String>> WORLD_GROUP = new HashMap<>() {{
         // このグループのワールド間の移動は同一のインベントリ、体力、経験値、進捗、統計を使用(処理不要)
         put("default", new HashSet<>() {{
