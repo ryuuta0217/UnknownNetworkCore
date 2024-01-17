@@ -59,6 +59,19 @@ public class ReflectionUtil {
         }
     }*/
 
+    public static void setFinalObject(Field targetField, Object instance, Object newValue) {
+        try {
+            Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+            unsafeField.setAccessible(true);
+            sun.misc.Unsafe unsafe = (sun.misc.Unsafe) unsafeField.get(null);
+
+            long fieldOffset = unsafe.objectFieldOffset(targetField);
+            unsafe.putObject(instance, fieldOffset, newValue);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void setStaticFinalObject(Field targetField, Object newValue) {
         try {
             if (!Modifier.isStatic(targetField.getModifiers())) {
