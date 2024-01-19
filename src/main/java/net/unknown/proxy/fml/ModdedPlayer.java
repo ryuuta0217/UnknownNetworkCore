@@ -32,16 +32,22 @@
 package net.unknown.proxy.fml;
 
 import io.netty.buffer.ByteBuf;
+import net.md_5.bungee.api.ProxyServer;
 
+import java.util.Random;
 import java.util.UUID;
+import java.util.logging.Logger;
 
-public interface ModdedPlayer {
+public abstract class ModdedPlayer {
+    protected static final Logger LOGGER = ProxyServer.getInstance().getLogger();
+    protected static final Random RANDOM = new Random();
+
     /**
      * Forgeのバージョンを返します
      *
      * @return FML version
      */
-    int getFMLVersion();
+    public abstract int getFMLVersion();
 
     /**
      * Client -> Server の C2SLoginPayloadPacket と同じデータ構造で
@@ -50,5 +56,5 @@ public interface ModdedPlayer {
      * @param buf      データ展開先のバッファ
      * @param uniqueId データに内包するプレイヤーのUUID
      */
-    void getData(ByteBuf buf, UUID uniqueId);
+    public abstract void getData(ByteBuf buf, UUID uniqueId);
 }
