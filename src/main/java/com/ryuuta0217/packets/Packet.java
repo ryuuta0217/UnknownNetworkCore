@@ -34,7 +34,5 @@ package com.ryuuta0217.packets;
 import io.netty.buffer.ByteBuf;
 
 public interface Packet {
-    ByteBuf encode(ByteBuf buf);
-
-    Packet decode(ByteBuf buf);
+    void encode(ByteBuf buf);
 }
