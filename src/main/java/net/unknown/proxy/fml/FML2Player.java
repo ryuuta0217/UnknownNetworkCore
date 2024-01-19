@@ -31,8 +31,8 @@
 
 package net.unknown.proxy.fml;
 
-import com.ryuuta0217.packets.C2SModListReply;
-import com.ryuuta0217.packets.S2CModList;
+import com.ryuuta0217.packets.forge.v2.C2SModListReply;
+import com.ryuuta0217.packets.forge.v2.S2CModList;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;

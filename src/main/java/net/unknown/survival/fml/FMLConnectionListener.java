@@ -31,7 +31,7 @@
 
 package net.unknown.survival.fml;
 
-import com.ryuuta0217.packets.C2SModListReply;
+import com.ryuuta0217.packets.forge.v2.C2SModListReply;
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

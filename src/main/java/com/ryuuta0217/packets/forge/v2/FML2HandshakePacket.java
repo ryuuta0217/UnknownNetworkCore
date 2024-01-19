@@ -29,7 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.packets;
+package com.ryuuta0217.packets.forge.v2;
 
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
