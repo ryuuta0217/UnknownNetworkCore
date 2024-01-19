@@ -29,7 +29,14 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared.messaging;
+package net.unknown.proxy.fml;
 
-public class Packet {
+import net.md_5.bungee.api.event.PluginMessageEvent;
+import net.md_5.bungee.api.event.PreLoginEvent;
+import net.md_5.bungee.protocol.packet.LoginPayloadResponse;
+
+public interface ModdedHandshakeProcessor {
+    void onPluginMessageReceived(PluginMessageEvent event);
+    void onPreLogin(PreLoginEvent event);
+    void onLoginPayloadResponseReceived(LoginPayloadResponse response);
 }
