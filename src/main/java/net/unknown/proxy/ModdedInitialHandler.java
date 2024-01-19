@@ -31,10 +31,6 @@
 
 package net.unknown.proxy;
 
-import com.google.common.base.Preconditions;
-import com.ryuuta0217.packets.C2SModListReply;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.handler.codec.haproxy.HAProxyMessageDecoder;
@@ -43,29 +39,24 @@ import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.config.ListenerInfo;
 import net.md_5.bungee.api.event.ClientConnectEvent;
-import net.md_5.bungee.api.event.PlayerHandshakeEvent;
 import net.md_5.bungee.connection.InitialHandler;
 import net.md_5.bungee.netty.ChannelWrapper;
 import net.md_5.bungee.netty.HandlerBoss;
 import net.md_5.bungee.netty.PipelineUtils;
 import net.md_5.bungee.protocol.*;
-import net.md_5.bungee.protocol.packet.Handshake;
 import net.md_5.bungee.protocol.packet.LoginPayloadResponse;
-import net.md_5.bungee.util.QuietException;
 import net.unknown.core.util.ReflectionUtil;
-import net.unknown.proxy.fml.FML2Player;
+import net.unknown.proxy.fml.ModdedHandshakeProcessor;
 import net.unknown.proxy.fml.ModdedPlayer;
 
 import java.lang.reflect.Field;
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class ModdedInitialHandler extends InitialHandler {
-    public static final Map<Integer, Object> PENDING_FORGE_PLAYER_CONNECTIONS = new HashMap<>();
+    public static final Map<Integer, ModdedPlayer> PENDING_FORGE_PLAYER_CONNECTIONS = new HashMap<>();
     public static final Map<String, ModdedPlayer> FORGE_PLAYERS = new HashMap<>();
     private static final Logger LOGGER = UnknownNetworkProxyCore.getInstance().getProxy().getLogger();
     private static final KickStringWriter legacyKicker = getLegacyKicker();
@@ -164,18 +155,11 @@ public class ModdedInitialHandler extends InitialHandler {
                     ChatColor.AQUA + "また、この問題を公式Discordにて開発に報告していただけると助かります。");
             return;
         }
-        PENDING_FORGE_PLAYER_CONNECTIONS.remove(response.getId());
-
-        ByteBuf buf = Unpooled.wrappedBuffer(response.getData());
-
-        try {
-            C2SModListReply handshake = C2SModListReply.decode(buf);
-            FORGE_PLAYERS.put(this.getName(), new FML2Player(handshake.getMods(), handshake.getChannels(), handshake.getRegistries()));
-            LOGGER.info("[" + this.getName() + "|" + this.getSocketAddress() + "] <-> Successfully FML2 handshake completed");
-            LOGGER.info("[" + this.getName() + "|" + this.getSocketAddress() + "] <-> Connected as using mods: " + handshake.getMods());
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+        if (PENDING_FORGE_PLAYER_CONNECTIONS.get(response.getId()) instanceof ModdedHandshakeProcessor processor) {
+            processor.onLoginPayloadResponseReceived(response);
         }
+
+        PENDING_FORGE_PLAYER_CONNECTIONS.remove(response.getId());
     }
 
     public ChannelWrapper getChannel() {

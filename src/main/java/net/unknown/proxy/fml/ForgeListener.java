@@ -31,66 +31,57 @@
 
 package net.unknown.proxy.fml;
 
-import com.ryuuta0217.packets.S2CModList;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import net.md_5.bungee.UserConnection;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
+import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.api.event.ServerConnectedEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.protocol.ProtocolConstants;
-import net.md_5.bungee.protocol.packet.LoginPayloadRequest;
 import net.unknown.proxy.ModdedInitialHandler;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.logging.Logger;
+import java.util.*;
 
 public class ForgeListener implements Listener {
-    private static final Logger LOGGER = ProxyServer.getInstance().getLogger();
-    private static final Random RANDOM = new Random();
+    public static final Map<String, ModdedHandshakeProcessor> ESTABLISHING_MODDED_PLAYERS = new HashMap<>();
+
+    @EventHandler
+    public void onPluginMessageReceived(PluginMessageEvent event) {
+        if (event.getSender() instanceof UserConnection connection) { // from client
+            if (ESTABLISHING_MODDED_PLAYERS.containsKey(connection.getName())) {
+                ESTABLISHING_MODDED_PLAYERS.get(connection.getName()).onPluginMessageReceived(event);
+            }
+        }
+    }
 
     @EventHandler
     public void onPreLogin(PreLoginEvent event) {
         if (!(event.getConnection() instanceof ModdedInitialHandler handler)) return;
-        String logPrefix = "[" + handler.getName() + "|" + handler.getSocketAddress() + "]";
 
-        if (handler.getHandshake().getProtocolVersion() >= ProtocolConstants.MINECRAFT_1_13 && handler.getExtraDataInHandshake().contains("FML2")) {
-            LOGGER.info(logPrefix + "  -> Connected as using FML2 protocol");
-            LOGGER.info(logPrefix + "  -  Initializing FML2 Handshake (S2CModList)");
-            LoginPayloadRequest loginPayloadRequest = new LoginPayloadRequest();
-            S2CModList packet = new S2CModList(new HashSet<>() {{
-                add("minecraft");
-                add("forge");
-            }}, new HashMap<>() {{
-                put("forge:tier_sorting", "1.0");
-            }}, new HashSet<>());
-            loginPayloadRequest.setData(ByteBufUtil.getBytes(packet.encode(Unpooled.buffer())));
-            loginPayloadRequest.setChannel("fml:handshake");
-            int id = RANDOM.nextInt(Short.MAX_VALUE);
-            if (ModdedInitialHandler.PENDING_FORGE_PLAYER_CONNECTIONS.containsKey(id)) {
-                LOGGER.info(logPrefix + "  -  FML2 handshake Message ID " + id + " is duplicated, re-generating.");
-                while (ModdedInitialHandler.PENDING_FORGE_PLAYER_CONNECTIONS.containsKey(id)) {
-                    id = RANDOM.nextInt(Integer.MAX_VALUE);
-                    LOGGER.info(logPrefix + "  -  FML2 handshake new Message ID is " + id);
-                }
-                LOGGER.info(logPrefix + "  -  FML2 handshake Message ID duplicate is fixed.");
-            } else {
-                LOGGER.info(logPrefix + "  -  FML2 handshake Message ID is " + id);
+        if (handler.getHandshake().getProtocolVersion() >= ProtocolConstants.MINECRAFT_1_13) {
+            ModdedHandshakeProcessor player = null;
+
+            if (handler.getExtraDataInHandshake().contains("FML2")) {
+                player = new FML2Player();
+            } else if (handler.getExtraDataInHandshake().contains("FORGE")) {
+                player = new ForgePlayer();
             }
-            ModdedInitialHandler.PENDING_FORGE_PLAYER_CONNECTIONS.put(id, event.getConnection());
-            loginPayloadRequest.setId(id);
-            event.getConnection().unsafe().sendPacket(loginPayloadRequest);
-            LOGGER.info(logPrefix + " <-  LoginPayloadRequest (FML2 Handshake S2CModList) Sent");
+
+            if (player != null) {
+                ESTABLISHING_MODDED_PLAYERS.put(handler.getName(), player);
+                player.onPreLogin(event);
+            }
         }
     }
 
     @EventHandler
     public void onDisconnect(PlayerDisconnectEvent event) {
+        ESTABLISHING_MODDED_PLAYERS.remove(event.getPlayer().getName());
         ModdedInitialHandler.FORGE_PLAYERS.remove(event.getPlayer().getName());
     }
 
@@ -100,7 +91,7 @@ public class ForgeListener implements Listener {
             ModdedPlayer fp = ModdedInitialHandler.FORGE_PLAYERS.get(event.getPlayer().getName());
             ByteBuf buf = Unpooled.buffer();
             fp.getData(buf, event.getPlayer().getUniqueId());
-            event.getServer().sendData("unknown:forge", buf.array());
+            event.getServer().sendData("unknown:forge", ByteBufUtil.getBytes(buf));
         }
     }
 }
