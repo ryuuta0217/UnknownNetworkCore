@@ -109,4 +109,9 @@ public class MinecraftPacketReader {
             out.writeBytes(b);
         }
     }
+
+    public static void writeUUID(UUID value, ByteBuf out) {
+        out.writeLong(value.getMostSignificantBits());
+        out.writeLong(value.getLeastSignificantBits());
+    }
 }
