@@ -35,6 +35,8 @@ public enum ConnectionEnvironment {
     VANILLA,
     FML,
     FML2,
+    FML3,
+    FORGE,
     LITE_LOADER,
     FABRIC
 }
