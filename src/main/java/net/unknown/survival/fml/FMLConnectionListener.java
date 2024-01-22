@@ -36,7 +36,7 @@ import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import net.kyori.adventure.text.Component;
-import net.unknown.survival.enums.ConnectionEnvironment;
+import net.unknown.shared.enums.ConnectionEnvironment;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;

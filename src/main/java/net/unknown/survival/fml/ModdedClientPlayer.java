@@ -31,7 +31,7 @@
 
 package net.unknown.survival.fml;
 
-import net.unknown.survival.enums.ConnectionEnvironment;
+import net.unknown.shared.enums.ConnectionEnvironment;
 
 import java.util.HashMap;
 import java.util.Map;
