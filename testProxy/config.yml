@@ -1,4 +1,4 @@
-enforce_secure_profile: true
+enforce_secure_profile: false
 listeners:
 - query_port: 25577
   motd: '&1Another Bungee server'
@@ -16,7 +16,7 @@ listeners:
   tab_size: 60
   force_default_server: false
 remote_ping_cache: -1
-network_compression_threshold: 256
+network_compression_threshold: 2
 permissions:
   default:
   - bungeecord.command.server
@@ -30,8 +30,8 @@ log_pings: true
 connection_throttle_limit: 3
 server_connect_timeout: 5000
 timeout: 30000
+stats: 3993bb0a-8ba1-42d8-a9c1-6f4ce95ca724
 player_limit: -1
-prevent_proxy_connections: false
 ip_forward: true
 groups:
   md_5:
@@ -39,9 +39,9 @@ groups:
 remote_ping_timeout: 5000
 connection_throttle: 4000
 log_commands: false
-stats: 3993bb0a-8ba1-42d8-a9c1-6f4ce95ca724
-online_mode: true
-forge_support: true
+prevent_proxy_connections: false
+online_mode: false
+forge_support: false
 disabled_commands:
 - disabledcommandhere
 servers:
