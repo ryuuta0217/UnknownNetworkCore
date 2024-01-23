@@ -34,19 +34,16 @@ package com.ryuuta0217.packets.forge.v2;
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class FML2HandshakePacket {
     private static final byte MAGIC = 1;
-    private final List<String> mods;
+    private final Set<String> mods;
     private final Map<String, String> channels;
     private final Map<String, String> registries;
 
-    public FML2HandshakePacket(List<String> mods, Map<String, String> channels, Map<String, String> registries) {
+    public FML2HandshakePacket(Set<String> mods, Map<String, String> channels, Map<String, String> registries) {
         this.mods = mods;
         this.channels = channels;
         this.registries = registries;
@@ -69,7 +66,7 @@ public class FML2HandshakePacket {
         //                   ...
         //
         int modCount = MinecraftPacketReader.readVarInt(buf); // [Mod Count]
-        List<String> mods = new ArrayList<>();
+        Set<String> mods = new HashSet<>();
         IntStream.range(0, modCount).forEach(i -> {
             mods.add(MinecraftPacketReader.readString(buf, 256)); // [Mod Name]
         });
@@ -105,7 +102,7 @@ public class FML2HandshakePacket {
         //                   ...
         //
         int modCount = MinecraftPacketReader.readVarInt(buf); // [Mod Count]
-        List<String> mods = new ArrayList<>();
+        Set<String> mods = new HashSet<>();
         IntStream.range(0, modCount).forEach(i -> {
             mods.add(MinecraftPacketReader.readString(buf, 256)); // [Mod Name]
         });
@@ -190,7 +187,7 @@ public class FML2HandshakePacket {
         return buf;
     }
 
-    public List<String> getMods() {
+    public Set<String> getMods() {
         return this.mods;
     }
 

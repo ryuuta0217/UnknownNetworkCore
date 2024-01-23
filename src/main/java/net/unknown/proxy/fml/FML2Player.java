@@ -32,21 +32,26 @@
 package net.unknown.proxy.fml;
 
 import com.ryuuta0217.packets.forge.v2.C2SModListReply;
+import com.ryuuta0217.packets.forge.v2.FML2HandshakePacket;
 import com.ryuuta0217.packets.forge.v2.S2CModList;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import net.md_5.bungee.UserConnection;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
 import net.md_5.bungee.protocol.DefinedPacket;
 import net.md_5.bungee.protocol.packet.LoginPayloadRequest;
 import net.md_5.bungee.protocol.packet.LoginPayloadResponse;
 import net.unknown.proxy.ModdedInitialHandler;
+import net.unknown.shared.fml.ModClientInformation;
 
 import java.util.*;
 
 public class FML2Player extends ModdedPlayer implements ModdedHandshakeProcessor {
     private ModdedInitialHandler handler;
+    private UserConnection player;
     private Set<String> mods;
     private Map<String, String> channels;
     private Map<String, String> registries;
@@ -130,13 +135,29 @@ public class FML2Player extends ModdedPlayer implements ModdedHandshakeProcessor
     }
 
     @Override
-    public void getData(ByteBuf buf, UUID uniqueId) {
-        DefinedPacket.writeUUID(uniqueId, buf);
+    public void setProxiedPlayer(UserConnection player) {
+        this.player = player;
+    }
+
+    @Override
+    public ProxiedPlayer getProxiedPlayer() {
+        return this.player;
+    }
+
+    @Override
+    public void getData(ByteBuf buf) {
+        if (this.player == null) throw new IllegalStateException("Player is not set");
+        DefinedPacket.writeUUID(this.player.getUniqueId(), buf);
         new C2SModListReply(this.mods, this.channels, this.registries).encode(buf);
     }
 
     @Override
     public int getFMLVersion() {
         return 2;
+    }
+
+    @Override
+    public ModClientInformation toModClientInformation() {
+        return new ModClientInformation(this.player.getUniqueId(), new FML2HandshakePacket(this.mods, this.channels, this.registries));
     }
 }

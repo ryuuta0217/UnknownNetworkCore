@@ -50,7 +50,6 @@ import net.unknown.core.skin.SkinManager;
 import net.unknown.core.tab.TabListPingManager;
 import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.shared.VersionInfo;
-import net.unknown.shared.messaging.UNCMessaging;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.v1_20_R2.CraftServer;
 import org.bukkit.event.HandlerList;
@@ -113,7 +112,6 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         });*/
         CustomChatTypes.bootstrap();
         Commands.init();
-        UNCMessaging.initBukkit();
         UnknownNetworkCore.getEnvironment().onLoad();
         long end = System.nanoTime();
         getLogger().info("Plugin was loaded in " + (end - start) / 1000000 + "ms");

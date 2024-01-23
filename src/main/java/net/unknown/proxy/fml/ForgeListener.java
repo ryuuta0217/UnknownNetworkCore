@@ -35,7 +35,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import net.md_5.bungee.UserConnection;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.event.PlayerDisconnectEvent;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.PreLoginEvent;
@@ -89,9 +88,12 @@ public class ForgeListener implements Listener {
     public void onConnectedToServer(ServerConnectedEvent event) {
         if (ModdedInitialHandler.FORGE_PLAYERS.containsKey(event.getPlayer().getName())) {
             ModdedPlayer fp = ModdedInitialHandler.FORGE_PLAYERS.get(event.getPlayer().getName());
-            ByteBuf buf = Unpooled.buffer();
-            fp.getData(buf, event.getPlayer().getUniqueId());
-            event.getServer().sendData("unknown:forge", ByteBufUtil.getBytes(buf));
+            fp.setProxiedPlayer(event.getPlayer() instanceof UserConnection connection ? connection : null);
+            if (fp.getProxiedPlayer() != null) {
+                ByteBuf buf = Unpooled.buffer();
+                fp.toModClientInformation().encode(buf);
+                event.getServer().sendData("unknown:forge", ByteBufUtil.getBytes(buf));
+            }
         }
     }
 }

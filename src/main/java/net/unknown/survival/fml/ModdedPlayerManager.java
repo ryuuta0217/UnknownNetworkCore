@@ -31,6 +31,7 @@
 
 package net.unknown.survival.fml;
 
+import net.unknown.shared.fml.ModClientInformation;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -42,14 +43,14 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ModdedPlayerManager implements Listener {
-    private static final Map<UUID, ModdedClientPlayer> MOD_INSTALLED_PLAYERS = new HashMap<>();
+    private static final Map<UUID, ModClientInformation> MOD_INSTALLED_PLAYERS = new HashMap<>();
 
     @Nullable
-    public static ModdedClientPlayer getModPlayer(Player player) {
+    public static ModClientInformation getModPlayer(Player player) {
         return MOD_INSTALLED_PLAYERS.getOrDefault(player.getUniqueId(), null);
     }
 
-    public static void addPlayer(Player player, ModdedClientPlayer modPlayer) {
+    public static void addPlayer(Player player, ModClientInformation modPlayer) {
         MOD_INSTALLED_PLAYERS.put(player.getUniqueId(), modPlayer);
     }
 

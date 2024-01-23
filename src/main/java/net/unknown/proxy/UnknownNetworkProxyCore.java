@@ -36,7 +36,6 @@ import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.YamlConfiguration;
 import net.unknown.proxy.fml.ForgeListener;
-import net.unknown.shared.messaging.UNCMessaging;
 
 import java.io.File;
 import java.io.IOException;
@@ -106,7 +105,6 @@ public class UnknownNetworkProxyCore extends Plugin {
         getProxy().getPluginManager().registerListener(this, new ForgeListener());
         getProxy().getPluginManager().registerListener(this, new PingListener());
         //getProxy().getPluginManager().registerListener(this, new ServerDisconnectListener());
-        UNCMessaging.initBungeeCord();
         LOBBY = getProxy().getServerInfo("lobby");
         SURVIVAL = getProxy().getServerInfo("survival");
     }

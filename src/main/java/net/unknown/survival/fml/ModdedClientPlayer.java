@@ -39,18 +39,18 @@ import java.util.Set;
 
 public class ModdedClientPlayer {
     private final ConnectionEnvironment env;
-    private final Map<String, String> mods;
+    private final Map<String, Map.Entry<String, String>> mods;
     private final Map<String, String> channels;
     private final Map<String, String> registries;
     private Map<String, String> withoutForgeChannels;
 
     public ModdedClientPlayer(ConnectionEnvironment env, Set<String> mods, Map<String, String> channels, Map<String, String> registries) {
         this(env, new HashMap<>() {{
-            mods.forEach(modName -> put(modName, ""));
+            mods.forEach(modName -> put(modName, Map.entry(modName, "0")));
         }}, channels, registries);
     }
 
-    public ModdedClientPlayer(ConnectionEnvironment env, Map<String, String> mods, Map<String, String> channels, Map<String, String> registries) {
+    public ModdedClientPlayer(ConnectionEnvironment env, Map<String, Map.Entry<String, String>> mods, Map<String, String> channels, Map<String, String> registries) {
         this.env = env;
         this.mods = mods;
         this.channels = channels;
@@ -61,7 +61,7 @@ public class ModdedClientPlayer {
         return this.env;
     }
 
-    public Map<String, String> getMods() {
+    public Map<String, Map.Entry<String, String>> getMods() {
         return this.mods;
     }
 
