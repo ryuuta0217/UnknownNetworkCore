@@ -226,15 +226,4 @@ public class VanishManager implements Listener {
             event.quitMessage(null);
         }
     }
-
-    @EventHandler(priority = EventPriority.LOWEST)
-    public void onWorldChanged(PlayerChangedWorldEvent event) {
-        VANISHED_PLAYERS.forEach(uuid -> {
-            Player vanished = Bukkit.getPlayer(uuid);
-            if (vanished != null) {
-                removeFromTabList(vanished, event.getPlayer());
-                setHidden(vanished, event.getPlayer());
-            }
-        });
-    }
 }
