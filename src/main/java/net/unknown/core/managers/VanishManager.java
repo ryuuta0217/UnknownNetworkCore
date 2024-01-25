@@ -266,7 +266,7 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (isVanished(event.getPlayer())) { // If vanished player logged in, hide from all players.
             event.joinMessage(null);
-            if (MODE == 1) RunnableManager.runDelayed(() -> vanish(event.getPlayer().getUniqueId(), true), 1);
+            if (MODE == 1) RunnableManager.runDelayed(() -> vanish(event.getPlayer().getUniqueId(), true), 10);
         } else if (!event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
             VANISHED_PLAYERS.forEach(uuid -> {
                 Player vanished = Bukkit.getPlayer(uuid);
