@@ -40,6 +40,9 @@ import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
+import net.unknown.core.packet.PacketManager;
+import net.unknown.core.packet.event.PacketSendingEvent;
+import net.unknown.core.packet.listener.OutgoingPacketListener;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -56,7 +59,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class VanishManager implements Listener {
+public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoUpdatePacket> implements Listener {
     private static final VanishManager INSTANCE = new VanishManager();
     private static final Set<UUID> VANISHED_PLAYERS = new HashSet<>();
 
@@ -215,13 +218,23 @@ public class VanishManager implements Listener {
 
     private VanishManager() {
         ListenerManager.registerListener(this);
+        PacketManager.getInstance().registerOutgoingS2CListener(ClientboundPlayerInfoUpdatePacket.class, this);
+    }
+
+    @Override
+    public void onSendingPacket(PacketSendingEvent<ClientboundPlayerInfoUpdatePacket> event) {
+        if (event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) return;
+
+        if (event.getPacket().actions().contains(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)) {
+            event.getPacket().entries().removeIf(player -> isVanished(player.profileId()));
+        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (isVanished(event.getPlayer())) { // If vanished player logged in, hide from all players.
             event.joinMessage(null);
-            vanish(event.getPlayer(), true);
+            //RunnableManager.runDelayed(() -> vanish(event.getPlayer(), true), 1);
         } else if (!event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
             VANISHED_PLAYERS.forEach(uuid -> {
                 Player vanished = Bukkit.getPlayer(uuid);
