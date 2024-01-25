@@ -54,5 +54,6 @@ public class Commands {
         TimeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
         SwapLocationCommand.register(UnknownNetworkCorePlugin.getBrigadier());
         ProgrammedFireworksCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        VanishCommand.register(UnknownNetworkCorePlugin.getBrigadier());
     }
 }

@@ -32,6 +32,7 @@
 package net.unknown.core.managers;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.MinecraftServer;
@@ -122,8 +123,12 @@ public class VanishManager implements Listener {
     }
 
     private static void removeFromTabList(ServerPlayer removeTarget, ServerPlayer sendTarget) {
-        if (sendTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode()))
+        if (sendTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
+            removeTarget.listName = removeTarget.getName().copy().withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+            sendTarget.connection.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, removeTarget));
+            removeTarget.listName = null;
             return;
+        }
         if (sendTarget.getUUID().equals(removeTarget.getUUID())) return;
         sendTarget.connection.send(new ClientboundPlayerInfoRemovePacket(Stream.of(removeTarget).map(ServerPlayer::getUUID).collect(Collectors.toList())));
     }
@@ -215,8 +220,7 @@ public class VanishManager implements Listener {
         VANISHED_PLAYERS.forEach(uuid -> {
             Player vanished = Bukkit.getPlayer(uuid);
             if (vanished != null) {
-                removeFromTabList(vanished, event.getPlayer());
-                setHidden(vanished, event.getPlayer());
+                vanish(vanished, true);
             }
         });
     }

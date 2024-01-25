@@ -56,6 +56,7 @@ public enum Permissions {
     COMMAND_TELEPORTWORLD("unknown.core.command.teleportworld", 2, TeleportWorldCommand.class),
     COMMAND_TRASH("unknown.core.command.trash", "minecraft.command.trash", 0, TrashCommand.class),
     COMMAND_PROGRAMMEDFIREWORKS("unknown.core.command.programmedfireworks", "minecraft.command.programmedfireworks", 2, ProgrammedFireworksCommand.class),
+    COMMAND_VANISH("unknown.core.command.vanish", "minecraft.command.vanish", 2, VanishCommand.class),
 
     FEATURE_USE_COLOR_CODE("unknown.feature.use_color_code", 2, null),
     FEATURE_SEE_VANISHED_PLAYERS("unknown.feature.see_vanished_players", 2, null);

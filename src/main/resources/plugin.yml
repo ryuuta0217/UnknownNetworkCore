@@ -22,12 +22,15 @@ permissions:
       minecraft.command.setpose: true
       minecraft.command.eval: true
       minecraft.command.crash: true
+      minecraft.command.vanish: true
       unknown.core.command.nick: true
       unknown.core.command.skin: true
       unknown.core.command.packet: true
       unknown.core.command.setpose: true
       unknown.core.command.eval: true
       unknown.core.command.crash: true
+      unknown.core.command.vanish: true
+      unknown.feature.see_vanished_players: true
   unknown.survival.default:
     default: true
     children:
