@@ -57,8 +57,6 @@ public class VanishManager implements Listener {
     private static final VanishManager INSTANCE = new VanishManager();
     private static final Set<UUID> VANISHED_PLAYERS = new HashSet<>();
 
-    public static int DELAY = 1;
-
     public static boolean isVanished(ServerPlayer player) {
         return isVanished(player.getUUID());
     }
@@ -241,7 +239,7 @@ public class VanishManager implements Listener {
             RunnableManager.runDelayed(() -> {
                 removeFromTabList(Bukkit.getPlayer(event.getPlayer().getUniqueId()));
                 setHidden(event.getPlayer());
-            }, DELAY);
+            }, 1);
         } else if (!event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
             VANISHED_PLAYERS.forEach(uuid -> {
                 Player vanished = Bukkit.getPlayer(uuid);
