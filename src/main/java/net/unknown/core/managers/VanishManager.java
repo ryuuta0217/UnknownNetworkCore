@@ -223,10 +223,14 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
 
     @Override
     public void onSendingPacket(PacketSendingEvent<ClientboundPlayerInfoUpdatePacket> event) {
-        if (event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) return;
+        try {
+            if (event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) return;
 
-        if (event.getPacket().actions().contains(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)) {
-            event.getPacket().entries().removeIf(player -> isVanished(player.profileId()));
+            if (event.getPacket().actions().contains(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)) {
+                event.getPacket().entries().removeIf(player -> isVanished(player.profileId()));
+            }
+        } catch(Throwable t) {
+            t.printStackTrace();
         }
     }
 
