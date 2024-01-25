@@ -37,6 +37,7 @@ import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCorePlugin;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Bukkit;
@@ -80,7 +81,7 @@ public class VanishManager implements Listener {
         removeFromTabList(player);
         setHidden(player);
         if (!silent) {
-            Bukkit.broadcast(Component.translatable("multiplayer.player.left", player.adventure$displayName));
+            Bukkit.broadcast(Component.translatable("multiplayer.player.left", player.adventure$displayName).color(DefinedTextColor.YELLOW));
         }
         return true;
     }
@@ -95,7 +96,7 @@ public class VanishManager implements Listener {
         addToTabList(player);
         setShowing(player);
         if (!silent) {
-            Bukkit.broadcast(Component.translatable("multiplayer.player.joined", player.adventure$displayName));
+            Bukkit.broadcast(Component.translatable("multiplayer.player.joined", player.adventure$displayName).color(DefinedTextColor.YELLOW));
         }
         return true;
     }
