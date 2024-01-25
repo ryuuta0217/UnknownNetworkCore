@@ -60,7 +60,7 @@ public class PingListener implements Listener {
 
         List<Integer> protocolNumbers = config.getIntList("supported-protocol-numbers");
         BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(763); // if failed to get min, use default (defined default)
-        protocolNumbers.remove(BASE_SUPPORTED_PROTOCOL_NUMBER);
+        protocolNumbers.remove((Integer) BASE_SUPPORTED_PROTOCOL_NUMBER);
         SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>(protocolNumbers);
     }
 
