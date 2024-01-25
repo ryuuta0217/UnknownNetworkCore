@@ -154,6 +154,12 @@ public class VanishManager implements Listener {
     }
 
     private static void addToTabList(ServerPlayer addTarget, ServerPlayer sendTarget) {
+        if (sendTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
+            addTarget.listName = addTarget.getName();
+            sendTarget.connection.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, addTarget));
+            addTarget.listName = null;
+            return;
+        }
         if (sendTarget.getUUID().equals(addTarget.getUUID())) return;
         sendTarget.connection.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, addTarget));
     }
