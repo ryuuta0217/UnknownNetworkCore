@@ -215,8 +215,7 @@ public class VanishManager implements Listener {
         VANISHED_PLAYERS.forEach(uuid -> {
             Player vanished = Bukkit.getPlayer(uuid);
             if (vanished != null) {
-                removeFromTabList(vanished, event.getPlayer());
-                setHidden(vanished, event.getPlayer());
+                vanish(vanished, true);
             }
         });
     }
