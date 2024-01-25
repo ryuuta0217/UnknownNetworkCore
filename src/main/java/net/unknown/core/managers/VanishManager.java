@@ -251,7 +251,7 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
             List<ClientboundPlayerInfoUpdatePacket.Entry> entries = new ArrayList<>(event.getPacket().entries());
             entries.removeIf(player -> {
                 boolean result = !event.getPlayer().getUniqueId().equals(player.profileId()) && isVanished(player.profileId());
-                if (result) System.out.println("Removing " + player.displayName().getString() + " on " + event.getPacket().actions() + " to " + event.getPlayer().getName());
+                if (result) System.out.println("Removing " + player.profileId() + " on " + event.getPacket().actions() + " to " + event.getPlayer().getName());
                 return result;
             });
 
