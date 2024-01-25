@@ -154,6 +154,12 @@ public class VanishManager implements Listener {
     }
 
     private static void addToTabList(ServerPlayer addTarget, ServerPlayer sendTarget) {
+        if (sendTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
+            addTarget.listName = addTarget.getName();
+            sendTarget.connection.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, addTarget));
+            addTarget.listName = null;
+            return;
+        }
         if (sendTarget.getUUID().equals(addTarget.getUUID())) return;
         sendTarget.connection.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, addTarget));
     }
@@ -213,16 +219,18 @@ public class VanishManager implements Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
-        if (isVanished(event.getPlayer())) {
+        if (isVanished(event.getPlayer())) { // If vanished player logged in, hide from all players.
             event.joinMessage(null);
+            vanish(event.getPlayer(), true);
+        } else if (!event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
+            VANISHED_PLAYERS.forEach(uuid -> {
+                Player vanished = Bukkit.getPlayer(uuid);
+                if (vanished != null) {
+                    removeFromTabList(vanished, event.getPlayer());
+                    setHidden(vanished, event.getPlayer());
+                }
+            });
         }
-
-        VANISHED_PLAYERS.forEach(uuid -> {
-            Player vanished = Bukkit.getPlayer(uuid);
-            if (vanished != null) {
-                vanish(vanished, true);
-            }
-        });
     }
 
     @EventHandler(priority = EventPriority.LOWEST)

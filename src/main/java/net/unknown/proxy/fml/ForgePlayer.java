@@ -143,6 +143,9 @@ public class ForgePlayer extends ModdedPlayer implements ModdedHandshakeProcesso
     private PluginMessage createModVersions() { // phase 1
         ByteBuf buf = Unpooled.buffer();
 
+        // Write phase
+        MinecraftPacketReader.writeVarInt(this.currentPhase, buf);
+
         // <modid, <name, version>>
         Map<String, ModVersions.Info> serverInstalledModsDummy = new HashMap<>() {{
             put("minecraft", new ModVersions.Info("Minecraft", "1.20.4"));
