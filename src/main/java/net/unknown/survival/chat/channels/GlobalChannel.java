@@ -34,7 +34,10 @@ package net.unknown.survival.chat.channels;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.chat.ChatType;
 import net.kyori.adventure.chat.SignedMessage;
+import net.kyori.adventure.text.Component;
 import net.minecraft.network.chat.SignedMessageBody;
+import net.unknown.core.managers.VanishManager;
+import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Bukkit;
 
 public class GlobalChannel extends ChatChannel {
@@ -50,7 +53,10 @@ public class GlobalChannel extends ChatChannel {
 
     @Override
     public void processChat(AsyncChatEvent event) {
-
+        if (VanishManager.isVanished(event.getPlayer())) {
+            NewMessageUtil.sendErrorMessage(event.getPlayer(), Component.text("現在Vanish中です。チャットメッセージを送信するには、Vanishを解除してください。"));
+            event.setCancelled(true);
+        }
         //event.viewers().removeIf(audience -> audience.equals(Bukkit.getPlayer("Yncryption")));
     }
 }
