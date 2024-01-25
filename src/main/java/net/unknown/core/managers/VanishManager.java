@@ -249,7 +249,11 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
             if (event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) return;
 
             List<ClientboundPlayerInfoUpdatePacket.Entry> entries = new ArrayList<>(event.getPacket().entries());
-            entries.removeIf(player -> isVanished(player.profileId()));
+            entries.removeIf(player -> {
+                boolean result = !event.getPlayer().getUniqueId().equals(player.profileId()) && isVanished(player.profileId());
+                if (result) System.out.println("Removing " + player.displayName().getString() + " on " + event.getPacket().actions() + " to " + event.getPlayer().getName());
+                return result;
+            });
 
             Field entriesField = ObfuscationUtil.getClassByName(ClientboundPlayerInfoUpdatePacket.class.getName()).getFieldByMojangName("entries").getField();
             ReflectionUtil.setFinalObject(entriesField, event.getPacket(), entries);
