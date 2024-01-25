@@ -48,6 +48,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValueAdapter;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -87,6 +89,7 @@ public class VanishManager implements Listener {
         VANISHED_PLAYERS.add(player.getUUID());
         removeFromTabList(player);
         setHidden(player);
+        player.getBukkitEntity().setMetadata("vanished", new FixedMetadataValue(UnknownNetworkCorePlugin.getInstance(), true));
         if (!silent) {
             Bukkit.broadcast(Component.translatable("multiplayer.player.left", player.adventure$displayName).color(DefinedTextColor.YELLOW));
         }
@@ -111,6 +114,7 @@ public class VanishManager implements Listener {
         VANISHED_PLAYERS.remove(player.getUUID());
         addToTabList(player);
         setShowing(player);
+        player.getBukkitEntity().removeMetadata("vanished", UnknownNetworkCorePlugin.getInstance());
         if (!silent) {
             Bukkit.broadcast(Component.translatable("multiplayer.player.joined", player.adventure$displayName).color(DefinedTextColor.YELLOW));
         }
