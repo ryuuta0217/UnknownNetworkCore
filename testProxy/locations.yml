@@ -1,1 +1,2 @@
-{'Yncryption;localhost:25565': lobby, 'Yncryption;localhost:25577': lobby}
+{'Yncryption;localhost:25565': lobby, 'Yncryption;localhost:25577': lobby, 'Dev;127.0.0.1:25565': lobby,
+  'Dev;localhost:25565': lobby}

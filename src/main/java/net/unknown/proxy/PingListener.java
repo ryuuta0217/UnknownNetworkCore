@@ -31,22 +31,38 @@
 
 package net.unknown.proxy;
 
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.ServerPing;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.event.ProxyPingEvent;
 import net.md_5.bungee.api.plugin.Listener;
+import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.event.EventHandler;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class PingListener implements Listener {
-    private static final int BASE_SUPPORTED_PROTOCOL_NUMBER = 763; // 1.20, 1.20.1
-    private static final Set<Integer> SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>() {{
-        add(764); // 1.20.2
-    }};
+    private static final String PROTOCOL_NAME;
+    private static final int BASE_SUPPORTED_PROTOCOL_NUMBER;
+    private static final Set<Integer> SUPPORTED_PROTOCOL_NUMBERS;
+
+    static {
+        Configuration config = UnknownNetworkProxyCore.getConfig();
+        if (!config.contains("protocol-name")) {
+            config.set("protocol-name", "Minecraft 1.20.x");
+        }
+
+        if (!config.contains("supported-protocol-numbers")) {
+            config.set("supported-protocol-numbers", List.of(763, 764, 765)); // 1.20.2, 1.20.3, 1.20.4
+        }
+
+        PROTOCOL_NAME = config.getString("protocol-name");
+
+        List<Integer> protocolNumbers = config.getIntList("supported-protocol-numbers");
+        BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(763); // if failed to get min, use default (defined default)
+        protocolNumbers.remove(BASE_SUPPORTED_PROTOCOL_NUMBER);
+        SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>(protocolNumbers);
+    }
 
     @EventHandler
     public void onPing(ProxyPingEvent event) {
@@ -57,7 +73,7 @@ public class PingListener implements Listener {
         if (SUPPORTED_PROTOCOL_NUMBERS.contains(playerProtocolVersion)) {
             protocolVersion = playerProtocolVersion;
         }
-        sp.setVersion(new ServerPing.Protocol("Minecraft 1.20.x", protocolVersion));
+        sp.setVersion(new ServerPing.Protocol(PROTOCOL_NAME, protocolVersion));
 
         event.setResponse(sp);
     }

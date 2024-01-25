@@ -3,8 +3,6 @@ name: Build Plugin
 on:
   push:
     branches: [ develop, production ]
-  pull_request:
-    branches: [ develop ]
 
 jobs:
   build:

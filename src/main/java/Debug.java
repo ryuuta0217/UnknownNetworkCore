@@ -29,63 +29,30 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-import com.ryuuta0217.packets.FML2HandshakePacket;
+import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Debug {
     public static void main(String[] args) {
-        FML2HandshakePacket packet = new FML2HandshakePacket(new ArrayList<>() {{
-            add("minecraft");
-            add("packetdebugger");
-            add("forge");
-        }}, new HashMap<>() {{
-            put("fml:loginwrapper", "FML2");
-            put("forge:tier_sorting", "1.0");
-            put("fml:handshake", "FML2");
-            put("minecraft:unregister", "FML2");
-            put("fml:play", "FML2");
-            put("minecraft:register", "FML2");
-            put("forge:split", "1.1");
-        }}, new HashMap<>() {{
-            put("minecraft:block", null);
-            put("minecraft:fluid", null);
-            put("minecraft:item", null);
-            put("minecraft:mob_effect", null);
-            put("minecraft:sound_event", null);
-            put("minecraft:potion", null);
-            put("minecraft:enchantment", null);
-            put("minecraft:entity_type", null);
-            put("minecraft:block_entity_type", null);
-            put("minecraft:particle_type", null);
-            put("minecraft:menu", null);
-            put("minecraft:motive", null);
-            put("minecraft:recipe_serializer", null);
-            put("minecraft:stat_type", null);
-            put("minecraft:villager_profession", null);
-            put("minecraft:data_serializers", null);
-        }});
-
-        ByteBuf buf = Unpooled.buffer();
-        buf.writeByte(1 & 0xff);
-        buf = packet.encodeS2C(buf);
-
-        /*
-        Mods: [minecraft, packetdebugger, forge]
-
-Channels: {fml:loginwrapper=FML2, forge:tier_sorting=1.0, fml:handshake=FML2, minecraft:unregister=FML2, fml:play=FML2, minecraft:register=FML2, forge:split=1.1}
-
-Registries: [minecraft:villager_profession, minecraft:data_serializers]
-         */
-
-        System.out.println(Arrays.toString(ByteBufUtil.getBytes(buf)));
+        byte[] bytes = new byte[]{2, 5, 11, 102, 111, 114, 103, 101, 58, 108, 111, 103, 105, 110, 0, 20, 109, 105, 110, 101, 99, 114, 97, 102, 116, 58, 117, 110, 114, 101, 103, 105, 115, 116, 101, 114, 0, 15, 102, 111, 114, 103, 101, 58, 104, 97, 110, 100, 115, 104, 97, 107, 101, 0, 18, 102, 111, 114, 103, 101, 58, 116, 105, 101, 114, 95, 115, 111, 114, 116, 105, 110, 103, 1, 18, 109, 105, 110, 101, 99, 114, 97, 102, 116, 58, 114, 101, 103, 105, 115, 116, 101, 114, 0};
+        ByteBuf buf = Unpooled.wrappedBuffer(bytes);
+        int phase = MinecraftPacketReader.readVarInt(buf);
+        int elementsCount = MinecraftPacketReader.readVarInt(buf);
+        Map<String, Integer> elements = new HashMap<>();
+        for (int i = 0; i < elementsCount; i++) {
+            String element = MinecraftPacketReader.readString(buf, 32767);
+            int elementLength = MinecraftPacketReader.readVarInt(buf);
+            elements.put(element, elementLength);
+        }
+        System.out.println("Phase: " + phase);
+        System.out.println("Elements count: " + elementsCount);
+        System.out.println("Elements: " + elements);
     }
 
     public static Unsafe getUnsafe() {

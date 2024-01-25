@@ -29,7 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package com.ryuuta0217.packets;
+package com.ryuuta0217.packets.forge.v2;
 
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
@@ -40,22 +40,22 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.IntStream;
 
-public class S2CModList {
-    private static final byte MAGIC = 1;
+public class C2SModListReply {
+    public static final byte PACKET_ID = 2;
 
     private final Set<String> mods;
     private final Map<String, String> channels;
-    private final Set<String> registries;
+    private final Map<String, String> registries;
 
-    public S2CModList(Set<String> mods, Map<String, String> channels, Set<String> registries) {
+    public C2SModListReply(Set<String> mods, Map<String, String> channels, Map<String, String> registries) {
         this.mods = mods;
         this.channels = channels;
         this.registries = registries;
     }
 
-    public static S2CModList decode(ByteBuf buf) {
+    public static C2SModListReply decode(ByteBuf buf) {
         short magic = buf.readUnsignedByte();
-        if (magic != MAGIC) throw new IllegalArgumentException("Invalid discriminator byte " + magic);
+        if (magic != PACKET_ID) throw new IllegalArgumentException("Invalid discriminator byte " + magic);
 
         int count = MinecraftPacketReader.readVarInt(buf);
         Set<String> mods = new HashSet<>();
@@ -66,14 +66,14 @@ public class S2CModList {
         IntStream.range(0, count).forEach(i -> channels.put(MinecraftPacketReader.readString(buf, 32767), MinecraftPacketReader.readString(buf, 256)));
 
         count = MinecraftPacketReader.readVarInt(buf);
-        Set<String> registries = new HashSet<>();
-        IntStream.range(0, count).forEach(i -> registries.add(MinecraftPacketReader.readString(buf, 32767)));
+        Map<String, String> registries = new HashMap<>();
+        IntStream.range(0, count).forEach(i -> registries.put(MinecraftPacketReader.readString(buf, 32767), MinecraftPacketReader.readString(buf, 256)));
 
-        return new S2CModList(mods, channels, registries);
+        return new C2SModListReply(mods, channels, registries);
     }
 
     public ByteBuf encode(ByteBuf buf) {
-        buf.writeByte(MAGIC);
+        buf.writeByte(PACKET_ID);
         MinecraftPacketReader.writeVarInt(this.mods.size(), buf);
         this.mods.forEach(mod -> MinecraftPacketReader.writeString(mod, buf));
 
@@ -84,8 +84,23 @@ public class S2CModList {
         });
 
         MinecraftPacketReader.writeVarInt(this.registries.size(), buf);
-        this.registries.forEach(registry -> MinecraftPacketReader.writeString(registry, buf));
+        this.registries.forEach((registry, version) -> {
+            MinecraftPacketReader.writeString(registry, buf);
+            MinecraftPacketReader.writeString(version, buf);
+        });
 
         return buf;
+    }
+
+    public Set<String> getMods() {
+        return this.mods;
+    }
+
+    public Map<String, String> getChannels() {
+        return this.channels;
+    }
+
+    public Map<String, String> getRegistries() {
+        return this.registries;
     }
 }

@@ -61,7 +61,7 @@ import java.util.List;
 public class AutoSmelting implements Listener {
     public static boolean DEBUG = false;
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.HIGHEST) // WorldGuard is handling event at HIGH, if block in protected area is broken, WorldGuard cancels the block break. If it is not canceled, this event handler is called and the processing is performed.
     public void onBlockBreak(BlockBreakEvent event) {
         ServerPlayer player = MinecraftAdapter.player(event.getPlayer());
         if (player == null) return;

@@ -36,12 +36,10 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.server.level.ServerPlayer;
-import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.dependency.Vault;
-import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -49,6 +47,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleFlightEvent;
@@ -126,6 +125,7 @@ public class FlightManager {
         EMPTY_BALANCE("所持金が不足しているため"),
         GAME_MODE_CHANGED("ゲームモードが変更されたため"),
         QUIT("ログアウトしたため"),
+	    WORLD_CHANGED("別のワールドに移動したため"),
         IN_GROUND(MAX_ON_GROUND_MINUTES + "分間地上にいたため"),
         SIX_ENCOUNT_TOMATO("トマトと6回出会ったため"),
         SELF_END("");
@@ -194,20 +194,11 @@ public class FlightManager {
 
             if (this.player.isFlying()) {
                 /* 落下ダメージを無効化する */
-                Listener dummyListener = new Listener() {
-                };
-                Bukkit.getPluginManager().registerEvent(EntityDamageEvent.class, dummyListener, EventPriority.MONITOR, (l, e) -> {
-                    if (e instanceof EntityDamageEvent event) {
-                        if (event.getEntity() == this.player) {
-                            if (event.getCause() == EntityDamageEvent.DamageCause.FALL) {
-                                event.setCancelled(true);
-                                HandlerList.unregisterAll(l);
-                            }
-                        }
-                    }
-                }, UnknownNetworkCorePlugin.getInstance());
-                /* 最大 10秒 */
-                RunnableManager.runAsyncDelayed(() -> HandlerList.unregisterAll(dummyListener), 20 * 10);
+                ListenerManager.waitForEvent(EntityDamageEvent.class, false, EventPriority.MONITOR, (e) -> {
+                    return e.getEntity().getUniqueId().equals(this.player.getUniqueId()) && e.getCause() == EntityDamageEvent.DamageCause.FALL;
+                }, (e) -> {
+                    e.setCancelled(true);
+                }, 10, ListenerManager.TimeType.SECONDS, () -> {});
 
                 this.player.setFlying(false); // 飛行オフ
             }
@@ -278,6 +269,13 @@ public class FlightManager {
                 if (event.getNewGameMode() != GameMode.SURVIVAL && event.getNewGameMode() != GameMode.ADVENTURE) {
                     FlightManager.disableFlight(this.player, EndReason.GAME_MODE_CHANGED);
                 }
+            }
+        }
+
+        @EventHandler
+        public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
+            if (event.getPlayer().equals(this.player)) {
+                FlightManager.disableFlight(this.player, EndReason.WORLD_CHANGED);
             }
         }
 

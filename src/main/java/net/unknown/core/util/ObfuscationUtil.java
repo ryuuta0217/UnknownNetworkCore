@@ -198,7 +198,7 @@ public class ObfuscationUtil {
             }
 
             MemoryMappingTree mapping = new MemoryMappingTree();
-            MappingReader.read(new InputStreamReader(mappingRaw, StandardCharsets.UTF_8), MappingFormat.TINY_2, mapping);
+            MappingReader.read(new InputStreamReader(mappingRaw, StandardCharsets.UTF_8), MappingFormat.TINY_2_FILE, mapping);
             for (MappingTree.ClassMapping classMapping : mapping.getClasses()) {
                 String mojangClassName = classMapping.getName(ObfHelper.MOJANG_PLUS_YARN_NAMESPACE).replace("/", ".");
                 String spigotClassName = classMapping.getName(ObfHelper.SPIGOT_NAMESPACE).replace("/", ".");
@@ -281,6 +281,26 @@ public class ObfuscationUtil {
         return CLASSES;
     }
 
+    public static Class getClassByName(String effectiveName) {
+        String[] classes = effectiveName.split("\\$");
+        Class parent = CLASSES.values()
+                .stream()
+                .filter(clazz -> clazz.getEffectiveName().equals(classes[0]))
+                .findAny()
+                .orElse(null);
+
+        if (parent != null) {
+            for (int i = 1; i < classes.length; i++) {
+                Class subClass = parent.getSubClass(classes[i], classes[i]);
+                if (subClass != null) parent = subClass;
+                else return null;
+            }
+            return parent;
+        }
+
+        return null;
+    }
+
     public static Class getClassByMojangName(String mojangClassName) {
         String[] classes = mojangClassName.split("\\$");
         if (CLASSES.containsKey(classes[0])) {
@@ -298,6 +318,25 @@ public class ObfuscationUtil {
         Class parent = CLASSES.values()
                 .stream()
                 .filter(clazz -> clazz.getObfuscatedName().equals(classes[0]))
+                .findAny()
+                .orElse(null);
+
+        if (parent != null) {
+            for (int i = 1; i < classes.length; i++) {
+                Class subClass = parent.getSubClassByObfuscatedName(classes[i]);
+                if (subClass != null) parent = subClass;
+                else return null;
+            }
+            return parent;
+        }
+        return null;
+    }
+
+    public static Class getClassBySpigotName(String spigotClassName) {
+        String[] classes = spigotClassName.split("\\$");
+        Class parent = CLASSES.values()
+                .stream()
+                .filter(clazz -> clazz.getSpigotName().equals(classes[0]))
                 .findAny()
                 .orElse(null);
 

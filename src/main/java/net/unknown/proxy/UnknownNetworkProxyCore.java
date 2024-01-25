@@ -33,14 +33,20 @@ package net.unknown.proxy;
 
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.YamlConfiguration;
 import net.unknown.proxy.fml.ForgeListener;
+
+import java.io.File;
+import java.io.IOException;
 
 public class UnknownNetworkProxyCore extends Plugin {
     private static ServerInfo LOBBY;
     private static ServerInfo SURVIVAL;
 
     private static UnknownNetworkProxyCore INSTANCE;
+
+    private static Configuration CONFIG;
 
     public UnknownNetworkProxyCore() {
         INSTANCE = this;
@@ -62,9 +68,36 @@ public class UnknownNetworkProxyCore extends Plugin {
         return SURVIVAL;
     }
 
+    public static Configuration getConfig() {
+        return CONFIG;
+    }
+
+    public static void saveConfig() {
+        File configFile = new File(getInstance().getDataFolder(), "config.yml");
+        try {
+            getConfigProvider().save(CONFIG, configFile);
+        } catch (IOException e) {
+            getInstance().getLogger().warning("Failed to save configuration file!");
+        }
+    }
+
+    private static void loadConfig() throws IOException {
+        File configFile = new File(getInstance().getDataFolder(), "config.yml");
+        if ((configFile.getParentFile().exists() || configFile.getParentFile().mkdirs()) && (configFile.exists() || configFile.createNewFile())) {
+            CONFIG = getConfigProvider().load(configFile);
+        } else {
+            throw new IOException("Failed to create configuration file!");
+        }
+    }
+
     @Override
     public void onLoad() {
         ModdedInitialHandler.injectModdedInitialHandler();
+        try {
+            loadConfig();
+        } catch (IOException e) {
+            getLogger().warning("Failed to load configuration file!");
+        }
     }
 
     @Override

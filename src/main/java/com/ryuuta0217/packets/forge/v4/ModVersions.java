@@ -29,12 +29,34 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.enums;
+package com.ryuuta0217.packets.forge.v4;
 
-public enum ConnectionEnvironment {
-    VANILLA,
-    FML,
-    FML2,
-    LITE_LOADER,
-    FABRIC
+import com.ryuuta0217.packets.Packet;
+import com.ryuuta0217.util.MinecraftPacketReader;
+import io.netty.buffer.ByteBuf;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public record ModVersions(Map<String, Info> mods) implements Packet {
+    public static ModVersions decode(ByteBuf buf) {
+        int modCount = MinecraftPacketReader.readVarInt(buf);
+        HashMap<String, Info> mods = new HashMap<>(modCount);
+        for (int i = 0; i < modCount; i++) {
+            mods.put(MinecraftPacketReader.readString(buf), new Info(MinecraftPacketReader.readString(buf), MinecraftPacketReader.readString(buf)));
+        }
+        return new ModVersions(mods);
+    }
+
+    public void encode(ByteBuf out) {
+        MinecraftPacketReader.writeVarInt(this.mods.size(), out);
+        this.mods.forEach((k, v) -> {
+            MinecraftPacketReader.writeString(k, out);
+
+            MinecraftPacketReader.writeString(v.name(), out);
+            MinecraftPacketReader.writeString(v.version(), out);
+        });
+    }
+
+    public record Info(String name, String version) {}
 }

@@ -1,38 +1,34 @@
-[21:34:12] [main/INFO]: Using standard Java JCE cipher.
-[21:34:12] [main/INFO]: Using standard Java compressor.
-[21:34:12] [main/INFO]: Enabled Waterfall version git:Waterfall-Bootstrap:1.19-R0.1-SNAPSHOT:e79619e:519
-[21:34:12] [main/INFO]: Not on Windows, attempting to use enhanced EpollEventLoop
-[21:34:12] [main/WARN]: Epoll is not working, falling back to NIO: ExceptionInInitializerError : null @ io.netty.channel.epoll.Epoll:40
-[21:34:12] [main/INFO]: Discovered module: ModuleSpec(name=cmd_alert, file=modules/cmd_alert.jar, provider=JenkinsModuleSource())
-[21:34:12] [main/INFO]: Discovered module: ModuleSpec(name=cmd_find, file=modules/cmd_find.jar, provider=JenkinsModuleSource())
-[21:34:12] [main/INFO]: Discovered module: ModuleSpec(name=cmd_list, file=modules/cmd_list.jar, provider=JenkinsModuleSource())
-[21:34:12] [main/INFO]: Discovered module: ModuleSpec(name=cmd_send, file=modules/cmd_send.jar, provider=JenkinsModuleSource())
-[21:34:12] [main/INFO]: Discovered module: ModuleSpec(name=cmd_server, file=modules/cmd_server.jar, provider=JenkinsModuleSource())
-[21:34:12] [main/INFO]: Discovered module: ModuleSpec(name=reconnect_yaml, file=modules/reconnect_yaml.jar, provider=JenkinsModuleSource())
-[21:34:12] [main/INFO]: Loaded plugin reconnect_yaml version git:reconnect_yaml:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:12] [main/INFO]: Loaded plugin cmd_find version git:cmd_find:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:12] [main/INFO]: Loaded plugin cmd_server version git:cmd_server:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:12] [main/INFO]:  -> Injection started
-[21:34:12] [main/INFO]:  -> Create new ChannelInitializer instance
-[21:34:12] [main/INFO]:  -> Instance OK
-[21:34:12] [main/INFO]:  -> Checking currently SERVER_CHILD value
-[21:34:12] [main/INFO]:  -> SERVER_CHILD is default, continue injection
-[21:34:12] [main/INFO]:  -> Finding SERVER_CHILD field
-[21:34:12] [main/INFO]:  -> Found! public static final io.netty.channel.ChannelInitializer net.md_5.bungee.netty.PipelineUtils.SERVER_CHILD
-[21:34:12] [main/INFO]:  -> Injecting
-[21:34:12] [main/INFO]:  -> Injection completed.
-[21:34:12] [main/INFO]: Loaded plugin UnknownNetworkCore version git-UnknownNetworkCore-e7316d4b by ryuuta0217
-[21:34:12] [main/INFO]: Loaded plugin cmd_alert version git:cmd_alert:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:12] [main/INFO]: Loaded plugin cmd_send version git:cmd_send:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:12] [main/INFO]: Loaded plugin cmd_list version git:cmd_list:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:12] [main/WARN]: Forced host server pvp is not defined
-[21:34:13] [main/INFO]: Enabled plugin reconnect_yaml version git:reconnect_yaml:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:13] [main/INFO]: Enabled plugin cmd_find version git:cmd_find:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:13] [main/INFO]: Enabled plugin cmd_server version git:cmd_server:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:13] [main/INFO]: Enabled plugin UnknownNetworkCore version git-UnknownNetworkCore-e7316d4b by ryuuta0217
-[21:34:13] [main/INFO]: Enabled plugin cmd_alert version git:cmd_alert:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:13] [main/INFO]: Enabled plugin cmd_send version git:cmd_send:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:13] [main/INFO]: Enabled plugin cmd_list version git:cmd_list:1.19-R0.1-SNAPSHOT:e79619e:519 by WaterfallMC
-[21:34:13] [Netty Boss IO Thread #0/INFO]: Listening on /0.0.0.0:25565
-[21:34:55] [Netty Worker IO Thread #0/INFO]: [/127.0.0.1:56019] <-> ModdedInitialHandler has pinged
-[21:34:55] [Netty Worker IO Thread #1/INFO]: [/127.0.0.1:56022] <-> ModdedInitialHandler has pinged
+[23:30:47] [main/INFO]: Using standard Java JCE cipher.
+[23:30:47] [main/INFO]: Using standard Java compressor.
+[23:30:47] [main/INFO]: Enabled Waterfall version git:Waterfall-Bootstrap:1.20-R0.2-SNAPSHOT:e927093:560
+[23:30:47] [main/INFO]: Discovered module: ModuleSpec(name=cmd_alert, file=modules\cmd_alert.jar, provider=JenkinsModuleSource())
+[23:30:47] [main/INFO]: Discovered module: ModuleSpec(name=cmd_find, file=modules\cmd_find.jar, provider=JenkinsModuleSource())
+[23:30:47] [main/INFO]: Discovered module: ModuleSpec(name=cmd_list, file=modules\cmd_list.jar, provider=JenkinsModuleSource())
+[23:30:47] [main/INFO]: Discovered module: ModuleSpec(name=cmd_send, file=modules\cmd_send.jar, provider=JenkinsModuleSource())
+[23:30:47] [main/INFO]: Discovered module: ModuleSpec(name=cmd_server, file=modules\cmd_server.jar, provider=JenkinsModuleSource())
+[23:30:47] [main/INFO]: Discovered module: ModuleSpec(name=reconnect_yaml, file=modules\reconnect_yaml.jar, provider=JenkinsModuleSource())
+[23:30:47] [main/INFO]: Loaded plugin reconnect_yaml version git:reconnect_yaml:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [main/INFO]: Loaded plugin cmd_find version git:cmd_find:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [main/INFO]: Loaded plugin cmd_server version git:cmd_server:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [main/INFO]:  -> Injection started
+[23:30:47] [main/INFO]:  -> Create new ChannelInitializer instance
+[23:30:47] [main/INFO]:  -> Instance OK
+[23:30:47] [main/INFO]:  -> Checking currently SERVER_CHILD value
+[23:30:47] [main/INFO]:  -> SERVER_CHILD is default, continue injection
+[23:30:47] [main/INFO]:  -> Finding SERVER_CHILD field
+[23:30:47] [main/INFO]:  -> Found! public static final io.netty.channel.ChannelInitializer net.md_5.bungee.netty.PipelineUtils.SERVER_CHILD
+[23:30:47] [main/INFO]:  -> Injecting
+[23:30:47] [main/INFO]:  -> Injection completed.
+[23:30:47] [main/INFO]: Loaded plugin UnknownNetworkCore version git-UnknownNetworkCore-develop-07b2f375 by ryuuta0217
+[23:30:47] [main/INFO]: Loaded plugin cmd_alert version git:cmd_alert:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [main/INFO]: Loaded plugin cmd_send version git:cmd_send:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [main/INFO]: Loaded plugin cmd_list version git:cmd_list:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [main/WARN]: Forced host server pvp is not defined
+[23:30:47] [main/INFO]: Enabled plugin reconnect_yaml version git:reconnect_yaml:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [main/INFO]: Enabled plugin cmd_find version git:cmd_find:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [main/INFO]: Enabled plugin cmd_server version git:cmd_server:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [main/INFO]: Enabled plugin UnknownNetworkCore version git-UnknownNetworkCore-develop-07b2f375 by ryuuta0217
+[23:30:47] [main/INFO]: Enabled plugin cmd_alert version git:cmd_alert:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [main/INFO]: Enabled plugin cmd_send version git:cmd_send:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [main/INFO]: Enabled plugin cmd_list version git:cmd_list:1.20-R0.2-SNAPSHOT:e927093:560 by WaterfallMC
+[23:30:47] [Netty Boss IO Thread #0/INFO]: Listening on /0.0.0.0:25565
