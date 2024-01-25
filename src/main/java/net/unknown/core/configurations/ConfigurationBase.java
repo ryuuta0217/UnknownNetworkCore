@@ -98,6 +98,11 @@ public abstract class ConfigurationBase {
         return configurationFileName;
     }
 
+    public synchronized void reload() {
+        this.configuration = YamlConfiguration.loadConfiguration(configurationFile);
+        onLoad();
+    }
+
     public synchronized void save() {
         try {
             configuration.save(configurationFile);
