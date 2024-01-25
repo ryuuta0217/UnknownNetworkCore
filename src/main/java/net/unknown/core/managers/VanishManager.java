@@ -64,6 +64,8 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
     private static final VanishManager INSTANCE = new VanishManager();
     private static final Set<UUID> VANISHED_PLAYERS = new HashSet<>();
 
+    public static int MODE = 0;
+
     public static boolean isVanished(ServerPlayer player) {
         return isVanished(player.getUUID());
     }
@@ -74,6 +76,15 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
 
     public static boolean isVanished(UUID uniqueId) {
         return VANISHED_PLAYERS.contains(uniqueId);
+    }
+
+    public static boolean vanish(UUID uniqueId, boolean silent) {
+        if (Bukkit.getOfflinePlayer(uniqueId).isOnline()) {
+            return vanish(Bukkit.getPlayer(uniqueId), silent);
+        } else {
+            VANISHED_PLAYERS.add(uniqueId);
+            return true;
+        }
     }
 
     public static boolean vanish(Player player, boolean silent) {
@@ -89,6 +100,15 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
             Bukkit.broadcast(Component.translatable("multiplayer.player.left", player.adventure$displayName).color(DefinedTextColor.YELLOW));
         }
         return true;
+    }
+
+    public static boolean unvanish(UUID uniqueId, boolean silent) {
+        if (Bukkit.getOfflinePlayer(uniqueId).isOnline()) {
+            return unvanish(Bukkit.getPlayer(uniqueId), silent);
+        } else {
+            VANISHED_PLAYERS.remove(uniqueId);
+            return true;
+        }
     }
 
     public static boolean unvanish(Player player, boolean silent) {
@@ -224,16 +244,15 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
 
     @Override
     public void onSendingPacket(PacketSendingEvent<ClientboundPlayerInfoUpdatePacket> event) {
+        if (MODE == 1) return;
         try {
             if (event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) return;
 
-            if (event.getPacket().actions().contains(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)) {
-                List<ClientboundPlayerInfoUpdatePacket.Entry> entries = new ArrayList<>(event.getPacket().entries());
-                entries.removeIf(player -> isVanished(player.profileId()));
+            List<ClientboundPlayerInfoUpdatePacket.Entry> entries = new ArrayList<>(event.getPacket().entries());
+            entries.removeIf(player -> isVanished(player.profileId()));
 
-                Field entriesField = ObfuscationUtil.getClassByName(ClientboundPlayerInfoUpdatePacket.class.getName()).getFieldByMojangName("entries").getField();
-                ReflectionUtil.setFinalObject(entriesField, event.getPacket(), entries);
-            }
+            Field entriesField = ObfuscationUtil.getClassByName(ClientboundPlayerInfoUpdatePacket.class.getName()).getFieldByMojangName("entries").getField();
+            ReflectionUtil.setFinalObject(entriesField, event.getPacket(), entries);
         } catch(Throwable t) {
             t.printStackTrace();
         }
@@ -243,7 +262,7 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (isVanished(event.getPlayer())) { // If vanished player logged in, hide from all players.
             event.joinMessage(null);
-            //RunnableManager.runDelayed(() -> vanish(event.getPlayer(), true), 1);
+            if (MODE == 1) RunnableManager.runDelayed(() -> vanish(event.getPlayer().getUniqueId(), true), 1);
         } else if (!event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
             VANISHED_PLAYERS.forEach(uuid -> {
                 Player vanished = Bukkit.getPlayer(uuid);
