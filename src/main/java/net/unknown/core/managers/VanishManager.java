@@ -40,31 +40,24 @@ import net.minecraft.server.level.ServerPlayer;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
-import net.unknown.core.packet.PacketManager;
-import net.unknown.core.packet.event.PacketSendingEvent;
-import net.unknown.core.packet.listener.OutgoingPacketListener;
 import net.unknown.core.util.MinecraftAdapter;
-import net.unknown.core.util.ObfuscationUtil;
-import net.unknown.core.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoUpdatePacket> implements Listener {
+public class VanishManager implements Listener {
     private static final VanishManager INSTANCE = new VanishManager();
     private static final Set<UUID> VANISHED_PLAYERS = new HashSet<>();
 
-    public static int MODE = 0;
+    public static int DELAY = 1;
 
     public static boolean isVanished(ServerPlayer player) {
         return isVanished(player.getUUID());
@@ -239,34 +232,16 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
 
     private VanishManager() {
         ListenerManager.registerListener(this);
-        PacketManager.getInstance().registerOutgoingS2CListener(ClientboundPlayerInfoUpdatePacket.class, this);
-    }
-
-    @Override
-    public void onSendingPacket(PacketSendingEvent<ClientboundPlayerInfoUpdatePacket> event) {
-        if (MODE == 1) return;
-        try {
-            if (event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) return;
-
-            List<ClientboundPlayerInfoUpdatePacket.Entry> entries = new ArrayList<>(event.getPacket().entries());
-            entries.removeIf(player -> {
-                boolean result = !event.getPlayer().getUniqueId().equals(player.profileId()) && isVanished(player.profileId());
-                if (result) System.out.println("Removing " + player.profileId() + " on " + event.getPacket().actions() + " to " + event.getPlayer().getName());
-                return result;
-            });
-
-            Field entriesField = ObfuscationUtil.getClassByName(ClientboundPlayerInfoUpdatePacket.class.getName()).getFieldByMojangName("entries").getField();
-            ReflectionUtil.setFinalObject(entriesField, event.getPacket(), entries);
-        } catch(Throwable t) {
-            t.printStackTrace();
-        }
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (isVanished(event.getPlayer())) { // If vanished player logged in, hide from all players.
             event.joinMessage(null);
-            if (MODE == 1) RunnableManager.runDelayed(() -> vanish(event.getPlayer().getUniqueId(), true), 10);
+            RunnableManager.runDelayed(() -> {
+                removeFromTabList(Bukkit.getPlayer(event.getPlayer().getUniqueId()));
+                setHidden(event.getPlayer());
+            }, DELAY);
         } else if (!event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
             VANISHED_PLAYERS.forEach(uuid -> {
                 Player vanished = Bukkit.getPlayer(uuid);
