@@ -44,6 +44,8 @@ import net.unknown.core.packet.PacketManager;
 import net.unknown.core.packet.event.PacketSendingEvent;
 import net.unknown.core.packet.listener.OutgoingPacketListener;
 import net.unknown.core.util.MinecraftAdapter;
+import net.unknown.core.util.ObfuscationUtil;
+import net.unknown.core.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -53,9 +55,8 @@ import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.lang.reflect.Field;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -227,7 +228,11 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
             if (event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) return;
 
             if (event.getPacket().actions().contains(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER)) {
-                event.getPacket().entries().removeIf(player -> isVanished(player.profileId()));
+                List<ClientboundPlayerInfoUpdatePacket.Entry> entries = new ArrayList<>(event.getPacket().entries());
+                entries.removeIf(player -> isVanished(player.profileId()));
+
+                Field entriesField = ObfuscationUtil.getClassByName(ClientboundPlayerInfoUpdatePacket.class.getName()).getFieldByMojangName("entries").getField();
+                ReflectionUtil.setFinalObject(entriesField, event.getPacket(), entries);
             }
         } catch(Throwable t) {
             t.printStackTrace();
@@ -238,7 +243,7 @@ public class VanishManager extends OutgoingPacketListener<ClientboundPlayerInfoU
     public void onPlayerJoin(PlayerJoinEvent event) {
         if (isVanished(event.getPlayer())) { // If vanished player logged in, hide from all players.
             event.joinMessage(null);
-            RunnableManager.runDelayed(() -> vanish(event.getPlayer(), true), 1);
+            //RunnableManager.runDelayed(() -> vanish(event.getPlayer(), true), 1);
         } else if (!event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
             VANISHED_PLAYERS.forEach(uuid -> {
                 Player vanished = Bukkit.getPlayer(uuid);
