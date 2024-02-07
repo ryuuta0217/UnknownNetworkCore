@@ -91,20 +91,43 @@ public class ChatManager implements Listener {
                     .append(Component.text("(あなたの送信したチャットは認証されていません。ランチャーの再起動をお試しください。)", DefinedTextColor.GRAY, TextDecoration.ITALIC)));
             event.setCancelled(true);
         }
+
+        PlayerData.ChatData chatConfig = PlayerData.of(event.getPlayer()).getChatData();
+        ChatChannel channel = ChatManager.getCurrentChannel(event.getPlayer().getUniqueId());
+
+        if (PlainTextComponentSerializer.plainText().serialize(event.message()).startsWith(chatConfig.getForceGlobalChatPrefix())) {
+            event.message(event.message().replaceText((b) -> {
+                b.match(chatConfig.getForceGlobalChatPrefix()).once().replacement(Component.empty());
+            }));
+
+            channel = GlobalChannel.getInstance();
+        }
+
+        event.renderer(((source, sourceDisplayName, message, viewer) -> {
+            return Component.empty()
+                    .append(sourceDisplayName)
+                    .append(Component.text(":"))
+                    .appendSpace()
+                    .append(message);
+        }));
+
+        ChatRenderer parentRenderer = event.renderer();
         
-        event.renderer((source, sourceDisplayName, message, viewer) -> {
-            Component base = Component.empty();
+        if (channel.getType() == ChannelType.GLOBAL) {
+            event.renderer((source, sourceDisplayName, message, viewer) -> {
+                Prefix activePrefix = PlayerPrefixes.getActivePrefix(source.getUniqueId());
+                Component prefixWrapper = Component.empty();
+                prefixWrapper = activePrefix != null ? prefixWrapper.append(activePrefix.getPrefix()).append(Component.space()) : prefixWrapper;
 
-            Prefix activePrefix = PlayerPrefixes.getActivePrefix(source.getUniqueId());
-            Component prefixWrapper = Component.empty();
-            prefixWrapper = activePrefix != null ? prefixWrapper.append(activePrefix.getPrefix()).append(Component.space()) : prefixWrapper;
+                Component suffix = Component.empty();
+                if (UnknownNetworkSurvival.isLuckPermsEnabled()) {
+                    suffix = LuckPerms.getSuffixAsComponent(source.getUniqueId());
+                }
 
-            Component suffix = Component.empty();
-            if (UnknownNetworkSurvival.isLuckPermsEnabled()) {
-                suffix = LuckPerms.getSuffixAsComponent(source.getUniqueId());
-            }
-            return base.append(prefixWrapper).append(sourceDisplayName).append(suffix).append(Component.text(": ")).append(message);
-        });
+                Component modifiedDisplayName = Component.empty().append(prefixWrapper).append(sourceDisplayName).append(suffix);
+                return parentRenderer.render(source, modifiedDisplayName, message, viewer);
+            });
+        }
 
         // ColorCode Support
         if (event.getPlayer().hasPermission(Permissions.FEATURE_USE_COLOR_CODE.getPermissionNode())) {
@@ -112,7 +135,7 @@ public class ChatManager implements Listener {
         }
 
         // MiniMessage Support
-        if (PlayerData.of(event.getPlayer()).getChatData().isUseMiniMessage()) {
+        if (chatConfig.isUseMiniMessage()) {
             event.message(MiniMessage.miniMessage().deserialize(PlainTextComponentSerializer.plainText().serialize(event.message())));
         }
 
@@ -121,7 +144,7 @@ public class ChatManager implements Listener {
             b.match(Pattern.compile("https?://\\S+")).replacement((r, b2) -> Component.text(b2.content(), Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl(b2.content())));
         }));
 
-        if (PlayerData.of(event.getPlayer()).getChatData().isUseKanaConvert()) {
+        if (chatConfig.isUseKanaConvert()) {
             ChatRenderer baseRenderer = event.renderer();
             event.renderer((source, displayName, message, viewer) -> {
                 String msgStr = PlainTextComponentSerializer.plainText().serialize(message);
@@ -130,20 +153,15 @@ public class ChatManager implements Listener {
                     Component msg = PlainTextComponentSerializer.plainText().deserialize(kanaMsgStr);
                     return baseRenderer.render(source, displayName, Component.empty()
                             .append(msg)
-                            .append(Component.space().append(Component.text("(" + msgStr + ")",
-                                    Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC.withState(true))))), viewer);
+                            .appendSpace()
+                            .append(Component.text("(", Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC.withState(true)))
+                                    .append(message)
+                                    .append(Component.text(")"))), viewer);
                 }
                 return baseRenderer.render(source, displayName, message, viewer);
             });
         }
 
-        if (PlainTextComponentSerializer.plainText().serialize(event.message()).startsWith(PlayerData.of(event.getPlayer()).getChatData().getForceGlobalChatPrefix())) {
-            event.message(event.message().replaceText((b) -> {
-                b.match(PlayerData.of(event.getPlayer()).getChatData().getForceGlobalChatPrefix()).once().replacement(Component.empty());
-            }));
-            GlobalChannel.getInstance().processChat(event);
-        } else {
-            ChatManager.getCurrentChannel(event.getPlayer().getUniqueId()).processChat(event);
-        }
+        channel.processChat(event);
     }
 }

@@ -131,7 +131,8 @@ public class CustomChannel extends ChatChannel {
             if ((viewer instanceof Player player && !this.players.contains(player.getUniqueId())) || (!(viewer instanceof Player) && !(viewer instanceof ConsoleCommandSender))) return Component.empty();
             return Component.empty()
                     .append(getChannelPrefix(false))
-                    .append(renderer.render(source, sourceDisplayName, message, viewer));
+                    .appendSpace()
+                    .append(renderer.render(source, sourceDisplayName, customEvent.getMessage(), viewer));
         });
 
         //customEvent.getReceivers().forEach(receiver -> receiver.sendMessage((customEvent.getSender() == null ? Identity.nil() : customEvent.getSender().identity()), customEvent.getRenderedMessage()));
