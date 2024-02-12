@@ -191,6 +191,10 @@ public class MinecraftAdapter {
             return itemStack.save(new CompoundTag()).getAsString();
         }
 
+        public static String json(org.bukkit.inventory.ItemStack bukkit) {
+            return json(itemStack(bukkit));
+        }
+
         public static net.minecraft.world.item.ItemStack itemStack(org.bukkit.inventory.ItemStack bukkit) {
             if (bukkit instanceof CraftItemStack craft) {
                 if (craft.handle != null) return craft.handle;
