@@ -29,33 +29,12 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.vote.gui.view;
+package net.unknown.survival.data.model.vote;
 
-import net.unknown.core.gui.view.PaginationView;
-import net.unknown.survival.data.model.vote.ExchangeItem;
-import net.unknown.survival.data.model.vote.SelectableItem;
-import net.unknown.survival.vote.gui.VoteTicketExchangeGui;
-import org.bukkit.event.inventory.InventoryClickEvent;
-
-public class ChooseItemView extends PaginationView<String, VoteTicketExchangeGui> {
-    private final ChooseExchangeItemView previousView;
-    private final SelectableItem item;
-
-    public ChooseItemView(ChooseExchangeItemView previousView, ExchangeItem item) {
-        this(previousView, (SelectableItem) item);
-    }
-
-    public ChooseItemView(ChooseExchangeItemView previousView, SelectableItem item) {
-        super(previousView.getGui(), item.getChoices().keySet(), item::getChoice, null, null, (event, view) -> {
-            view.getGui().setView(previousView);
-        });
-        this.previousView = previousView;
-        this.item = item;
-    }
-
-    @Override
-    public void onElementButtonClicked(InventoryClickEvent event, String identifier) {
-        this.previousView.exchangeItem(this.getGui().getPlayer(), this.item, identifier);
-        this.getGui().setView(this.previousView);
-    }
+public enum ExchangeItemType {
+    SIMPLE,
+    SIMPLE_RANDOM,
+    CONTAINER,
+    SELECTABLE_CONTAINER,
+    SCRIPT
 }

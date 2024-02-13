@@ -37,11 +37,14 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.view.PaginationView;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.VoteTicketExchangeItems;
-import net.unknown.survival.data.model.VoteTicketExchangeItem;
+import net.unknown.survival.data.model.vote.*;
+import net.unknown.survival.data.model.vote.impl.ScriptExchangeItem;
+import net.unknown.survival.data.model.vote.impl.SimpleExchangeItem;
 import net.unknown.survival.queue.ItemGiveQueue;
 import net.unknown.survival.vote.VoteManager;
 import net.unknown.survival.vote.gui.VoteTicketExchangeGui;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -50,14 +53,14 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.BiConsumer;
 
-public class ChooseExchangeItemView extends PaginationView<VoteTicketExchangeItem, VoteTicketExchangeGui> {
-    private Map<Integer, VoteTicketExchangeItem> RANDOM_ITEMS = new HashMap<>();
+public class ChooseExchangeItemView extends PaginationView<ExchangeItem, VoteTicketExchangeGui> {
+    private Map<Integer, SimpleExchangeItem> RANDOM_ITEMS = new HashMap<>();
 
     public ChooseExchangeItemView(VoteTicketExchangeGui gui) {
         this(gui, null);
     }
 
-    public ChooseExchangeItemView(VoteTicketExchangeGui gui, BiConsumer<InventoryClickEvent, PaginationView<VoteTicketExchangeItem, VoteTicketExchangeGui>> previousAction) {
+    public ChooseExchangeItemView(VoteTicketExchangeGui gui, BiConsumer<InventoryClickEvent, PaginationView<ExchangeItem, VoteTicketExchangeGui>> previousAction) {
         super(gui, VoteTicketExchangeItems.getExchangeItems().values(), (item) -> {
             ItemStack showItem = item.getDisplayItem(gui.getPlayer());
             if (showItem == null || showItem.getType() == Material.AIR) return showItem;
@@ -69,7 +72,7 @@ public class ChooseExchangeItemView extends PaginationView<VoteTicketExchangeIte
                     addAll(meta.lore());
                 }
                 int playerTicketAmount = VoteManager.getPlayerTicketAmount(gui.getPlayer());
-                int price = item.getType() == VoteTicketExchangeItem.ItemType.SCRIPT ? item.execGetPriceFunction(gui.getPlayer()) : item.getPrice();
+                int price = item.getPrice(gui.getPlayer());
 
                 boolean purchasable = playerTicketAmount >= price;
                 add(Component.empty());
@@ -89,29 +92,29 @@ public class ChooseExchangeItemView extends PaginationView<VoteTicketExchangeIte
     }
 
     @Override
-    public void onElementButtonClicked(InventoryClickEvent event, VoteTicketExchangeItem item) {
+    public void onElementButtonClicked(InventoryClickEvent event, ExchangeItem item) {
         int playerTicketAmount = VoteManager.getPlayerTicketAmount(this.getGui().getPlayer());
-        int price = item.getType() == VoteTicketExchangeItem.ItemType.SCRIPT ? item.execGetPriceFunction(this.getGui().getPlayer()) : item.getPrice();
+        int price = item.getPrice(this.getGui().getPlayer());
 
         if (playerTicketAmount < price) {
             NewMessageUtil.sendErrorMessage(this.getGui().getPlayer(), "チケットが足りません (必要: " + price + " | 不足: " + (price - playerTicketAmount) + " | 所持: " + playerTicketAmount + ")");
             return;
         }
 
-        exchangeItem(item, null);
+        exchangeItem(this.getGui().getPlayer(), item, null);
     }
 
-    public void exchangeItem(VoteTicketExchangeItem item, @Nullable ItemStack choice) {
-        boolean isScriptMode = item.getType() == VoteTicketExchangeItem.ItemType.SCRIPT && !item.getOnExchangedScript().isEmpty() && item.getOnExchangedFunction() != null;
+    public void exchangeItem(HumanEntity exchanger, ExchangeItem item, @Nullable String choiceIdentifier) {
+        boolean isScriptMode = item instanceof ScriptExchangeItem;
 
         ItemStack exchangeItem = null;
-        if (item.getType() != VoteTicketExchangeItem.ItemType.SELECTABLE_CONTAINER) {
+        if (!item.hasMultipleChoices()) {
             if (!isScriptMode) {
-                exchangeItem = item.getItem().clone();
+                exchangeItem = item.getItem(exchanger, null).clone();
             }
         } else {
-            if (choice != null) {
-                exchangeItem = item.getItem(this.getGui().getPlayer(), choice);
+            if (choiceIdentifier != null) {
+                exchangeItem = item.getItem(this.getGui().getPlayer(), choiceIdentifier);
             } else {
                 this.getGui().setView(new ChooseItemView(this, item));
                 return;
@@ -121,12 +124,17 @@ public class ChooseExchangeItemView extends PaginationView<VoteTicketExchangeIte
         if (exchangeItem == null && !isScriptMode) throw new IllegalStateException("Invalid exchange item - " + item.getType());
 
         if (isScriptMode) {
-            item.execOnExchangedFunction(this.getGui().getPlayer(), choice);
+            ScriptExchangeItem scriptItem = (ScriptExchangeItem) item;
+            if (scriptItem.getOnExchangedFunction() != null) {
+                scriptItem.execOnExchangedFunction(this.getGui().getPlayer(), choiceIdentifier);
+            } else {
+                ItemGiveQueue.queue(this.getGui().getPlayer().getUniqueId(), scriptItem.getItem(exchanger, choiceIdentifier));
+            }
         } else {
             ItemGiveQueue.queue(this.getGui().getPlayer().getUniqueId(), exchangeItem);
         }
 
-        int price = item.getType() == VoteTicketExchangeItem.ItemType.SCRIPT ? item.execGetPriceFunction(this.getGui().getPlayer()) : item.getPrice();
+        int price = item.getPrice(this.getGui().getPlayer());
         VoteManager.removePlayerTickets(this.getGui().getPlayer(), price);
         NewMessageUtil.sendMessage(this.getGui().getPlayer(), Component.empty()
                 .append(Component.text("投票チケット" + price + "枚と"))
@@ -135,6 +143,6 @@ public class ChooseExchangeItemView extends PaginationView<VoteTicketExchangeIte
                 .append(exchangeItem.getAmount() > 1 ? Component.text(" x" + exchangeItem.getAmount()) : Component.empty())
                 .appendSpace()
                 .append(Component.text("を交換しました")));
-        if (item.getType() != VoteTicketExchangeItem.ItemType.SELECTABLE_CONTAINER) this.showPage(this.getCurrentPage());
+        if (item.getType() != ExchangeItemType.SELECTABLE_CONTAINER) this.showPage(this.getCurrentPage());
     }
 }

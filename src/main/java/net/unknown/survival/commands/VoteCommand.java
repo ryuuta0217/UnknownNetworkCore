@@ -54,10 +54,12 @@ import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.VoteTicketExchangeItems;
-import net.unknown.survival.data.model.VoteTicketExchangeItem;
+import net.unknown.survival.data.model.vote.*;
+import net.unknown.survival.data.model.vote.impl.ContainerExchangeItem;
+import net.unknown.survival.data.model.vote.impl.ScriptExchangeItem;
+import net.unknown.survival.data.model.vote.impl.SimpleExchangeItem;
 import net.unknown.survival.enums.Permissions;
 import net.unknown.survival.vote.gui.VoteTicketExchangeGui;
-import org.mozilla.javascript.Function;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -84,18 +86,19 @@ public class VoteCommand {
                                                                 .then(Commands.argument("price", IntegerArgumentType.integer(1))
                                                                         .executes(ctx -> addSimpleRandomExchangeItem(ctx, StringArgumentType.getString(ctx, "id"), ItemArgument.getItem(ctx, "display-item"), IntegerArgumentType.getInteger(ctx, "count"), IntegerArgumentType.getInteger(ctx, "price")))))))
                                         .then(Commands.literal("container")
-                                                .then(Commands.argument("container", ItemArgument.item(buildContext))
-                                                        .then(Commands.argument("stacks", IntegerArgumentType.integer(1))
-                                                                .then(Commands.argument("item", ItemArgument.item(buildContext))
-                                                                        .then(Commands.argument("count", IntegerArgumentType.integer(1))
-                                                                                .then(Commands.argument("price", IntegerArgumentType.integer(1))
-                                                                                        .executes(ctx -> addContainerExchangeItem(ctx, StringArgumentType.getString(ctx, "id"), ItemArgument.getItem(ctx, "container"), IntegerArgumentType.getInteger(ctx, "stacks"), ItemArgument.getItem(ctx, "item"), IntegerArgumentType.getInteger(ctx, "count"), IntegerArgumentType.getInteger(ctx, "price")))))))))
+                                                .then(Commands.argument("display-item", ItemArgument.item(buildContext))
+                                                        .then(Commands.argument("container", ItemArgument.item(buildContext))
+                                                                .then(Commands.argument("stacks", IntegerArgumentType.integer(1))
+                                                                        .then(Commands.argument("item", ItemArgument.item(buildContext))
+                                                                                .then(Commands.argument("count", IntegerArgumentType.integer(1))
+                                                                                        .then(Commands.argument("price", IntegerArgumentType.integer(1))
+                                                                                                .executes(ctx -> addContainerExchangeItem(ctx, StringArgumentType.getString(ctx, "id"), ItemArgument.getItem(ctx, "display-item"), ItemArgument.getItem(ctx, "container"), IntegerArgumentType.getInteger(ctx, "stacks"), ItemArgument.getItem(ctx, "item"), IntegerArgumentType.getInteger(ctx, "count"), IntegerArgumentType.getInteger(ctx, "price"))))))))))
                                         .then(Commands.literal("container_selectable")
-                                                .then(Commands.argument("container", ItemArgument.item(buildContext))
-                                                        .then(Commands.argument("display-item", ItemArgument.item(buildContext))
+                                                .then(Commands.argument("display-item", ItemArgument.item(buildContext))
+                                                        .then(Commands.argument("container", ItemArgument.item(buildContext))
                                                                 .then(Commands.argument("stacks", IntegerArgumentType.integer(1))
                                                                         .then(Commands.argument("price", IntegerArgumentType.integer(1))
-                                                                                .executes(ctx -> addContainerSelectableExchangeItem(ctx, StringArgumentType.getString(ctx, "id"), ItemArgument.getItem(ctx, "container"), ItemArgument.getItem(ctx, "display-item"), IntegerArgumentType.getInteger(ctx, "stacks"), IntegerArgumentType.getInteger(ctx, "price"))))))))
+                                                                                .executes(ctx -> addContainerSelectableExchangeItem(ctx, StringArgumentType.getString(ctx, "id"), ItemArgument.getItem(ctx, "display-item"), ItemArgument.getItem(ctx, "container"), IntegerArgumentType.getInteger(ctx, "stacks"), IntegerArgumentType.getInteger(ctx, "price"))))))))
                                         .then(Commands.literal("script")
                                                 .then(Commands.argument("getItem", StringArgumentType.string())
                                                         .then(Commands.argument("getDisplayItem", StringArgumentType.string())
@@ -127,9 +130,9 @@ public class VoteCommand {
                                                                 .suggests((ctx, suggestionsBuilder) -> {
                                                                     String id = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "id", null);
                                                                     if (VoteTicketExchangeItems.has(id)) {
-                                                                        VoteTicketExchangeItem item = VoteTicketExchangeItems.getExchangeItems().get(id);
-                                                                        if (item.getType() == VoteTicketExchangeItem.ItemType.SELECTABLE_CONTAINER || item.getType() == VoteTicketExchangeItem.ItemType.SIMPLE_RANDOM) {
-                                                                            item.getChoices().keySet().forEach(choiceId -> suggestionsBuilder.suggest(choiceId, net.minecraft.network.chat.Component.literal(item.getType().name())));
+                                                                        ExchangeItem item = VoteTicketExchangeItems.getExchangeItems().get(id);
+                                                                        if (item instanceof SelectableItem selectableItem) {
+                                                                            selectableItem.getChoices().keySet().forEach(choiceId -> suggestionsBuilder.suggest(choiceId, net.minecraft.network.chat.Component.literal(item.getType().name())));
                                                                         }
                                                                     }
                                                                     return suggestionsBuilder.buildFuture();
@@ -181,7 +184,7 @@ public class VoteCommand {
         org.bukkit.inventory.ItemStack bukkitStack = MinecraftAdapter.ItemStack.itemStack(minecraftStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItem.ofSimple(bukkitStack, price);
+        SimpleExchangeItem exchangeItem = ExchangeItem.ofSimple(bukkitStack, price);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたインスタンス(" + exchangeItem.hashCode() + ")を追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         VoteTicketExchangeItems.add(id, exchangeItem);
@@ -193,7 +196,7 @@ public class VoteCommand {
                 .appendSpace()
                 .append(bukkitStack.displayName().hoverEvent(bukkitStack.asHoverEvent()).appendSpace().append(Component.text("x" + bukkitStack.getAmount())))
                 .appendSpace()
-                .append(Component.text("(チケット x" + exchangeItem.getPrice() + ")"))
+                .append(Component.text("(チケット x" + exchangeItem.getPrice(null) + ")"))
                 .append(Component.text("を追加しました")));
         return 0;
     }
@@ -211,7 +214,7 @@ public class VoteCommand {
 
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItem.ofSimpleRandom(bukkitDisplayStack, price, null);
+        SimpleExchangeItem exchangeItem = ExchangeItem.ofSimpleRandom(bukkitDisplayStack, null, price);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたインスタンス(" + exchangeItem.hashCode() + ")を追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         VoteTicketExchangeItems.add(id, exchangeItem);
@@ -223,19 +226,23 @@ public class VoteCommand {
                 .appendSpace()
                 .append(bukkitDisplayStack.displayName().hoverEvent(bukkitDisplayStack.asHoverEvent()).appendSpace().append(Component.text("x" + bukkitDisplayStack.getAmount())))
                 .appendSpace()
-                .append(Component.text("(チケット x" + exchangeItem.getPrice() + ")"))
+                .append(Component.text("(チケット x" + exchangeItem.getPrice(null) + ")"))
                 .append(Component.text("を追加しました")));
 
         NewMessageUtil.sendMessage(ctx.getSource(), Component.text("注意: /vote exchange modify " + id + " choices <add|remove|list> を使用して、選択肢を追加してください", DefinedTextColor.YELLOW), false);
         return 0;
     }
 
-    private static int addContainerExchangeItem(CommandContext<CommandSourceStack> ctx, String id, ItemInput container, int stacks, ItemInput item, int count, int price) throws CommandSyntaxException {
+    private static int addContainerExchangeItem(CommandContext<CommandSourceStack> ctx, String id, ItemInput displayItem, ItemInput container, int stacks, ItemInput item, int count, int price) throws CommandSyntaxException {
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("ID " + id + " が存在するか調べています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         if (VoteTicketExchangeItems.has(id)) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "ID " + id + " は既に使用されています");
             return 1;
         }
+
+        NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容から表示アイテムのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
+        ItemStack minecraftDisplayItemStack = displayItem.createItemStack(1, false);
+        org.bukkit.inventory.ItemStack bukkitDisplayItemStack = MinecraftAdapter.ItemStack.itemStack(minecraftDisplayItemStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容からコンテナのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         ItemStack minecraftContainerStack = container.createItemStack(1, false);
@@ -246,7 +253,7 @@ public class VoteCommand {
         org.bukkit.inventory.ItemStack bukkitStack = MinecraftAdapter.ItemStack.itemStack(minecraftStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItem.ofContainer(bukkitContainerStack, stacks, bukkitStack, price);
+        SimpleExchangeItem exchangeItem = ExchangeItem.ofContainer(bukkitContainerStack, bukkitContainerStack, bukkitStack, stacks, price);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたインスタンス(" + exchangeItem.hashCode() + ")を追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         VoteTicketExchangeItems.add(id, exchangeItem);
@@ -262,28 +269,28 @@ public class VoteCommand {
                 .appendSpace()
                 .append(Component.text("(" + stacks + "スタック)"))
                 .appendSpace()
-                .append(Component.text("(チケット x" + exchangeItem.getPrice() + ")"))
+                .append(Component.text("(チケット x" + exchangeItem.getPrice(null) + ")"))
                 .append(Component.text("を追加しました")));
         return 0;
     }
 
-    private static int addContainerSelectableExchangeItem(CommandContext<CommandSourceStack> ctx, String id, ItemInput container, ItemInput displayItem, int stacks, int price) throws CommandSyntaxException {
+    private static int addContainerSelectableExchangeItem(CommandContext<CommandSourceStack> ctx, String id, ItemInput displayItem, ItemInput container, int stacks, int price) throws CommandSyntaxException {
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("ID " + id + " が存在するか調べています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         if (VoteTicketExchangeItems.has(id)) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "ID " + id + " は既に使用されています");
             return 1;
         }
 
-        NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容からコンテナのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        ItemStack minecraftContainerStack = container.createItemStack(1, false);
-        org.bukkit.inventory.ItemStack bukkitContainerStack = MinecraftAdapter.ItemStack.itemStack(minecraftContainerStack);
-
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容から表示アイテムのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         ItemStack minecraftDisplayItemStack = displayItem.createItemStack(1, false);
         org.bukkit.inventory.ItemStack bukkitDisplayItemStack = MinecraftAdapter.ItemStack.itemStack(minecraftDisplayItemStack);
 
+        NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容からコンテナのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
+        ItemStack minecraftContainerStack = container.createItemStack(1, false);
+        org.bukkit.inventory.ItemStack bukkitContainerStack = MinecraftAdapter.ItemStack.itemStack(minecraftContainerStack);
+
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItem.ofSelectableContainer(bukkitContainerStack, bukkitDisplayItemStack, stacks, null, price);
+        SimpleExchangeItem exchangeItem = ExchangeItem.ofSelectableContainer(bukkitDisplayItemStack, bukkitContainerStack, null, stacks, price);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたインスタンス(" + exchangeItem.hashCode() + ")を追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         VoteTicketExchangeItems.add(id, exchangeItem);
@@ -297,7 +304,7 @@ public class VoteCommand {
                 .appendSpace()
                 .append(Component.text("(" + stacks + "スタック)"))
                 .appendSpace()
-                .append(Component.text("(チケット x" + exchangeItem.getPrice() + ")"))
+                .append(Component.text("(チケット x" + exchangeItem.getPrice(null) + ")"))
                 .append(Component.text("を追加しました")));
 
         if (bukkitContainerStack.getType() != bukkitDisplayItemStack.getType()) NewMessageUtil.sendMessage(ctx.getSource(), Component.text("注意: コンテナと表示アイテムが異なっています。利用者のUXを考えて、同一のものを利用するべきです。", DefinedTextColor.YELLOW), false);
@@ -364,7 +371,7 @@ public class VoteCommand {
         }
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItem.ofScript(getItem, getDisplayItem, getPrice, onExchanged);
+        ScriptExchangeItem exchangeItem = ExchangeItem.ofScript(getItem, getPrice, getDisplayItem, onExchanged);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたインスタンス(" + exchangeItem.hashCode() + ")を追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         VoteTicketExchangeItems.add(id, exchangeItem);
@@ -383,7 +390,7 @@ public class VoteCommand {
         org.bukkit.inventory.ItemStack bukkitItemStack = MinecraftAdapter.ItemStack.itemStack(minecraftItemStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたItemStackをVoteTicketExchangeItemに設定しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
+        ExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
         exchangeItem.setItem(bukkitItemStack);
 
         NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
@@ -402,24 +409,26 @@ public class VoteCommand {
             return 1;
         }
 
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
+        ExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
 
-        if (exchangeItem.getType() == VoteTicketExchangeItem.ItemType.SCRIPT) {
+        if (exchangeItem.getType() == ExchangeItemType.SCRIPT) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "ID " + id + " はスクリプトによってアイテムが決定されるため、コンテナを設定することはできません");
             return 2;
         }
 
-        if (exchangeItem.getType() != VoteTicketExchangeItem.ItemType.CONTAINER && exchangeItem.getType() != VoteTicketExchangeItem.ItemType.SELECTABLE_CONTAINER) {
+        if (exchangeItem.getType() != ExchangeItemType.CONTAINER && exchangeItem.getType() != ExchangeItemType.SELECTABLE_CONTAINER) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "ID " + id + " はコンテナを設定することができません");
             return 3;
         }
+
+        ContainerExchangeItem containerExchangeItem = ((ContainerExchangeItem) exchangeItem);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力された内容からItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         ItemStack minecraftContainer = container.createItemStack(1, false);
         org.bukkit.inventory.ItemStack bukkitContainer = MinecraftAdapter.ItemStack.itemStack(minecraftContainer);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたItemStackをVoteTicketExchangeItemに設定しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        exchangeItem.setContainer(bukkitContainer);
+        containerExchangeItem.setContainer(bukkitContainer);
 
         NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
                 .append(Component.text("投票チケット交換アイテム " + id + " のコンテナを"))
@@ -437,13 +446,13 @@ public class VoteCommand {
             return 1;
         }
 
-        if (VoteTicketExchangeItems.get(id).getType() == VoteTicketExchangeItem.ItemType.SCRIPT) {
+        if (VoteTicketExchangeItems.get(id).getType() == ExchangeItemType.SCRIPT) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "スクリプトによって価格が決定されるアイテムの価格はコマンドから変更できません");
             return 2;
         }
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("新しい価格をVoteTicketExchangeItemに設定しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
+        ExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
         exchangeItem.setPrice(price);
 
         NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
@@ -462,19 +471,21 @@ public class VoteCommand {
             return 1;
         }
 
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
+        ExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
 
-        if (exchangeItem.getType() != VoteTicketExchangeItem.ItemType.SELECTABLE_CONTAINER && exchangeItem.getType() != VoteTicketExchangeItem.ItemType.SIMPLE_RANDOM) {
+        if (exchangeItem.getType() != ExchangeItemType.SELECTABLE_CONTAINER && exchangeItem.getType() != ExchangeItemType.SIMPLE_RANDOM) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "ID " + id + " は選択可能な種類ではないため、選択肢を追加することができません");
             return 2;
         }
+
+        SelectableItem selectableItem = ((SelectableItem) exchangeItem);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力された内容からItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         ItemStack minecraftChoice = choice.createItemStack(count, false);
         org.bukkit.inventory.ItemStack bukkitChoice = MinecraftAdapter.ItemStack.itemStack(minecraftChoice);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたItemStackをVoteTicketExchangeItemの選択肢に追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        exchangeItem.addChoice(choiceId, bukkitChoice);
+        selectableItem.addChoice(choiceId, bukkitChoice);
 
         NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
                 .append(Component.text("投票チケット交換アイテム " + id + " の選択肢を追加しました: [" + choiceId + "]"))
@@ -490,21 +501,23 @@ public class VoteCommand {
             return 1;
         }
 
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
+        ExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
 
-        if (exchangeItem.getType() != VoteTicketExchangeItem.ItemType.SELECTABLE_CONTAINER && exchangeItem.getType() != VoteTicketExchangeItem.ItemType.SIMPLE_RANDOM) {
+        if (exchangeItem.getType() != ExchangeItemType.SELECTABLE_CONTAINER && exchangeItem.getType() != ExchangeItemType.SIMPLE_RANDOM) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "ID " + id + " は選択可能な種類ではないため、選択肢を削除することができません");
             return 2;
         }
 
+        SelectableItem selectableItem = ((SelectableItem) exchangeItem);
+
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("選択肢 " + choiceId + " が存在するか調べています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        if (!exchangeItem.hasChoice(choiceId)) {
+        if (!selectableItem.hasChoice(choiceId)) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "選択肢 " + choiceId + " は存在しません");
             return 3;
         }
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("選択肢 " + choiceId + " をVoteTicketExchangeItemから削除しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        if (exchangeItem.removeChoice(choiceId)) {
+        if (selectableItem.removeChoice(choiceId)) {
             NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
                     .append(Component.text("投票チケット交換アイテム " + id + " の選択肢 " + choiceId + " を削除しました")));
             return 0;
@@ -521,21 +534,23 @@ public class VoteCommand {
             return 1;
         }
 
-        VoteTicketExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
+        ExchangeItem exchangeItem = VoteTicketExchangeItems.get(id);
 
-        if (exchangeItem.getType() != VoteTicketExchangeItem.ItemType.SELECTABLE_CONTAINER && exchangeItem.getType() != VoteTicketExchangeItem.ItemType.SIMPLE_RANDOM) {
+        if (exchangeItem.getType() != ExchangeItemType.SELECTABLE_CONTAINER && exchangeItem.getType() != ExchangeItemType.SIMPLE_RANDOM) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), "ID " + id + " は選択可能な種類ではないため、選択肢を表示することができません");
             return 2;
         }
 
+        SelectableItem selectableItem = ((SelectableItem) exchangeItem);
+
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("投票チケット交換アイテム " + id + " の選択肢を表示しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
 
-        Map<String, org.bukkit.inventory.ItemStack> choices = exchangeItem.getChoices();
+        Map<String, org.bukkit.inventory.ItemStack> choices = selectableItem.getChoices();
 
         AtomicReference<Component> message = new AtomicReference<>(Component.empty()
                 .append(Component.text("投票チケット交換アイテム " + id + " の選択肢一覧 (" + choices.size() + ")", DefinedTextColor.GREEN)));
 
-        exchangeItem.getChoices().forEach((choiceId, choice) -> {
+        selectableItem.getChoices().forEach((choiceId, choice) -> {
             message.set(message.get().append(Component.newline())
                     .append(Component.text("[" + choiceId + "] ", DefinedTextColor.GOLD))
                     .append(choice.displayName().hoverEvent(choice.asHoverEvent())));
@@ -561,7 +576,7 @@ public class VoteCommand {
     private static int showExchangeItems(CommandContext<CommandSourceStack> ctx) {
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("投票チケット交換アイテム一覧を表示しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
 
-        Map<String, VoteTicketExchangeItem> exchangeItems = VoteTicketExchangeItems.getExchangeItems();
+        Map<String, ExchangeItem> exchangeItems = VoteTicketExchangeItems.getExchangeItems();
 
         AtomicReference<Component> message = new AtomicReference<>(Component.empty()
                 .append(Component.text("投票チケット交換アイテム一覧 (" + exchangeItems.size() + ")", DefinedTextColor.GREEN)));
