@@ -34,14 +34,16 @@ package net.unknown.survival.economy;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import net.unknown.UnknownNetworkCorePlugin;
+import net.unknown.survival.economy.repository.BankRepository;
 import net.unknown.survival.economy.repository.PlayerRepository;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.ServicePriority;
 
 import java.math.BigDecimal;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class VaultEconomy implements Economy {
     private static final VaultEconomy INSTANCE = new VaultEconomy();
@@ -90,7 +92,7 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public int fractionalDigits() {
-        return 2;
+        return UnknownNetworkEconomy.FRACTIONAL_DIGITS;
     }
 
     /**
@@ -387,10 +389,6 @@ public class VaultEconomy implements Economy {
         return this.depositPlayer(player, amount);
     }
 
-    private static EconomyResponse bankNotImplemented() {
-        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "NOT_IMPLEMENTED_BANK");
-    }
-
     /**
      * @param name
      * @param player
@@ -399,7 +397,7 @@ public class VaultEconomy implements Economy {
     @Deprecated
     @Override
     public EconomyResponse createBank(String name, String player) {
-        return bankNotImplemented();
+        return this.createBank(name, Bukkit.getOfflinePlayer(player));
     }
 
     /**
@@ -411,7 +409,16 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public EconomyResponse createBank(String name, OfflinePlayer player) {
-        return bankNotImplemented();
+        try {
+            BankRepository bank = BankRepository.create(player.getUniqueId(), name);
+            if (bank != null) {
+                return new EconomyResponse(0, bank.getBalance().doubleValue(), EconomyResponse.ResponseType.SUCCESS, null);
+            } else {
+                return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "口座の作成に失敗しました");
+            }
+        } catch(Throwable t) {
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, t.getMessage());
+        }
     }
 
     /**
@@ -422,7 +429,16 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public EconomyResponse deleteBank(String name) {
-        return bankNotImplemented();
+        String[] nameSplit = name.split("_", 2);
+        UUID owner = UUID.fromString(nameSplit[0]);
+        String bankName = nameSplit[1];
+
+        if (BankRepository.isExists(owner, bankName)) {
+            BankRepository bank = BankRepository.remove(owner, bankName);
+            return new EconomyResponse(-bank.getBalance().doubleValue(), 0, EconomyResponse.ResponseType.SUCCESS, null);
+        }
+
+        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "口座が見つかりませんでした");
     }
 
     /**
@@ -433,7 +449,16 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public EconomyResponse bankBalance(String name) {
-        return bankNotImplemented();
+        String[] nameSplit = name.split("_", 2);
+        UUID owner = UUID.fromString(nameSplit[0]);
+        String bankName = nameSplit[1];
+
+        if (BankRepository.isExists(owner, bankName)) {
+            BankRepository bank = BankRepository.get(owner, bankName);
+            return new EconomyResponse(bank.getBalance().doubleValue(), bank.getBalance().doubleValue(), EconomyResponse.ResponseType.SUCCESS, null);
+        }
+
+        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "口座が見つかりませんでした");
     }
 
     /**
@@ -445,7 +470,11 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public EconomyResponse bankHas(String name, double amount) {
-        return bankNotImplemented();
+        EconomyResponse response = this.bankBalance(name);
+
+        if (response.type == EconomyResponse.ResponseType.FAILURE) return response;
+        if (response.balance >= amount) return new EconomyResponse(response.amount, response.balance, EconomyResponse.ResponseType.SUCCESS, null);
+        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "Error");
     }
 
     /**
@@ -457,7 +486,17 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public EconomyResponse bankWithdraw(String name, double amount) {
-        return bankNotImplemented();
+        String[] nameSplit = name.split("_", 2);
+        UUID owner = UUID.fromString(nameSplit[0]);
+        String bankName = nameSplit[1];
+
+        if (BankRepository.isExists(owner, bankName)) {
+            BankRepository bank = BankRepository.get(owner, bankName);
+            BigDecimal balance = bank.withdraw(BigDecimal.valueOf(amount));
+            return new EconomyResponse(amount, balance.doubleValue(), EconomyResponse.ResponseType.SUCCESS, null);
+        }
+
+        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "口座が見つかりませんでした");
     }
 
     /**
@@ -469,7 +508,17 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public EconomyResponse bankDeposit(String name, double amount) {
-        return bankNotImplemented();
+        String[] nameSplit = name.split("_", 2);
+        UUID owner = UUID.fromString(nameSplit[0]);
+        String bankName = nameSplit[1];
+
+        if (BankRepository.isExists(owner, bankName)) {
+            BankRepository bank = BankRepository.get(owner, bankName);
+            BigDecimal balance = bank.deposit(BigDecimal.valueOf(amount));
+            return new EconomyResponse(amount, balance.doubleValue(), EconomyResponse.ResponseType.SUCCESS, null);
+        }
+
+        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "口座が見つかりませんでした");
     }
 
     /**
@@ -480,7 +529,7 @@ public class VaultEconomy implements Economy {
     @Deprecated
     @Override
     public EconomyResponse isBankOwner(String name, String playerName) {
-        return bankNotImplemented();
+        return this.isBankOwner(name, Bukkit.getOfflinePlayer(playerName));
     }
 
     /**
@@ -492,7 +541,15 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public EconomyResponse isBankOwner(String name, OfflinePlayer player) {
-        return bankNotImplemented();
+        String[] nameSplit = name.split("_", 2);
+        UUID owner = UUID.fromString(nameSplit[0]);
+        String bankName = nameSplit[1];
+
+        if (owner.equals(player.getUniqueId()) && BankRepository.isExists(owner, name)) {
+            return new EconomyResponse(0, 0, EconomyResponse.ResponseType.SUCCESS, null);
+        }
+
+        return new EconomyResponse(0, 0, EconomyResponse.ResponseType.FAILURE, "口座が見つかりませんでした");
     }
 
     /**
@@ -503,7 +560,7 @@ public class VaultEconomy implements Economy {
     @Deprecated
     @Override
     public EconomyResponse isBankMember(String name, String playerName) {
-        return bankNotImplemented();
+        return this.isBankOwner(name, playerName);
     }
 
     /**
@@ -515,7 +572,7 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public EconomyResponse isBankMember(String name, OfflinePlayer player) {
-        return bankNotImplemented();
+        return this.isBankOwner(name, player);
     }
 
     /**
@@ -525,7 +582,13 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public List<String> getBanks() {
-        return Collections.emptyList();
+        List<String> banks = new ArrayList<>();
+        BankRepository.getBanks().forEach((uuid, playerBanks) -> {
+            playerBanks.keySet().forEach(bankName -> {
+                banks.add(uuid + "_" + bankName);
+            });
+        });
+        return banks;
     }
 
     /**

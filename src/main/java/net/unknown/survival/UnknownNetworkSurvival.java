@@ -34,6 +34,7 @@ package net.unknown.survival;
 import net.milkbowl.vault.economy.Economy;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.discord.UnknownNetworkDiscordBot;
+import net.unknown.survival.economy.UnknownNetworkEconomy;
 import net.unknown.survival.economy.VaultEconomy;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.bossbar.BlueMapBar;
@@ -107,6 +108,7 @@ public class UnknownNetworkSurvival {
         CustomChannels.load();
         //AntiVillagerLag.startLoopTask();
         PlayerDeathListener.load();
+        UnknownNetworkEconomy.init();
 
         CustomEnchantments.initialize();
         GNArms.initialize();

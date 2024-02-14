@@ -31,12 +31,15 @@
 
 package net.unknown.survival.economy.repository;
 
+import net.unknown.core.managers.RunnableManager;
 import net.unknown.shared.SharedConstants;
+import net.unknown.survival.economy.UnknownNetworkEconomy;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.HashMap;
@@ -68,6 +71,7 @@ public class PlayerRepository implements Repository {
     public BigDecimal deposit(BigDecimal value) {
         if (value.compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("金額は0以上である必要があります。");
         this.balance = this.balance.add(value);
+        RunnableManager.runAsync(this::save);
         return this.balance;
     }
 
@@ -81,6 +85,7 @@ public class PlayerRepository implements Repository {
     public BigDecimal withdraw(BigDecimal value) {
         if (value.compareTo(BigDecimal.ZERO) < 0) throw new IllegalArgumentException("金額は0以上である必要があります。");
         this.balance = this.balance.subtract(value);
+        RunnableManager.runAsync(this::save);
         return this.balance;
     }
 
@@ -111,7 +116,7 @@ public class PlayerRepository implements Repository {
             try {
                 if (file.exists() || file.createNewFile()) {
                     FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-                    config.set("balance", this.getBalance().doubleValue());
+                    config.set("balance", this.getBalance().scaleByPowerOfTen(UnknownNetworkEconomy.FRACTIONAL_DIGITS).longValue());
                     config.save(file);
                 }
             } catch (Throwable t) {
@@ -121,21 +126,49 @@ public class PlayerRepository implements Repository {
     }
 
     public static boolean hasAccount(UUID player) {
-        return REPOSITORIES.containsKey(player);
+        return REPOSITORIES.containsKey(player) || load(player) != null;
     }
 
     public static PlayerRepository getAccount(UUID player) {
+        if (hasAccount(player) && !REPOSITORIES.containsKey(player)) {
+            REPOSITORIES.put(player, load(player));
+        }
         return REPOSITORIES.getOrDefault(player, null);
     }
 
     public static PlayerRepository getAccountOrCreate(UUID player) {
         if (hasAccount(player)) return getAccount(player);
-        REPOSITORIES.put(player, new PlayerRepository(player, BigDecimal.valueOf(10000.0D)));
+        REPOSITORIES.put(player, new PlayerRepository(player, BigDecimal.valueOf(UnknownNetworkEconomy.PLAYER_DEFAULT_BALANCE)));
         return getAccountOrCreate(player);
     }
 
     public static synchronized void loadExists() {
+        if (SAVE_DIR.exists() || SAVE_DIR.mkdirs()) {
+            for (File playerRepositoryFile : SAVE_DIR.listFiles()) {
+                UUID player = UUID.fromString(playerRepositoryFile.getName().replaceFirst("\\.yml$", ""));
+                PlayerRepository repository = load(player);
+                if (repository != null) {
+                    REPOSITORIES.put(player, repository);
+                } else {
+                    LOGGER.warn("プレイヤー " + player + " の所持金を読み込めませんでした");
+                }
+            }
+        }
+    }
 
+    @Nullable
+    public static PlayerRepository load(UUID player) {
+        File playerRepositoryFile = new File(SAVE_DIR, player.toString() + ".yml");
+
+        if (playerRepositoryFile.exists()) {
+            FileConfiguration config = YamlConfiguration.loadConfiguration(playerRepositoryFile);
+            if (config.isSet("balance")) {
+                BigDecimal balance = BigDecimal.valueOf(config.getLong("balance")).scaleByPowerOfTen(-UnknownNetworkEconomy.FRACTIONAL_DIGITS);
+                return new PlayerRepository(player, balance);
+            }
+        }
+
+        return null;
     }
 
     public static synchronized void saveAll() {

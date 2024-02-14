@@ -31,5 +31,15 @@
 
 package net.unknown.survival.economy;
 
+import net.unknown.survival.economy.repository.BankRepository;
+import net.unknown.survival.economy.repository.PlayerRepository;
+
 public class UnknownNetworkEconomy {
+    public static final int FRACTIONAL_DIGITS = 3;
+    public static final double PLAYER_DEFAULT_BALANCE = 10000.0D;
+
+    public static void init() {
+        PlayerRepository.loadExists();
+        BankRepository.loadExists();
+    }
 }
