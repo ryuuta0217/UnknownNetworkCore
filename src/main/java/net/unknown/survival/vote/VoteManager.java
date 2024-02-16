@@ -82,7 +82,12 @@ public class VoteManager implements Listener {
         });
 
         RunnableManager.runAsync(() -> { // REST APIコールは遅延を引き起こす可能性があるので非同期で実行する
-            UUID uuid = MojangApi.getUUID(event.getVote().getUsername());
+            UUID uuid;
+            if (event.getVote().getUsername().startsWith("BE_")) {
+                uuid = Bukkit.getOfflinePlayer(event.getVote().getUsername()).getUniqueId();
+            } else {
+                uuid = MojangApi.getUUID(event.getVote().getUsername());
+            }
             ItemGiveQueue.queue(uuid, VoteManager.buildTicket(event.getVote().getUsername(), uuid));
         });
     }

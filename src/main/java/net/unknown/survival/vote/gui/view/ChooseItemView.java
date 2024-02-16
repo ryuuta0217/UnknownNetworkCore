@@ -32,17 +32,20 @@
 package net.unknown.survival.vote.gui.view;
 
 import net.unknown.core.gui.view.PaginationView;
-import net.unknown.survival.data.model.VoteTicketExchangeItem;
+import net.unknown.survival.data.model.vote.ExchangeItem;
+import net.unknown.survival.data.model.vote.SelectableItem;
 import net.unknown.survival.vote.gui.VoteTicketExchangeGui;
-import org.bukkit.Material;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.inventory.ItemStack;
 
 public class ChooseItemView extends PaginationView<String, VoteTicketExchangeGui> {
     private final ChooseExchangeItemView previousView;
-    private final VoteTicketExchangeItem item;
+    private final SelectableItem item;
 
-    public ChooseItemView(ChooseExchangeItemView previousView, VoteTicketExchangeItem item) {
+    public ChooseItemView(ChooseExchangeItemView previousView, ExchangeItem item) {
+        this(previousView, (SelectableItem) item);
+    }
+
+    public ChooseItemView(ChooseExchangeItemView previousView, SelectableItem item) {
         super(previousView.getGui(), item.getChoices().keySet(), item::getChoice, null, null, (event, view) -> {
             view.getGui().setView(previousView);
         });
@@ -51,8 +54,8 @@ public class ChooseItemView extends PaginationView<String, VoteTicketExchangeGui
     }
 
     @Override
-    public void onElementButtonClicked(InventoryClickEvent event, String id) {
-        this.previousView.exchangeItem(this.item, this.item.getChoice(id));
+    public void onElementButtonClicked(InventoryClickEvent event, String identifier) {
+        this.previousView.exchangeItem(this.getGui().getPlayer(), this.item, identifier);
         this.getGui().setView(this.previousView);
     }
 }

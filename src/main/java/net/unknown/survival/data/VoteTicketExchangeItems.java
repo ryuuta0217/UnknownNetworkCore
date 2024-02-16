@@ -33,16 +33,18 @@ package net.unknown.survival.data;
 
 import net.unknown.core.configurations.ConfigurationBase;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.survival.data.model.VoteTicketExchangeItem;
+import net.unknown.survival.data.model.vote.*;
+import net.unknown.survival.data.model.vote.impl.*;
 import org.bukkit.configuration.ConfigurationSection;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 public class VoteTicketExchangeItems extends ConfigurationBase {
     private static final VoteTicketExchangeItems INSTANCE = new VoteTicketExchangeItems();
 
-    private Map<String, VoteTicketExchangeItem> exchangeItems;
+    private Map<String, ExchangeItem> exchangeItems;
 
     private VoteTicketExchangeItems() {
         super("vote-ticket-exchange-items.yml", false, "UNC/VoteTicketExchangeItems");
@@ -55,7 +57,14 @@ public class VoteTicketExchangeItems extends ConfigurationBase {
             ConfigurationSection exchangeItemsSection = this.getConfig().getConfigurationSection("exchange-items");
             exchangeItemsSection.getKeys(false).forEach(id -> {
                 ConfigurationSection section = exchangeItemsSection.getConfigurationSection(id);
-                VoteTicketExchangeItem item = VoteTicketExchangeItem.load(section);
+                ExchangeItemType type = ExchangeItemType.valueOf(section.getString("type"));
+                ExchangeItem item = switch (type) {
+                    case SIMPLE -> SimpleExchangeItem.load(section);
+                    case SIMPLE_RANDOM -> SimpleRandomExchangeItem.load(section);
+                    case CONTAINER -> ContainerExchangeItem.load(section);
+                    case SELECTABLE_CONTAINER -> SelectableContainerExchangeItem.load(section);
+                    case SCRIPT -> ScriptExchangeItem.load(section);
+                };
                 if (item != null) this.exchangeItems.put(id, item);
                 else this.getLogger().warning("Failed to load vote ticket exchange item for ID " + id);
             });
@@ -66,27 +75,27 @@ public class VoteTicketExchangeItems extends ConfigurationBase {
         return VoteTicketExchangeItems.INSTANCE;
     }
 
-    public static Map<String, VoteTicketExchangeItem> getExchangeItems() {
-        return getInstance().exchangeItems;
+    public static Map<String, ExchangeItem> getExchangeItems() {
+        return Collections.unmodifiableMap(getInstance().exchangeItems);
     }
 
     public static boolean has(String id) {
         return getInstance().exchangeItems.containsKey(id);
     }
 
-    public static void add(String id, VoteTicketExchangeItem item) {
+    public static void add(String id, ExchangeItem item) {
         if (id.contains(".")) throw new IllegalArgumentException("ID cannot contain a '.'!");
         if (has(id)) throw new IllegalArgumentException("ID " + id + " is already taken!");
         getInstance().exchangeItems.put(id, item);
         RunnableManager.runAsync(getInstance()::save);
     }
 
-    public static VoteTicketExchangeItem get(String id) {
+    public static ExchangeItem get(String id) {
         return getExchangeItems().getOrDefault(id, null);
     }
 
-    public static VoteTicketExchangeItem remove(String id) {
-        VoteTicketExchangeItem removed = getInstance().exchangeItems.remove(id);
+    public static ExchangeItem remove(String id) {
+        ExchangeItem removed = getInstance().exchangeItems.remove(id);
         if (removed != null) RunnableManager.runAsync(getInstance()::save);
         return removed;
     }
@@ -97,7 +106,8 @@ public class VoteTicketExchangeItems extends ConfigurationBase {
         ConfigurationSection exchangeItemsSection = this.getConfig().createSection("exchange-items");
         this.exchangeItems.forEach((id, item) -> {
             ConfigurationSection section = exchangeItemsSection.createSection(id);
-            item.save(section);
+            section.set("type", item.getType().name());
+            item.write(section);
         });
         super.save();
     }

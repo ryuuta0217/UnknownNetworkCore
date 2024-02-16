@@ -31,7 +31,10 @@
 
 package net.unknown.survival.economy.repository;
 
+import net.unknown.core.managers.RunnableManager;
 import net.unknown.shared.SharedConstants;
+import net.unknown.survival.economy.UnknownNetworkEconomy;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.slf4j.Logger;
@@ -40,9 +43,11 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.File;
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BankRepository implements Repository {
@@ -54,11 +59,17 @@ public class BankRepository implements Repository {
     private final UUID owner;
     private final String name;
     private BigDecimal balance;
+    private final Map<Long, Transaction> transactions;
 
-    public BankRepository(UUID owner, String name, BigDecimal balance) {
+    public BankRepository(UUID owner, String name, BigDecimal balance, Map<Long, Transaction> transactions) {
         this.owner = owner;
         this.name = name;
         this.balance = balance;
+        this.transactions = new HashMap<>(transactions); // always mutable
+    }
+
+    public BankRepository(UUID owner, String name, BigDecimal balance) {
+        this(owner, name, balance, Collections.emptyMap());
     }
 
     /**
@@ -89,6 +100,9 @@ public class BankRepository implements Repository {
     public BigDecimal deposit(BigDecimal value) {
         if (value.compareTo(BigDecimal.ZERO) > 0) throw new IllegalArgumentException("金額は0以上である必要があります。");
         this.balance = this.balance.add(value);
+        long timestamp = System.currentTimeMillis();
+        this.auditTransaction(timestamp, Transaction.Type.DEPOSIT, value, this.balance, false);
+        RunnableManager.runAsync(this::save);
         return this.balance;
     }
 
@@ -102,6 +116,9 @@ public class BankRepository implements Repository {
     public BigDecimal withdraw(BigDecimal value) {
         if (value.compareTo(BigDecimal.ZERO) > 0) throw new IllegalArgumentException("金額は0以上である必要があります。");
         this.balance = this.balance.subtract(value);
+        long timestamp = System.currentTimeMillis();
+        this.auditTransaction(timestamp, Transaction.Type.WITHDRAW, value, this.balance, false);
+        RunnableManager.runAsync(this::save);
         return this.balance;
     }
 
@@ -116,6 +133,32 @@ public class BankRepository implements Repository {
     }
 
     /**
+     * 取引を記録します。
+     *
+     * @param timestamp 取引日時
+     * @param type 取引の種類
+     * @param amount 取引金額
+     * @param balance 取引後の残高
+     */
+    public void auditTransaction(long timestamp, Transaction.Type type, BigDecimal amount, BigDecimal balance) {
+        this.auditTransaction(timestamp, type, amount, balance, true);
+    }
+
+    /**
+     * 取引を記録します。
+     *
+     * @param timestamp 取引日時
+     * @param type 取引の種類
+     * @param amount 取引金額
+     * @param balance 取引後の残高
+     * @param save ディスクへ保存するかどうか
+     */
+    public void auditTransaction(long timestamp, Transaction.Type type, BigDecimal amount, BigDecimal balance, boolean save) {
+        this.transactions.put(timestamp, new Transaction(type, amount, balance, null));
+        if (save) RunnableManager.runAsync(this::save);
+    }
+
+    /**
      * 口座情報をファイルに書き込みます。
      */
     @Override
@@ -126,8 +169,12 @@ public class BankRepository implements Repository {
             try {
                 if (file.exists() || file.createNewFile()) {
                     FileConfiguration config = YamlConfiguration.loadConfiguration(file);
-                    config.set("name", this.getName());
                     config.set("balance", this.getBalance().doubleValue());
+
+                    config.set("transactions", null);
+                    ConfigurationSection transactionsSection = config.createSection("transactions");
+                    this.transactions.forEach((timestamp, transaction) -> transaction.save(transactionsSection.createSection(String.valueOf(timestamp))));
+
                     config.save(file);
                 }
             } catch (Throwable t) {
@@ -176,6 +223,12 @@ public class BankRepository implements Repository {
         return BANKS.get(owner).get(bankName);
     }
 
+    public static Map<UUID, Map<String, BankRepository>> getBanks() {
+        return BANKS.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> new HashMap<>(e.getValue())));
+    }
+
     /**
      * 口座が存在するかどうかを検証します。
      * プレイヤーがMapに存在しなければ新しくHashMapインスタンスを生成します。
@@ -203,13 +256,9 @@ public class BankRepository implements Repository {
                                 .filter(file -> file.getName().endsWith(".yml"))
                                 .forEach(bankFile -> {
                                     try {
-                                        FileConfiguration config = YamlConfiguration.loadConfiguration(bankFile);
-                                        if (config.contains("balance") && config.contains("name")) {
-                                            String bankName = config.getString("name");
-                                            BigDecimal balance = BigDecimal.valueOf(config.getDouble("balance"));
-                                            if (!isExists(owner, bankName)) {
-                                                BANKS.get(owner).put(bankName, new BankRepository(owner, bankName, balance));
-                                            }
+                                        String bankName = bankFile.getName().replaceFirst("\\.yml$", "");
+                                        if (!isExists(owner, bankName)) {
+                                            BANKS.get(owner).put(bankName, load(owner, bankName));
                                         }
                                     } catch (Throwable t) {
                                         LOGGER.error("プレイヤー " + owner + " の口座ファイル " + bankFile.getName() + " の読み込みに失敗しました", t);
@@ -217,6 +266,37 @@ public class BankRepository implements Repository {
                                 });
                     });
         }
+    }
+
+    public static BankRepository load(UUID owner, String bankName) {
+        try {
+            File bankFile = new File(SAVE_DIR, owner.toString() + "/" + bankName + ".yml");
+            FileConfiguration config = YamlConfiguration.loadConfiguration(bankFile);
+            if (config.isSet("balance")) {
+                BigDecimal balance = BigDecimal.valueOf(config.getDouble("balance"));
+                Map<Long, Transaction> transactions = new HashMap<>();
+                if (config.isSet("transactions")) {
+                    ConfigurationSection transactionSection = config.getConfigurationSection("transactions");
+
+                    transactionSection.getValues(false).forEach((timestampStr, transactionDataRaw) -> {
+                        if (timestampStr.matches("\\d+") && transactionDataRaw instanceof ConfigurationSection transactionData) {
+                            long timestamp = Long.parseLong(timestampStr);
+                            Transaction transaction = Transaction.load(transactionData);
+                            if (transaction != null) {
+                                transactions.put(timestamp, transaction);
+                            } else {
+                                LOGGER.warn("プレイヤー " + owner + " の口座 " + bankName + " の " + timestamp + " に行われた取引履歴を読み込み中にエラーが発生しました");
+                            }
+                        }
+                    });
+                }
+                return new BankRepository(owner, bankName, balance);
+            }
+        } catch(Throwable t) {
+            t.printStackTrace();
+        }
+        LOGGER.error("プレイヤー " + owner + " の口座 " + bankName + " の読み込みに失敗しました");
+        return null;
     }
 
     /**
@@ -233,5 +313,111 @@ public class BankRepository implements Repository {
      */
     public synchronized static void saveAll() {
         BANKS.keySet().forEach(BankRepository::save);
+    }
+
+    public static class Transaction {
+        private final Type type;
+        private final BigDecimal amount;
+        private final BigDecimal balance;
+        @Nullable private final UUID target;
+
+        protected Transaction(Type type, BigDecimal amount, BigDecimal balance, @Nullable UUID target) {
+            this.type = type;
+            this.amount = amount;
+            this.balance = balance;
+            this.target = target;
+        }
+
+        protected Transaction(Type type, double amount, double balance, UUID target) {
+            this(type, BigDecimal.valueOf(amount), BigDecimal.valueOf(balance), target);
+        }
+
+        protected Transaction(Type type, long scaledAmount, long scaledBalance, UUID target) {
+            this(type, BigDecimal.valueOf(scaledAmount).scaleByPowerOfTen(-UnknownNetworkEconomy.FRACTIONAL_DIGITS), BigDecimal.valueOf(scaledBalance).scaleByPowerOfTen(-UnknownNetworkEconomy.FRACTIONAL_DIGITS), target);
+        }
+
+        public static Transaction createDeposit(BigDecimal amount, BigDecimal balance) {
+            return new Transaction(Type.DEPOSIT, amount, balance, null);
+        }
+
+        public static Transaction createDeposit(double amount, double balance) {
+            return createDeposit(BigDecimal.valueOf(amount), BigDecimal.valueOf(balance));
+        }
+
+        public static Transaction createDeposit(long scaledAmount, long scaledBalance) {
+            return createDeposit(BigDecimal.valueOf(scaledAmount).scaleByPowerOfTen(-UnknownNetworkEconomy.FRACTIONAL_DIGITS), BigDecimal.valueOf(scaledBalance).scaleByPowerOfTen(-UnknownNetworkEconomy.FRACTIONAL_DIGITS));
+        }
+
+        public static Transaction createWithdraw(BigDecimal amount, BigDecimal balance) {
+            return new Transaction(Type.WITHDRAW, amount, balance, null);
+        }
+
+        public static Transaction createWithdraw(double amount, double balance) {
+            return createWithdraw(BigDecimal.valueOf(amount), BigDecimal.valueOf(balance));
+        }
+
+        public static Transaction createWithdraw(long scaledAmount, long scaledBalance) {
+            return createWithdraw(BigDecimal.valueOf(scaledAmount).scaleByPowerOfTen(-UnknownNetworkEconomy.FRACTIONAL_DIGITS), BigDecimal.valueOf(scaledBalance).scaleByPowerOfTen(-UnknownNetworkEconomy.FRACTIONAL_DIGITS));
+        }
+
+        public static Transaction createTransferSent(UUID target, BigDecimal amount, BigDecimal balance) {
+            return new Transaction(Type.TRANSFER_SEND, amount, balance, target);
+        }
+
+        public static Transaction createTransferSent(UUID target, double amount, double balance) {
+            return createTransferSent(target, BigDecimal.valueOf(amount), BigDecimal.valueOf(balance));
+        }
+
+        public static Transaction createTransferSent(UUID target, long scaledAmount, long scaledBalance) {
+            return createTransferSent(target, BigDecimal.valueOf(scaledAmount).scaleByPowerOfTen(-UnknownNetworkEconomy.FRACTIONAL_DIGITS), BigDecimal.valueOf(scaledBalance).scaleByPowerOfTen(-UnknownNetworkEconomy.FRACTIONAL_DIGITS));
+        }
+
+        public static Transaction createTransferReceive(UUID target, BigDecimal amount, BigDecimal balance) {
+            return new Transaction(Type.TRANSFER_RECEIVE, amount, balance, target);
+        }
+
+        public static Transaction createTransferReceive(UUID target, double amount, double balance) {
+            return createTransferReceive(target, BigDecimal.valueOf(amount), BigDecimal.valueOf(balance));
+        }
+
+        public static Transaction createTransferReceive(UUID target, long scaledAmount, long scaledBalance) {
+            return createTransferReceive(target, BigDecimal.valueOf(scaledAmount).scaleByPowerOfTen(-UnknownNetworkEconomy.FRACTIONAL_DIGITS), BigDecimal.valueOf(scaledBalance).scaleByPowerOfTen(-UnknownNetworkEconomy.FRACTIONAL_DIGITS));
+        }
+
+        public Type getType() {
+            return this.type;
+        }
+
+        public BigDecimal getAmount() {
+            return this.amount;
+        }
+
+        public BigDecimal getBalance() {
+            return this.balance;
+        }
+
+        public void save(ConfigurationSection config) {
+            config.set("type", this.type.name());
+            config.set("amount", this.amount.scaleByPowerOfTen(UnknownNetworkEconomy.FRACTIONAL_DIGITS).longValue());
+            config.set("balance", this.balance.scaleByPowerOfTen(UnknownNetworkEconomy.FRACTIONAL_DIGITS).longValue());
+
+            if (this.type == Type.TRANSFER_SEND || this.type == Type.TRANSFER_RECEIVE) {
+                config.set("target", this.target.toString());
+            }
+        }
+
+        @Nullable
+        public static Transaction load(ConfigurationSection config) {
+            if (config.isSet("type") && config.isSet("amount") && config.isSet("balance")) {
+                Type type = Type.valueOf(config.getString("type"));
+                UUID target = config.isSet("target") ? UUID.fromString(config.getString("target")) : null;
+                return new Transaction(type, config.getLong("amount"), config.getLong("balance"), target);
+            }
+            return null;
+        }
+
+        public enum Type {
+            DEPOSIT, WITHDRAW, TRANSFER_SEND, TRANSFER_RECEIVE
+        }
     }
 }
