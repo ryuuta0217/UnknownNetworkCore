@@ -57,7 +57,7 @@ public class PlayerJoinListener implements Listener {
         }
     }
 
-    @EventHandler
+    @EventHandler(ignoreCancelled = true)
     public void onPlayerJoined(PlayerJoinEvent event) {
         if (!event.getPlayer().hasPlayedBefore()) {
             event.joinMessage(Component.text(event.getPlayer().getName() + " が初めてゲームに参加しました", DefinedTextColor.YELLOW));
