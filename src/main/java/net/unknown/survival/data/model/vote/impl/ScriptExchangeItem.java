@@ -71,6 +71,11 @@ public class ScriptExchangeItem implements ExchangeItem {
     }
 
     @Override
+    public void setDisplayItem(ItemStack item) {
+        throw new UnsupportedOperationException("Can't set script displayItem");
+    }
+
+    @Override
     public ItemStack getItem(@Nullable HumanEntity exchanger, @Nullable String choiceIdentifier) {
         return this.execGetItemFunction(exchanger, choiceIdentifier);
     }

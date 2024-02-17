@@ -61,6 +61,7 @@ import net.unknown.survival.data.model.vote.impl.SimpleExchangeItem;
 import net.unknown.survival.enums.Permissions;
 import net.unknown.survival.vote.gui.VoteTicketExchangeGui;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -214,7 +215,7 @@ public class VoteCommand {
 
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        SimpleExchangeItem exchangeItem = ExchangeItem.ofSimpleRandom(bukkitDisplayStack, null, price);
+        SimpleExchangeItem exchangeItem = ExchangeItem.ofSimpleRandom(bukkitDisplayStack, Collections.emptyMap(), price);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたインスタンス(" + exchangeItem.hashCode() + ")を追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         VoteTicketExchangeItems.add(id, exchangeItem);
@@ -253,7 +254,7 @@ public class VoteCommand {
         org.bukkit.inventory.ItemStack bukkitStack = MinecraftAdapter.ItemStack.itemStack(minecraftStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        SimpleExchangeItem exchangeItem = ExchangeItem.ofContainer(bukkitContainerStack, bukkitContainerStack, bukkitStack, stacks, price);
+        SimpleExchangeItem exchangeItem = ExchangeItem.ofContainer(bukkitDisplayItemStack, bukkitContainerStack, bukkitStack, stacks, price);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたインスタンス(" + exchangeItem.hashCode() + ")を追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         VoteTicketExchangeItems.add(id, exchangeItem);
@@ -290,7 +291,7 @@ public class VoteCommand {
         org.bukkit.inventory.ItemStack bukkitContainerStack = MinecraftAdapter.ItemStack.itemStack(minecraftContainerStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        SimpleExchangeItem exchangeItem = ExchangeItem.ofSelectableContainer(bukkitDisplayItemStack, bukkitContainerStack, null, stacks, price);
+        SimpleExchangeItem exchangeItem = ExchangeItem.ofSelectableContainer(bukkitDisplayItemStack, bukkitContainerStack, Collections.emptyMap(), stacks, price);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたインスタンス(" + exchangeItem.hashCode() + ")を追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
         VoteTicketExchangeItems.add(id, exchangeItem);

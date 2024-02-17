@@ -38,6 +38,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
 
@@ -46,7 +47,7 @@ public interface ExchangeItem {
         return new SimpleExchangeItem(item, price);
     }
 
-    static SimpleRandomExchangeItem ofSimpleRandom(ItemStack displayItem, Map<String, ItemStack> choices, int price) {
+    static SimpleRandomExchangeItem ofSimpleRandom(ItemStack displayItem, @Nonnull Map<String, ItemStack> choices, int price) {
         return new SimpleRandomExchangeItem(displayItem, choices, price);
     }
 
@@ -54,7 +55,7 @@ public interface ExchangeItem {
         return new ContainerExchangeItem(displayItem, container, item, stacks, price);
     }
 
-    static SelectableContainerExchangeItem ofSelectableContainer(ItemStack displayItem, ItemStack container, Map<String, ItemStack> choices, int stacks, int price) {
+    static SelectableContainerExchangeItem ofSelectableContainer(ItemStack displayItem, ItemStack container, @Nonnull Map<String, ItemStack> choices, int stacks, int price) {
         return new SelectableContainerExchangeItem(displayItem, container, choices, stacks, price);
     }
 
@@ -67,6 +68,7 @@ public interface ExchangeItem {
     }
     ExchangeItemType getType();
     ItemStack getDisplayItem(@Nullable HumanEntity exchanger);
+    void setDisplayItem(ItemStack item);
     ItemStack getItem(@Nullable HumanEntity exchanger, @Nullable String choiceIdentifier);
     void setItem(ItemStack item);
     int getPrice(@Nullable HumanEntity exchanger);

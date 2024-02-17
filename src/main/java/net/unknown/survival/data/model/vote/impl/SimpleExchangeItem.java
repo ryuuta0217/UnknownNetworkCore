@@ -66,14 +66,21 @@ public class SimpleExchangeItem implements ExchangeItem {
         return this.item;
     }
 
+    @Override
     @Nullable
     public ItemStack getDisplayItem(HumanEntity player) {
         return this.item;
     }
 
+    @Override
     public void setItem(ItemStack item) {
         this.item = item;
         RunnableManager.runAsync(VoteTicketExchangeItems.getInstance()::save);
+    }
+
+    @Override
+    public void setDisplayItem(ItemStack item) {
+        this.setItem(item);
     }
 
     @Override
@@ -99,7 +106,7 @@ public class SimpleExchangeItem implements ExchangeItem {
 
     @Override
     public void write(ConfigurationSection config) {
-        config.set("item", this.item);
+        config.set("item", this.item != null ? MinecraftAdapter.ItemStack.json(this.item) : null);
         config.set("price", this.price);
     }
 }

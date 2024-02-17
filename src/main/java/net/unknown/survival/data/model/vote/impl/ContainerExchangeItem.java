@@ -68,6 +68,12 @@ public class ContainerExchangeItem extends SimpleExchangeItem {
         return this.displayItem;
     }
 
+    @Override
+    public void setDisplayItem(ItemStack item) {
+        this.displayItem = item;
+        this.save();
+    }
+
     public ItemStack getContainer(@Nullable HumanEntity exchanger) {
         return this.container;
     }
