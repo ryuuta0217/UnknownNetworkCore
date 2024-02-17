@@ -53,11 +53,13 @@ import net.unknown.core.managers.EvalManager;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
-import net.unknown.survival.data.VoteTicketExchangeItems;
-import net.unknown.survival.data.model.vote.*;
-import net.unknown.survival.data.model.vote.impl.ContainerExchangeItem;
-import net.unknown.survival.data.model.vote.impl.ScriptExchangeItem;
-import net.unknown.survival.data.model.vote.impl.SimpleExchangeItem;
+import net.unknown.survival.vote.data.ExchangeItem;
+import net.unknown.survival.vote.data.ExchangeItemType;
+import net.unknown.survival.vote.data.SelectableItem;
+import net.unknown.survival.vote.data.VoteTicketExchangeItems;
+import net.unknown.survival.vote.data.impl.ContainerExchangeItem;
+import net.unknown.survival.vote.data.impl.ScriptExchangeItem;
+import net.unknown.survival.vote.data.impl.SimpleExchangeItem;
 import net.unknown.survival.enums.Permissions;
 import net.unknown.survival.vote.gui.VoteTicketExchangeGui;
 
