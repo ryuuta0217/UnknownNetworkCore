@@ -101,6 +101,7 @@ shadowJar {
 
 reobfJar {
     outputJar = layout.buildDirectory.file("libs/${project.name}.jar")
+    archiveClassifier = null
 }
 
 runMojangMappedServer {
@@ -195,7 +196,10 @@ publishing {
             artifact(reobfJar.outputJar) {
                 classifier = null
             }
-            artifact shadowJar
+
+            artifact(shadowJar) {
+                classifier = 'mojang'
+            }
 
             pom {
                 name = project.name
