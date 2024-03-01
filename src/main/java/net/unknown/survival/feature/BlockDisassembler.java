@@ -43,21 +43,31 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.LevelEvent;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+import net.minecraft.world.level.block.entity.DropperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.unknown.launchwrapper.event.BlockDispenseBeforeEvent;
+import net.unknown.launchwrapper.mixininterfaces.IMixinBlockEntity;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.v1_20_R2.block.CraftBlock;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class BlockDisassembler implements Listener {
+    private static final Component NAME = Component.literal("Block Disassembler").withStyle(ChatFormatting.RED, ChatFormatting.BOLD);
+
     @EventHandler
     public void onDispenserShoot(BlockDispenseBeforeEvent event) {
         if (event.getBlockSource().state().getBlock() == Blocks.DISPENSER) {
             DispenserBlockEntity dispenser = event.getBlockSource().blockEntity();
-            if (dispenser.getDisplayName().contains(Component.literal("Block Disassembler").withStyle(ChatFormatting.RED, ChatFormatting.BOLD))) {
+            IMixinBlockEntity mixinBlockEntity = ((IMixinBlockEntity) dispenser);
+            if (dispenser.getDisplayName().contains(NAME)) {
                 event.setCancelled(true);
 
                 ServerLevel level = ((ServerLevel) dispenser.getLevel());
@@ -69,14 +79,19 @@ public class BlockDisassembler implements Listener {
                 BlockState targetState = level.getBlockStateIfLoaded(targetPos);
                 if (targetState == null || targetState.isAir()) return; // 空気だったり読み込まれてなかったらやめる
 
-                ItemStack shootItem = event.getItem();
-                if (targetState.getBlock() != Blocks.BEDROCK && !shootItem.getItem().isCorrectToolForDrops(targetState)) return; // 適正ツールじゃないならやめる
-                if (shootItem.getMaxDamage() - shootItem.getDamageValue() == 1) return; // 次のブロック破壊で壊れそうならやめる
-                shootItem.hurt(1, level.random, null);
+                BlockBreakEvent bbEvent = new BlockBreakEvent(CraftBlock.at(level, targetPos), new FakePlayer(dispenser, mixinBlockEntity.getPlacer()).getBukkitEntity());
+                Bukkit.getPluginManager().callEvent(bbEvent);
 
-                destroyBlockWithDrops(level, targetPos, shootItem).forEach(dropItem -> {
-                    Block.popResource(level, targetPos, dropItem);
-                });
+                if (!bbEvent.isCancelled()) {
+                    ItemStack shootItem = event.getItem();
+                    if (targetState.getBlock() != Blocks.BEDROCK && !shootItem.getItem().isCorrectToolForDrops(targetState)) return; // 適正ツールじゃないならやめる
+                    if (shootItem.getMaxDamage() - shootItem.getDamageValue() == 1) return; // 次のブロック破壊で壊れそうならやめる
+                    shootItem.hurt(1, level.random, null);
+
+                    destroyBlockWithDrops(level, targetPos, shootItem).forEach(dropItem -> {
+                        Block.popResource(level, targetPos, dropItem);
+                    });
+                }
             }
         }
     }
@@ -88,5 +103,47 @@ public class BlockDisassembler implements Listener {
         level.setBlock(blockPos, Blocks.AIR.defaultBlockState(), Block.UPDATE_ALL, 512);
         level.gameEvent(GameEvent.BLOCK_DESTROY, blockPos, GameEvent.Context.of(null, currentState));
         return drops;
+    }
+
+    public static class FakePlayer extends net.unknown.core.entity.FakePlayer {
+        private final DispenserBlockEntity dispenser;
+
+        public FakePlayer(DispenserBlockEntity dispenser, @Nullable UUID uniqueId) {
+            super((ServerLevel) dispenser.getLevel(), dispenser.getName().getString(), uniqueId);
+            this.dispenser = dispenser;
+            this.moveTo(dispenser.getBlockPos(), 0.0f, 0.0f);
+        }
+
+        @Nullable
+        @Override
+        public Component getTabListDisplayName() {
+            return NAME;
+        }
+
+        @Override
+        public Component getName() {
+            return NAME;
+        }
+
+        @Override
+        public Component getDisplayName() {
+            return NAME;
+        }
+
+        @Override
+        public String getScoreboardName() {
+            return NAME.getString();
+        }
+
+        @Override
+        protected Component getTypeName() {
+            return NAME;
+        }
+
+        @Nullable
+        @Override
+        public Component getCustomName() {
+            return NAME;
+        }
     }
 }
