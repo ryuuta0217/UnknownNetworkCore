@@ -101,7 +101,6 @@ shadowJar {
 
 reobfJar {
     outputJar = layout.buildDirectory.file("libs/${project.name}.jar")
-    archiveClassifier = null
 }
 
 runMojangMappedServer {
