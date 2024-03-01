@@ -167,12 +167,14 @@ task reCompressWaterfall(type: Zip, dependsOn: downloadWaterfall) {
     archiveFileName = "waterfall.jar"
 }
 
-compileJava.dependsOn(reCompressWaterfall)
+compileJava.dependsOn(reCompressWaterfall, shadowJar, reobfJar)
 
 task copyArtifactToProxy(type: Copy) {
     from project.file("build/libs/UnknownNetworkCore.jar")
     into project.file("testProxy/plugins")
 }
+
+publish.dependsOn(reobfJar)
 
 artifacts {
     jar
