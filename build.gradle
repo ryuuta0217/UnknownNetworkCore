@@ -191,9 +191,10 @@ publishing {
             groupId = 'net.unknown'
             artifactId = project.name
             version = version
-            from components.java
 
-            artifact reobfJar.outputJar
+            artifact(reobfJar.outputJar) {
+                classifier = null
+            }
             artifact shadowJar
 
             pom {
