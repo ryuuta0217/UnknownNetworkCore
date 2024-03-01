@@ -129,8 +129,8 @@ task downloadWaterfall(type: Task) {
     var wf = new File("libs/standalone/waterfall.jar")
 
     if (!wf.exists()) {
-        download {
-            src "https://api.papermc.io/v2/projects/waterfall/versions/1.19/builds/526/downloads/waterfall-1.19-526.jar"
+        download.run {
+            src "https://api.papermc.io/v2/projects/waterfall/versions/1.20/builds/565/downloads/waterfall-1.20-565.jar"
             dest 'libs/standalone/waterfall.jar'
         }
 
