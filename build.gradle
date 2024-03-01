@@ -96,6 +96,7 @@ jar {
 
 shadowJar {
     archiveFileName = archiveBaseName.get() + "-mojang." + archiveExtension.get()
+    archiveClassifier = 'mojang'
 }
 
 reobfJar {
@@ -190,11 +191,10 @@ publishing {
             groupId = 'net.unknown'
             artifactId = project.name
             version = version
-            artifact "build/libs/UnknownNetworkCore.jar"
+            from components.java
 
-            artifact("build/libs/UnknownNetworkCore-mojang.jar") {
-                classifier "mojang"
-            }
+            artifact reobfJar.outputJar
+            artifact shadowJar
 
             pom {
                 name = project.name
