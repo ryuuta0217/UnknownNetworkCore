@@ -81,7 +81,8 @@ public class BlockDisassembler implements Listener {
                 if (targetState == null || targetState.isAir()) return; // 空気だったり読み込まれてなかったらやめる
 
                 ItemStack shootItem = event.getItem();
-                if (targetState.getBlock() != Blocks.BEDROCK && !shootItem.getItem().isCorrectToolForDrops(targetState)) return; // 適正ツールじゃないならやめる
+                if (targetState.getBlock() == Blocks.BEDROCK) return; // 岩盤は破壊させないよーん
+                if (targetState.requiresCorrectToolForDrops() && !shootItem.getItem().isCorrectToolForDrops(targetState)) return; // 適正ツールが必要なブロックなら適正ツールチェック
                 if (shootItem.getMaxDamage() - shootItem.getDamageValue() == 1) return; // 次のブロック破壊で壊れそうならやめる
 
                 FakePlayer player = new FakePlayer(dispenser, mixinBlockEntity.getPlacer());
