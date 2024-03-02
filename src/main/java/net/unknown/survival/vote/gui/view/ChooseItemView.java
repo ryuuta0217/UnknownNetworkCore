@@ -32,8 +32,8 @@
 package net.unknown.survival.vote.gui.view;
 
 import net.unknown.core.gui.view.PaginationView;
-import net.unknown.survival.data.model.vote.ExchangeItem;
-import net.unknown.survival.data.model.vote.SelectableItem;
+import net.unknown.survival.vote.data.ExchangeItem;
+import net.unknown.survival.vote.data.SelectableItem;
 import net.unknown.survival.vote.gui.VoteTicketExchangeGui;
 import org.bukkit.event.inventory.InventoryClickEvent;
 

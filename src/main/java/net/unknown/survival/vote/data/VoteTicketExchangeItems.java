@@ -29,12 +29,11 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.data;
+package net.unknown.survival.vote.data;
 
 import net.unknown.core.configurations.ConfigurationBase;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.survival.data.model.vote.*;
-import net.unknown.survival.data.model.vote.impl.*;
+import net.unknown.survival.vote.data.impl.*;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.Collections;

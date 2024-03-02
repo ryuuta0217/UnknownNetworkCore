@@ -106,8 +106,17 @@ public class FakePlayer extends ServerPlayer {
 
     @Override
     public float getAttackStrengthScale(float baseTime) {
-        return super.getAttackStrengthScale(baseTime);
-        //return 1.0F; // Always returns 1.0F (charged)
+        // 通常、strengthScaleは以下の計算式で計算される:
+        // Mth.clamp((this.attackStrengthTicker + baseTime) / this.getCurrentItemAttackStrengthDelay(), 0.0F, 1.0F);
+        // attackStrengthTicker は、tick() で常に加算され続け、以下の場合に0にリセットされる:
+        // ・プレイヤーがアイテムを持ち替えた場合。
+        // ・プレイヤーが右クリックを行った場合。(swingHand)
+        // baseTime は通常、0.5F が渡される。
+        // getCurrentItemAttackStrengthDelay() は以下の計算式で計算される:
+        // (float) (1.0D / this.getAttributeValue(Attributes.ATTACK_SPEED) * 20.0D);
+        // つまり、FakePlayerにおいては、attackStrengthTickerが（ほとんどの場合）常に0であるため、strengthScaleは0.2程度に収まってしまう。
+        // そのため、FakePlayerにおいては、strengthScaleを1.0に固定する。
+        return 1.0F;
     }
 
     @Override
@@ -126,10 +135,6 @@ public class FakePlayer extends ServerPlayer {
             {
                 // Paper end
                 float attackDamage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                System.out.println("[HELLO] attack() started - Attribute of attack damage is " + attackDamage);
-                Bukkit.getOnlinePlayers().stream().findAny().ifPresent(player -> {
-                    System.out.println(player.getName() + "'s attack damage is " + MinecraftAdapter.player(player).getAttributeValue(Attributes.ATTACK_DAMAGE));
-                });
                 float damageBonus;
 
                 if (target instanceof LivingEntity) {
@@ -138,24 +143,9 @@ public class FakePlayer extends ServerPlayer {
                     damageBonus = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), MobType.UNDEFINED);
                 }
 
-                float strengthScale = this.getAttackStrengthScale(0.5F); // TODO: attackStrengthTicker どうするか (FakePlayerは常に0になる, 普通のプレイヤーは2-3になったりする)
-                System.out.println("Strength scale is " + strengthScale + "(attackStrengthTicker = " + this.attackStrengthTicker + ", CurrentItemAttackStrengthDelay = " + this.getCurrentItemAttackStrengthDelay() + ")");
-                Bukkit.getOnlinePlayers().stream().findAny().ifPresent(player -> {
-                    ServerPlayer sp = MinecraftAdapter.player(player);
-                    int attackStrengthTicker = -1;
-                    try {
-                        Field f = ObfuscationUtil.getClassByMojangName("net.minecraft.world.entity.LivingEntity").getFieldByMojangName("attackStrengthTicker").getField();
-                        if (f.trySetAccessible()) {
-                            attackStrengthTicker = (int) f.get(sp);
-                        }
-                    } catch (NoSuchFieldException | IllegalAccessException e) {
-                        // ignored
-                    }
-                    System.out.println(player.getName() + "'s strength scale is " + sp.getAttackStrengthScale(0.5F) + "(attackStrengthTicker = " + attackStrengthTicker + ", CurrentItemAttackStrengthDelay = " + sp.getCurrentItemAttackStrengthDelay() + ")");
-                });
+                float strengthScale = this.getAttackStrengthScale(0.5F);
 
                 attackDamage *= 0.2F + strengthScale * strengthScale * 0.8F;
-                System.out.println("2nd attackDamage is " + attackDamage);
                 damageBonus *= strengthScale;
                 // this.resetAttackCooldown(); // CraftBukkit - Moved to EntityLiving to reset the cooldown after the damage is dealt
                 if (attackDamage > 0.0F || damageBonus > 0.0F) {
@@ -172,31 +162,31 @@ public class FakePlayer extends ServerPlayer {
 
                     boolean critical = true;// charged && this.fallDistance > 0.0F && !this.onGround() && !this.onClimbable() && !this.isInWater() && !this.hasEffect(MobEffects.BLINDNESS) && !this.isPassenger() && target instanceof LivingEntity; // Paper - Add critical damage API - conflict on change
 
-                    critical = critical && !this.level().paperConfig().entities.behavior.disablePlayerCrits; // Paper
-                    critical = critical && !this.isSprinting();
+                    // critical = critical && !this.level().paperConfig().entities.behavior.disablePlayerCrits; // Paper // Disable - this is not a player
+                    // critical = critical && !this.isSprinting(); // Disable - this is not a player, always critical.
                     if (critical) {
                         attackDamage *= 1.5F;
                     }
 
                     attackDamage += damageBonus;
-                    boolean flag3 = false;
-                    double d0 = (double) (this.walkDist - this.walkDistO);
+                    boolean sweepAttack = false; // Unknown Network: If always critical hit, sweep attack is always false.
+                    double d0 = this.walkDist - this.walkDistO;
 
                     if (charged && !critical && !criticalKnockback && this.onGround() && d0 < (double) this.getSpeed()) {
                         ItemStack itemstack = this.getItemInHand(InteractionHand.MAIN_HAND);
 
                         if (itemstack.getItem() instanceof SwordItem) {
-                            flag3 = true;
+                            sweepAttack = true;
                         }
                     }
 
                     float f3 = 0.0F;
                     boolean flag4 = false;
-                    int j = EnchantmentHelper.getFireAspect(this);
+                    int fireAspect = EnchantmentHelper.getFireAspect(this);
 
                     if (target instanceof LivingEntity) {
                         f3 = ((LivingEntity) target).getHealth();
-                        if (j > 0 && !target.isOnFire()) {
+                        if (fireAspect > 0 && !target.isOnFire()) {
                             // CraftBukkit start - Call a combust event when somebody hits with a fire enchanted item
                             EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), target.getBukkitEntity(), 1);
                             org.bukkit.Bukkit.getPluginManager().callEvent(combustEvent);
@@ -211,15 +201,13 @@ public class FakePlayer extends ServerPlayer {
 
                     Vec3 vec3d = target.getDeltaMovement();
                     boolean damaged = target.hurt(this.damageSources().playerAttack(this).critical(critical), attackDamage); // Paper - add critical damage API
-                    if (damaged) System.out.println("Successfully damaged to entity, damage is  " + attackDamage);
-                    else System.out.println("Failed to damage to entity, damage is " + attackDamage);
 
                     if (damaged) {
                         if (knockback > 0) {
                             if (target instanceof LivingEntity) {
-                                ((LivingEntity) target).knockback((double) ((float) knockback * 0.5F), (double) Mth.sin(this.getYRot() * 0.017453292F), (double) (-Mth.cos(this.getYRot() * 0.017453292F)), this); // Paper
+                                ((LivingEntity) target).knockback((float) knockback * 0.5F, Mth.sin(this.getYRot() * 0.017453292F), -Mth.cos(this.getYRot() * 0.017453292F), this); // Paper
                             } else {
-                                target.push((double) (-Mth.sin(this.getYRot() * 0.017453292F) * (float) knockback * 0.5F), 0.1D, (double) (Mth.cos(this.getYRot() * 0.017453292F) * (float) knockback * 0.5F), this); // Paper
+                                target.push(-Mth.sin(this.getYRot() * 0.017453292F) * (float) knockback * 0.5F, 0.1D, Mth.cos(this.getYRot() * 0.017453292F) * (float) knockback * 0.5F, this); // Paper
                             }
 
                             this.setDeltaMovement(this.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
@@ -230,15 +218,15 @@ public class FakePlayer extends ServerPlayer {
                             // Paper end
                         }
 
-                        if (flag3) {
+                        if (sweepAttack) {
                             float f4 = 1.0F + EnchantmentHelper.getSweepingDamageRatio(this) * attackDamage;
                             List<LivingEntity> list = this.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(1.0D, 0.25D, 1.0D));
 
                             for (LivingEntity entityliving : list) {
-                                if (entityliving != this && entityliving != target && !this.isAlliedTo((Entity) entityliving) && (!(entityliving instanceof ArmorStand) || !((ArmorStand) entityliving).isMarker()) && this.distanceToSqr((Entity) entityliving) < 9.0D) {
+                                if (entityliving != this && entityliving != target && !this.isAlliedTo(entityliving) && (!(entityliving instanceof ArmorStand) || !((ArmorStand) entityliving).isMarker()) && this.distanceToSqr(entityliving) < 9.0D) {
                                     // CraftBukkit start - Only apply knockback if the damage hits
                                     if (entityliving.hurt(this.damageSources().playerAttack(this).sweep().critical(critical), f4)) { // Paper - add critical damage API
-                                        entityliving.knockback(0.4000000059604645D, (double) Mth.sin(this.getYRot() * 0.017453292F), (double) (-Mth.cos(this.getYRot() * 0.017453292F)), this); // Pa
+                                        entityliving.knockback(0.4000000059604645D, Mth.sin(this.getYRot() * 0.017453292F), -Mth.cos(this.getYRot() * 0.017453292F), this); // Pa
                                     }
                                     // CraftBukkit end
                                 }
@@ -276,7 +264,7 @@ public class FakePlayer extends ServerPlayer {
                             this.crit(target);
                         }
 
-                        if (!critical && !flag3) {
+                        if (!critical && !sweepAttack) {
                             if (charged) {
                                 //sendSoundEffect(this, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.getSoundSource(), 1.0F, 1.0F); // Paper - send while respecting visibility
                             } else {
@@ -312,9 +300,9 @@ public class FakePlayer extends ServerPlayer {
                             float f5 = f3 - ((LivingEntity) target).getHealth();
 
                             this.awardStat(Stats.DAMAGE_DEALT, Math.round(f5 * 10.0F));
-                            if (j > 0) {
+                            if (fireAspect > 0) {
                                 // CraftBukkit start - Call a combust event when somebody hits with a fire enchanted item
-                                EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), target.getBukkitEntity(), j * 4);
+                                EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), target.getBukkitEntity(), fireAspect * 4);
                                 org.bukkit.Bukkit.getPluginManager().callEvent(combustEvent);
 
                                 if (!combustEvent.isCancelled()) {

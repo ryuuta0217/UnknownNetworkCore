@@ -29,77 +29,51 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.data.model.vote.impl;
+package net.unknown.survival.vote.data;
 
-import net.unknown.core.managers.EvalManager;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.core.util.MinecraftAdapter;
-import net.unknown.survival.data.VoteTicketExchangeItems;
-import net.unknown.survival.data.model.vote.ExchangeItem;
-import net.unknown.survival.data.model.vote.ExchangeItemType;
+import net.unknown.survival.vote.data.impl.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
-import org.mozilla.javascript.Function;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.Map;
 
-public class SimpleExchangeItem implements ExchangeItem {
-    @Nullable protected ItemStack item;
-    protected int price;
-
-    public SimpleExchangeItem(@Nullable ItemStack item, int price) {
-        this.item = item;
-        this.price = price;
+public interface ExchangeItem {
+    static SimpleExchangeItem ofSimple(ItemStack item, int price) {
+        return new SimpleExchangeItem(item, price);
     }
 
-    @Override
-    public ExchangeItemType getType() {
-        return ExchangeItemType.SIMPLE;
+    static SimpleRandomExchangeItem ofSimpleRandom(ItemStack displayItem, @Nonnull Map<String, ItemStack> choices, int price) {
+        return new SimpleRandomExchangeItem(displayItem, choices, price);
     }
 
-    @Override
-    @Nullable
-    public ItemStack getItem(@Nullable HumanEntity player, @Nullable String choiceIdentifier) {
-        return this.item;
+    static ContainerExchangeItem ofContainer(ItemStack displayItem, ItemStack container, ItemStack item, int stacks, int price) {
+        return new ContainerExchangeItem(displayItem, container, item, stacks, price);
     }
 
-    @Nullable
-    public ItemStack getDisplayItem(HumanEntity player) {
-        return this.item;
+    static SelectableContainerExchangeItem ofSelectableContainer(ItemStack displayItem, ItemStack container, @Nonnull Map<String, ItemStack> choices, int stacks, int price) {
+        return new SelectableContainerExchangeItem(displayItem, container, choices, stacks, price);
     }
 
-    public void setItem(ItemStack item) {
-        this.item = item;
+    static ScriptExchangeItem ofScript(String getItem, String getPrice, String getDisplayItem, String onExchanged) {
+        return new ScriptExchangeItem(getItem, getPrice, getDisplayItem, onExchanged);
+    }
+
+    default boolean hasMultipleChoices() {
+        return this instanceof SelectableItem;
+    }
+    ExchangeItemType getType();
+    ItemStack getDisplayItem(@Nullable HumanEntity exchanger);
+    void setDisplayItem(ItemStack item);
+    ItemStack getItem(@Nullable HumanEntity exchanger, @Nullable String choiceIdentifier);
+    void setItem(ItemStack item);
+    int getPrice(@Nullable HumanEntity exchanger);
+    void setPrice(int price);
+    default void save() {
         RunnableManager.runAsync(VoteTicketExchangeItems.getInstance()::save);
     }
-
-    @Override
-    public int getPrice(@Nullable HumanEntity exchanger) {
-        return this.price;
-    }
-
-    @Override
-    public void setPrice(int price) {
-        this.price = price;
-        this.save();
-    }
-
-    @Nullable
-    public static SimpleExchangeItem load(ConfigurationSection config) {
-        if (config.isSet("price")) {
-            ItemStack item = config.isSet("item") ? MinecraftAdapter.ItemStack.itemStack(MinecraftAdapter.ItemStack.json(config.getString("item"))) : null;
-            int price = config.getInt("price");
-            return new SimpleExchangeItem(item, price);
-        }
-        return null;
-    }
-
-    @Override
-    public void write(ConfigurationSection config) {
-        config.set("item", this.item);
-        config.set("price", this.price);
-    }
+    void write(ConfigurationSection config);
 }

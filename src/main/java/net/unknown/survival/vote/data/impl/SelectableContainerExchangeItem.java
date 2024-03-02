@@ -29,11 +29,11 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.data.model.vote.impl;
+package net.unknown.survival.vote.data.impl;
 
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.util.MinecraftAdapter;
-import net.unknown.survival.data.model.vote.SelectableItem;
+import net.unknown.survival.vote.data.SelectableItem;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.configuration.ConfigurationSection;
@@ -42,6 +42,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.HashMap;
@@ -51,7 +52,7 @@ import java.util.stream.Collectors;
 public class SelectableContainerExchangeItem extends ContainerExchangeItem implements SelectableItem {
     protected Map<String, ItemStack> choices;
 
-    public SelectableContainerExchangeItem(ItemStack displayItem, ItemStack container, Map<String, ItemStack> choices, int stacks, int price) {
+    public SelectableContainerExchangeItem(ItemStack displayItem, ItemStack container, @Nonnull Map<String, ItemStack> choices, int stacks, int price) {
         super(displayItem, container, null, stacks, price);
         this.choices = new HashMap<>(choices); // always Mutable
     }

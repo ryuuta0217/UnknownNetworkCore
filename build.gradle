@@ -9,10 +9,10 @@ plugins {
     id 'application'
     id 'maven-publish'
     id 'io.papermc.paperweight.userdev' version '1.5.+' // Enable Development of using Mojang Mapping.
-    id 'xyz.jpenilla.run-paper' version '2.2.0' // Run Mojang Mapped or Spigot Mapped Server
-    id 'com.github.johnrengelman.shadow' version '7.1.0' // fatJar
-    id 'org.cadixdev.licenser' version '0.6.1' // Add License Header to source code headers.
-    id "de.undercouch.download" version "4.1.2" // File Downloader
+    id 'xyz.jpenilla.run-paper' version '+' // Run Mojang Mapped or Spigot Mapped Server
+    id 'com.github.johnrengelman.shadow' version '+' // fatJar
+    id 'org.cadixdev.licenser' version '+' // Add License Header to source code headers.
+    id "de.undercouch.download" version "+" // File Downloader
     id 'com.palantir.git-version' version '+' // Git Information Getter
 }
 
@@ -96,6 +96,7 @@ jar {
 
 shadowJar {
     archiveFileName = archiveBaseName.get() + "-mojang." + archiveExtension.get()
+    archiveClassifier = 'mojang'
 }
 
 reobfJar {
@@ -129,8 +130,8 @@ task downloadWaterfall(type: Task) {
     var wf = new File("libs/standalone/waterfall.jar")
 
     if (!wf.exists()) {
-        download {
-            src "https://api.papermc.io/v2/projects/waterfall/versions/1.19/builds/526/downloads/waterfall-1.19-526.jar"
+        download.run {
+            src "https://api.papermc.io/v2/projects/waterfall/versions/1.20/builds/565/downloads/waterfall-1.20-565.jar"
             dest 'libs/standalone/waterfall.jar'
         }
 
@@ -167,10 +168,14 @@ task reCompressWaterfall(type: Zip, dependsOn: downloadWaterfall) {
     archiveFileName = "waterfall.jar"
 }
 
+compileJava.dependsOn(reCompressWaterfall)
+
 task copyArtifactToProxy(type: Copy) {
     from project.file("build/libs/UnknownNetworkCore.jar")
     into project.file("testProxy/plugins")
 }
+
+publish.dependsOn(reobfJar)
 
 artifacts {
     jar
@@ -186,10 +191,13 @@ publishing {
             groupId = 'net.unknown'
             artifactId = project.name
             version = version
-            artifact "build/libs/UnknownNetworkCore.jar"
 
-            artifact("build/libs/UnknownNetworkCore-mojang.jar") {
-                classifier "mojang"
+            artifact(reobfJar.outputJar) {
+                classifier = null
+            }
+
+            artifact(shadowJar) {
+                classifier = 'mojang'
             }
 
             pom {

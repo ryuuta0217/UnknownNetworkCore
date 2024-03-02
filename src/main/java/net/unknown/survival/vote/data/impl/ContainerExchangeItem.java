@@ -29,11 +29,11 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.data.model.vote.impl;
+package net.unknown.survival.vote.data.impl;
 
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.util.MinecraftAdapter;
-import net.unknown.survival.data.model.vote.ExchangeItemType;
+import net.unknown.survival.vote.data.ExchangeItemType;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
 import org.bukkit.configuration.ConfigurationSection;
@@ -66,6 +66,12 @@ public class ContainerExchangeItem extends SimpleExchangeItem {
     @Override
     public ItemStack getDisplayItem(@Nullable HumanEntity exchanger) {
         return this.displayItem;
+    }
+
+    @Override
+    public void setDisplayItem(ItemStack item) {
+        this.displayItem = item;
+        this.save();
     }
 
     public ItemStack getContainer(@Nullable HumanEntity exchanger) {

@@ -29,11 +29,11 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.data.model.vote.impl;
+package net.unknown.survival.vote.data.impl;
 
 import net.unknown.core.managers.EvalManager;
-import net.unknown.survival.data.model.vote.ExchangeItem;
-import net.unknown.survival.data.model.vote.ExchangeItemType;
+import net.unknown.survival.vote.data.ExchangeItem;
+import net.unknown.survival.vote.data.ExchangeItemType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
@@ -68,6 +68,11 @@ public class ScriptExchangeItem implements ExchangeItem {
     @Override
     public ItemStack getDisplayItem(@Nullable HumanEntity exchanger) {
         return this.execGetDisplayFunction(exchanger);
+    }
+
+    @Override
+    public void setDisplayItem(ItemStack item) {
+        throw new UnsupportedOperationException("Can't set script displayItem");
     }
 
     @Override

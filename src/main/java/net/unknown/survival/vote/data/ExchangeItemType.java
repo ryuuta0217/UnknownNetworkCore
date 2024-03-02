@@ -29,22 +29,12 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.data.model.vote;
+package net.unknown.survival.vote.data;
 
-import org.bukkit.inventory.ItemStack;
-
-import javax.annotation.Nullable;
-import java.util.Map;
-
-public interface SelectableItem extends ExchangeItem {
-    @Override
-    default boolean hasMultipleChoices() {
-        return true;
-    }
-    Map<String, ItemStack> getChoices();
-    boolean hasChoice(String identifier);
-    @Nullable
-    ItemStack getChoice(String identifier);
-    void addChoice(String identifier, ItemStack choice);
-    boolean removeChoice(String identifier);
+public enum ExchangeItemType {
+    SIMPLE,
+    SIMPLE_RANDOM,
+    CONTAINER,
+    SELECTABLE_CONTAINER,
+    SCRIPT
 }

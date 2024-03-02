@@ -41,7 +41,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.phys.AABB;
@@ -156,11 +155,6 @@ public class Crusher implements Listener {
             super((ServerLevel) dispenser.getLevel(), dispenser.getName().getString(), uniqueId);
             this.dispenser = dispenser;
             this.moveTo(dispenser.getBlockPos(), 0.0f, 0.0f);
-        }
-
-        @Override
-        public void setLevel(Level world) {
-            this.dispenser.setLevel(world);
         }
     }
 }

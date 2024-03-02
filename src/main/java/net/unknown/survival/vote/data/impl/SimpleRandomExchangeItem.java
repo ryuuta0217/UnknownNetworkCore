@@ -29,15 +29,15 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.data.model.vote.impl;
+package net.unknown.survival.vote.data.impl;
 
 import net.unknown.core.util.MinecraftAdapter;
-import net.unknown.survival.data.model.vote.ExchangeItemType;
-import net.unknown.survival.data.model.vote.SelectableItem;
+import net.unknown.survival.vote.data.ExchangeItemType;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,7 +45,7 @@ import java.util.stream.Collectors;
 public class SimpleRandomExchangeItem extends SimpleExchangeItem {
     protected final Map<String, ItemStack> choices;
 
-    public SimpleRandomExchangeItem(ItemStack displayItem, Map<String, ItemStack> choices, int price) {
+    public SimpleRandomExchangeItem(ItemStack displayItem, @Nonnull Map<String, ItemStack> choices, int price) {
         super(displayItem, price);
         this.choices = new HashMap<>(choices); // always mutable
     }
