@@ -160,7 +160,7 @@ public class FakePlayer extends ServerPlayer {
                     }
 
                     attackDamage += damageBonus;
-                    boolean sweepAttack = false;
+                    boolean sweepAttack = false; // Unknown Network: If always critical hit, sweep attack is always false.
                     double d0 = this.walkDist - this.walkDistO;
 
                     if (charged && !critical && !criticalKnockback && this.onGround() && d0 < (double) this.getSpeed()) {
