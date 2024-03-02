@@ -153,8 +153,8 @@ public class FakePlayer extends ServerPlayer {
 
                     boolean critical = true;// charged && this.fallDistance > 0.0F && !this.onGround() && !this.onClimbable() && !this.isInWater() && !this.hasEffect(MobEffects.BLINDNESS) && !this.isPassenger() && target instanceof LivingEntity; // Paper - Add critical damage API - conflict on change
 
-                    critical = critical && !this.level().paperConfig().entities.behavior.disablePlayerCrits; // Paper
-                    critical = critical && !this.isSprinting();
+                    // critical = critical && !this.level().paperConfig().entities.behavior.disablePlayerCrits; // Paper // Disable - this is not a player
+                    // critical = critical && !this.isSprinting(); // Disable - this is not a player, always critical.
                     if (critical) {
                         attackDamage *= 1.5F;
                     }
