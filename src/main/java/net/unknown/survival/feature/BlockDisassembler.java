@@ -37,6 +37,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -79,13 +80,17 @@ public class BlockDisassembler implements Listener {
                 BlockState targetState = level.getBlockStateIfLoaded(targetPos);
                 if (targetState == null || targetState.isAir()) return; // 空気だったり読み込まれてなかったらやめる
 
-                BlockBreakEvent bbEvent = new BlockBreakEvent(CraftBlock.at(level, targetPos), new FakePlayer(dispenser, mixinBlockEntity.getPlacer()).getBukkitEntity());
+                ItemStack shootItem = event.getItem();
+                if (targetState.getBlock() != Blocks.BEDROCK && !shootItem.getItem().isCorrectToolForDrops(targetState)) return; // 適正ツールじゃないならやめる
+                if (shootItem.getMaxDamage() - shootItem.getDamageValue() == 1) return; // 次のブロック破壊で壊れそうならやめる
+
+                FakePlayer player = new FakePlayer(dispenser, mixinBlockEntity.getPlacer());
+                player.setItemInHand(InteractionHand.MAIN_HAND, shootItem);
+
+                BlockBreakEvent bbEvent = new BlockBreakEvent(CraftBlock.at(level, targetPos), player.getBukkitEntity());
                 Bukkit.getPluginManager().callEvent(bbEvent);
 
                 if (!bbEvent.isCancelled()) {
-                    ItemStack shootItem = event.getItem();
-                    if (targetState.getBlock() != Blocks.BEDROCK && !shootItem.getItem().isCorrectToolForDrops(targetState)) return; // 適正ツールじゃないならやめる
-                    if (shootItem.getMaxDamage() - shootItem.getDamageValue() == 1) return; // 次のブロック破壊で壊れそうならやめる
                     shootItem.hurt(1, level.random, null);
 
                     destroyBlockWithDrops(level, targetPos, shootItem).forEach(dropItem -> {
