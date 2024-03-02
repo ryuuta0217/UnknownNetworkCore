@@ -106,8 +106,17 @@ public class FakePlayer extends ServerPlayer {
 
     @Override
     public float getAttackStrengthScale(float baseTime) {
-        return super.getAttackStrengthScale(baseTime);
-        //return 1.0F; // Always returns 1.0F (charged)
+        // 通常、strengthScaleは以下の計算式で計算される:
+        // Mth.clamp((this.attackStrengthTicker + baseTime) / this.getCurrentItemAttackStrengthDelay(), 0.0F, 1.0F);
+        // attackStrengthTicker は、tick() で常に加算され続け、以下の場合に0にリセットされる:
+        // ・プレイヤーがアイテムを持ち替えた場合。
+        // ・プレイヤーが右クリックを行った場合。(swingHand)
+        // baseTime は通常、0.5F が渡される。
+        // getCurrentItemAttackStrengthDelay() は以下の計算式で計算される:
+        // (float) (1.0D / this.getAttributeValue(Attributes.ATTACK_SPEED) * 20.0D);
+        // つまり、FakePlayerにおいては、attackStrengthTickerが（ほとんどの場合）常に0であるため、strengthScaleは0.2程度に収まってしまう。
+        // そのため、FakePlayerにおいては、strengthScaleを1.0に固定する。
+        return 1.0F;
     }
 
     @Override
@@ -134,7 +143,7 @@ public class FakePlayer extends ServerPlayer {
                     damageBonus = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), MobType.UNDEFINED);
                 }
 
-                float strengthScale = this.getAttackStrengthScale(0.5F); // TODO: attackStrengthTicker どうするか (FakePlayerは常に0になる, 普通のプレイヤーは2-3になったりする)
+                float strengthScale = this.getAttackStrengthScale(0.5F);
 
                 attackDamage *= 0.2F + strengthScale * strengthScale * 0.8F;
                 damageBonus *= strengthScale;
