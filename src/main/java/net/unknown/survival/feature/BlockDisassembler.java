@@ -95,7 +95,7 @@ public class BlockDisassembler implements Listener {
                     shootItem.hurt(1, level.random, null);
 
                     destroyBlockWithDrops(level, targetPos, shootItem).forEach(dropItem -> {
-                        Block.popResource(level, targetPos, dropItem);
+                        if (bbEvent.isDropItems()) Block.popResource(level, targetPos, dropItem);
                     });
                 }
             }
