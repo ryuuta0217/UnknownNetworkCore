@@ -126,10 +126,6 @@ public class FakePlayer extends ServerPlayer {
             {
                 // Paper end
                 float attackDamage = (float) this.getAttributeValue(Attributes.ATTACK_DAMAGE);
-                System.out.println("[HELLO] attack() started - Attribute of attack damage is " + attackDamage);
-                Bukkit.getOnlinePlayers().stream().findAny().ifPresent(player -> {
-                    System.out.println(player.getName() + "'s attack damage is " + MinecraftAdapter.player(player).getAttributeValue(Attributes.ATTACK_DAMAGE));
-                });
                 float damageBonus;
 
                 if (target instanceof LivingEntity) {
@@ -139,23 +135,8 @@ public class FakePlayer extends ServerPlayer {
                 }
 
                 float strengthScale = this.getAttackStrengthScale(0.5F); // TODO: attackStrengthTicker どうするか (FakePlayerは常に0になる, 普通のプレイヤーは2-3になったりする)
-                System.out.println("Strength scale is " + strengthScale + "(attackStrengthTicker = " + this.attackStrengthTicker + ", CurrentItemAttackStrengthDelay = " + this.getCurrentItemAttackStrengthDelay() + ")");
-                Bukkit.getOnlinePlayers().stream().findAny().ifPresent(player -> {
-                    ServerPlayer sp = MinecraftAdapter.player(player);
-                    int attackStrengthTicker = -1;
-                    try {
-                        Field f = ObfuscationUtil.getClassByMojangName("net.minecraft.world.entity.LivingEntity").getFieldByMojangName("attackStrengthTicker").getField();
-                        if (f.trySetAccessible()) {
-                            attackStrengthTicker = (int) f.get(sp);
-                        }
-                    } catch (NoSuchFieldException | IllegalAccessException e) {
-                        // ignored
-                    }
-                    System.out.println(player.getName() + "'s strength scale is " + sp.getAttackStrengthScale(0.5F) + "(attackStrengthTicker = " + attackStrengthTicker + ", CurrentItemAttackStrengthDelay = " + sp.getCurrentItemAttackStrengthDelay() + ")");
-                });
 
                 attackDamage *= 0.2F + strengthScale * strengthScale * 0.8F;
-                System.out.println("2nd attackDamage is " + attackDamage);
                 damageBonus *= strengthScale;
                 // this.resetAttackCooldown(); // CraftBukkit - Moved to EntityLiving to reset the cooldown after the damage is dealt
                 if (attackDamage > 0.0F || damageBonus > 0.0F) {
@@ -211,8 +192,6 @@ public class FakePlayer extends ServerPlayer {
 
                     Vec3 vec3d = target.getDeltaMovement();
                     boolean damaged = target.hurt(this.damageSources().playerAttack(this).critical(critical), attackDamage); // Paper - add critical damage API
-                    if (damaged) System.out.println("Successfully damaged to entity, damage is  " + attackDamage);
-                    else System.out.println("Failed to damage to entity, damage is " + attackDamage);
 
                     if (damaged) {
                         if (knockback > 0) {
