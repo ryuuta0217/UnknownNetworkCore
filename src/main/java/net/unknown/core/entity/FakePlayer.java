@@ -160,24 +160,24 @@ public class FakePlayer extends ServerPlayer {
                     }
 
                     attackDamage += damageBonus;
-                    boolean flag3 = false;
-                    double d0 = (double) (this.walkDist - this.walkDistO);
+                    boolean sweepAttack = false;
+                    double d0 = this.walkDist - this.walkDistO;
 
                     if (charged && !critical && !criticalKnockback && this.onGround() && d0 < (double) this.getSpeed()) {
                         ItemStack itemstack = this.getItemInHand(InteractionHand.MAIN_HAND);
 
                         if (itemstack.getItem() instanceof SwordItem) {
-                            flag3 = true;
+                            sweepAttack = true;
                         }
                     }
 
                     float f3 = 0.0F;
                     boolean flag4 = false;
-                    int j = EnchantmentHelper.getFireAspect(this);
+                    int fireAspect = EnchantmentHelper.getFireAspect(this);
 
                     if (target instanceof LivingEntity) {
                         f3 = ((LivingEntity) target).getHealth();
-                        if (j > 0 && !target.isOnFire()) {
+                        if (fireAspect > 0 && !target.isOnFire()) {
                             // CraftBukkit start - Call a combust event when somebody hits with a fire enchanted item
                             EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), target.getBukkitEntity(), 1);
                             org.bukkit.Bukkit.getPluginManager().callEvent(combustEvent);
@@ -196,9 +196,9 @@ public class FakePlayer extends ServerPlayer {
                     if (damaged) {
                         if (knockback > 0) {
                             if (target instanceof LivingEntity) {
-                                ((LivingEntity) target).knockback((double) ((float) knockback * 0.5F), (double) Mth.sin(this.getYRot() * 0.017453292F), (double) (-Mth.cos(this.getYRot() * 0.017453292F)), this); // Paper
+                                ((LivingEntity) target).knockback((float) knockback * 0.5F, Mth.sin(this.getYRot() * 0.017453292F), -Mth.cos(this.getYRot() * 0.017453292F), this); // Paper
                             } else {
-                                target.push((double) (-Mth.sin(this.getYRot() * 0.017453292F) * (float) knockback * 0.5F), 0.1D, (double) (Mth.cos(this.getYRot() * 0.017453292F) * (float) knockback * 0.5F), this); // Paper
+                                target.push(-Mth.sin(this.getYRot() * 0.017453292F) * (float) knockback * 0.5F, 0.1D, Mth.cos(this.getYRot() * 0.017453292F) * (float) knockback * 0.5F, this); // Paper
                             }
 
                             this.setDeltaMovement(this.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
@@ -209,15 +209,15 @@ public class FakePlayer extends ServerPlayer {
                             // Paper end
                         }
 
-                        if (flag3) {
+                        if (sweepAttack) {
                             float f4 = 1.0F + EnchantmentHelper.getSweepingDamageRatio(this) * attackDamage;
                             List<LivingEntity> list = this.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate(1.0D, 0.25D, 1.0D));
 
                             for (LivingEntity entityliving : list) {
-                                if (entityliving != this && entityliving != target && !this.isAlliedTo((Entity) entityliving) && (!(entityliving instanceof ArmorStand) || !((ArmorStand) entityliving).isMarker()) && this.distanceToSqr((Entity) entityliving) < 9.0D) {
+                                if (entityliving != this && entityliving != target && !this.isAlliedTo(entityliving) && (!(entityliving instanceof ArmorStand) || !((ArmorStand) entityliving).isMarker()) && this.distanceToSqr(entityliving) < 9.0D) {
                                     // CraftBukkit start - Only apply knockback if the damage hits
                                     if (entityliving.hurt(this.damageSources().playerAttack(this).sweep().critical(critical), f4)) { // Paper - add critical damage API
-                                        entityliving.knockback(0.4000000059604645D, (double) Mth.sin(this.getYRot() * 0.017453292F), (double) (-Mth.cos(this.getYRot() * 0.017453292F)), this); // Pa
+                                        entityliving.knockback(0.4000000059604645D, Mth.sin(this.getYRot() * 0.017453292F), -Mth.cos(this.getYRot() * 0.017453292F), this); // Pa
                                     }
                                     // CraftBukkit end
                                 }
@@ -255,7 +255,7 @@ public class FakePlayer extends ServerPlayer {
                             this.crit(target);
                         }
 
-                        if (!critical && !flag3) {
+                        if (!critical && !sweepAttack) {
                             if (charged) {
                                 //sendSoundEffect(this, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_STRONG, this.getSoundSource(), 1.0F, 1.0F); // Paper - send while respecting visibility
                             } else {
@@ -291,9 +291,9 @@ public class FakePlayer extends ServerPlayer {
                             float f5 = f3 - ((LivingEntity) target).getHealth();
 
                             this.awardStat(Stats.DAMAGE_DEALT, Math.round(f5 * 10.0F));
-                            if (j > 0) {
+                            if (fireAspect > 0) {
                                 // CraftBukkit start - Call a combust event when somebody hits with a fire enchanted item
-                                EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), target.getBukkitEntity(), j * 4);
+                                EntityCombustByEntityEvent combustEvent = new EntityCombustByEntityEvent(this.getBukkitEntity(), target.getBukkitEntity(), fireAspect * 4);
                                 org.bukkit.Bukkit.getPluginManager().callEvent(combustEvent);
 
                                 if (!combustEvent.isCancelled()) {
