@@ -57,7 +57,7 @@ public class PlayerJoinListener implements Listener {
         }
     }
 
-    @EventHandler(ignoreCancelled = true)
+    @EventHandler
     public void onPlayerJoined(PlayerJoinEvent event) {
         if (!event.getPlayer().hasPlayedBefore()) {
             event.joinMessage(Component.text(event.getPlayer().getName() + " が初めてゲームに参加しました", DefinedTextColor.YELLOW));
@@ -74,7 +74,7 @@ public class PlayerJoinListener implements Listener {
             long diff = now - lastLogin;
             if (lastLogin > 0 && diff > TimeUnit.HOURS.toMillis(1)) {
                 // 1時間以上前にログインしていた場合
-                event.joinMessage(Component.text(event.getPlayer().getName() + " が" + getFormattedTime(diff) + "ぶりにログインしました", DefinedTextColor.YELLOW));
+                if (event.joinMessage() != null) event.joinMessage(Component.text(event.getPlayer().getName() + " が" + getFormattedTime(diff) + "ぶりにログインしました", DefinedTextColor.YELLOW));
             }
         }
         LAST_SEEN.remove(event.getPlayer().getUniqueId());
