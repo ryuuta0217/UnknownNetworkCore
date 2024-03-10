@@ -69,9 +69,22 @@ public class CustomChatTypes {
                     Style.EMPTY));
     public static final net.kyori.adventure.chat.ChatType PRIVATE_MESSAGE_OUTGOING_ADVENTURE = net.kyori.adventure.chat.ChatType.chatType(NamespacedKey.fromString(PRIVATE_MESSAGE_OUTGOING.location().toString()));
 
+    public static final ResourceKey<ChatType> PRIVATE_MESSAGE = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("private_message"));
+    public static final ChatType VALUE_PRIVATE_MESSAGE = new ChatType(
+            new ChatTypeDecoration( // for chat view
+                    "§b[PM]§r [%s] %s",
+                    List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT),
+                    Style.EMPTY),
+            new ChatTypeDecoration( // for narration
+                    "%s が %s に %s と言いました",
+                    List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.TARGET, ChatTypeDecoration.Parameter.CONTENT),
+                    Style.EMPTY));
+    public static final net.kyori.adventure.chat.ChatType PRIVATE_MESSAGE_ADVENTURE = net.kyori.adventure.chat.ChatType.chatType(NamespacedKey.fromString(PRIVATE_MESSAGE.location().toString()));
+
     public static void bootstrap() {
         register(Registries.CHAT_TYPE, PRIVATE_MESSAGE_INCOMING, VALUE_PRIVATE_MESSAGE_INCOMING);
         register(Registries.CHAT_TYPE, PRIVATE_MESSAGE_OUTGOING, VALUE_PRIVATE_MESSAGE_OUTGOING);
+        register(Registries.CHAT_TYPE, PRIVATE_MESSAGE, VALUE_PRIVATE_MESSAGE);
     }
 
     @SuppressWarnings("unchecked")
