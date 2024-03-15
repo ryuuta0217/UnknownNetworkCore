@@ -40,6 +40,9 @@ import net.unknown.core.bossbar.TPSBar;
 import net.unknown.core.chat.CustomChatTypes;
 import net.unknown.core.commands.Commands;
 import net.unknown.core.feature.PrivateMessageListener;
+import net.unknown.core.feature.admin.spy.Spy;
+import net.unknown.core.feature.admin.spy.modules.CommandSpy;
+import net.unknown.core.feature.admin.spy.modules.PrivateMessageSpy;
 import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.managers.ListenerManager;
@@ -134,6 +137,8 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         Athletics.loadProgresses();
         TrashManager.loadExists();
         ThirdPartyPluginPermissionsFixer.scheduleNextTick();
+        Spy.registerModule(new CommandSpy());
+        Spy.registerModule(new PrivateMessageSpy());
         getLogger().info("");
         getLogger().info("");
         getLogger().info("""
@@ -158,6 +163,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         getLogger().info("");
         getLogger().info("");
         UnknownNetworkCore.getEnvironment().onEnable();
+        Spy.freeze();
         long end = System.nanoTime();
         getLogger().info("Plugin was enabled in " + (end - start) / 1000000 + "ms");
     }
