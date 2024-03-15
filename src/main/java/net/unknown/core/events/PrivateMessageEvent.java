@@ -53,6 +53,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -117,21 +118,21 @@ public class PrivateMessageEvent extends Event implements Cancellable {
         return this.receivers.stream().map(ServerPlayer::getBukkitEntity).collect(Collectors.toSet());
     }
 
+    @Nullable
     public Component message() {
-        return NewMessageUtil.convertMinecraft2Adventure(this.message.unsignedContent());
+        return NewMessageUtil.convertMinecraft2Adventure(this.message.decoratedContent());
     }
 
     public void message(Component message) {
-        this.message = new PlayerChatMessage(
-                SignedMessageLink.unsigned(this.source.getEntity() == null ? Util.NIL_UUID : this.source.getEntity().getUUID()),
-                null,
-                SignedMessageBody.unsigned(PlainTextComponentSerializer.plainText().serialize(message)),
-                NewMessageUtil.convertAdventure2Minecraft(message),
-                FilterMask.PASS_THROUGH);
+        this.message = this.message.withUnsignedContent(NewMessageUtil.convertAdventure2Minecraft(message));
         this.isDirty = true;
     }
 
-    public void message(PlayerChatMessage message) {
+    public PlayerChatMessage playerChatMessage() {
+        return this.message;
+    }
+
+    public void playerChatMessage(PlayerChatMessage message) {
         this.message = message;
     }
 

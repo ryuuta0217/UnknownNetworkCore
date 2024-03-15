@@ -54,6 +54,7 @@ import org.bukkit.craftbukkit.v1_20_R2.block.CraftBlock;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -81,22 +82,28 @@ public class BlockDisassembler implements Listener {
                 if (targetState == null || targetState.isAir()) return; // 空気だったり読み込まれてなかったらやめる
 
                 ItemStack shootItem = event.getItem();
-                if (targetState.getBlock() != Blocks.BEDROCK && !shootItem.getItem().isCorrectToolForDrops(targetState)) return; // 適正ツールじゃないならやめる
+                if (targetState.getBlock() == Blocks.BEDROCK) return; // 岩盤は破壊させないよーん
+                if (targetState.requiresCorrectToolForDrops() && !shootItem.getItem().isCorrectToolForDrops(targetState)) return; // 適正ツールが必要なブロックなら適正ツールチェック
                 if (shootItem.getMaxDamage() - shootItem.getDamageValue() == 1) return; // 次のブロック破壊で壊れそうならやめる
 
                 FakePlayer player = new FakePlayer(dispenser, mixinBlockEntity.getPlacer());
                 player.setItemInHand(InteractionHand.MAIN_HAND, shootItem);
 
+                PlayerInteractEvent piEvent = new PlayerInteractEvent(player.getBukkitEntity(), org.bukkit.event.block.Action.LEFT_CLICK_BLOCK, null, CraftBlock.at(level, targetPos), CraftBlock.notchToBlockFace(player.getDirection()));
+                Bukkit.getPluginManager().callEvent(piEvent);
+
+                if (piEvent.isCancelled()) return;
+
                 BlockBreakEvent bbEvent = new BlockBreakEvent(CraftBlock.at(level, targetPos), player.getBukkitEntity());
                 Bukkit.getPluginManager().callEvent(bbEvent);
 
-                if (!bbEvent.isCancelled()) {
-                    shootItem.hurt(1, level.random, null);
+                if (bbEvent.isCancelled()) return;
 
-                    destroyBlockWithDrops(level, targetPos, shootItem).forEach(dropItem -> {
-                        Block.popResource(level, targetPos, dropItem);
-                    });
-                }
+                shootItem.hurt(1, level.random, null);
+
+                destroyBlockWithDrops(level, targetPos, shootItem).forEach(dropItem -> {
+                    if (bbEvent.isDropItems()) Block.popResource(level, targetPos, dropItem);
+                });
             }
         }
     }
@@ -117,6 +124,11 @@ public class BlockDisassembler implements Listener {
             super((ServerLevel) dispenser.getLevel(), dispenser.getName().getString(), uniqueId);
             this.dispenser = dispenser;
             this.moveTo(dispenser.getBlockPos(), 0.0f, 0.0f);
+        }
+
+        @Override
+        public Direction getDirection() {
+            return this.dispenser.getBlockState().getValue(DispenserBlock.FACING);
         }
 
         @Nullable

@@ -32,9 +32,11 @@
 package net.unknown.survival.feature;
 
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
@@ -48,6 +50,7 @@ import net.minecraft.world.phys.Vec3;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.launchwrapper.event.BlockDispenseBeforeEvent;
 import net.unknown.launchwrapper.mixininterfaces.IMixinBlockEntity;
+import org.bukkit.block.Block;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.Nullable;
@@ -59,30 +62,33 @@ import java.util.UUID;
 
 // Code name: Tempest
 public class Crusher implements Listener {
+    private static final Component NAME = Component.literal("Crusher").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD);
+    public static final int RANGE = 2;
+
     @EventHandler
     public void onDispenserPreShoot(BlockDispenseBeforeEvent event) {
         DispenserBlockEntity dispenser = event.getBlockSource().blockEntity();
-        BlockPos pos = event.getBlockSource().pos();
-        if (!dispenser.hasCustomName()) return;
-        if (!PlainTextComponentSerializer.plainText().serialize(NewMessageUtil.convertMinecraft2Adventure(dispenser.getCustomName())).equals("Crusher")) return;
-        event.setCancelled(true);
+        if (dispenser.getDisplayName().contains(NAME)) {
+            BlockPos pos = event.getBlockSource().pos();
+            event.setCancelled(true);
 
-        UUID placer = ((IMixinBlockEntity) dispenser).getPlacer();
+            UUID placer = ((IMixinBlockEntity) dispenser).getPlacer();
 
-        FakePlayer player = new FakePlayer(dispenser, placer == null ? UUID.randomUUID() : placer);
-        player.setItemInHand(InteractionHand.MAIN_HAND, event.getItem());
-        if (player.getMainHandItem().equals(event.getItem())) {
-            //System.out.println("Validation completed - Dispenser's shoot item is in player's hand.");
+            FakePlayer player = new FakePlayer(dispenser, placer == null ? UUID.randomUUID() : placer);
+            player.setItemInHand(InteractionHand.MAIN_HAND, event.getItem());
+            if (player.getMainHandItem().equals(event.getItem())) {
+                //System.out.println("Validation completed - Dispenser's shoot item is in player's hand.");
+            }
+
+            List<LivingEntity> detectedEntities = getEntities(dispenser, RANGE*2, RANGE, RANGE, RANGE, RANGE);
+            detectedEntities.forEach(entity -> {
+                if (entity instanceof Player) return;
+                player.attack(entity);
+                //entity.hurt(player.damageSources().playerAttack(player), Integer.MAX_VALUE);
+                //int exp = entity.getExperienceReward();
+                //ExperienceOrb.award(event.getBlockSource().level(), Vec3.atCenterOf(new Vec3i(pos.getX(), pos.getY(), pos.getZ())), exp, org.bukkit.entity.ExperienceOrb.SpawnReason.ENTITY_DEATH, entity);
+            });
         }
-
-        List<LivingEntity> detectedEntities = getEntities(dispenser, 2, 2, 0, 2, 2);
-        detectedEntities.forEach(entity -> {
-            if (entity instanceof Player) return;
-            player.attack(entity);
-            //entity.hurt(player.damageSources().playerAttack(player), Integer.MAX_VALUE);
-            //int exp = entity.getExperienceReward();
-            //ExperienceOrb.award(event.getBlockSource().level(), Vec3.atCenterOf(new Vec3i(pos.getX(), pos.getY(), pos.getZ())), exp, org.bukkit.entity.ExperienceOrb.SpawnReason.ENTITY_DEATH, entity);
-        });
     }
 
     private static List<LivingEntity> getEntities(DispenserBlockEntity dispenser, int front, int up, int down, int left, int right) {
