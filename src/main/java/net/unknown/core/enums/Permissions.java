@@ -59,7 +59,8 @@ public enum Permissions {
     COMMAND_VANISH("unknown.core.command.vanish", "minecraft.command.vanish", 2, VanishCommand.class),
 
     FEATURE_USE_COLOR_CODE("unknown.feature.use_color_code", 2, null),
-    FEATURE_SEE_VANISHED_PLAYERS("unknown.feature.see_vanished_players", 2, null);
+    FEATURE_SEE_VANISHED_PLAYERS("unknown.feature.see_vanished_players", 2, null),
+    FEATURE_SPY("unknown.feature.spy", 2, null);
 
     private final int opLevel;
     private final String[] permissionNodes;
