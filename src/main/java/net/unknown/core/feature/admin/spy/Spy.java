@@ -139,8 +139,9 @@ public class Spy implements Listener {
                         .append(Component.text(">"))
                         .appendSpace()
                         .append(message);
-                if (sender == null) {
-                    audience.sendMessage(spyMessage);
+                audience.sendMessage(spyMessage);
+                /*if (sender == null) {
+                    // audience.sendMessage(spyMessage);
                 } else {
                     PlayerChatMessage chatMessage = PlayerChatMessage.unsigned(sender, PlainTextComponentSerializer.plainText().serialize(spyMessage))
                             .withUnsignedContent(NewMessageUtil.convertAdventure2Minecraft(spyMessage));
@@ -149,7 +150,7 @@ public class Spy implements Listener {
                     if (audienceMinecraftPlayer != null) {
                         audienceMinecraftPlayer.sendChatMessage(chatMessage, false, ChatType);
                     }
-                }
+                }*/
             } else {
                 audience.sendMessage(Component.empty()
                         .append(Component.text("[Spy]"))

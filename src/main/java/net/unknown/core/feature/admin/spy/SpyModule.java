@@ -38,6 +38,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 
 import java.util.function.Predicate;
+import java.util.UUID;
+import javax.annotation.Nullable;
 
 public interface SpyModule {
     void onRegistering();
@@ -49,15 +51,27 @@ public interface SpyModule {
     }
 
     default void broadcastSpyMessage(Component message, boolean logConsole) {
-        this.broadcastSpyMessage(message, (player) -> false, logConsole);
+        this.broadcastSpyMessage(message, logConsole, null);
+    }
+
+    default void broadcastSpyMessage(Component message, boolean logConsole, @Nullable UUID sender) {
+        this.broadcastSpyMessage(message, (player) -> false, logConsole, sender);
     }
 
     default void broadcastSpyMessage(Component message, Predicate<Player> receiverRemoveIf) {
-        this.broadcastSpyMessage(message, receiverRemoveIf, false);
+        this.broadcastSpyMessage(message, receiverRemoveIf, null);
+    }
+
+    default void broadcastSpyMessage(Component message, Predicate<Player> receiverRemoveIf, @Nullable UUID sender) {
+        this.broadcastSpyMessage(message, receiverRemoveIf, false, sender);
     }
 
     default void broadcastSpyMessage(Component message, Predicate<Player> receiverRemoveIf, boolean logConsole) {
-        Spy.broadcastSpyMessage(this, message, receiverRemoveIf, logConsole);
+        this.broadcastSpyMessage(message, receiverRemoveIf, logConsole, null);
+    }
+
+    default void broadcastSpyMessage(Component message, Predicate<Player> receiverRemoveIf, boolean logConsole, @Nullable UUID sender) {
+        Spy.broadcastSpyMessage(this, message, receiverRemoveIf, logConsole, sender);
     }
 
     default void onTickStart(ServerTickStartEvent event) {
