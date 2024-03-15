@@ -73,8 +73,8 @@ public class CustomChatTypes {
     public static final ResourceKey<ChatType> PRIVATE_MESSAGE = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("private_message"));
     public static final ChatType VALUE_PRIVATE_MESSAGE = new ChatType(
             new ChatTypeDecoration( // for chat view
-                    "§b[PM]§r [%s] %s",
-                    List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT),
+                    "§b[PM]§r [%s -> %s] %s",
+                    List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.TARGET, ChatTypeDecoration.Parameter.CONTENT),
                     Style.EMPTY),
             new ChatTypeDecoration( // for narration
                     "%s が %s に %s と言いました",
