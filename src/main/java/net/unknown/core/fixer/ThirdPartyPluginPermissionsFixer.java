@@ -39,6 +39,7 @@ import org.bukkit.command.SimpleCommandMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -70,7 +71,7 @@ public class ThirdPartyPluginPermissionsFixer {
                     String k = e.getKey();
                     PluginCommand v = e.getValue();
 
-                    if (v.getPermission() == null) v.setPermission("multiverse.core.command." + v.getName());
+                    if (v.getPermission() == null) updatePermission(v, "multiverse.core.command." + v.getName());
                 });
     }
 
@@ -85,7 +86,7 @@ public class ThirdPartyPluginPermissionsFixer {
                     String k = e.getKey();
                     PluginCommand v = e.getValue();
 
-                    if (v.getPermission() == null) v.setPermission("multiverse.inventories.command." + v.getName());
+                    if (v.getPermission() == null) updatePermission(v, "multiverse.inventories.command." + v.getName());
                 });
     }
 
@@ -100,7 +101,7 @@ public class ThirdPartyPluginPermissionsFixer {
                     String k = e.getKey();
                     PluginCommand v = e.getValue();
 
-                    if (v.getPermission() == null) v.setPermission("multiverse.netherportals.command." + v.getName());
+                    if (v.getPermission() == null) updatePermission(v, "multiverse.netherportals.command." + v.getName());
                 });
     }
 
@@ -118,15 +119,15 @@ public class ThirdPartyPluginPermissionsFixer {
                     if (v.getPermission() != null) return;
 
                     if (v.getName().equals("gsit")) {
-                        v.setPermission("gsit.sit");
+                        updatePermission(v, "gsit.sit");
                     } else if (v.getName().equals("glay")) {
-                        v.setPermission("gsit.lay");
+                        updatePermission(v, "gsit.lay");
                     } else if (v.getName().equals("gbellyflop")) {
-                        v.setPermission("gsit.bellyflop");
+                        updatePermission(v, "gsit.bellyflop");
                     } else if (v.getName().equals("gspin")) {
-                        v.setPermission("gsit.spin");
+                        updatePermission(v, "gsit.spin");
                     } else if (v.getName().equals("gcrawl")) {
-                        v.setPermission("gsit.crawl");
+                        updatePermission(v, "gsit.crawl");
                     }
                 });
     }
@@ -143,8 +144,8 @@ public class ThirdPartyPluginPermissionsFixer {
                     PluginCommand v = e.getValue();
 
                     if (v.getPermission() == null) {
-                        if (!v.getName().equals("spark")) v.setPermission("spark." + v.getName());
-                        else v.setPermission("spark");
+                        if (!v.getName().equals("spark")) updatePermission(v, "spark." + v.getName());
+                        else updatePermission(v, "spark");
                     }
                 });
     }
@@ -161,5 +162,15 @@ public class ThirdPartyPluginPermissionsFixer {
         }
 
         return new HashMap<>();
+    }
+
+    private static void updatePermission(PluginCommand command, String newPermission) {
+        updatePermission(command, command.getPermission(), newPermission);
+    }
+
+    private static void updatePermission(@Nonnull PluginCommand command, @Nullable String oldPermission, @Nonnull String newPermission) {
+        if (oldPermission != null && oldPermission.equals(newPermission)) return;
+        LOGGER.info("Updating permission for plugin \"" + command.getPlugin().getName() + "\" command \"" + command.getName() + "\" from \"" + oldPermission + "\" to \"" + newPermission + "\"");
+        command.setPermission(newPermission);
     }
 }
