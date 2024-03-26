@@ -35,6 +35,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.unknown.core.util.BrigadierUtil;
@@ -53,7 +54,7 @@ import java.util.stream.Collectors;
 
 public class Suggestions {
     public static final SuggestionProvider<CommandSourceStack> HOME_SUGGEST = (ctx, builder) -> {
-        ServerPlayer target = BrigadierUtil.getArgumentOrDefault(ctx, ServerPlayer.class, "対象", ctx.getSource().getPlayerOrException());
+        ServerPlayer target = BrigadierUtil.isArgumentKeyExists(ctx, "対象") ? EntityArgument.getPlayer(ctx, "対象") : ctx.getSource().getPlayerOrException();
         PlayerData.HomeData data = PlayerData.of(target.getBukkitEntity()).getHomeData();
         HomeGroup group = BrigadierUtil.isArgumentKeyExists(ctx, "グループ") ? data.getGroup(StringArgumentType.getString(ctx, "グループ")) : data.getDefaultGroup();
 
@@ -61,7 +62,7 @@ public class Suggestions {
         else return SharedSuggestionProvider.suggest(group.getHomes().keySet().toArray(new String[0]), builder);
     };
     public static final SuggestionProvider<CommandSourceStack> HOME_GROUP_SUGGEST = (ctx, builder) -> {
-        ServerPlayer target = BrigadierUtil.getArgumentOrDefault(ctx, ServerPlayer.class, "対象", ctx.getSource().getPlayerOrException());
+        ServerPlayer target = BrigadierUtil.isArgumentKeyExists(ctx, "対象") ? EntityArgument.getPlayer(ctx, "対象") : ctx.getSource().getPlayerOrException();
         PlayerData.HomeData data = PlayerData.of(target).getHomeData();
         return SharedSuggestionProvider.suggest(data.getGroups().keySet().toArray(new String[0]), builder);
     };
