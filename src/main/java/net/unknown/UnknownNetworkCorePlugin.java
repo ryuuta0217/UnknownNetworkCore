@@ -43,6 +43,7 @@ import net.unknown.core.feature.PrivateMessageListener;
 import net.unknown.core.feature.admin.spy.Spy;
 import net.unknown.core.feature.admin.spy.modules.CommandSpy;
 import net.unknown.core.feature.admin.spy.modules.PrivateMessageSpy;
+import net.unknown.core.fixer.MultiverseInventoriesFixer;
 import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.managers.ListenerManager;
@@ -137,6 +138,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         Athletics.loadProgresses();
         TrashManager.loadExists();
         ThirdPartyPluginPermissionsFixer.scheduleNextTick();
+        MultiverseInventoriesFixer.fixAll();
         Spy.registerModule(new CommandSpy());
         Spy.registerModule(new PrivateMessageSpy());
         getLogger().info("");
