@@ -14,19 +14,4 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.ryuuta0217.api.github.user.interfaces;
-
-import javax.annotation.Nullable;
-
-public interface PrivateUser extends PublicUser {
-    long getOwnedPrivateRepos();
-
-    boolean isTwoFactorAuthentication();
-
-    /* NOT REQUIRED UNDER (when null, null or false) */
-    boolean isBusinessPlus();
-
-    @Nullable
-    String getLdapDistinguishedName();
-
-}
+package com.ryuuta0217;

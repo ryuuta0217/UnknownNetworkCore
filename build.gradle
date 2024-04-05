@@ -39,6 +39,11 @@ configurations {
 license {
     header = project.file("HEADER.txt")
     include '**/*.java'
+
+    matching(includes: ['**/com/ryuuta0217/**/*.java']) {
+        header = project.file("src/main/java/com/ryuuta0217/HEADER.txt")
+    }
+
     properties {
         organization = 'Unknown Network'
         year = 2023
