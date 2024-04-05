@@ -37,7 +37,7 @@ configurations {
 }
 
 license {
-    header = project.file("HEADER.txt")
+    header = project.file("src/main/java/net/unknown/HEADER.txt")
     include '**/*.java'
 
     matching(includes: ['**/com/ryuuta0217/**/*.java']) {
