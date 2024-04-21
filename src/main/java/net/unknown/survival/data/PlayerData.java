@@ -338,7 +338,7 @@ public class PlayerData extends ConfigurationBase {
         }
 
         public boolean removeAll(Collection<String> c) {
-            boolean removed = this.removeIf((name, group) -> c.contains(name));
+            boolean removed = this.homeGroups.keySet().removeAll(c);
             if (removed) this.saveAsync();
             return removed;
         }
