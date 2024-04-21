@@ -333,13 +333,13 @@ public class PlayerData extends ConfigurationBase {
 
         public boolean removeIf(BiPredicate<String, HomeGroup> filter) {
             boolean removed = this.homeGroups.entrySet().removeIf(e -> filter.test(e.getKey(), e.getValue()));
-            this.saveAsync();
+            if (removed) this.saveAsync();
             return removed;
         }
 
         public boolean removeAll(Collection<String> c) {
             boolean removed = this.removeIf((name, group) -> c.contains(name));
-            this.saveAsync();
+            if (removed) this.saveAsync();
             return removed;
         }
 
