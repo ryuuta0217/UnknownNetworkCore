@@ -33,6 +33,7 @@ package net.unknown;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.locale.Language;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.unknown.core.athletic.Athletics;
 import net.unknown.core.block.MultiPageChest;
@@ -52,6 +53,7 @@ import net.unknown.core.managers.TrashManager;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.skin.SkinManager;
 import net.unknown.core.tab.TabListPingManager;
+import net.unknown.core.util.Languages;
 import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.shared.VersionInfo;
 import org.bukkit.Bukkit;
@@ -59,6 +61,8 @@ import org.bukkit.craftbukkit.v1_20_R2.CraftServer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
+
+import java.util.Locale;
 
 public class UnknownNetworkCorePlugin extends JavaPlugin {
     private static final JSONParser JSON_PARSER = new JSONParser();
@@ -96,6 +100,9 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
             getLogger().info("Plugin folder created.");
         }
         ObfuscationUtil.loadAllMappings();
+        Languages.init();
+        Languages.load(Locale.JAPAN);
+        Language.inject(Languages.getLanguage(Locale.JAPAN));
         getLogger().info("Server launched in " + ObfuscationUtil.OBF_STATE);
         /*ObfuscationUtil.getMapping().forEach((mojangName, clazz) -> {
             try {
