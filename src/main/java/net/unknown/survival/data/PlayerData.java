@@ -52,6 +52,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.function.BiPredicate;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -328,6 +329,18 @@ public class PlayerData extends ConfigurationBase {
             if (this.defaultGroupName.equals(groupName)) throw new IllegalArgumentException("ホームグループ " + groupName + " はデフォルトに設定されています。先にデフォルト設定を解除してください。");
             this.homeGroups.remove(groupName);
             this.saveAsync();
+        }
+
+        public boolean removeIf(BiPredicate<String, HomeGroup> filter) {
+            boolean removed = this.homeGroups.entrySet().removeIf(e -> filter.test(e.getKey(), e.getValue()));
+            if (removed) this.saveAsync();
+            return removed;
+        }
+
+        public boolean removeAll(Collection<String> c) {
+            boolean removed = this.homeGroups.keySet().removeAll(c);
+            if (removed) this.saveAsync();
+            return removed;
         }
 
         public void removeGroup(HomeGroup group) {

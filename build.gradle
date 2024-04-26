@@ -37,8 +37,13 @@ configurations {
 }
 
 license {
-    header = project.file("HEADER.txt")
+    header = project.file("src/main/java/net/unknown/HEADER.txt")
     include '**/*.java'
+
+    matching(includes: ['**/com/ryuuta0217/**/*.java']) {
+        header = project.file("src/main/java/com/ryuuta0217/HEADER.txt")
+    }
+
     properties {
         organization = 'Unknown Network'
         year = 2023
@@ -73,6 +78,7 @@ dependencies {
     compileOnly group: 'com.onarandombox.multiversecore', name: 'Multiverse-Core', version: '+'
     compileOnly group: 'com.onarandombox.multiverseinventories', name: 'Multiverse-Inventories', version: '+'
     compileOnly group: 'net.coreprotect', name: 'coreprotect', version: '+'
+    implementation group: 'org.apache.commons', name: 'commons-compress', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
 }

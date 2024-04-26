@@ -39,6 +39,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
@@ -78,7 +79,7 @@ public class SetHomeCountCommand {
     }
 
     private static int sendCurrent(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ServerPlayer player = BrigadierUtil.getArgumentOrDefault(ctx, ServerPlayer.class, "対象", ctx.getSource().getPlayerOrException());
+        ServerPlayer player = BrigadierUtil.isArgumentKeyExists(ctx, "対象") ? EntityArgument.getPlayer(ctx, "対象") : ctx.getSource().getPlayerOrException();
         PlayerData.HomeData data = PlayerData.of(player).getHomeData();
         MessageUtil.sendAdminMessage(ctx.getSource(), player.displayName + " のホーム設定上限値は " + data.getHomeBaseCount() + "(base) + " + data.getHomeAdditionalCount() + "(additional) = " + data.getMaxHomeCount() + "個 です", false);
         return 1;

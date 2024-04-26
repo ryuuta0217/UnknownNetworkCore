@@ -33,6 +33,7 @@ package net.unknown;
 
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.locale.Language;
 import net.minecraft.server.dedicated.DedicatedServer;
 import net.unknown.core.athletic.Athletics;
 import net.unknown.core.block.MultiPageChest;
@@ -43,6 +44,7 @@ import net.unknown.core.feature.PrivateMessageListener;
 import net.unknown.core.feature.admin.spy.Spy;
 import net.unknown.core.feature.admin.spy.modules.CommandSpy;
 import net.unknown.core.feature.admin.spy.modules.PrivateMessageSpy;
+import net.unknown.core.fixer.MultiverseInventoriesFixer;
 import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
 import net.unknown.core.managers.ListenerManager;
@@ -51,6 +53,7 @@ import net.unknown.core.managers.TrashManager;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.skin.SkinManager;
 import net.unknown.core.tab.TabListPingManager;
+import net.unknown.core.util.Languages;
 import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.shared.VersionInfo;
 import org.bukkit.Bukkit;
@@ -58,6 +61,8 @@ import org.bukkit.craftbukkit.v1_20_R2.CraftServer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
+
+import java.util.Locale;
 
 public class UnknownNetworkCorePlugin extends JavaPlugin {
     private static final JSONParser JSON_PARSER = new JSONParser();
@@ -95,6 +100,9 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
             getLogger().info("Plugin folder created.");
         }
         ObfuscationUtil.loadAllMappings();
+        Languages.init();
+        Languages.load(Locale.JAPAN);
+        Language.inject(Languages.getLanguage(Locale.JAPAN));
         getLogger().info("Server launched in " + ObfuscationUtil.OBF_STATE);
         /*ObfuscationUtil.getMapping().forEach((mojangName, clazz) -> {
             try {
@@ -137,6 +145,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         Athletics.loadProgresses();
         TrashManager.loadExists();
         ThirdPartyPluginPermissionsFixer.scheduleNextTick();
+        MultiverseInventoriesFixer.fixAll();
         Spy.registerModule(new CommandSpy());
         Spy.registerModule(new PrivateMessageSpy());
         getLogger().info("");

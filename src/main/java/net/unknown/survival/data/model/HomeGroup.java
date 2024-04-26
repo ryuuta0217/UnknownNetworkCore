@@ -39,7 +39,9 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.function.BiPredicate;
 import java.util.logging.Logger;
 
 public class HomeGroup {
@@ -101,6 +103,18 @@ public class HomeGroup {
         if (!hasHome(home)) throw new IllegalArgumentException("Provided home " + home.name() + " is not group " + this.getName() + "'s home.");
         this.homes.remove(home.name());
         this.saveAsync();
+    }
+
+    public boolean removeIf(BiPredicate<String, Home> filter) {
+        boolean removed = this.homes.entrySet().removeIf(e -> filter.test(e.getKey(), e.getValue()));
+        if (removed) this.saveAsync();
+        return removed;
+    }
+
+    public boolean removeAll(Collection<String> c) {
+        boolean removed = this.homes.keySet().removeAll(c);
+        if (removed) this.saveAsync();
+        return removed;
     }
 
     public Material getIcon() {
