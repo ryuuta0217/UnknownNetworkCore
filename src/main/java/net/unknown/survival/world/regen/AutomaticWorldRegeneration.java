@@ -171,7 +171,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
             if (this.running) return;
             this.running = true;
 
-            // execBeforeScript
+            // TODO: execBeforeScript
 
             if (this.preGenerated) {
                 Map<String, Map<String, String>> gameRules = Arrays.stream(this.worldNames)
@@ -196,7 +196,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
                 this.regenerateWorlds();
             }
 
-            // execAfterScript
+            // TODO: execAfterScript
             AutomaticWorldRegeneration.getInstance().setLastExecutionTime(System.currentTimeMillis());
             this.running = false;
         }
@@ -265,6 +265,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         }
 
         public void backupWorld(String worldName) {
+            // TODO: if installed Multiverse-Inventories plugin, include inventories (grab from "plugins/Multiverse-Inventories/worlds/<worldName>/**"
             File backupFolder = new File(AutomaticWorldRegeneration.getInstance().getBackupFolderFormatted(worldName, AutomaticWorldRegeneration.getInstance().getLastExecuteTime(), LocalDateTime.now()));
             File backupFile = new File(backupFolder, AutomaticWorldRegeneration.getInstance().getBackupFileFormatted(worldName, AutomaticWorldRegeneration.getInstance().getLastExecuteTime(), LocalDateTime.now(), "tar.zst"));
             String backupFilePath = backupFile.getPath();
