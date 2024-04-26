@@ -48,7 +48,7 @@ import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.core.util.ReflectionUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftInventory;
+import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftInventory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

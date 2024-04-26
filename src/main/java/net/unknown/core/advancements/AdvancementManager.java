@@ -38,6 +38,7 @@ import com.google.gson.JsonSerializationContext;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.advancements.*;
+import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.resources.ResourceLocation;
@@ -179,7 +180,7 @@ public class AdvancementManager {
                         .build());
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
-            builder.addCriterion(String.valueOf(i), CriteriaTriggers.IMPOSSIBLE.createCriterion(CriteriaTriggers.IMPOSSIBLE.createInstance(null, null)));
+            builder.addCriterion(String.valueOf(i), CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance()));
         });
 
         AdvancementHolder adv = builder.build(ResourceLocation.of("unpass:root", ':'));

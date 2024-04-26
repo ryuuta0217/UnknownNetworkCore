@@ -58,6 +58,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntityKnockbackEvent;
 import org.bukkit.event.entity.ProjectileHitEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -171,7 +172,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
 
         if (hurtSuccess) {
             if (knockback > 0.0F && target instanceof net.minecraft.world.entity.LivingEntity livingTarget) {
-                livingTarget.knockback(knockback * 0.5F, Mth.sin(source.getYRot() * 0.017453292F), -Mth.cos(source.getYRot() * 0.017453292F), source); // Paper
+                livingTarget.knockback(knockback * 0.5F, Mth.sin(source.getYRot() * 0.017453292F), -Mth.cos(source.getYRot() * 0.017453292F), source, EntityKnockbackEvent.KnockbackCause.ENTITY_ATTACK); // Paper
                 source.setDeltaMovement(source.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
             }
 
@@ -211,7 +212,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
 
             if (damageAttr != null) {
                 damageAttr.getModifiers(AttributeModifier.Operation.ADDITION).forEach(multiplyModifier -> {
-                    if (multiplyModifier.getName().equals(damageAttributeModifierName)) {
+                    if (multiplyModifier.name.equals(damageAttributeModifierName)) {
                         damageAttr.removeModifier(multiplyModifier);
                     }
                 });
@@ -233,7 +234,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
 
             if (kbAttr != null) {
                 kbAttr.getModifiers(AttributeModifier.Operation.ADDITION).forEach(multiplyModifier -> {
-                    if (multiplyModifier.getName().equals(kbAttributeModifierName)) {
+                    if (multiplyModifier.name.equals(kbAttributeModifierName)) {
                         kbAttr.removeModifier(multiplyModifier);
                     }
                 });

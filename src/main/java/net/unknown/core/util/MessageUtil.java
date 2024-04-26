@@ -39,7 +39,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameRules;
 import net.unknown.core.define.DefinedTextColor;
@@ -48,7 +47,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 
@@ -63,11 +62,11 @@ public class MessageUtil {
             .append(Component.text("U.N.", net.kyori.adventure.text.format.Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD.withState(true))))
             .append(Component.text("]", DefinedTextColor.GRAY))
             .append(Component.text(" "));
-    private static final MutableComponent PREFIX_MINECRAFT_COMPONENT = MutableComponent.create(new LiteralContents(""))
-            .append(MutableComponent.create(new LiteralContents("[")).withStyle(ChatFormatting.GRAY))
-            .append(MutableComponent.create(new LiteralContents("U.N.")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
-            .append(MutableComponent.create(new LiteralContents("]")).withStyle(ChatFormatting.GRAY))
-            .append(MutableComponent.create(new LiteralContents(" ")));
+    private static final MutableComponent PREFIX_MINECRAFT_COMPONENT = net.minecraft.network.chat.Component.empty()
+            .append(net.minecraft.network.chat.Component.literal("[")).withStyle(ChatFormatting.GRAY)
+            .append(net.minecraft.network.chat.Component.literal("U.N.")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)
+            .append(net.minecraft.network.chat.Component.literal("]")).withStyle(ChatFormatting.GRAY)
+            .append(net.minecraft.network.chat.Component.literal(" "));
     private static final String PREFIX_ERROR = "§c";
     private static final String PREFIX_ADMIN = "§r";
     private static final String PREFIX_ADMIN_ERROR = "§c";

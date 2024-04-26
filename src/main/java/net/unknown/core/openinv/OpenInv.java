@@ -43,7 +43,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -82,11 +82,11 @@ public class OpenInv {
                     this.setExtraData(playerData);
 
                     File tempFile = File.createTempFile(handle.getStringUUID() + "-", ".dat", playerIo.getPlayerDir());
-                    NbtIo.writeCompressed(playerData, tempFile);
+                    NbtIo.writeCompressed(playerData, tempFile.toPath());
 
                     File newFile = new File(playerIo.getPlayerDir(), handle.getStringUUID() + ".dat");
                     File oldFile = new File(playerIo.getPlayerDir(), handle.getStringUUID() + ".dat_old");
-                    Util.safeReplaceFile(newFile, tempFile, oldFile);
+                    Util.safeReplaceFile(newFile.toPath(), tempFile.toPath(), oldFile.toPath());
                 } catch(IOException e) {
                     e.printStackTrace();
                 }

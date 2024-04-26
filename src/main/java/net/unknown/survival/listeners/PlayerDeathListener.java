@@ -40,7 +40,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -56,7 +55,7 @@ import org.bukkit.*;
 import org.bukkit.block.Chest;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_20_R2.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -97,7 +96,7 @@ public class PlayerDeathListener implements Listener {
             REMOVAL_TASKS.get(uniqueId).remove(location);
             location.getBlock().setType(Material.AIR);
             if (Bukkit.getOfflinePlayer(uniqueId).isOnline()) {
-                NewMessageUtil.sendMessage(Bukkit.getPlayer(uniqueId), MutableComponent.create(new LiteralContents(""))
+                NewMessageUtil.sendMessage(Bukkit.getPlayer(uniqueId), Component.empty()
                         .append(getGraveyardComponent(location))
                         .append(" は自然に還りました。アイテムは回収できません。"));
             }
@@ -121,14 +120,14 @@ public class PlayerDeathListener implements Listener {
     }
 
     private static Component getGraveyardComponent(Location loc) {
-        return MutableComponent.create(new LiteralContents("[墓]"))
+        return Component.literal("[墓]")
                 .withStyle(Style.EMPTY
                         .withColor(ChatFormatting.AQUA)
                         .withUnderlined(true)
                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                MutableComponent.create(new LiteralContents(""))
-                                        .append(MutableComponent.create(new LiteralContents("====== 墓の情報 =====\n")).withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD))
-                                        .append(MutableComponent.create(new LiteralContents("ワールド: " + MessageUtil.getWorldName(loc.getWorld()) + "\n")).withStyle(ChatFormatting.YELLOW)
+                                Component.empty()
+                                        .append(Component.literal("====== 墓の情報 =====\n").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD))
+                                        .append(Component.literal("ワールド: " + MessageUtil.getWorldName(loc.getWorld()) + "\n").withStyle(ChatFormatting.YELLOW)
                                                 .append("座標: " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ())))));
     }
 
