@@ -45,7 +45,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.*;
-import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvents;
@@ -216,10 +215,10 @@ public class MsgCommand {
     }
 
     public static Component spyMessage(Component senderName, Component receiverName, Component message) {
-        return MutableComponent.create(new LiteralContents(""))
-                .append(MutableComponent.create(new LiteralContents("[PM]")).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
+        return Component.empty()
+                .append(Component.literal("[PM]")).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA))
                 .append(" ")
-                .append(MutableComponent.create(new LiteralContents("[")).append(senderName).append(" -> ").append(receiverName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)))
+                .append(Component.literal("[")).append(senderName).append(" -> ").append(receiverName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW))
                 .append(" ")
                 .append(message);
     }

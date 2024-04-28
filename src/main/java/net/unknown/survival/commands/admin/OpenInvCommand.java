@@ -32,9 +32,7 @@
 package net.unknown.survival.commands.admin;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.*;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Container;
@@ -46,7 +44,7 @@ import net.minecraft.world.item.ItemStack;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftHumanEntity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -110,7 +108,7 @@ public class OpenInvCommand {
         File playerFile = new File(playerDir, playerUniqueId + ".dat");
         if (playerFile.exists()) {
             try {
-                return NbtIo.readCompressed(playerFile);
+                return NbtIo.readCompressed(playerFile.toPath(), NbtAccounter.unlimitedHeap());
             } catch (IOException ignored) {}
         }
 
@@ -122,7 +120,7 @@ public class OpenInvCommand {
         File playerFile = new File(playerDir, playerUniqueId + ".dat");
         if (playerFile.exists()) {
             try {
-                NbtIo.writeCompressed(playerData, playerFile);
+                NbtIo.writeCompressed(playerData, playerFile.toPath());
                 return true;
             } catch (IOException ignored) {}
         }

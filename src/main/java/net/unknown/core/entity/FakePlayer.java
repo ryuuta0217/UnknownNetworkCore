@@ -66,9 +66,10 @@ import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.core.util.ReflectionUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_20_R2.util.CraftVector;
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftVector;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityExhaustionEvent;
+import org.bukkit.event.entity.EntityKnockbackEvent;
 import org.bukkit.event.player.PlayerVelocityEvent;
 
 import javax.annotation.Nullable;
@@ -205,7 +206,7 @@ public class FakePlayer extends ServerPlayer {
                     if (damaged) {
                         if (knockback > 0) {
                             if (target instanceof LivingEntity) {
-                                ((LivingEntity) target).knockback((float) knockback * 0.5F, Mth.sin(this.getYRot() * 0.017453292F), -Mth.cos(this.getYRot() * 0.017453292F), this); // Paper
+                                ((LivingEntity) target).knockback((float) knockback * 0.5F, Mth.sin(this.getYRot() * 0.017453292F), -Mth.cos(this.getYRot() * 0.017453292F), this, EntityKnockbackEvent.KnockbackCause.ENTITY_ATTACK); // Paper
                             } else {
                                 target.push(-Mth.sin(this.getYRot() * 0.017453292F) * (float) knockback * 0.5F, 0.1D, Mth.cos(this.getYRot() * 0.017453292F) * (float) knockback * 0.5F, this); // Paper
                             }
@@ -226,7 +227,7 @@ public class FakePlayer extends ServerPlayer {
                                 if (entityliving != this && entityliving != target && !this.isAlliedTo(entityliving) && (!(entityliving instanceof ArmorStand) || !((ArmorStand) entityliving).isMarker()) && this.distanceToSqr(entityliving) < 9.0D) {
                                     // CraftBukkit start - Only apply knockback if the damage hits
                                     if (entityliving.hurt(this.damageSources().playerAttack(this).sweep().critical(critical), f4)) { // Paper - add critical damage API
-                                        entityliving.knockback(0.4000000059604645D, Mth.sin(this.getYRot() * 0.017453292F), -Mth.cos(this.getYRot() * 0.017453292F), this); // Pa
+                                        entityliving.knockback(0.4000000059604645D, Mth.sin(this.getYRot() * 0.017453292F), -Mth.cos(this.getYRot() * 0.017453292F), this, EntityKnockbackEvent.KnockbackCause.SWEEP_ATTACK); // Pa
                                     }
                                     // CraftBukkit end
                                 }

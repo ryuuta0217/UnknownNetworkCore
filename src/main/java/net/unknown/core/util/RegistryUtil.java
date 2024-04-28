@@ -38,20 +38,21 @@ import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.core.Holder;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import org.bukkit.Fluid;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_20_R2.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_20_R2.enchantments.CraftEnchantment;
-import org.bukkit.craftbukkit.v1_20_R2.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.v1_20_R2.util.CraftNamespacedKey;
+import org.bukkit.*;
+import org.bukkit.craftbukkit.v1_20_R3.CraftRegistry;
+import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.v1_20_R3.enchantments.CraftEnchantment;
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.v1_20_R3.util.CraftNamespacedKey;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -92,7 +93,7 @@ public class RegistryUtil {
     public static <T> T forceRegister(Registry<T> registry, ResourceLocation id, T value) {
         if (!unfreeze(registry)) LOGGER.warning("Failed to unfreeze Registry! But continue force registering.");
         Registry.register(registry, id, value);
-        if(registry == BuiltInRegistries.ENCHANTMENT && value instanceof Enchantment enchant) {
+        /*if(registry == BuiltInRegistries.ENCHANTMENT && value instanceof Enchantment enchant) { // Currently unused - Bukkit is implemented global Registry system. this system is inherit from NMS registry.
             try {
                 Field f = org.bukkit.enchantments.Enchantment.class.getDeclaredField("acceptingNew");
                 if (f.trySetAccessible()) {
@@ -103,12 +104,13 @@ public class RegistryUtil {
             } catch(IllegalAccessException | NoSuchFieldException e) {
                 throw new RuntimeException(e);
             }
-        }
+        }*/
         freeze(registry);
         return registry.get(id) != null ? value : null;
     }
 
-    public static <T> boolean forceReplace(Registry<T> registry, ResourceLocation id, T objectTo) {
+    @SuppressWarnings("rawtypes")
+    public static <B extends Keyed, T> boolean forceReplace(Registry<T> registry, ResourceLocation id, T objectTo) {
         String logPrefix = "[forceReplace] [" + id.toString() + "] ";
         if (registry instanceof MappedRegistry<T> mappedRegistry) {
             T objectFrom = mappedRegistry.get(id);
@@ -118,13 +120,6 @@ public class RegistryUtil {
                 if (resourceKey != null) {
                     int registryId = mappedRegistry.getId(objectFrom);
                     logPrefix += "[ID=" + registryId + "] ";
-
-                    CraftEnchantment bukkitOldEnchant = null;
-                    String bukkitOldEnchantName = null;
-                    if (registry == BuiltInRegistries.ENCHANTMENT && objectFrom instanceof Enchantment && objectTo instanceof Enchantment) {
-                        bukkitOldEnchant = (CraftEnchantment) org.bukkit.enchantments.Enchantment.getByKey(CraftNamespacedKey.fromMinecraft(registry.getKey(objectFrom)));
-                        bukkitOldEnchantName = bukkitOldEnchant.getName();
-                    }
 
                     if (!unfreeze(registry)) LOGGER.warning("Failed to unfreeze Registry! But continue force replace object.");
 
@@ -270,69 +265,23 @@ public class RegistryUtil {
                                 }
                                 /* END OF LIFECYCLES */
 
-                                if (bukkitOldEnchant != null) {
-                                    LOGGER.info(logPrefix + "[Bukkit/Enchantment] Enchantment registry replacing detected, applying to Bukkit's enchantment registry as new object.");
+                                // Convert Minecraft Registry to Bukkit Registry
+                                org.bukkit.Registry bukkitRegistry = convertRegistry(registry);
+                                if (bukkitRegistry instanceof CraftRegistry bukkitCraftRegistry) {
+                                    Class<CraftRegistry> bukkitRegistryClass = CraftRegistry.class;
 
-                                    Enchantment oldEnchant = (Enchantment) objectFrom;
-                                    Enchantment newEnchant = (Enchantment) objectTo;
+                                    Field bukkitCacheField = bukkitRegistryClass.getDeclaredField("cache");
+                                    Map bukkitCache = getObject(bukkitCacheField, bukkitRegistry, Map.class);
 
-                                    CraftEnchantment bukkitNewEnchant = new CraftEnchantment(newEnchant);
+                                    Field bukkitByValueField = bukkitRegistryClass.getDeclaredField("byValue");
+                                    Map bukkitByValue = getObject(bukkitByValueField, bukkitRegistry, Map.class);
 
-                                    if (bukkitOldEnchant.getHandle().equals(oldEnchant) && bukkitNewEnchant.getHandle().equals(newEnchant)) {
-                                        Class<org.bukkit.enchantments.Enchantment> bukkitEnchantmentClass = org.bukkit.enchantments.Enchantment.class;
+                                    NamespacedKey key = CraftNamespacedKey.fromMinecraft(id);
+                                    Object bukkitObjectFrom = bukkitCache.get(key);
+                                    Object bukkitObjectTo = bukkitCraftRegistry.createBukkit(key, objectTo);
 
-                                        Field bukkitByKeyField = bukkitEnchantmentClass.getDeclaredField("byKey");
-                                        Map<NamespacedKey, org.bukkit.enchantments.Enchantment> bukkitByKey = getObject(bukkitByKeyField, null, Map.class);
-
-                                        Field bukkitByNameField = bukkitEnchantmentClass.getDeclaredField("byName");
-                                        Map<String, org.bukkit.enchantments.Enchantment> bukkitByName = getObject(bukkitByNameField, null, Map.class);
-
-                                        if (bukkitByKey != null && bukkitByName != null) {
-                                            LOGGER.info(logPrefix + "[Bukkit/Enchantment] Got bukkit fields successfully, proceed as field-modify mode.");
-
-                                            /* [Bukkit] Key => Enchantment Map */
-                                            int originalBukkitByKeySize = bukkitByKey.size();
-                                            int bukkitByKeySize = originalBukkitByKeySize;
-
-                                            bukkitByKey.remove(bukkitOldEnchant.getKey());
-                                            if ((bukkitByKeySize - 1) == bukkitByKey.size() && bukkitByKey.getOrDefault(bukkitOldEnchant.getKey(), null) == null) {
-                                                LOGGER.info(logPrefix + "[Bukkit/Enchantment] [byKey] Successfully removed " + bukkitOldEnchant.getKey() + " => " + bukkitOldEnchant + " Map");
-                                            } else {
-                                                LOGGER.warning(logPrefix + "[Bukkit/Enchantment] [byKey] Failed to remove " + bukkitOldEnchant.getKey() + " => " + bukkitOldEnchant + " Map");
-                                            }
-
-                                            bukkitByKeySize = bukkitByKey.size();
-
-                                            bukkitByKey.put(bukkitNewEnchant.getKey(), bukkitNewEnchant);
-                                            if ((bukkitByKeySize + 1) == bukkitByKey.size() && bukkitByKey.size() == originalBukkitByKeySize && bukkitByKey.get(bukkitNewEnchant.getKey()) == bukkitNewEnchant) {
-                                                LOGGER.info(logPrefix + "[Bukkit/Enchantment] [byKey] Successfully added " + bukkitNewEnchant.getKey() + " => " + bukkitNewEnchant + " Map");
-                                            } else {
-                                                LOGGER.warning(logPrefix + "[Bukkit/Enchantment] [byKey] Failed to add " + bukkitNewEnchant.getKey() + " => " + bukkitNewEnchant + " Map");
-                                            }
-                                            /* [Bukkit] END OF Key => Enchantment Map */
-
-                                            /* [Bukkit] EnchantName => Enchantment Map */
-                                            int originalBukkitByNameSize = bukkitByName.size();
-                                            int bukkitByNameSize = originalBukkitByNameSize;
-
-                                            bukkitByName.remove(bukkitOldEnchantName);
-                                            if ((bukkitByNameSize - 1) == bukkitByName.size() && bukkitByName.getOrDefault(bukkitOldEnchantName, null) == null) {
-                                                LOGGER.info(logPrefix + "[Bukkit/Enchantment] [byName] Successfully removed " + bukkitOldEnchantName + " => " + bukkitOldEnchant + " Map");
-                                            } else {
-                                                LOGGER.warning(logPrefix + "[Bukkit/Enchantment] [byName] Failed to remove " + bukkitOldEnchantName + " => " + bukkitOldEnchant + " Map");
-                                            }
-
-                                            bukkitByNameSize = bukkitByName.size();
-
-                                            bukkitByName.put(bukkitNewEnchant.getName(), bukkitNewEnchant);
-                                            if ((bukkitByNameSize + 1) == bukkitByName.size() && bukkitByName.size() == originalBukkitByNameSize && bukkitByName.get(bukkitNewEnchant.getName()) == bukkitNewEnchant) {
-                                                LOGGER.info(logPrefix + "[Bukkit/Enchantment] [byName] Successfully added " + bukkitNewEnchant.getName() + " => " + bukkitNewEnchant + " Map");
-                                            } else {
-                                                LOGGER.warning(logPrefix + "[Bukkit/Enchantment] [byName] Failed to add " + bukkitNewEnchant.getName() + " => " + bukkitNewEnchant + " Map");
-                                            }
-                                            /* [Bukkit] END OF EnchantName => Enchantment Map */
-                                        }
-                                    }
+                                    bukkitCache.replace(CraftNamespacedKey.fromMinecraft(id), bukkitObjectTo);
+                                    bukkitByValue.replace(bukkitObjectFrom, key);
                                 }
 
                                 if (mappedRegistry.getId(objectTo) == registryId && registry.size() == registryCount) {
@@ -362,6 +311,19 @@ public class RegistryUtil {
             }
         }
         return false;
+    }
+
+    private static <B extends Keyed, M> org.bukkit.Registry<B> convertRegistry(Registry<M> minecraftRegistry) {
+        RegistryAccess registryAccess = CraftRegistry.getMinecraftRegistry();
+        if (minecraftRegistry.equals(registryAccess.registryOrThrow(Registries.ENCHANTMENT))) return (org.bukkit.Registry<B>) org.bukkit.Registry.ENCHANTMENT;
+        if (minecraftRegistry.equals(registryAccess.registryOrThrow(Registries.INSTRUMENT))) return (org.bukkit.Registry<B>) org.bukkit.Registry.INSTRUMENT;
+        if (minecraftRegistry.equals(registryAccess.registryOrThrow(Registries.MOB_EFFECT))) return (org.bukkit.Registry<B>) org.bukkit.Registry.EFFECT;
+        if (minecraftRegistry.equals(registryAccess.registryOrThrow(Registries.STRUCTURE))) return (org.bukkit.Registry<B>) org.bukkit.Registry.STRUCTURE;
+        if (minecraftRegistry.equals(BuiltInRegistries.STRUCTURE_TYPE)) return (org.bukkit.Registry<B>) org.bukkit.Registry.STRUCTURE_TYPE;
+        if (minecraftRegistry.equals(registryAccess.registryOrThrow(Registries.TRIM_MATERIAL))) return (org.bukkit.Registry<B>) org.bukkit.Registry.TRIM_MATERIAL;
+        if (minecraftRegistry.equals(registryAccess.registryOrThrow(Registries.TRIM_PATTERN))) return (org.bukkit.Registry<B>) org.bukkit.Registry.TRIM_PATTERN;
+        if (minecraftRegistry.equals(registryAccess.registryOrThrow(Registries.DAMAGE_TYPE))) return (org.bukkit.Registry<B>) org.bukkit.Registry.DAMAGE_TYPE;
+        return null;
     }
 
     private static Object getObject(Field field, Object instance) {

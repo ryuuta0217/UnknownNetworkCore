@@ -50,7 +50,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.unknown.launchwrapper.event.BlockDispenseBeforeEvent;
 import net.unknown.launchwrapper.mixininterfaces.IMixinBlockEntity;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_20_R2.block.CraftBlock;
+import org.bukkit.craftbukkit.v1_20_R3.block.CraftBlock;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;

@@ -44,7 +44,7 @@ import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
@@ -101,7 +101,7 @@ public class PrivateChatChannel extends ChatChannel {
         event.viewers().removeIf(viewer -> !viewer.equals(receiver.getBukkitEntity()));
 
         PlayerChatMessage originalMessage = MinecraftAdapter.Adventure.playerChatMessage(event.signedMessage());
-        boolean isNotModifiedMessage = Objects.equals(originalMessage.requireResult().message().component(), event.message());
+        boolean isNotModifiedMessage = Objects.equals(originalMessage.adventureView().unsignedContent(), event.message());
         OutgoingChatMessage message = OutgoingChatMessage.create(isNotModifiedMessage ? originalMessage : originalMessage.withUnsignedContent(NewMessageUtil.convertAdventure2Minecraft(event.message())));
 
         event.viewers().forEach(viewer -> {

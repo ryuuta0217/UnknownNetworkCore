@@ -42,7 +42,7 @@ import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.managers.RunnableManager;
-import org.bukkit.craftbukkit.v1_20_R2.entity.CraftPlayer;
+import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -61,7 +61,9 @@ public class TabListPingManager implements Listener {
             PING_OBJECTIVE_NAME,
             ObjectiveCriteria.DUMMY,
             OBJECTIVE_DISPLAYNAME,
-            ObjectiveCriteria.RenderType.INTEGER
+            ObjectiveCriteria.RenderType.INTEGER,
+            true,
+            null
     );
 
     public static final ClientboundSetObjectivePacket CREATE_OBJECTIVE = new ClientboundSetObjectivePacket(OBJECTIVE, ClientboundSetObjectivePacket.METHOD_ADD);
@@ -114,10 +116,11 @@ public class TabListPingManager implements Listener {
                 .forEach(player -> {
                     latencies.entrySet().forEach(e -> {
                         ClientboundSetScorePacket setScore = new ClientboundSetScorePacket(
-                                ServerScoreboard.Method.CHANGE,
                                 PING_OBJECTIVE_NAME,
                                 e.getKey(),
-                                e.getValue()
+                                e.getValue(),
+                                null,
+                                null
                         );
 
                         player.connection.send(setScore);
