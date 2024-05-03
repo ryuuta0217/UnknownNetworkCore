@@ -34,7 +34,6 @@ package net.unknown.core.dependency;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import net.royawesome.jlibnoise.module.combiner.Min;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
