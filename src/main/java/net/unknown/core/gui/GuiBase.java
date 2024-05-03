@@ -49,6 +49,7 @@ public class GuiBase implements Listener {
     protected final Inventory inventory;
     protected boolean onceDeferUnregisterOnClose = false;
     protected boolean unRegisterOnClose;
+    protected boolean passOnlyThisInventory = true;
     protected BiConsumer<Integer, InventoryClickEvent> onClick;
 
     public GuiBase(InventoryHolder owner, InventoryType type, Component guiTitle, boolean unRegisterOnClose) {
@@ -125,7 +126,7 @@ public class GuiBase implements Listener {
             if (event.getClick().isShiftClick()) { // When Shift Click
                 event.setCancelled(true); // Cancel Event
             }
-            return;
+            if (this.passOnlyThisInventory) return;
         }
         event.setCancelled(true);
         onClick(event);
