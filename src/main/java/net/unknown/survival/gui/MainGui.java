@@ -98,6 +98,11 @@ public class MainGui extends GuiBase {
                             .lore(Component.text("アイテムを持ってここを左クリックで頭に被ります", TextColor.color(0xFF76A6)))
                             .build());
 
+                    inv.setItem(25, new ItemStackBuilder(Material.BRUSH)
+                            .displayName(Component.text("NBT Remover"))
+                            .lore(Component.text("NBTを吹き飛ばすためのGUIを開きます", DefinedTextColor.YELLOW))
+                            .build());
+
                     inv.setItem(26, new ItemStackBuilder(Material.BUCKET)
                             .displayName(Component.text("ゴミ箱", DefinedTextColor.RED))
                             .lore(Component.text("クリックするとゴミ箱を開きます", DefinedTextColor.LIGHT_PURPLE))
@@ -129,6 +134,13 @@ public class MainGui extends GuiBase {
                 event.getWhoClicked().getInventory().setHelmet(newHead);
                 event.getView().setCursor(oldHead);
                 MessageUtil.sendMessage((Player) event.getWhoClicked(), "アイテムを頭に被りました");
+            }
+            case 25 -> {
+                if (event.getWhoClicked() instanceof Player player) {
+                    player.closeInventory();
+                    NBTRemoveGui removeGui = new NBTRemoveGui(player);
+                    removeGui.open(player);
+                }
             }
             case 26 -> {
                 if (event.getWhoClicked() instanceof Player player) {
