@@ -116,8 +116,8 @@ public class TabListPingManager implements Listener {
                 .forEach(player -> {
                     latencies.entrySet().forEach(e -> {
                         ClientboundSetScorePacket setScore = new ClientboundSetScorePacket(
-                                PING_OBJECTIVE_NAME,
                                 e.getKey(),
+                                PING_OBJECTIVE_NAME,
                                 e.getValue(),
                                 null,
                                 null
