@@ -93,7 +93,7 @@ public class UpdateUtil {
 
     public static final String PAPER_API_BASE_URL = "https://api.papermc.io";
 
-    public static final String UNC_FILE_PATTERN = "https://repo.yncrypt.net/repository/unknown-network/net/unknown/UnknownNetworkCore/%1$s/UnknownNetworkCore-%1$s.jar";
+    public static final String UNC_FILE_PATTERN = "https://repo.ryuuta0217.com/repository/unknown-network/net/unknown/UnknownNetworkCore/%1$s/UnknownNetworkCore-%1$s.jar";
 
     public static void main(String[] args) {
         GitHubAPI api = new GitHubAPI(GITHUB_ACCESS_TOKEN);
