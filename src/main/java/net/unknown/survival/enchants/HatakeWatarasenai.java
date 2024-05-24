@@ -54,7 +54,7 @@ public class HatakeWatarasenai implements Listener {
                 if (p.getInventory().getBoots().getLore() == null) return;
                 if (p.getInventory().getBoots().getLore().parallelStream().noneMatch(lore -> lore.equals("§c畑渡らせない")))
                     return;
-                p.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 30, 127, false, false, false));
+                p.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, 30, 127, false, false, false));
             });
         }, 10L, 10L);
     }

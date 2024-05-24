@@ -112,7 +112,7 @@ public class PathfinderGrapple implements Listener {
 
         for (; covered < distance; p1.add(vector)) {
             Particle.DustOptions dustOptions = new Particle.DustOptions(color, 2);
-            world.spawnParticle(Particle.REDSTONE, p1.getX(), p1.getY(), p1.getZ(), 2, dustOptions);
+            world.spawnParticle(Particle.DUST, p1.getX(), p1.getY(), p1.getZ(), 2, dustOptions);
             covered += space;
         }
     }

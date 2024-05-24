@@ -33,82 +33,30 @@ package net.unknown.survival.enchants.nms;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.effect.MobEffects;
-import net.minecraft.world.entity.Entity;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
-import net.minecraft.world.item.AxeItem;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.DamageEnchantment;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.util.RegistryUtil;
 
-public class DamageEnchant extends Enchantment {
-    public static final int ALL = 0;
-    public static final int UNDEAD = 1;
-    public static final int ARTHROPODS = 2;
-    private static final String[] NAMES = new String[] {"all", "undead", "arthropods"};
-    private static final int[] MIN_COST = new int[] {1, 5, 5};
-    private static final int[] LEVEL_COST = new int[] {11, 8, 8};
-    private static final int[] LEVEL_COST_SPAN = new int[] {24, 20, 20};
-    public final int type;
+import java.util.Optional;
 
-    public DamageEnchant(Enchantment.Rarity weight, int typeIndex, EquipmentSlot... slots) {
-        super(weight, EnchantmentCategory.WEAPON, slots);
-        this.type = typeIndex;
-    }
-
+public class DamageEnchant {
     public static void register() {
-        if (!RegistryUtil.forceReplace(BuiltInRegistries.ENCHANTMENT, ResourceLocation.of("minecraft:sharpness", ':'), new DamageEnchant(Rarity.COMMON, 0, EquipmentSlot.MAINHAND))) {
+        if (!RegistryUtil.forceReplace(BuiltInRegistries.ENCHANTMENT, ResourceLocation.of("minecraft:sharpness", ':'), new DamageEnchantment(
+                Enchantment.definition(
+                        ItemTags.SHARP_WEAPON_ENCHANTABLE,
+                        ItemTags.SWORD_ENCHANTABLE,
+                        10,
+                        10,
+                        Enchantment.dynamicCost(1, 11),
+                        Enchantment.dynamicCost(21, 11),
+                        1,
+                        EquipmentSlot.MAINHAND
+                ),
+                Optional.empty()))) {
             UnknownNetworkCorePlugin.getInstance().getLogger().warning("Failed to register \"Sharpness V -> Sharpness X\" enchantment.");
         };
-    }
-
-    @Override
-    public int getMinCost(int level) {
-        return MIN_COST[this.type] + (level - 1) * LEVEL_COST[this.type];
-    }
-
-    @Override
-    public int getMaxCost(int level) {
-        return this.getMinCost(level) * LEVEL_COST_SPAN[this.type];
-    }
-
-    @Override
-    public int getMaxLevel() {
-        return 10;
-    }
-
-    @Override
-    public float getDamageBonus(int level, MobType group) {
-        return this.type == 0 ? 1.0F + (float) Math.max(0, level - 1) * 0.5F : (this.type == 1 && group == MobType.UNDEAD ? (float) level * 2.5F : (this.type == 2 && group == MobType.ARTHROPOD ? (float) level * 2.5F : 0.0F));
-    }
-
-    @Override
-    public boolean checkCompatibility(Enchantment other) {
-        return !(other instanceof DamageEnchantment);
-    }
-
-    @Override
-    public boolean canEnchant(ItemStack stack) {
-        return stack.getItem() instanceof AxeItem || super.canEnchant(stack);
-    }
-
-    @Override
-    public void doPostAttack(LivingEntity user, Entity target, int level) {
-        if (target instanceof LivingEntity) {
-            LivingEntity entityliving1 = (LivingEntity) target;
-
-            if (this.type == 2 && level > 0 && entityliving1.getMobType() == MobType.ARTHROPOD) {
-                int j = 20 + user.getRandom().nextInt(10 * level);
-
-                entityliving1.addEffect(new MobEffectInstance(MobEffects.MOVEMENT_SLOWDOWN, j, 3), org.bukkit.event.entity.EntityPotionEffectEvent.Cause.ATTACK); // CraftBukkit
-            }
-        }
-
     }
 }

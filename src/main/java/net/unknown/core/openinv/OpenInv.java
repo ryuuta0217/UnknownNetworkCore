@@ -43,7 +43,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -63,7 +63,7 @@ public class OpenInv {
             @Override
             public void loadData() {
                 System.out.println("loadData - " + this.getUniqueId());
-                CompoundTag loadedData = this.server.getHandle().playerIo.load(this.getHandle());
+                CompoundTag loadedData = this.server.getHandle().playerIo.load(this.getHandle()).orElse(null);
 
                 if (loadedData != null) {
                     this.getHandle().readAdditionalSaveData(loadedData);
@@ -98,7 +98,7 @@ public class OpenInv {
             if (bukkitEntityField.trySetAccessible()) {
                 bukkitEntityField.set(dummyPlayer, dummyBukkitEntity);
 
-                CompoundTag playerData = MinecraftServer.getServer().getPlayerList().playerIo.load(dummyPlayer);
+                CompoundTag playerData = MinecraftServer.getServer().getPlayerList().playerIo.load(dummyPlayer).orElse(null);
                 if (playerData != null) {
                     dummyPlayer.readAdditionalSaveData(playerData);
                     return dummyPlayer.getBukkitEntity();

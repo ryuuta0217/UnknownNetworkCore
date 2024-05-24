@@ -35,10 +35,8 @@ import com.google.common.collect.BiMap;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
-import net.minecraft.core.Holder;
-import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.*;
 import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -48,11 +46,11 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_20_R3.CraftRegistry;
-import org.bukkit.craftbukkit.v1_20_R3.block.data.CraftBlockData;
-import org.bukkit.craftbukkit.v1_20_R3.enchantments.CraftEnchantment;
-import org.bukkit.craftbukkit.v1_20_R3.util.CraftMagicNumbers;
-import org.bukkit.craftbukkit.v1_20_R3.util.CraftNamespacedKey;
+import org.bukkit.craftbukkit.CraftRegistry;
+import org.bukkit.craftbukkit.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.enchantments.CraftEnchantment;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.util.CraftNamespacedKey;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
@@ -116,7 +114,7 @@ public class RegistryUtil {
             T objectFrom = mappedRegistry.get(id);
             if (objectFrom != null) {
                 ResourceKey<T> resourceKey = mappedRegistry.getResourceKey(objectFrom).orElse(null);
-                Lifecycle lifecycle = mappedRegistry.lifecycle(objectFrom);
+                Lifecycle lifecycle = mappedRegistry.registryLifecycle();
                 if (resourceKey != null) {
                     int registryId = mappedRegistry.getId(objectFrom);
                     logPrefix += "[ID=" + registryId + "] ";
@@ -295,7 +293,7 @@ public class RegistryUtil {
                                 }
                             } else {
                                 LOGGER.warning("Failed to get some field(s). Proceed to duplicate key registration.");
-                                mappedRegistry.register(resourceKey, objectTo, lifecycle);
+                                mappedRegistry.register(resourceKey, objectTo, RegistrationInfo.BUILT_IN);
                                 if (mappedRegistry.getKey(objectTo) != null) {
                                     LOGGER.info(logPrefix + "Successfully registered object.");
                                     freeze(mappedRegistry);

@@ -33,39 +33,36 @@ package net.unknown.survival.enchants;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentCategory;
 
 public class RangedBoneMeal {
     public static class RangedBoneMealEnchantment extends Enchantment {
         private static RangedBoneMealEnchantment INSTANCE;
 
         protected RangedBoneMealEnchantment() {
-            super(Rarity.COMMON, EnchantmentCategory.WEAPON, new EquipmentSlot[0]);
+            super(Enchantment.definition(
+                    TagKey.create(Registries.ITEM, ResourceLocation.of("minecraft:bone_meal", ':')),
+                            3,
+                            5,
+                            Enchantment.dynamicCost(1, 8),
+                            Enchantment.dynamicCost(16, 8),
+                            3,
+                            EquipmentSlot.MAINHAND
+            ));
             Registry.register(BuiltInRegistries.ENCHANTMENT, "ranged_bone_meal", this);
         }
 
         public static RangedBoneMealEnchantment instance() {
             if (INSTANCE == null) INSTANCE = new RangedBoneMealEnchantment();
             return INSTANCE;
-        }
-
-        @Override
-        public int getMaxLevel() {
-            return 5;
-        }
-
-        @Override
-        public int getMinCost(int level) {
-            return 8 * level;
-        }
-
-        @Override
-        public int getMaxCost(int level) {
-            return super.getMinCost(level) + 16;
         }
 
         @Override

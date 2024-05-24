@@ -34,39 +34,35 @@ package net.unknown.survival.enchants.nms;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentCategory;
+
+import javax.annotation.Nullable;
 
 public class EnchantExample extends Enchantment {
-    protected EnchantExample(Rarity weight, EquipmentSlot... slotTypes) {
-        super(weight, EnchantmentCategory.BREAKABLE, slotTypes);
+    protected EnchantExample() {
+        super(Enchantment.definition(
+                ItemTags.WEAPON_ENCHANTABLE,
+                ItemTags.SWORDS,
+                5,
+                3,
+                Enchantment.dynamicCost(0, 8),
+                Enchantment.dynamicCost(15, 8),
+                3,
+                EquipmentSlot.MAINHAND
+        ));
     }
 
     public static void register() {
-        Registry.register(BuiltInRegistries.ENCHANTMENT, "example", new EnchantExample(Rarity.COMMON, EquipmentSlot.MAINHAND));
+        Registry.register(BuiltInRegistries.ENCHANTMENT, "example", new EnchantExample());
     }
 
     @Override
-    public int getMaxLevel() {
-        return 3;
-    }
-
-    @Override
-    public int getMinCost(int level) {
-        return 8 * level;
-    }
-
-    @Override
-    public int getMaxCost(int level) {
-        return this.getMinCost(level) + 15;
-    }
-
-    @Override
-    public float getDamageBonus(int level, MobType group) {
+    public float getDamageBonus(int level, @Nullable EntityType<?> type) {
         return level * 1.5F;
     }
 

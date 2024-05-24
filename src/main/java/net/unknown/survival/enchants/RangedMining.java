@@ -37,11 +37,11 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.Block;
@@ -157,28 +157,21 @@ public class RangedMining implements Listener {
         private static RangedMiningEnchantment INSTANCE;
 
         protected RangedMiningEnchantment() {
-            super(Rarity.RARE, EnchantmentCategory.DIGGER, new net.minecraft.world.entity.EquipmentSlot[] {net.minecraft.world.entity.EquipmentSlot.MAINHAND});
+            super(Enchantment.definition(
+                    ItemTags.MINING_ENCHANTABLE,
+                    ItemTags.PICKAXES, 11,
+                    3,
+                    Enchantment.dynamicCost(1, 15),
+                    Enchantment.dynamicCost(30, 15),
+                    1,
+                    net.minecraft.world.entity.EquipmentSlot.MAINHAND
+            ));
             this.descriptionId = "範囲破壊";
         }
 
         public static RangedMiningEnchantment instance() {
             if (INSTANCE == null) INSTANCE = new RangedMiningEnchantment();
             return INSTANCE;
-        }
-
-        @Override
-        public int getMaxLevel() {
-            return 3;
-        }
-
-        @Override
-        public int getMinCost(int level) {
-            return 15 * level;
-        }
-
-        @Override
-        public int getMaxCost(int level) {
-            return super.getMinCost(level) + 30;
         }
 
         @Override

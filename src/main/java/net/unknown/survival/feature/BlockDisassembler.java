@@ -50,7 +50,7 @@ import net.minecraft.world.level.gameevent.GameEvent;
 import net.unknown.launchwrapper.event.BlockDispenseBeforeEvent;
 import net.unknown.launchwrapper.mixininterfaces.IMixinBlockEntity;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_20_R3.block.CraftBlock;
+import org.bukkit.craftbukkit.block.CraftBlock;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -83,7 +83,7 @@ public class BlockDisassembler implements Listener {
 
                 ItemStack shootItem = event.getItem();
                 if (targetState.getBlock() == Blocks.BEDROCK) return; // 岩盤は破壊させないよーん
-                if (targetState.requiresCorrectToolForDrops() && !shootItem.getItem().isCorrectToolForDrops(targetState)) return; // 適正ツールが必要なブロックなら適正ツールチェック
+                if (targetState.requiresCorrectToolForDrops() && !shootItem.getItem().isCorrectToolForDrops(shootItem, targetState)) return; // 適正ツールが必要なブロックなら適正ツールチェック
                 if (shootItem.getMaxDamage() - shootItem.getDamageValue() == 1) return; // 次のブロック破壊で壊れそうならやめる
 
                 FakePlayer player = new FakePlayer(dispenser, mixinBlockEntity.getPlacer());
@@ -99,7 +99,7 @@ public class BlockDisassembler implements Listener {
 
                 if (bbEvent.isCancelled()) return;
 
-                shootItem.hurt(1, level.random, null);
+                shootItem.hurtAndBreak(1, level.random, null, () -> {});
 
                 destroyBlockWithDrops(level, targetPos, shootItem).forEach(dropItem -> {
                     if (bbEvent.isDropItems()) Block.popResource(level, targetPos, dropItem);

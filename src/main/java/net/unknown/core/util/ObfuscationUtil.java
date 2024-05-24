@@ -33,11 +33,9 @@ package net.unknown.core.util;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.papermc.paper.util.MappingEnvironment;
 import io.papermc.paper.util.ObfHelper;
-import net.fabricmc.mappingio.MappingReader;
-import net.fabricmc.mappingio.format.MappingFormat;
-import net.fabricmc.mappingio.tree.MappingTree;
-import net.fabricmc.mappingio.tree.MemoryMappingTree;
+import net.neoforged.srgutils.IMappingFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -197,74 +195,86 @@ public class ObfuscationUtil {
                 return;
             }
 
-            MemoryMappingTree mapping = new MemoryMappingTree();
-            MappingReader.read(new InputStreamReader(mappingRaw, StandardCharsets.UTF_8), MappingFormat.TINY_2_FILE, mapping);
-            for (MappingTree.ClassMapping classMapping : mapping.getClasses()) {
-                String mojangClassName = classMapping.getName(ObfHelper.MOJANG_PLUS_YARN_NAMESPACE).replace("/", ".");
-                String spigotClassName = classMapping.getName(ObfHelper.SPIGOT_NAMESPACE).replace("/", ".");
+            try (final InputStream mappingStream = MappingEnvironment.mappingsStream()) {
+                final IMappingFile mapping = IMappingFile.load(mappingStream);
 
-                boolean isSubClass = classMapping.getName(ObfHelper.MOJANG_PLUS_YARN_NAMESPACE).contains("$");
+                for (IMappingFile.IClass mappingClass : mapping.getClasses()) {
+                    Class helperClass;
 
-                Class clazz;
+                    if (!mappingClass.getOriginal().contains("$")) {
+                        // for Normal Classes logic
+                        helperClass = new Class(ClassMapping.TINY, mappingClass.getOriginal(), mappingClass.getMapped());
+                    } else {
+                        // for Sub classes logic
+                        String[] originalClassNames = mappingClass.getOriginal().split("\\$");
+                        String[] obfuscatedClassNames = mappingClass.getMapped().split("\\$");
 
-                if (!isSubClass) {
-                    clazz = new Class(ClassMapping.TINY, mojangClassName, spigotClassName);
-                    //clazz = tinyClasses.getOrDefault(mojangClassName, new Class(mojangClassName, spigotClassName));
-                } else {
-                    String[] mojangNames = mojangClassName.split("\\$");
-                    String[] spigotNames = spigotClassName.split("\\$");
-                    /*if(!tinyClasses.containsKey(mojangNames[0])) {
-                        tinyClasses.put(mojangNames[0], new Class(mojangNames[0], spigotNames[0]))
-                    }*/
+                        Class helperSubClass = tinyClasses.getOrDefault(originalClassNames[0], null);
 
-                    Class parent = tinyClasses.get(mojangNames[0]);
-                    for (int i = 1; i < mojangNames.length; i++) {
-                        SubClass subClazz = parent.getSubClass(mojangNames[i], spigotNames[i]);
-                        if (subClazz == null) {
-                            subClazz = new SubClass(parent, ClassMapping.TINY, mojangNames[i], spigotNames[i]);
-                            parent.addSubClass(subClazz);
+                        for (int i = 1; i < originalClassNames.length; i++) {
+                            if (helperSubClass.getSubClass(originalClassNames[i], null) != null) {
+                                // If found parent class, use this.
+                                helperSubClass = helperSubClass.getSubClass(originalClassNames[i], obfuscatedClassNames[i]);
+                            } else {
+                                // If not found parent class, create new.
+                                SubClass newSubClass = new SubClass(helperSubClass, ClassMapping.TINY, originalClassNames[i], obfuscatedClassNames[i]);
+                                helperSubClass.addSubClass(newSubClass);
+                                helperSubClass = newSubClass;
+                            }
                         }
-                        parent = subClazz;
+
+                        if (helperSubClass == null) {
+                            throw new IllegalStateException("Unknown sub-class detected: " + mappingClass.getOriginal());
+                        }
+
+                        helperClass = helperSubClass;
                     }
 
-                    clazz = parent;
+                    // Add Methods to Class
+                    mappingClass.getMethods()
+                            .stream()
+                            .map(method -> {
+                                Matcher descMatcher = DESCRIPTOR_PATTERN.matcher(method.getDescriptor());
+                                if (descMatcher.matches()) {
+                                    String argsRaw = descMatcher.group(1);
+                                    String returnTypeRaw = descMatcher.group(2);
+
+                                    Matcher argsMatcher = DESCRIPTOR_PARAMS_PATTERN.matcher(argsRaw);
+                                    List<String> params = new ArrayList<>();
+                                    while (argsMatcher.find()) {
+                                        params.add(argsMatcher.group());
+                                    }
+
+                                    return new Method(
+                                            helperClass,
+                                            ClassMapping.TINY,
+                                            ObfuscationUtil.formatTypeDescriptor(returnTypeRaw),
+                                            method.getOriginal(),
+                                            params.stream()
+                                                    .map(ObfuscationUtil::formatTypeDescriptor)
+                                                    .toArray(String[]::new),
+                                            method.getMapped());
+                                } else {
+                                    LOGGER.warn("Unknown descriptor pattern detected in class " + mappingClass.getOriginal() + " at method " + method.getOriginal() + ". Descriptor: " + method.getDescriptor());
+                                    return null;
+                                }
+                            })
+                            .filter(Objects::nonNull)
+                            .forEach(helperClass::addMethod);
+
+                    // Add Fields to Class
+                    mappingClass.getFields()
+                            .stream()
+                            .map(field -> new Field(
+                                    helperClass,
+                                    ClassMapping.TINY,
+                                    ObfuscationUtil.formatTypeDescriptor(field.getDescriptor()),
+                                    field.getOriginal(),
+                                    field.getMapped()))
+                            .forEach(helperClass::addField);
+
+                    if (!(helperClass instanceof SubClass)) tinyClasses.put(helperClass.getName(), helperClass);
                 }
-
-                for (MappingTree.MethodMapping methodMapping : classMapping.getMethods()) {
-                    String descriptor = methodMapping.getDesc(ObfHelper.MOJANG_PLUS_YARN_NAMESPACE);
-                    Matcher descMatcher = DESCRIPTOR_PATTERN.matcher(descriptor);
-                    if (descMatcher.matches()) {
-                        String argsRaw = descMatcher.group(1);
-                        String returnTypeRaw = descMatcher.group(2);
-
-                        Matcher argsMatcher = DESCRIPTOR_PARAMS_PATTERN.matcher(argsRaw);
-                        List<String> params = new ArrayList<>();
-                        while (argsMatcher.find()) {
-                            params.add(argsMatcher.group());
-                        }
-                        clazz.addMethod(new Method(
-                                clazz,
-                                ClassMapping.TINY,
-                                ObfuscationUtil.formatTypeDescriptor(returnTypeRaw),
-                                methodMapping.getName(ObfHelper.MOJANG_PLUS_YARN_NAMESPACE),
-                                params.stream()
-                                        .map(ObfuscationUtil::formatTypeDescriptor)
-                                        .toArray(String[]::new),
-                                methodMapping.getName(ObfHelper.SPIGOT_NAMESPACE)));
-                    }
-                }
-
-                for (MappingTree.FieldMapping fieldMapping : classMapping.getFields()) {
-                    clazz.addField(new Field(
-                            clazz,
-                            ClassMapping.TINY,
-                            ObfuscationUtil.formatTypeDescriptor(fieldMapping.getDesc(ObfHelper.MOJANG_PLUS_YARN_NAMESPACE)),
-                            fieldMapping.getName(ObfHelper.MOJANG_PLUS_YARN_NAMESPACE),
-                            fieldMapping.getName(ObfHelper.SPIGOT_NAMESPACE)));
-                }
-
-                if (!isSubClass) tinyClasses.put(clazz.getName(), clazz);
-
             }
 
             tinyClasses.entrySet().stream()

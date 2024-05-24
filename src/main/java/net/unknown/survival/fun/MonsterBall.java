@@ -34,6 +34,7 @@ package net.unknown.survival.fun;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -42,10 +43,11 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.ThrownEgg;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.util.MinecraftAdapter;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -64,7 +66,7 @@ public class MonsterBall implements Listener {
     @EventHandler
     public void onEggHit(ProjectileHitEvent event) {
         if (((CraftEntity) event.getEntity()).getHandle() instanceof ThrownEgg egg) {
-            org.bukkit.inventory.ItemStack thrownEggItem = MinecraftAdapter.ItemStack.itemStack(egg.getItemRaw());
+            org.bukkit.inventory.ItemStack thrownEggItem = MinecraftAdapter.ItemStack.itemStack(egg.getItem());
             if (thrownEggItem.hasItemMeta() && thrownEggItem.getItemMeta().hasDisplayName() && thrownEggItem.getItemMeta().displayName().equals(Component.text("モンスターボール", NamedTextColor.RED, TextDecoration.BOLD).decoration(TextDecoration.ITALIC, false))) {
                 if (event.getHitEntity() != null) {
                     if (((CraftEntity) event.getHitEntity()).getHandle() instanceof Mob mob) {
@@ -79,7 +81,7 @@ public class MonsterBall implements Listener {
                             ItemStack spawnEgg = new ItemStack(SpawnEggItem.byId(mob.getType()));
                             CompoundTag spawnEggTag = new CompoundTag();
                             spawnEggTag.put("EntityTag", entityTag);
-                            spawnEgg.setTag(spawnEggTag);
+                            spawnEgg.set(DataComponents.ENTITY_DATA, CustomData.of(entityTag));
 
                             ItemEntity e = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), spawnEgg);
                             mob.level().addFreshEntity(e, CreatureSpawnEvent.SpawnReason.EGG);

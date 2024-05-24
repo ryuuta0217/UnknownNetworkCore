@@ -107,7 +107,7 @@ public class VoteManager implements Listener {
     public static ItemStackBuilder ticketBuilder() {
         return new ItemStackBuilder(Material.PAPER)
                 .displayName(VoteManager.getTicketItemName())
-                .addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1)
+                .addEnchantment(Enchantment.PROTECTION, 1)
                 .addItemFlag(ItemFlag.HIDE_ENCHANTS);
     }
 

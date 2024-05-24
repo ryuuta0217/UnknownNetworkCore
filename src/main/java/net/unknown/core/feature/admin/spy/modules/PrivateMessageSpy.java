@@ -36,6 +36,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.chat.CustomChatTypes;
 import net.unknown.core.events.PrivateMessageEvent;
@@ -92,10 +93,10 @@ public class PrivateMessageSpy implements SpyModule, Listener {
             if (audience instanceof Player audiencePlayer) {
                 ServerPlayer audienceMinecraftPlayer = MinecraftAdapter.player(audiencePlayer);
                 if (audienceMinecraftPlayer != null) {
-                    audienceMinecraftPlayer.sendChatMessage(OutgoingChatMessage.create(originalMessage), false, CustomChatTypes.VALUE_PRIVATE_MESSAGE.bind(NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName)).withTargetName(NewMessageUtil.convertAdventure2Minecraft(targetDisplayName)));
+                    audienceMinecraftPlayer.sendChatMessage(OutgoingChatMessage.create(originalMessage), false, CustomChatTypes.VALUE_PRIVATE_MESSAGE.bind(CustomChatTypes.PRIVATE_MESSAGE, MinecraftServer.getDefaultRegistryAccess(), NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName)).withTargetName(NewMessageUtil.convertAdventure2Minecraft(targetDisplayName)));
                 }
             } else {
-                audience.sendMessage(NewMessageUtil.convertMinecraft2Adventure(CustomChatTypes.VALUE_PRIVATE_MESSAGE.chat().decorate(NewMessageUtil.convertAdventure2Minecraft(LegacyComponentSerializer.legacySection().deserialize(PlainTextComponentSerializer.plainText().serialize(message))), CustomChatTypes.VALUE_PRIVATE_MESSAGE.bind(NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName)).withTargetName(NewMessageUtil.convertAdventure2Minecraft(targetDisplayName)))));
+                audience.sendMessage(NewMessageUtil.convertMinecraft2Adventure(CustomChatTypes.VALUE_PRIVATE_MESSAGE.chat().decorate(NewMessageUtil.convertAdventure2Minecraft(LegacyComponentSerializer.legacySection().deserialize(PlainTextComponentSerializer.plainText().serialize(message))), CustomChatTypes.VALUE_PRIVATE_MESSAGE.bind(CustomChatTypes.PRIVATE_MESSAGE, MinecraftServer.getDefaultRegistryAccess(), NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName)).withTargetName(NewMessageUtil.convertAdventure2Minecraft(targetDisplayName)))));
             }
         });
     }

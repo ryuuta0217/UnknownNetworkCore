@@ -150,7 +150,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
         float knockback = (float) source.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
 
         if (target instanceof net.minecraft.world.entity.LivingEntity) {
-            damage += EnchantmentHelper.getDamageBonus(source.getMainHandItem(), ((net.minecraft.world.entity.LivingEntity) target).getMobType());
+            damage += EnchantmentHelper.getDamageBonus(source.getMainHandItem(), ((net.minecraft.world.entity.LivingEntity) target).getType());
             knockback += EnchantmentHelper.getKnockbackBonus(source);
         }
 
@@ -162,7 +162,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             org.bukkit.Bukkit.getPluginManager().callEvent(combustEvent);
 
             if (!combustEvent.isCancelled()) {
-                target.setSecondsOnFire(combustEvent.getDuration(), false);
+                target.igniteForSeconds(combustEvent.getDuration(), false);
             }
             // CraftBukkit end
         }
@@ -211,14 +211,16 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             AttributeInstance damageAttr = golem.getAttribute(Attributes.ATTACK_DAMAGE);
 
             if (damageAttr != null) {
-                damageAttr.getModifiers(AttributeModifier.Operation.ADDITION).forEach(multiplyModifier -> {
-                    if (multiplyModifier.name.equals(damageAttributeModifierName)) {
-                        damageAttr.removeModifier(multiplyModifier);
+                damageAttr.getModifiers().forEach(modifier -> {
+                    if (modifier.operation() == AttributeModifier.Operation.ADD_VALUE) {
+                        if (modifier.name().equals(damageAttributeModifierName)) {
+                            damageAttr.removeModifier(modifier);
+                        }
                     }
                 });
 
                 // ATTACK_DAMAGEは、デフォルトではBaseが0なので、Additionを使用する。これにより、Base: 0 に、valueの値(upgradeLevel = 1 の場合、 3 * 1 = 3) が加算され、最終的にダメージは 3 になる。
-                AttributeModifier modifier = new AttributeModifier(damageAttributeModifierName, BASE_SNOWBALL_DAMAGE * upgradeLevel, AttributeModifier.Operation.ADDITION);
+                AttributeModifier modifier = new AttributeModifier(damageAttributeModifierName, BASE_SNOWBALL_DAMAGE * upgradeLevel, AttributeModifier.Operation.ADD_VALUE);
                 damageAttr.addPermanentModifier(modifier);
             }
             /* End of Damage */
@@ -233,14 +235,16 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             AttributeInstance kbAttr = golem.getAttribute(Attributes.ATTACK_KNOCKBACK);
 
             if (kbAttr != null) {
-                kbAttr.getModifiers(AttributeModifier.Operation.ADDITION).forEach(multiplyModifier -> {
-                    if (multiplyModifier.name.equals(kbAttributeModifierName)) {
-                        kbAttr.removeModifier(multiplyModifier);
+                kbAttr.getModifiers().forEach(modifier -> {
+                    if (modifier.operation() == AttributeModifier.Operation.ADD_VALUE) {
+                        if (modifier.name().equals(kbAttributeModifierName)) {
+                            kbAttr.removeModifier(modifier);
+                        }
                     }
                 });
 
                 // ATTACK_KNOCKBACKは、デフォルトではBaseが0なので、Additionを使用する。これにより、Base: 0 に、valueの値(upgradeLevel = 1 の場合、 1 + 1 = 2) が加算され、最終的にx2のノックバックの値になる。
-                AttributeModifier modifier = new AttributeModifier(kbAttributeModifierName, 1 + upgradeLevel, AttributeModifier.Operation.ADDITION);
+                AttributeModifier modifier = new AttributeModifier(kbAttributeModifierName, 1 + upgradeLevel, AttributeModifier.Operation.ADD_VALUE);
                 kbAttr.addPermanentModifier(modifier);
             }
             /* End of KnockBack */

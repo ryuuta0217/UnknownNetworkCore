@@ -44,7 +44,7 @@ import net.minecraft.world.item.ItemStack;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -90,7 +90,7 @@ public class OpenInvCommand {
                 for(int i = 0; i < inventoryList.size(); i++) {
                     CompoundTag itemStackTag = inventoryList.getCompound(i);
                     int slot = itemStackTag.getByte("Slot") & 255;
-                    ItemStack itemStack = ItemStack.of(itemStackTag);
+                    ItemStack itemStack = ItemStack.parseOptional(MinecraftServer.getDefaultRegistryAccess(), itemStackTag);
                     inv.setItem(convInvSlotMinecraft2Bukkit(slot), MinecraftAdapter.ItemStack.itemStack(itemStack));
                 }
             }
@@ -144,7 +144,7 @@ public class OpenInvCommand {
                 contents.forEach((slot, item) -> {
                     CompoundTag inventoryItemContainer = new CompoundTag();
                     inventoryItemContainer.putInt("Slot", slot);
-                    inventoryList.set(slot, item.save(new CompoundTag()));
+                    inventoryList.set(slot, item.save(MinecraftServer.getDefaultRegistryAccess(), new CompoundTag()));
                 });
             }
 

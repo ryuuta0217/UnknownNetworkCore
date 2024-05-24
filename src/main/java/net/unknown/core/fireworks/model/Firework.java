@@ -31,6 +31,9 @@
 
 package net.unknown.core.fireworks.model;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -38,6 +41,8 @@ import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.ItemStack;
 import net.unknown.core.configurations.ConfigurationSerializer;
+import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.item.component.Fireworks;
 import net.unknown.core.fireworks.ProgrammedFireworks;
 import net.unknown.core.fireworks.ref.ColorReference;
 import net.unknown.core.fireworks.ref.LocationReference;
@@ -46,11 +51,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.craftbukkit.v1_20_R3.CraftServer;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftFirework;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.entity.CraftFirework;
 
 import java.util.*;
 import java.util.stream.Stream;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * プログラム化された花火の打ち上げ内容を表すクラスです。
@@ -148,16 +155,20 @@ public class Firework {
     public ItemStack buildItemStack() {
         ItemStack item = new ItemStack(net.minecraft.world.item.Items.FIREWORK_ROCKET);
 
-        // Format: {Fireworks:{Explosions:[{Type:1,Trail:1,Colors:[I;15204362,15204362]}],Flight:3,}}
-        CompoundTag tag = new CompoundTag();
-        CompoundTag fireworks = new CompoundTag();
-        ListTag explosions = new ListTag();
-        this.getExplosions().forEach((id, explosion) -> {
-            explosions.add(explosion.buildCompoundTag());
+        Collector<Integer, IntList, IntList> intListCollector = Collector.of(IntArrayList::new, IntList::addLast, (a, b) -> {
+            a.addAll(b);
+            return a;
         });
-        fireworks.put("Explosions", explosions);
-        tag.put("Fireworks", fireworks);
-        item.setTag(tag);
+
+        item.set(DataComponents.FIREWORKS, new Fireworks(3, this.getExplosions()
+                .values()
+                .stream()
+                .map(explosion -> {
+                    IntList colors = explosion.getColors().stream().map(Color::asRGB).collect(intListCollector);
+                    IntList fadeColors = explosion.getFadeColors().stream().map(Color::asRGB).collect(intListCollector);
+                    return new FireworkExplosion(explosion.getShape(), colors, fadeColors, explosion.isTrail(), explosion.isFlicker());
+                })
+                .collect(Collectors.toList())));
         return item;
     }
 
@@ -257,13 +268,13 @@ public class Firework {
      * Represents Minecraft's Firework Explosion.
      */
     public static class Explosion {
-        private final FireworkRocketItem.Shape type;
+        private final FireworkExplosion.Shape type;
         private final boolean flicker;
         private final boolean trail;
         private final ArrayList<ColorReference> colors;
         private final ArrayList<ColorReference> fadeColors;
 
-        public Explosion(FireworkRocketItem.Shape type, boolean flicker, boolean trail, List<ColorReference> colors, List<ColorReference> fadeColors) {
+        public Explosion(FireworkExplosion.Shape type, boolean flicker, boolean trail, List<ColorReference> colors, List<ColorReference> fadeColors) {
             this.type = type;
             this.flicker = flicker;
             this.trail = trail;
@@ -271,7 +282,7 @@ public class Firework {
             this.fadeColors = new ArrayList<>(fadeColors);
         }
 
-        public FireworkRocketItem.Shape getType() {
+        public FireworkExplosion.Shape getShape() {
             return this.type;
         }
 
@@ -311,7 +322,7 @@ public class Firework {
         }
 
         public static Explosion buildObject(CompoundTag tag, String programId) {
-            FireworkRocketItem.Shape type = FireworkRocketItem.Shape.values()[tag.getInt("Type")];
+            FireworkExplosion.Shape shape = FireworkExplosion.Shape.values()[tag.getInt("Type")];
             boolean flicker = tag.getBoolean("Flicker");
             boolean trail = tag.getBoolean("Trail");
             int[] colors = tag.getIntArray("Colors");
@@ -364,7 +375,7 @@ public class Firework {
                 return null;
             }).toList();
 
-            return new Explosion(type, flicker, trail, colorRefs, fadeColorRefs);
+            return new Explosion(shape, flicker, trail, colorRefs, fadeColorRefs);
         }
 
         public void write(ConfigurationSection section) {
@@ -376,7 +387,7 @@ public class Firework {
         }
 
         public static Explosion read(ConfigurationSection section) {
-            FireworkRocketItem.Shape type = FireworkRocketItem.Shape.valueOf(section.getString("type"));
+            FireworkExplosion.Shape type = FireworkExplosion.Shape.valueOf(section.getString("type"));
             boolean flicker = section.getBoolean("flicker");
             boolean trail = section.getBoolean("trail");
             List<ColorReference> colors = section.getStringList("colors").stream().map(ColorReference::parse).toList();

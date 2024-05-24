@@ -71,7 +71,7 @@ public class Commands {
 
         TeleportPetCommand.register(UnknownNetworkCorePlugin.getBrigadier());
 
-        ChannelCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        ChannelCommand.register(UnknownNetworkCorePlugin.getBrigadier(), buildContext);
 
         SpawnCommand.register(UnknownNetworkCorePlugin.getBrigadier());
         LastTpCommand.register(UnknownNetworkCorePlugin.getBrigadier());

@@ -926,7 +926,7 @@ public class ProtectionGui extends GuiBase {
             ItemStack currentHand = player.getInventory().getItemInMainHand();
             ItemStack newHand = new ItemStackBuilder(Material.GOLDEN_AXE)
                     .displayName(Component.text("範囲選択斧", DefinedTextColor.GOLD))
-                    .addEnchantment(Enchantment.DIG_SPEED, 1)
+                    .addEnchantment(Enchantment.EFFICIENCY, 1)
                     .custom(is -> is.addItemFlags(ItemFlag.HIDE_ATTRIBUTES, ItemFlag.HIDE_ENCHANTS))
                     .build();
             player.getInventory().setItem(player.getInventory().getHeldItemSlot(), newHand);
@@ -947,7 +947,7 @@ public class ProtectionGui extends GuiBase {
 
                     if (e.getItem() == null || e.getItem().getType() != Material.GOLDEN_AXE) return;
                     if (e.getItem().getItemMeta() == null || e.getItem().getItemMeta().displayName() == null) return;
-                    if (!e.getItem().getEnchantments().containsKey(Enchantment.DIG_SPEED)) return;
+                    if (!e.getItem().getEnchantments().containsKey(Enchantment.EFFICIENCY)) return;
 
                     if (e.getClickedBlock() == null || !e.hasBlock()) return;
                     if (e.getAction() != Action.LEFT_CLICK_BLOCK && e.getAction() != Action.RIGHT_CLICK_BLOCK) return;
@@ -1002,7 +1002,7 @@ public class ProtectionGui extends GuiBase {
                     if (e.getItemDrop().getItemStack().getType() != Material.GOLDEN_AXE) return;
                     if (e.getItemDrop().getItemStack().getItemMeta() == null || e.getItemDrop().getItemStack().getItemMeta().displayName() == null)
                         return;
-                    if (!e.getItemDrop().getItemStack().getEnchantments().containsKey(Enchantment.DIG_SPEED)) return;
+                    if (!e.getItemDrop().getItemStack().getEnchantments().containsKey(Enchantment.EFFICIENCY)) return;
                     player.getInventory().setItem(player.getInventory().getHeldItemSlot(), currentHand);
                     unregisterAllListeners(listeners);
                     if (!task.isCancelled()) task.cancel();
@@ -1035,7 +1035,7 @@ public class ProtectionGui extends GuiBase {
 
             ItemStack currentHand = player.getInventory().getItemInMainHand();
             ItemStack newHand = new ItemStackBuilder(Material.SPYGLASS)
-                    .addEnchantment(Enchantment.PROTECTION_PROJECTILE, 1)
+                    .addEnchantment(Enchantment.PROJECTILE_PROTECTION, 1)
                     .custom(is -> is.addItemFlags(ItemFlag.HIDE_ENCHANTS))
                     .build();
 
@@ -1067,8 +1067,8 @@ public class ProtectionGui extends GuiBase {
                     if (toDropItem.getType() != Material.SPYGLASS) return;
 
                     Map<Enchantment, Integer> toDropItemEnchants = toDropItem.getEnchantments();
-                    if (!toDropItemEnchants.containsKey(Enchantment.PROTECTION_PROJECTILE)) return;
-                    if (toDropItemEnchants.get(Enchantment.PROTECTION_PROJECTILE) != 1) return;
+                    if (!toDropItemEnchants.containsKey(Enchantment.PROJECTILE_PROTECTION)) return;
+                    if (toDropItemEnchants.get(Enchantment.PROJECTILE_PROTECTION) != 1) return;
                     /* End of Pre-tests */
 
                     // TODO: インベントリからアイテムを捨てられると、HeldItemSlotの場所に対象のアイテムがあるとは限らないので、別途処理
