@@ -13,6 +13,7 @@ testServer/cache/
 testServer/libraries/
 testServer/versions/
 testServer/plugins/*/
+testServer/paper.jar
 !testServer/plugins/UnknownNetworkCore/
 .DS_Store
 shared/discord-config.txt
