@@ -66,6 +66,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+// TODO 装備を外した時にItemStackがEMPTYになるのでModulesなどの内容をtick()で読み出して保持しておく
 public class GNDrive implements GN, Listener {
     public static final Map<UUID, GNDrive> INSTANCES = new HashMap<>();
     private static final Set<GNModule> AVAILABLE_MODULES = new HashSet<>() {{
@@ -132,8 +133,7 @@ public class GNDrive implements GN, Listener {
             if (PLAYER_CURRENT_DRIVE.containsKey(player.getUniqueId())) {
                 UUID driveId = PLAYER_CURRENT_DRIVE.get(player.getUniqueId());
                 if (INSTANCES.containsKey(driveId)) {
-                    INSTANCES.get(driveId).stopTick();
-                    INSTANCES.remove(driveId);
+                    INSTANCES.remove(driveId).stopTick();
                 }
             }
             PLAYER_CURRENT_DRIVE.remove(player.getUniqueId()); // 何も装備してないならカレントから外す
@@ -239,6 +239,9 @@ public class GNDrive implements GN, Listener {
     @Override
     public void stopTick() {
         if (this.task != null && !this.task.isCancelled()) {
+            ListenerManager.unregisterListener(this);
+            this.task.cancel();
+
             if (Bukkit.getOfflinePlayer(this.getOwner()).isOnline()) {
                 this.getEnabledModules().forEach(module -> {
                     GNContext ctx = new GNContext(Bukkit.getPlayer(this.getOwner()), this.getTag(), 0, -1,
@@ -246,8 +249,6 @@ public class GNDrive implements GN, Listener {
                     module.onDisable(ctx);
                 });
             }
-            ListenerManager.unregisterListener(this);
-            this.task.cancel();
         }
     }
 
@@ -327,27 +328,27 @@ public class GNDrive implements GN, Listener {
         ListTag Lore = new ListTag();
 
         Set<GNModule> enabled = this.getEnabledModules();
-        Lore.add(StringTag.valueOf("{\"text\":\"==== 有効なモジュール ===\", \"color\":\"green\", \"italic\":\"false\"}"));
+        Lore.add(StringTag.valueOf("{\"text\":\"==== 有効なモジュール ===\", \"color\":\"green\", \"italic\":false}"));
         if (enabled.size() > 0) {
             enabled.forEach(module -> {
-                Lore.add(StringTag.valueOf("[{\"text\":\"[*]\", \"color\":\"green\", \"bold\":\"true\", \"italic\":\"false\"}, {\"text\":\" \", \"color\":\"white\"}, {\"text\":\"" + module.getName() + "\", \"color\":\"green\", \"italic\":\"false\"}]"));
+                Lore.add(StringTag.valueOf("[{\"text\":\"[*]\", \"color\":\"green\", \"bold\":true, \"italic\":false}, {\"text\":\" \", \"color\":\"white\"}, {\"text\":\"" + module.getName() + "\", \"color\":\"green\", \"italic\":false}]"));
             });
         } else {
-            Lore.add(StringTag.valueOf("{\"text\":\"     なし\", \"color\":\"gray\", \"italic\":\"false\"}"));
+            Lore.add(StringTag.valueOf("{\"text\":\"     なし\", \"color\":\"gray\", \"italic\":false}"));
         }
         Lore.add(StringTag.valueOf(LORE_EMPTY));
         Set<GNModule> disabled = this.getDisabledModules();
-        Lore.add(StringTag.valueOf("{\"text\":\"==== 無効なモジュール ===\", \"color\":\"red\", \"italic\":\"false\"}"));
+        Lore.add(StringTag.valueOf("{\"text\":\"==== 無効なモジュール ===\", \"color\":\"red\", \"italic\":false}"));
         if (disabled.size() > 0) {
             disabled.forEach(module -> {
-                Lore.add(StringTag.valueOf("[{\"text\":\"[-]\", \"color\":\"red\", \"bold\":\"true\", \"italic\":\"false\"}, {\"text\":\" \", \"color\":\"white\"}, {\"text\":\"" + module.getName() + "\", \"color\":\"red\", \"italic\":\"false\"}]"));
+                Lore.add(StringTag.valueOf("[{\"text\":\"[-]\", \"color\":\"red\", \"bold\":true, \"italic\":false}, {\"text\":\" \", \"color\":\"white\"}, {\"text\":\"" + module.getName() + "\", \"color\":\"red\", \"italic\":false}]"));
             });
         } else {
-            Lore.add(StringTag.valueOf("{\"text\":\"     なし\", \"color\":\"gray\", \"italic\":\"false\"}"));
+            Lore.add(StringTag.valueOf("{\"text\":\"     なし\", \"color\":\"gray\", \"italic\":false}"));
         }
         Lore.add(StringTag.valueOf(LORE_EMPTY));
-        Lore.add(StringTag.valueOf("{\"text\":\"現在の粒子生産量: " + getGeneratorParticlesOutput() + "\", \"color\":\"aqua\", \"italic\":\"false\"}"));
-        Lore.add(StringTag.valueOf("{\"text\":\"現在の粒子貯蔵量: " + getStoredParticles() + "/" + getMaximumStorableParticles() + "\", \"color\":\"aqua\", \"italic\":\"false\"}"));
+        Lore.add(StringTag.valueOf("{\"text\":\"現在の粒子生産量: " + getGeneratorParticlesOutput() + "\", \"color\":\"aqua\", \"italic\":false}"));
+        Lore.add(StringTag.valueOf("{\"text\":\"現在の粒子貯蔵量: " + getStoredParticles() + "/" + getMaximumStorableParticles() + "\", \"color\":\"aqua\", \"italic\":false}"));
 
         List<Component> styledLoreLines = Lore.stream()
                 .filter(tag -> tag instanceof StringTag)
@@ -356,7 +357,7 @@ public class GNDrive implements GN, Listener {
                 .map(json -> Component.Serializer.fromJson(json, MinecraftServer.getDefaultRegistryAccess()))
                 .map(component -> (Component) component)
                 .toList();
-        ItemLore lore = new ItemLore(ComponentUtil.stripStyles(styledLoreLines), styledLoreLines);
+        ItemLore lore = new ItemLore(styledLoreLines, styledLoreLines);
         this.drive.set(DataComponents.LORE, lore);
     }
 
