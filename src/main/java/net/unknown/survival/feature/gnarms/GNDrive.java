@@ -85,7 +85,7 @@ public class GNDrive implements GN, Listener {
         this.drive = MinecraftAdapter.ItemStack.itemStack(drive);
         this.owner = getOwner(this.drive);
         this.id = getId(this.drive);
-        if (!isTagValid(this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe())) throw new IllegalArgumentException("Invalid GNDrive!");
+        if (!isTagValid(this.drive.has(DataComponents.CUSTOM_DATA) ? this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) throw new IllegalArgumentException("Invalid GNDrive!");
         INSTANCES.put(this.id, this);
     }
 
@@ -93,7 +93,7 @@ public class GNDrive implements GN, Listener {
         this.drive = drive;
         this.owner = getOwner(this.drive);
         this.id = getId(this.drive);
-        if (!isTagValid(this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe())) throw new IllegalArgumentException("Invalid GNDrive!");
+        if (!isTagValid(this.drive.has(DataComponents.CUSTOM_DATA) ? this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) throw new IllegalArgumentException("Invalid GNDrive!");
         INSTANCES.put(this.id, this);
     }
 
@@ -102,7 +102,7 @@ public class GNDrive implements GN, Listener {
             PlayerInventory inv = player.getInventory();
             if (inv.getChestplate() != null) { // チェストプレートを装備している
                 ItemStack chestPlate = MinecraftAdapter.ItemStack.itemStack(inv.getChestplate());
-                if (isTagValid(chestPlate.get(DataComponents.CUSTOM_DATA).getUnsafe())) { // NBTタグが一致
+                if (isTagValid(chestPlate.has(DataComponents.CUSTOM_DATA) ? chestPlate.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) { // NBTタグが一致
                     UUID owner = getOwner(chestPlate); // OwnerのUUIDがUtil.NIL_UUIDの場合はIndividual Information Attestation Systemで所有権の初期化を行う
                     if (owner != null && player.getUniqueId().equals(owner)) { // 所有者が適切
                         UUID currentDriveId = getId(chestPlate);
@@ -141,14 +141,14 @@ public class GNDrive implements GN, Listener {
     }
 
     public static UUID getId(ItemStack drive) {
-        if (isTagValid(drive.get(DataComponents.CUSTOM_DATA).getUnsafe())) {
+        if (isTagValid(drive.has(DataComponents.CUSTOM_DATA) ? drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) {
             return drive.get(DataComponents.CUSTOM_DATA).getUnsafe().getCompound("GNDrive").getUUID("ID");
         }
         return null;
     }
 
     public static UUID getOwner(ItemStack drive) {
-        if (isTagValid(drive.get(DataComponents.CUSTOM_DATA).getUnsafe())) {
+        if (isTagValid(drive.has(DataComponents.CUSTOM_DATA) ? drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) {
             return drive.get(DataComponents.CUSTOM_DATA).getUnsafe().getCompound("GNDrive").getUUID("Owner");
         }
         return null;
@@ -405,7 +405,7 @@ public class GNDrive implements GN, Listener {
 
     @Nonnull
     private CompoundTag getTag() {
-        return Objects.requireNonNull(this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe()).getCompound("GNDrive");
+        return Objects.requireNonNull(this.drive.has(DataComponents.CUSTOM_DATA) ? this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null).getCompound("GNDrive");
     }
 
     private CompoundTag getGeneratorTag() {
