@@ -1,8 +1,39 @@
 name: UnknownNetworkCore
 version: "@version@"
-api-version: 1.20
+api-version: "1.20"
 main: net.unknown.UnknownNetworkCorePlugin
-softdepend: ["WorldGuard", "Multiverse-Core", "HolographicDisplays", "Vault", "Jecon", "BlueMap", "Votifier", "CoreProtect"]
+has-open-classloader: true
+dependencies:
+  server:
+    Vault:
+      load: BEFORE
+      required: true
+      join-classpath: true
+    WorldGuard:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    Multiverse-Core:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    CoreProtect:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    BlueMap:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    Votifier:
+      load: BEFORE
+      required: false
+      join-classpath: true
+    HolographicDisplays:
+      load: BEFORE
+      required: false
+      join-classpath: true
+softdepend: ["Jecon"]
 permissions:
   unknown.core.default:
     default: true
