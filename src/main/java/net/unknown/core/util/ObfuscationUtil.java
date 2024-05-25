@@ -55,9 +55,9 @@ public class ObfuscationUtil {
     // (Ljava/util/function/Function;Ljava/util/function/Predicate;)Ljava/lang/Object;
     public static final Pattern DESCRIPTOR_PATTERN = Pattern.compile("^\\((.*)\\)(.*)$");
     private static final Logger LOGGER = LoggerFactory.getLogger("UNC/ObfuscationUtil");
-    private static final Pattern CLASS_OBF_PATTERN = Pattern.compile("^([a-zA-Z_$0-9.]+) -> ([a-z$]+):$");
-    private static final Pattern FIELD_OBF_PATTERN = Pattern.compile("^    ([a-zA-Z_$0-9.\\[\\]]+) ([a-zA-Z_0-9$]+) -> ([a-zA-Z_]+)$");
-    private static final Pattern METHOD_OBF_PATTERN = Pattern.compile("^    (\\d+:\\d+):([a-zA-Z_$0-9.]+) ([a-zA-Z_0-9]+)(\\(.*\\)) -> ([a-z]+)$");
+    private static final Pattern CLASS_OBF_PATTERN = Pattern.compile("^([a-zA-Z_$0-9.]+) -> ([a-zA-Z_$0-9.]+):$");
+    private static final Pattern FIELD_OBF_PATTERN = Pattern.compile("^    ([a-zA-Z_$0-9.\\[\\]]+) ([a-zA-Z_0-9$]+) -> ([a-zA-Z_0-9$]+)$");
+    private static final Pattern METHOD_OBF_PATTERN = Pattern.compile("^    (\\d+:\\d+):([a-zA-Z_$0-9.]+) ([a-zA-Z_0-9]+)(\\(.*\\)) -> ([a-zA-Z_0-9]+)$");
     private static final Map<String, Class> CLASSES = new HashMap<>();
 
     static {
@@ -91,6 +91,7 @@ public class ObfuscationUtil {
             Class currentClass = null;
 
             for (String line : mojangMapping) {
+                if (line.startsWith("#")) continue;
                 Matcher classMatcher = CLASS_OBF_PATTERN.matcher(line);
                 if (classMatcher.matches()) {
                     String originalClass = classMatcher.group(1);
@@ -199,20 +200,21 @@ public class ObfuscationUtil {
                 final IMappingFile mapping = IMappingFile.load(mappingStream);
 
                 for (IMappingFile.IClass mappingClass : mapping.getClasses()) {
+                    if (mappingClass.getOriginal().replace("/", ".").startsWith("org.bukkit")) continue;
                     Class helperClass;
 
                     if (!mappingClass.getOriginal().contains("$")) {
                         // for Normal Classes logic
-                        helperClass = new Class(ClassMapping.TINY, mappingClass.getOriginal(), mappingClass.getMapped());
+                        helperClass = new Class(ClassMapping.TINY, mappingClass.getOriginal().replace("/", "."), mappingClass.getMapped().replace("/", "."));
                     } else {
                         // for Sub classes logic
-                        String[] originalClassNames = mappingClass.getOriginal().split("\\$");
-                        String[] obfuscatedClassNames = mappingClass.getMapped().split("\\$");
+                        String[] originalClassNames = mappingClass.getOriginal().replace("/", ".").split("\\$");
+                        String[] obfuscatedClassNames = mappingClass.getMapped().replace("/", ".").split("\\$");
 
-                        Class helperSubClass = tinyClasses.getOrDefault(originalClassNames[0], null);
+                        Class helperSubClass = tinyClasses.computeIfAbsent(originalClassNames[0], originalClassName -> new Class(ClassMapping.TINY, originalClassNames[0], obfuscatedClassNames[0]));
 
                         for (int i = 1; i < originalClassNames.length; i++) {
-                            if (helperSubClass.getSubClass(originalClassNames[i], null) != null) {
+                            if (helperSubClass.getSubClass(originalClassNames[i], obfuscatedClassNames[i]) != null) {
                                 // If found parent class, use this.
                                 helperSubClass = helperSubClass.getSubClass(originalClassNames[i], obfuscatedClassNames[i]);
                             } else {
@@ -221,10 +223,6 @@ public class ObfuscationUtil {
                                 helperSubClass.addSubClass(newSubClass);
                                 helperSubClass = newSubClass;
                             }
-                        }
-
-                        if (helperSubClass == null) {
-                            throw new IllegalStateException("Unknown sub-class detected: " + mappingClass.getOriginal());
                         }
 
                         helperClass = helperSubClass;
