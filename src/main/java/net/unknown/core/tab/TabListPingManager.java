@@ -31,8 +31,14 @@
 
 package net.unknown.core.tab;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.numbers.BlankFormat;
+import net.minecraft.network.chat.numbers.FixedFormat;
+import net.minecraft.network.chat.numbers.NumberFormat;
+import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
@@ -122,12 +128,20 @@ public class TabListPingManager implements Listener {
                                 PING_OBJECTIVE_NAME,
                                 e.getValue(),
                                 Optional.of(Component.literal(e.getKey())),
-                                Optional.of(BlankFormat.INSTANCE)
+                                getDisplayFormatOptional(e.getValue())
                         );
 
                         player.connection.send(setScore);
                     });
                 });
+    }
+
+    public static Optional<NumberFormat> getDisplayFormatOptional(int ping) {
+        return Optional.of(getDisplayFormat(ping));
+    }
+
+    public static NumberFormat getDisplayFormat(int ping) {
+        return new FixedFormat(Component.literal(ping + "ms").withStyle(ping <= 50 ? ChatFormatting.GREEN : ping <= 150 ? ChatFormatting.YELLOW : ChatFormatting.RED));
     }
 
     @EventHandler
