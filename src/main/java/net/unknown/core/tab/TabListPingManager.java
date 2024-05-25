@@ -32,6 +32,7 @@
 package net.unknown.core.tab;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.numbers.BlankFormat;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
@@ -49,6 +50,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TabListPingManager implements Listener {
@@ -119,8 +121,8 @@ public class TabListPingManager implements Listener {
                                 e.getKey(),
                                 PING_OBJECTIVE_NAME,
                                 e.getValue(),
-                                null,
-                                null
+                                Optional.of(Component.literal(e.getKey())),
+                                Optional.of(BlankFormat.INSTANCE)
                         );
 
                         player.connection.send(setScore);
