@@ -88,7 +88,25 @@ public class ReflectionUtil {
             Object fieldBase = unsafe.staticFieldBase(targetField);
             long fieldOffset = unsafe.staticFieldOffset(targetField);
 
-            unsafe.putObject(fieldBase, fieldOffset, newValue);
+            if (newValue instanceof Integer) {
+                unsafe.putInt(fieldBase, fieldOffset, (Integer) newValue);
+            } else if (newValue instanceof Long) {
+                unsafe.putLong(fieldBase, fieldOffset, (Long) newValue);
+            } else if (newValue instanceof Boolean) {
+                unsafe.putBoolean(fieldBase, fieldOffset, (Boolean) newValue);
+            } else if (newValue instanceof Byte) {
+                unsafe.putByte(fieldBase, fieldOffset, (Byte) newValue);
+            } else if (newValue instanceof Short) {
+                unsafe.putShort(fieldBase, fieldOffset, (Short) newValue);
+            } else if (newValue instanceof Character) {
+                unsafe.putChar(fieldBase, fieldOffset, (Character) newValue);
+            } else if (newValue instanceof Float) {
+                unsafe.putFloat(fieldBase, fieldOffset, (Float) newValue);
+            } else if (newValue instanceof Double) {
+                unsafe.putDouble(fieldBase, fieldOffset, (Double) newValue);
+            } else {
+                unsafe.putObject(fieldBase, fieldOffset, newValue);
+            }
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }
