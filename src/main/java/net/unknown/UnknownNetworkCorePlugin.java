@@ -123,6 +123,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         });*/
         CustomChatTypes.bootstrap();
         Commands.init();
+        MultiverseInventoriesFixer.fixAll();
         UnknownNetworkCore.getEnvironment().onLoad();
         long end = System.nanoTime();
         getLogger().info("Plugin was loaded in " + (end - start) / 1000000 + "ms");
@@ -145,7 +146,6 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         Athletics.loadProgresses();
         TrashManager.loadExists();
         ThirdPartyPluginPermissionsFixer.scheduleNextTick();
-        MultiverseInventoriesFixer.fixAll();
         Spy.registerModule(new CommandSpy());
         Spy.registerModule(new PrivateMessageSpy());
         getLogger().info("");
