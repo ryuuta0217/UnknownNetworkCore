@@ -17,6 +17,10 @@ dependencies:
       load: BEFORE
       required: false
       join-classpath: true
+    Multiverse-Inventories:
+      load: BEFORE
+      required: false
+      join-classpath: true
     CoreProtect:
       load: BEFORE
       required: false
