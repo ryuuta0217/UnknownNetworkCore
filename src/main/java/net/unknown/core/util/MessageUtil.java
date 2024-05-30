@@ -64,9 +64,9 @@ public class MessageUtil {
             .append(Component.text("]", DefinedTextColor.GRAY))
             .append(Component.text(" "));
     private static final MutableComponent PREFIX_MINECRAFT_COMPONENT = net.minecraft.network.chat.Component.empty()
-            .append(net.minecraft.network.chat.Component.literal("[")).withStyle(ChatFormatting.GRAY)
-            .append(net.minecraft.network.chat.Component.literal("U.N.")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)
-            .append(net.minecraft.network.chat.Component.literal("]")).withStyle(ChatFormatting.GRAY)
+            .append(net.minecraft.network.chat.Component.literal("[").withStyle(ChatFormatting.GRAY))
+            .append(net.minecraft.network.chat.Component.literal("U.N.").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
+            .append(net.minecraft.network.chat.Component.literal("]").withStyle(ChatFormatting.GRAY))
             .append(net.minecraft.network.chat.Component.literal(" "));
     private static final String PREFIX_ERROR = "§c";
     private static final String PREFIX_ADMIN = "§r";
