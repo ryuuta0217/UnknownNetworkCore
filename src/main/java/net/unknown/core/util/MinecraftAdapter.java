@@ -31,6 +31,9 @@
 
 package net.unknown.core.util;
 
+import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
+import ca.spottedleaf.dataconverter.minecraft.MCVersions;
+import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.chat.SignedMessage;
 import net.kyori.adventure.key.Key;
@@ -181,7 +184,12 @@ public class MinecraftAdapter {
         @Nullable
         public static net.minecraft.world.item.ItemStack json(String json) {
             try {
-                return net.minecraft.world.item.ItemStack.parse(MinecraftServer.getDefaultRegistryAccess(), TagParser.parseTag(json)).orElse(null);
+                CompoundTag tag = TagParser.parseTag(json);
+                if (!tag.contains("components") && tag.contains("tag")) {
+                    // Need to convert old NBT format to new format (DataComponent)
+                    tag = MCDataConverter.convertTag(MCTypeRegistry.ITEM_STACK, tag, MCVersions.V1_20_4, MCVersions.V1_20_6);
+                }
+                return net.minecraft.world.item.ItemStack.parse(MinecraftServer.getDefaultRegistryAccess(), tag).orElse(null);
             } catch (CommandSyntaxException e) {
                 return null;
             }
