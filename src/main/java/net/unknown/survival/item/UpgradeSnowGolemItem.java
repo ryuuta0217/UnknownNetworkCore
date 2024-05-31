@@ -172,7 +172,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
 
         if (hurtSuccess) {
             if (knockback > 0.0F && target instanceof net.minecraft.world.entity.LivingEntity livingTarget) {
-                livingTarget.knockback(knockback * 0.5F, Mth.sin(source.getYRot() * 0.017453292F), -Mth.cos(source.getYRot() * 0.017453292F), source, EntityKnockbackEvent.KnockbackCause.ENTITY_ATTACK); // Paper
+                livingTarget.knockback(knockback * 0.5F, Mth.sin(source.getYRot() * 0.017453292F), -Mth.cos(source.getYRot() * 0.017453292F), source, io.papermc.paper.event.entity.EntityKnockbackEvent.Cause.ENTITY_ATTACK); // Paper
                 source.setDeltaMovement(source.getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
             }
 
