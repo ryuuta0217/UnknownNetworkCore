@@ -45,7 +45,7 @@ import net.unknown.core.item.UnknownNetworkItemStack;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
-import org.bukkit.craftbukkit.v1_20_R3.event.CraftEventFactory;
+import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

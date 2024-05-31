@@ -53,13 +53,13 @@ public class PingListener implements Listener {
         }
 
         if (!config.contains("supported-protocol-numbers")) {
-            config.set("supported-protocol-numbers", List.of(763, 764, 765)); // 1.20.2, 1.20.3, 1.20.4
+            config.set("supported-protocol-numbers", List.of(763, 764, 765, 766)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6
         }
 
         PROTOCOL_NAME = config.getString("protocol-name");
 
         List<Integer> protocolNumbers = config.getIntList("supported-protocol-numbers");
-        BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(763); // if failed to get min, use default (defined default)
+        BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(766); // if failed to get min, use default (defined default)
         protocolNumbers.remove((Integer) BASE_SUPPORTED_PROTOCOL_NUMBER);
         SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>(protocolNumbers);
     }

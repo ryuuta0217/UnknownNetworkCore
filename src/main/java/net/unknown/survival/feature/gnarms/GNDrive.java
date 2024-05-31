@@ -33,6 +33,7 @@ package net.unknown.survival.feature.gnarms;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -40,12 +41,16 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.ItemLore;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
+import net.unknown.launchwrapper.util.ComponentUtil;
 import net.unknown.survival.feature.gnarms.module.GNModule;
 import net.unknown.survival.feature.gnarms.module.GNModules;
 import org.bukkit.Bukkit;
@@ -61,6 +66,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+// TODO 装備を外した時にItemStackがEMPTYになるのでModulesなどの内容をtick()で読み出して保持しておく
 public class GNDrive implements GN, Listener {
     public static final Map<UUID, GNDrive> INSTANCES = new HashMap<>();
     private static final Set<GNModule> AVAILABLE_MODULES = new HashSet<>() {{
@@ -80,7 +86,7 @@ public class GNDrive implements GN, Listener {
         this.drive = MinecraftAdapter.ItemStack.itemStack(drive);
         this.owner = getOwner(this.drive);
         this.id = getId(this.drive);
-        if (!isTagValid(this.drive.getOrCreateTag())) throw new IllegalArgumentException("Invalid GNDrive!");
+        if (!isTagValid(this.drive.has(DataComponents.CUSTOM_DATA) ? this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) throw new IllegalArgumentException("Invalid GNDrive!");
         INSTANCES.put(this.id, this);
     }
 
@@ -88,7 +94,7 @@ public class GNDrive implements GN, Listener {
         this.drive = drive;
         this.owner = getOwner(this.drive);
         this.id = getId(this.drive);
-        if (!isTagValid(this.drive.getOrCreateTag())) throw new IllegalArgumentException("Invalid GNDrive!");
+        if (!isTagValid(this.drive.has(DataComponents.CUSTOM_DATA) ? this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) throw new IllegalArgumentException("Invalid GNDrive!");
         INSTANCES.put(this.id, this);
     }
 
@@ -97,7 +103,7 @@ public class GNDrive implements GN, Listener {
             PlayerInventory inv = player.getInventory();
             if (inv.getChestplate() != null) { // チェストプレートを装備している
                 ItemStack chestPlate = MinecraftAdapter.ItemStack.itemStack(inv.getChestplate());
-                if (isTagValid(chestPlate.getTag())) { // NBTタグが一致
+                if (isTagValid(chestPlate.has(DataComponents.CUSTOM_DATA) ? chestPlate.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) { // NBTタグが一致
                     UUID owner = getOwner(chestPlate); // OwnerのUUIDがUtil.NIL_UUIDの場合はIndividual Information Attestation Systemで所有権の初期化を行う
                     if (owner != null && player.getUniqueId().equals(owner)) { // 所有者が適切
                         UUID currentDriveId = getId(chestPlate);
@@ -127,8 +133,7 @@ public class GNDrive implements GN, Listener {
             if (PLAYER_CURRENT_DRIVE.containsKey(player.getUniqueId())) {
                 UUID driveId = PLAYER_CURRENT_DRIVE.get(player.getUniqueId());
                 if (INSTANCES.containsKey(driveId)) {
-                    INSTANCES.get(driveId).stopTick();
-                    INSTANCES.remove(driveId);
+                    INSTANCES.remove(driveId).stopTick();
                 }
             }
             PLAYER_CURRENT_DRIVE.remove(player.getUniqueId()); // 何も装備してないならカレントから外す
@@ -136,15 +141,15 @@ public class GNDrive implements GN, Listener {
     }
 
     public static UUID getId(ItemStack drive) {
-        if (isTagValid(drive.getTag())) {
-            return drive.getTag().getCompound("GNDrive").getUUID("ID");
+        if (isTagValid(drive.has(DataComponents.CUSTOM_DATA) ? drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) {
+            return drive.get(DataComponents.CUSTOM_DATA).getUnsafe().getCompound("GNDrive").getUUID("ID");
         }
         return null;
     }
 
     public static UUID getOwner(ItemStack drive) {
-        if (isTagValid(drive.getTag())) {
-            return drive.getTag().getCompound("GNDrive").getUUID("Owner");
+        if (isTagValid(drive.has(DataComponents.CUSTOM_DATA) ? drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) {
+            return drive.get(DataComponents.CUSTOM_DATA).getUnsafe().getCompound("GNDrive").getUUID("Owner");
         }
         return null;
     }
@@ -234,6 +239,9 @@ public class GNDrive implements GN, Listener {
     @Override
     public void stopTick() {
         if (this.task != null && !this.task.isCancelled()) {
+            ListenerManager.unregisterListener(this);
+            this.task.cancel();
+
             if (Bukkit.getOfflinePlayer(this.getOwner()).isOnline()) {
                 this.getEnabledModules().forEach(module -> {
                     GNContext ctx = new GNContext(Bukkit.getPlayer(this.getOwner()), this.getTag(), 0, -1,
@@ -241,8 +249,6 @@ public class GNDrive implements GN, Listener {
                     module.onDisable(ctx);
                 });
             }
-            ListenerManager.unregisterListener(this);
-            this.task.cancel();
         }
     }
 
@@ -319,36 +325,40 @@ public class GNDrive implements GN, Listener {
 
     @Override
     public void updateLore() {
-        if (!this.drive.getTag().contains("display", Tag.TAG_COMPOUND)) {
-            this.drive.getTag().put("display", new CompoundTag());
-        }
-
         ListTag Lore = new ListTag();
 
         Set<GNModule> enabled = this.getEnabledModules();
-        Lore.add(StringTag.valueOf("{\"text\":\"==== 有効なモジュール ===\", \"color\":\"green\", \"italic\":\"false\"}"));
+        Lore.add(StringTag.valueOf("{\"text\":\"==== 有効なモジュール ===\", \"color\":\"green\", \"italic\":false}"));
         if (enabled.size() > 0) {
             enabled.forEach(module -> {
-                Lore.add(StringTag.valueOf("[{\"text\":\"[*]\", \"color\":\"green\", \"bold\":\"true\", \"italic\":\"false\"}, {\"text\":\" \", \"color\":\"white\"}, {\"text\":\"" + module.getName() + "\", \"color\":\"green\", \"italic\":\"false\"}]"));
+                Lore.add(StringTag.valueOf("[{\"text\":\"[*]\", \"color\":\"green\", \"bold\":true, \"italic\":false}, {\"text\":\" \", \"color\":\"white\"}, {\"text\":\"" + module.getName() + "\", \"color\":\"green\", \"italic\":false}]"));
             });
         } else {
-            Lore.add(StringTag.valueOf("{\"text\":\"     なし\", \"color\":\"gray\", \"italic\":\"false\"}"));
+            Lore.add(StringTag.valueOf("{\"text\":\"     なし\", \"color\":\"gray\", \"italic\":false}"));
         }
         Lore.add(StringTag.valueOf(LORE_EMPTY));
         Set<GNModule> disabled = this.getDisabledModules();
-        Lore.add(StringTag.valueOf("{\"text\":\"==== 無効なモジュール ===\", \"color\":\"red\", \"italic\":\"false\"}"));
+        Lore.add(StringTag.valueOf("{\"text\":\"==== 無効なモジュール ===\", \"color\":\"red\", \"italic\":false}"));
         if (disabled.size() > 0) {
             disabled.forEach(module -> {
-                Lore.add(StringTag.valueOf("[{\"text\":\"[-]\", \"color\":\"red\", \"bold\":\"true\", \"italic\":\"false\"}, {\"text\":\" \", \"color\":\"white\"}, {\"text\":\"" + module.getName() + "\", \"color\":\"red\", \"italic\":\"false\"}]"));
+                Lore.add(StringTag.valueOf("[{\"text\":\"[-]\", \"color\":\"red\", \"bold\":true, \"italic\":false}, {\"text\":\" \", \"color\":\"white\"}, {\"text\":\"" + module.getName() + "\", \"color\":\"red\", \"italic\":false}]"));
             });
         } else {
-            Lore.add(StringTag.valueOf("{\"text\":\"     なし\", \"color\":\"gray\", \"italic\":\"false\"}"));
+            Lore.add(StringTag.valueOf("{\"text\":\"     なし\", \"color\":\"gray\", \"italic\":false}"));
         }
         Lore.add(StringTag.valueOf(LORE_EMPTY));
-        Lore.add(StringTag.valueOf("{\"text\":\"現在の粒子生産量: " + getGeneratorParticlesOutput() + "\", \"color\":\"aqua\", \"italic\":\"false\"}"));
-        Lore.add(StringTag.valueOf("{\"text\":\"現在の粒子貯蔵量: " + getStoredParticles() + "/" + getMaximumStorableParticles() + "\", \"color\":\"aqua\", \"italic\":\"false\"}"));
+        Lore.add(StringTag.valueOf("{\"text\":\"現在の粒子生産量: " + getGeneratorParticlesOutput() + "\", \"color\":\"aqua\", \"italic\":false}"));
+        Lore.add(StringTag.valueOf("{\"text\":\"現在の粒子貯蔵量: " + getStoredParticles() + "/" + getMaximumStorableParticles() + "\", \"color\":\"aqua\", \"italic\":false}"));
 
-        this.drive.getTag().getCompound("display").put("Lore", Lore);
+        List<Component> styledLoreLines = Lore.stream()
+                .filter(tag -> tag instanceof StringTag)
+                .map(tag -> (StringTag) tag)
+                .map(StringTag::getAsString)
+                .map(json -> Component.Serializer.fromJson(json, MinecraftServer.getDefaultRegistryAccess()))
+                .map(component -> (Component) component)
+                .toList();
+        ItemLore lore = new ItemLore(styledLoreLines, styledLoreLines);
+        this.drive.set(DataComponents.LORE, lore);
     }
 
     @Override
@@ -396,7 +406,7 @@ public class GNDrive implements GN, Listener {
 
     @Nonnull
     private CompoundTag getTag() {
-        return Objects.requireNonNull(this.drive.getTag()).getCompound("GNDrive");
+        return Objects.requireNonNull(this.drive.has(DataComponents.CUSTOM_DATA) ? this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null).getCompound("GNDrive");
     }
 
     private CompoundTag getGeneratorTag() {
@@ -495,9 +505,9 @@ public class GNDrive implements GN, Listener {
         }
 
         public ItemStack build() {
-            this.drive.getOrCreateTag().put("GNDrive", this.GNDrive);
-            this.drive.setHoverName(Component.literal("GNドライヴ").setStyle(Style.EMPTY.withItalic(false).withBold(true).withColor(ChatFormatting.GREEN)));
-            if (!net.unknown.survival.feature.gnarms.GNDrive.isTagValid(this.drive.getTag())) {
+            this.drive.set(DataComponents.CUSTOM_DATA, CustomData.of(new CompoundTag())).getUnsafe().put("GNDrive", this.GNDrive);
+            this.drive.set(DataComponents.CUSTOM_NAME, Component.literal("GNドライヴ").setStyle(Style.EMPTY.withItalic(false).withBold(true).withColor(ChatFormatting.GREEN)));
+            if (!net.unknown.survival.feature.gnarms.GNDrive.isTagValid(this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe())) {
                 throw new IllegalStateException("Cannot build a drive with invalid tags!");
             }
             return this.drive;

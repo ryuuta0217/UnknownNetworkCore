@@ -36,9 +36,12 @@ import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.nbt.TextComponentTagVisitor;
+import net.minecraft.server.MinecraftServer;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedItemStackBuilders;
@@ -48,7 +51,7 @@ import net.unknown.core.util.NewMessageUtil;
 import net.unknown.launchwrapper.hopper.ItemFilter;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R3.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
@@ -56,7 +59,7 @@ import org.bukkit.inventory.ItemStack;
 public class CreateItemFilterView extends ConfigureHopperViewBase {
     private ItemStack filterItem = null;
     private boolean useTag = false;
-    private CompoundTag tag = null;
+    private DataComponentPatch componentPatch = null;
 
     public CreateItemFilterView(ConfigureHopperView parentView) {
         super(parentView);
@@ -96,8 +99,8 @@ public class CreateItemFilterView extends ConfigureHopperViewBase {
             this.getGui().getInventory().setItem(32, new ItemStackBuilder(Material.WRITABLE_BOOK)
                     .displayName(Component.text("NBTタグを指定する", DefinedTextColor.GREEN))
                     .lore(Component.empty(),
-                            (this.tag != null ? Component.text("設定済", DefinedTextColor.GREEN) : Component.text("未設定", DefinedTextColor.RED)),
-                            (NewMessageUtil.convertMinecraft2Adventure(new TextComponentTagVisitor("", 0).visit(this.tag != null ? this.tag : new CompoundTag()))),
+                            (this.componentPatch != null ? Component.text("設定済", DefinedTextColor.GREEN) : Component.text("未設定", DefinedTextColor.RED)),
+                            (NewMessageUtil.convertMinecraft2Adventure(new TextComponentTagVisitor("").visit(this.componentPatch != null ? DataComponentPatch.CODEC.encodeStart(MinecraftServer.getDefaultRegistryAccess().createSerializationContext(NbtOps.INSTANCE), this.componentPatch).getOrThrow() : new CompoundTag()))),
                             Component.text("クリックで編集", DefinedTextColor.AQUA))
                     .build());
         } else {
@@ -141,9 +144,9 @@ public class CreateItemFilterView extends ConfigureHopperViewBase {
                 event.getWhoClicked().closeInventory();
 
                 NewMessageUtil.sendMessage(event.getWhoClicked(), Component.text("チャット欄にNBTタグを入力して送信してください", DefinedTextColor.GREEN), false);
-                if (this.tag != null) {
+                if (this.componentPatch != null) {
                     NewMessageUtil.sendMessage(event.getWhoClicked(), Component.text("[ここをクリックして現在設定されているタグを補完]", DefinedTextColor.GREEN)
-                            .clickEvent(ClickEvent.suggestCommand(this.tag.getAsString())));
+                            .clickEvent(ClickEvent.suggestCommand(DataComponentPatch.CODEC.encodeStart(MinecraftServer.getDefaultRegistryAccess().createSerializationContext(NbtOps.INSTANCE), this.componentPatch).getOrThrow().toString())), false);
                 }
 
                 ListenerManager.waitForEvent(AsyncChatEvent.class, false, EventPriority.LOWEST, (e) -> {
@@ -158,7 +161,7 @@ public class CreateItemFilterView extends ConfigureHopperViewBase {
                     // Here is only parse input NBT tag to CompoundTag. Tag parse is already checked in before.
                     String tagStr = PlainTextComponentSerializer.plainText().serialize(e.message());
                     try {
-                        this.tag = TagParser.parseTag(tagStr);
+                        this.componentPatch = DataComponentPatch.CODEC.parse(MinecraftServer.getDefaultRegistryAccess().createSerializationContext(NbtOps.INSTANCE), TagParser.parseTag(tagStr)).getOrThrow();
                     } catch (CommandSyntaxException ignored) {
                         // Unreachable in here, already checked before.
                     }
@@ -178,7 +181,7 @@ public class CreateItemFilterView extends ConfigureHopperViewBase {
 
             case 40 -> {
                 if (event.getCurrentItem() != null && event.getCurrentItem().getType() == Material.LIME_WOOL) {
-                    ItemFilter filter = new ItemFilter(CraftMagicNumbers.getItem(this.filterItem.getType()), this.useTag ? this.tag : null);
+                    ItemFilter filter = new ItemFilter(CraftMagicNumbers.getItem(this.filterItem.getType()), this.useTag ? this.componentPatch : null);
                     this.getGui().getMixinHopper().addFilter(filter);
                     NewMessageUtil.sendMessage(event.getWhoClicked(), "アイテムフィルターを作成しました。", false);
                     if (this.getParentView() instanceof FiltersView filters) {

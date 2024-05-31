@@ -89,6 +89,7 @@ public class PotionEffectItem extends UnknownNetworkItem implements Listener {
         TASK = RunnableManager.runRepeating(() -> {
             Bukkit.getOnlinePlayers().forEach(player -> {
                 for (EquipmentSlot slot : EquipmentSlot.values()) {
+                    if (slot == EquipmentSlot.BODY) continue; // getItem(BODY) is not implemented in 1.20.6, so we skip it.
                     ItemStack item = player.getInventory().getItem(slot);
                     if (Items.POTION_EFFECT_ITEM.equals(item)) {
                         Stack stack = new Stack(item);

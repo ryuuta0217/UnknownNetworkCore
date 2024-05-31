@@ -39,6 +39,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
@@ -61,7 +62,7 @@ import net.unknown.survival.chat.channels.ranged.TitleChatChannel;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
@@ -74,7 +75,7 @@ public class ChannelCommand {
 
     private static final Map<UUID, CustomChannel> TO_REMOVE_CONFIRM = new HashMap<>();
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("channel");
 
         builder.then(Commands.literal("setdefault")
@@ -103,7 +104,7 @@ public class ChannelCommand {
                                 .executes(ctx -> setChannel(ctx, ChannelType.CUSTOM))))
                 .then(Commands.literal("create") // /channel create <channelName> <displayName>
                         .then(Commands.argument("チャンネル名", StringArgumentType.word())
-                                .then(Commands.argument("表示名", ComponentArgument.textComponent())
+                                .then(Commands.argument("表示名", ComponentArgument.textComponent(buildContext))
                                         .executes(ChannelCommand::createChannel))))
                 .then(Commands.literal("remove")
                         .executes(ChannelCommand::removeChannel) // remove default channel
@@ -137,7 +138,7 @@ public class ChannelCommand {
                         .then(Commands.argument("チャンネル名", StringArgumentType.word())
                                 .suggests(Suggestions.OWNED_CHANNELS_SUGGEST)
                                 .then(Commands.literal("displayName")
-                                        .then(Commands.argument("表示名", ComponentArgument.textComponent())
+                                        .then(Commands.argument("表示名", ComponentArgument.textComponent(buildContext))
                                                 .executes(ChannelCommand::modifyChannelDisplayName)))));
 
         builder.then(Commands.literal("options")

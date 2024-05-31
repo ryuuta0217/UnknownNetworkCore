@@ -31,6 +31,7 @@
 
 package net.unknown.core.util;
 
+import io.papermc.paper.adventure.PaperAdventure;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -47,7 +48,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 
@@ -63,9 +64,9 @@ public class MessageUtil {
             .append(Component.text("]", DefinedTextColor.GRAY))
             .append(Component.text(" "));
     private static final MutableComponent PREFIX_MINECRAFT_COMPONENT = net.minecraft.network.chat.Component.empty()
-            .append(net.minecraft.network.chat.Component.literal("[")).withStyle(ChatFormatting.GRAY)
-            .append(net.minecraft.network.chat.Component.literal("U.N.")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD)
-            .append(net.minecraft.network.chat.Component.literal("]")).withStyle(ChatFormatting.GRAY)
+            .append(net.minecraft.network.chat.Component.literal("[").withStyle(ChatFormatting.GRAY))
+            .append(net.minecraft.network.chat.Component.literal("U.N.").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
+            .append(net.minecraft.network.chat.Component.literal("]").withStyle(ChatFormatting.GRAY))
             .append(net.minecraft.network.chat.Component.literal(" "));
     private static final String PREFIX_ERROR = "§c";
     private static final String PREFIX_ADMIN = "§r";
@@ -232,10 +233,10 @@ public class MessageUtil {
     }*/
 
     public static Component convertNMS2Adventure(net.minecraft.network.chat.Component nms) {
-        return GsonComponentSerializer.gson().deserializeFromTree(net.minecraft.network.chat.Component.Serializer.toJsonTree(nms));
+        return PaperAdventure.asAdventure(nms);
     }
 
     public static net.minecraft.network.chat.Component convertAdventure2NMS(Component adventure) {
-        return net.minecraft.network.chat.Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(adventure));
+        return PaperAdventure.asVanilla(adventure);
     }
 }

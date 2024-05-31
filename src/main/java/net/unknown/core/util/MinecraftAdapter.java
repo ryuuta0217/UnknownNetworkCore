@@ -31,6 +31,9 @@
 
 package net.unknown.core.util;
 
+import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
+import ca.spottedleaf.dataconverter.minecraft.MCVersions;
+import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.chat.SignedMessage;
 import net.kyori.adventure.key.Key;
@@ -44,6 +47,7 @@ import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -52,12 +56,12 @@ import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.craftbukkit.v1_20_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftEntity;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftInventory;
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
-import org.bukkit.craftbukkit.v1_20_R3.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.inventory.CraftInventory;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.Contract;
@@ -180,7 +184,12 @@ public class MinecraftAdapter {
         @Nullable
         public static net.minecraft.world.item.ItemStack json(String json) {
             try {
-                return net.minecraft.world.item.ItemStack.of(TagParser.parseTag(json));
+                CompoundTag tag = TagParser.parseTag(json);
+                if (!tag.contains("components") && tag.contains("tag")) {
+                    // Need to convert old NBT format to new format (DataComponent)
+                    tag = MCDataConverter.convertTag(MCTypeRegistry.ITEM_STACK, tag, MCVersions.V1_20_4, MCVersions.V1_20_6);
+                }
+                return net.minecraft.world.item.ItemStack.parse(MinecraftServer.getDefaultRegistryAccess(), tag).orElse(null);
             } catch (CommandSyntaxException e) {
                 return null;
             }
@@ -188,7 +197,7 @@ public class MinecraftAdapter {
 
         @Nonnull
         public static String json(net.minecraft.world.item.ItemStack itemStack) {
-            return itemStack.save(new CompoundTag()).getAsString();
+            return itemStack.save(MinecraftServer.getDefaultRegistryAccess(), new CompoundTag()).getAsString();
         }
 
         public static String json(org.bukkit.inventory.ItemStack bukkit) {

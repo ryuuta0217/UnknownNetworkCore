@@ -57,7 +57,7 @@ import net.unknown.core.util.Languages;
 import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.shared.VersionInfo;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_20_R3.CraftServer;
+import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
@@ -77,7 +77,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
     }
 
     public static CommandDispatcher<CommandSourceStack> getBrigadier() {
-        return getDedicatedServer().vanillaCommandDispatcher.getDispatcher();
+        return getDedicatedServer().getCommands().getDispatcher();
     }
 
     public static DedicatedServer getDedicatedServer() {
@@ -123,6 +123,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         });*/
         CustomChatTypes.bootstrap();
         Commands.init();
+        MultiverseInventoriesFixer.fixAll();
         UnknownNetworkCore.getEnvironment().onLoad();
         long end = System.nanoTime();
         getLogger().info("Plugin was loaded in " + (end - start) / 1000000 + "ms");
@@ -145,7 +146,6 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         Athletics.loadProgresses();
         TrashManager.loadExists();
         ThirdPartyPluginPermissionsFixer.scheduleNextTick();
-        MultiverseInventoriesFixer.fixAll();
         Spy.registerModule(new CommandSpy());
         Spy.registerModule(new PrivateMessageSpy());
         getLogger().info("");

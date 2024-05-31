@@ -108,7 +108,7 @@ public class ChainDestruction implements Listener {
         if (!isValidTarget(chainDestructTarget)) return;
         if (blockState.is(BlockTags.LOGS) && !(selectedItem.getItem() instanceof AxeItem)) return;
         if (!player.hasCorrectToolForDrops(blockState)) return;
-        if (selectedItem.getItem().getMaxDamage() - selectedItem.getDamageValue() == 1) return;
+        if (selectedItem.getMaxDamage() - selectedItem.getDamageValue() == 1) return;
 
         Set<BlockPos> toBreak = new HashSet<>();
 
@@ -121,7 +121,7 @@ public class ChainDestruction implements Listener {
         toBreak.forEach(pos -> {
             RunnableManager.runDelayed(() -> {
                 if (player.getMainHandItem().equals(selectedItem)) {
-                    if ((selectedItem.getItem().getMaxDamage() - selectedItem.getDamageValue()) > 1) {
+                    if ((selectedItem.getMaxDamage() - selectedItem.getDamageValue()) > 1) {
                         IGNORE_EVENT.get(player.getUUID()).add(pos);
                         try {
                             player.gameMode.destroyBlock(pos);

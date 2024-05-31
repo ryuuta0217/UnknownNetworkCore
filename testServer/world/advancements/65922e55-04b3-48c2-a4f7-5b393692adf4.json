@@ -1613,5 +1613,17 @@
     },
     "done": true
   },
-  "DataVersion": 3578
+  "us:collector/spawn_egg": {
+    "criteria": {
+      "zombie": "2024-05-31 04:01:45 +0900"
+    },
+    "done": false
+  },
+  "us:collector/collector": {
+    "criteria": {
+      "main": "2024-05-31 04:01:45 +0900"
+    },
+    "done": true
+  },
+  "DataVersion": 3839
 }

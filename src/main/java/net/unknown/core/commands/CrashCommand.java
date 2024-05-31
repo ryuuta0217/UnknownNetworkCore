@@ -54,7 +54,7 @@ public class CrashCommand {
                 .executes(ctx -> {
                     Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "対象");
                     targets.forEach(target -> {
-                        target.getBukkitEntity().spawnParticle(Particle.EXPLOSION_HUGE, target.getBukkitEntity().getLocation(), Integer.MAX_VALUE);
+                        target.getBukkitEntity().spawnParticle(Particle.EXPLOSION, target.getBukkitEntity().getLocation(), Integer.MAX_VALUE);
                         MessageUtil.broadcast(
                                 Component.empty()
                                         .append(Component.text("[!]", TextColor.color(16733525), TextDecoration.BOLD, TextDecoration.UNDERLINED))

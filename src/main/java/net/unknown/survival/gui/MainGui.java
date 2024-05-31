@@ -43,7 +43,7 @@ import net.unknown.survival.gui.prefix.PrefixGui;
 import net.unknown.survival.gui.warp.WarpGui;
 import net.unknown.survival.vote.gui.VoteTicketExchangeGui;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -60,7 +60,7 @@ public class MainGui extends GuiBase {
                     inv.setItem(11, new ItemStackBuilder(Material.PAPER)
                             .displayName(Component.text("投票チケットの交換", DefinedTextColor.AQUA))
                             .lore(Component.text("投票で得られたチケットを物品と交換できます", DefinedTextColor.YELLOW))
-                            .addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1)
+                            .addEnchantment(Enchantment.PROTECTION, 1)
                             .addItemFlag(ItemFlag.HIDE_ENCHANTS)
                             .build());
 

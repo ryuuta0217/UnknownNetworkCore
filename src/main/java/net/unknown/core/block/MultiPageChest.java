@@ -34,11 +34,12 @@ package net.unknown.core.block;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.commands.data.BlockDataAccessor;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftInventory;
+import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -88,7 +89,7 @@ public class MultiPageChest {
 
                         // Save the current page
                         ListTag pages = multiPageChestData.getList("Pages", CompoundTag.TAG_COMPOUND);
-                        ContainerHelper.saveAllItems(pages.getCompound(currentPage), (NonNullList<ItemStack>) chest.getContents());
+                        ContainerHelper.saveAllItems(pages.getCompound(currentPage), (NonNullList<ItemStack>) chest.getContents(), MinecraftServer.getDefaultRegistryAccess());
                         accessor.setData(originalData);
 
 

@@ -31,17 +31,19 @@
 
 package net.unknown.core.util;
 
+import io.papermc.paper.adventure.PaperAdventure;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.unknown.core.define.DefinedTextColor;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftHumanEntity;
-import org.bukkit.craftbukkit.v1_20_R3.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.spigotmc.SpigotConfig;
 
 public class NewMessageUtil {
@@ -415,11 +417,11 @@ public class NewMessageUtil {
     }
 
     public static Component convertAdventure2Minecraft(net.kyori.adventure.text.Component component) {
-        return Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(component));
+        return Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(component), MinecraftServer.getDefaultRegistryAccess());
     }
 
     public static net.kyori.adventure.text.Component convertMinecraft2Adventure(Component component) {
-        return GsonComponentSerializer.gson().deserializeFromTree(Component.Serializer.toJsonTree(component));
+        return PaperAdventure.asAdventure(component);
     }
 
     public static boolean equalsComponent(net.kyori.adventure.text.Component a, net.kyori.adventure.text.Component b) {

@@ -53,8 +53,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -66,7 +66,7 @@ import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.core.util.ReflectionUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.craftbukkit.v1_20_R3.util.CraftVector;
+import org.bukkit.craftbukkit.util.CraftVector;
 import org.bukkit.event.entity.EntityCombustByEntityEvent;
 import org.bukkit.event.entity.EntityExhaustionEvent;
 import org.bukkit.event.entity.EntityKnockbackEvent;
@@ -139,9 +139,9 @@ public class FakePlayer extends ServerPlayer {
                 float damageBonus;
 
                 if (target instanceof LivingEntity) {
-                    damageBonus = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), ((LivingEntity) target).getMobType());
+                    damageBonus = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), target.getType());
                 } else {
-                    damageBonus = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), MobType.UNDEFINED);
+                    damageBonus = EnchantmentHelper.getDamageBonus(this.getMainHandItem(), null);
                 }
 
                 float strengthScale = this.getAttackStrengthScale(0.5F);
@@ -194,7 +194,7 @@ public class FakePlayer extends ServerPlayer {
 
                             if (!combustEvent.isCancelled()) {
                                 flag4 = true;
-                                target.setSecondsOnFire(combustEvent.getDuration(), false);
+                                target.igniteForSeconds(combustEvent.getDuration(), false);
                             }
                             // CraftBukkit end
                         }
@@ -307,7 +307,7 @@ public class FakePlayer extends ServerPlayer {
                                 org.bukkit.Bukkit.getPluginManager().callEvent(combustEvent);
 
                                 if (!combustEvent.isCancelled()) {
-                                    target.setSecondsOnFire(combustEvent.getDuration(), false);
+                                    target.igniteForSeconds(combustEvent.getDuration(), false);
                                 }
                                 // CraftBukkit end
                             }
@@ -363,10 +363,10 @@ public class FakePlayer extends ServerPlayer {
         public ServerGamePacketListenerImpl(FakePlayer player) {
             super(player.getServer(), new Connection(PacketFlow.SERVERBOUND) {
                 @Override
-                public void setListener(PacketListener packetListener) {
+                public void setListenerForServerboundHandshake(PacketListener packetListener) {
                     // Ignored all
                 }
-            }, player, new CommonListenerCookie(player.gameProfile, 0, player.clientInformation()));
+            }, player, new CommonListenerCookie(player.getGameProfile(), 0, ClientInformation.createDefault(), false));
         }
 
         @Override

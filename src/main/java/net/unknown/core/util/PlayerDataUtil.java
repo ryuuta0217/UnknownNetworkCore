@@ -81,6 +81,6 @@ public class PlayerDataUtil {
 
     @Nullable
     public static CompoundTag getData(OfflinePlayer offlinePlayer) {
-        return DedicatedServer.getServer().playerDataStorage.getPlayerData(offlinePlayer.getUniqueId().toString());
+        return offlinePlayer.hasPlayedBefore() ? DedicatedServer.getServer().playerDataStorage.load(offlinePlayer.getName(), offlinePlayer.getUniqueId().toString()).orElse(null) : null;
     }
 }

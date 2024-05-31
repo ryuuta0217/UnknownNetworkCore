@@ -1,1 +1,0 @@
-kill ryuuta0217

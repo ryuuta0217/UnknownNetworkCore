@@ -8,8 +8,8 @@ plugins {
     id 'java'
     id 'application'
     id 'maven-publish'
-    id 'io.papermc.paperweight.userdev' version '1.5.+' // Enable Development of using Mojang Mapping.
-    id 'xyz.jpenilla.run-paper' version '2.2.4' // Run Mojang Mapped or Spigot Mapped Server
+    id 'io.papermc.paperweight.userdev' version '1.7.1' // Enable Development of using Mojang Mapping.
+    id 'xyz.jpenilla.run-paper' version '2.3.0' // Run Mojang Mapped or Spigot Mapped Server
     id 'com.github.johnrengelman.shadow' version '+' // fatJar
     id 'org.cadixdev.licenser' version '+' // Add License Header to source code headers.
     id "de.undercouch.download" version "+" // File Downloader
@@ -26,11 +26,9 @@ compileJava.options.encoding = "UTF-8"
 javadoc.options.encoding = "UTF-8"
 processResources.filteringCharset = "UTF-8"
 
-java.sourceCompatibility = JavaVersion.VERSION_17
-java.targetCompatibility = JavaVersion.VERSION_17
-compileJava.options.release.set(17)
-
-tasks.build.dependsOn(reobfJar)
+java.sourceCompatibility = JavaVersion.VERSION_21
+java.targetCompatibility = JavaVersion.VERSION_21
+compileJava.options.release.set(21)
 
 configurations {
     launchwrapper
@@ -64,13 +62,13 @@ repositories {
 }
 
 dependencies {
-    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.20.4-R0.1-SNAPSHOT")
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.20.6-R0.1-SNAPSHOT")
     compileOnly fileTree(dir: "libs", include: "*.jar")
     compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '+'
     compileOnly group: 'com.github.MilkBowl', name: 'VaultAPI', version: '+'
     compileOnly group: 'net.luckperms', name: 'api', version: '+'
-    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: '02c7c2c6'
-    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: '02c7c2c6', classifier: 'spigot'
+    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: '015a8a79'
+    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: '015a8a79'
     implementation group: 'org.mozilla', name: 'rhino', version: '+'
     compileOnly group: 'com.github.NuVotifier', name: 'NuVotifier', version: '+'
     implementation group: 'net.dv8tion', name: 'JDA', version: '+'
@@ -83,6 +81,12 @@ dependencies {
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
 }
 
+paperweight {
+    reobfArtifactConfiguration = ReobfArtifactConfiguration.getMOJANG_PRODUCTION()
+}
+
+
+import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
 import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
@@ -101,12 +105,11 @@ jar {
 }
 
 shadowJar {
-    archiveFileName = archiveBaseName.get() + "-mojang." + archiveExtension.get()
-    archiveClassifier = 'mojang'
+    archiveFileName = archiveBaseName.get() + "." + archiveExtension.get()
 }
 
 reobfJar {
-    outputJar = layout.buildDirectory.file("libs/${project.name}.jar")
+    outputJar = layout.buildDirectory.file("libs/${project.name}-spigot.jar")
 }
 
 runMojangMappedServer {
@@ -128,7 +131,7 @@ task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
     classpath(configurations.launchwrapper)
     args("--nogui", "--add-plugin=../build/libs/UnknownNetworkCore.jar")
     workingDir(project.file("testServer"))
-    systemProperty "UnknownNetworkMagic", "1.20"
+    systemProperty "UnknownNetworkMagic", "bundle,update_1_21"
     systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
 }
 
@@ -181,7 +184,7 @@ task copyArtifactToProxy(type: Copy) {
     into project.file("testProxy/plugins")
 }
 
-publish.dependsOn(reobfJar)
+publish.dependsOn(shadowJar)
 
 artifacts {
     jar
@@ -199,11 +202,11 @@ publishing {
             version = version
 
             artifact(reobfJar.outputJar) {
-                classifier = null
+                classifier = 'spigot'
             }
 
             artifact(shadowJar) {
-                classifier = 'mojang'
+                classifier = null
             }
 
             pom {
@@ -237,5 +240,10 @@ publishing {
                 password = System.getenv("NEXUS_PASSWORD")
             }
         }
+    }
+
+    publishReleasePublicationToMavenRepository {
+        dependsOn shadowJar
+        dependsOn reobfJar
     }
 }

@@ -42,6 +42,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.world.item.FireworkRocketItem;
+import net.minecraft.world.item.component.FireworkExplosion;
 import net.minecraft.world.phys.Vec3;
 import net.unknown.core.commands.Suggestions;
 import net.unknown.core.enums.Permissions;
@@ -81,11 +82,11 @@ public class ProgrammedFireworksCommand {
                                                                         .then(Commands.argument("shot-at-angle", BoolArgumentType.bool())
                                                                                 .executes(ProgrammedFireworksCommand::addFirework))))))))));
 
-        for (FireworkRocketItem.Shape shape : FireworkRocketItem.Shape.values()) {
+        for (FireworkExplosion.Shape shape : FireworkExplosion.Shape.values()) {
             addNode.then(Commands.literal("explosion")
                     .then(Commands.argument("program-id", StringArgumentType.word())
                             .then(Commands.argument("tick", IntegerArgumentType.integer(0))
-                                    .then(Commands.literal(shape.getName())
+                                    .then(Commands.literal(shape.name())
                                             .then(Commands.argument("flicker", BoolArgumentType.bool())
                                                     .then(Commands.argument("trail", BoolArgumentType.bool())
                                                             .then(Commands.argument("colors", StringArgumentType.word())

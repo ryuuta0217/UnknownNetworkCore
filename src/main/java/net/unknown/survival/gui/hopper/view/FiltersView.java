@@ -61,7 +61,7 @@ public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> impl
             ItemStack viewItem = ItemStack.EMPTY;
             if (filter instanceof ItemFilter itemFilter) {
                 viewItem = new ItemStack(itemFilter.getItem());
-                if (itemFilter.getNbt() != null) viewItem.setTag(itemFilter.getNbt());
+                if (itemFilter.getDataPatch() != null) viewItem.applyComponents(itemFilter.getDataPatch());
             } else if (filter instanceof TagFilter tagFilter) {
                 Iterable<Holder<Item>> taggedItems = BuiltInRegistries.ITEM.getTagOrEmpty(tagFilter.getTag());
 
@@ -72,7 +72,7 @@ public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> impl
 
                 Holder<Item> taggedFirstItem = taggedItemsList.get(randomIndex);
                 viewItem = new ItemStack(taggedFirstItem);
-                if (tagFilter.getNbt() != null) viewItem.setTag(tagFilter.getNbt());
+                if (tagFilter.getDataPatch() != null) viewItem.applyComponents(tagFilter.getDataPatch());
             }
 
             org.bukkit.inventory.ItemStack bukkitViewItem = MinecraftAdapter.ItemStack.itemStack(viewItem);

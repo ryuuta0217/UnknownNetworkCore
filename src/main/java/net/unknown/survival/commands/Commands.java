@@ -31,6 +31,7 @@
 
 package net.unknown.survival.commands;
 
+import io.papermc.paper.command.brigadier.PaperCommands;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.server.MinecraftServer;
 import net.unknown.UnknownNetworkCorePlugin;
@@ -46,12 +47,7 @@ import java.lang.reflect.Field;
 
 public class Commands {
     public static void init() {
-        CommandBuildContext buildContext = null;
-        try {
-            Field f = ObfuscationUtil.getClassByMojangName("net.minecraft.server.ReloadableServerResources").getFieldByMojangName("commandBuildContext").getField();
-            f.trySetAccessible();
-            buildContext = (CommandBuildContext) f.get(MinecraftServer.getServer().resources.managers());
-        } catch(Throwable t) { t.printStackTrace(); }
+        CommandBuildContext buildContext = PaperCommands.INSTANCE.getBuildContext();
 
         /* HOMES */
         DelHomeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
@@ -71,7 +67,7 @@ public class Commands {
 
         TeleportPetCommand.register(UnknownNetworkCorePlugin.getBrigadier());
 
-        ChannelCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        ChannelCommand.register(UnknownNetworkCorePlugin.getBrigadier(), buildContext);
 
         SpawnCommand.register(UnknownNetworkCorePlugin.getBrigadier());
         LastTpCommand.register(UnknownNetworkCorePlugin.getBrigadier());

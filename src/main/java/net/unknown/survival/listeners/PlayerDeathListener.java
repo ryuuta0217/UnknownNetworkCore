@@ -40,6 +40,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
@@ -55,7 +56,7 @@ import org.bukkit.*;
 import org.bukkit.block.Chest;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_20_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
@@ -254,7 +255,7 @@ public class PlayerDeathListener implements Listener {
         chest.update();
 
         List<String> itemJsonSet = items.stream().map(is -> {
-            return is.save(new CompoundTag()).getAsString(); // for load, use ItemStack.of(TagParser.parse(...))
+            return is.save(MinecraftServer.getDefaultRegistryAccess(), new CompoundTag()).getAsString(); // for load, use ItemStack.of(TagParser.parse(...))
         }).toList();
 
         event.getDrops().clear();
@@ -297,7 +298,7 @@ public class PlayerDeathListener implements Listener {
                         .stream()
                         .map(json -> {
                             try {
-                                return ItemStack.of(TagParser.parseTag(json));
+                                return ItemStack.parseOptional(MinecraftServer.getDefaultRegistryAccess(), TagParser.parseTag(json));
                             } catch (CommandSyntaxException e) {
                                 e.printStackTrace();
                                 LOGGER.severe("Failed to parse Item from JSON");
