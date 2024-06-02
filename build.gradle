@@ -59,6 +59,7 @@ repositories {
     maven { url = "https://repo.ryuuta0217.com/repository/unknown-network/" }
     maven { url = "https://repo.onarandombox.com/content/groups/public/" } // Multiverse-(Core|Inventories|Portals|NetherPortals) repo
     maven { url = "https://maven.playpro.com/" } // CoreProtect
+    maven { url = "https://repo.papermc.io/repository/maven-public/" } // Velocity
 }
 
 dependencies {
@@ -79,6 +80,8 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
+    compileOnly group: 'com.velocitypowered', name: 'velocity-api', version: '+'
+    annotationProcessor group: 'com.velocitypowered', name: 'velocity-api', version: '+'
 }
 
 paperweight {
