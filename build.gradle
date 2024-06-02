@@ -14,12 +14,14 @@ plugins {
     id 'org.cadixdev.licenser' version '+' // Add License Header to source code headers.
     id "de.undercouch.download" version "+" // File Downloader
     id 'com.palantir.git-version' version '+' // Git Information Getter
+    id "org.jetbrains.gradle.plugin.idea-ext" version "1.0.1" // IntelliJ IDEA Plugin
 }
 
 //apply plugin: xyz.jpenilla.runpaper.RunPaper
 
 group 'net.unknown'
 version versionDetails().gitHash[0..7]
+def styledVersion = "git-" + project.name + "-" + (versionDetails().branchName != null ? versionDetails().branchName : System.getenv("BRANCH_NAME")) + "-" + versionDetails().gitHash[0..7];
 
 compileJava.dependsOn = ["licenseFormat"]
 compileJava.options.encoding = "UTF-8"
@@ -88,6 +90,21 @@ paperweight {
     reobfArtifactConfiguration = ReobfArtifactConfiguration.getMOJANG_PRODUCTION()
 }
 
+def generateTemplates = tasks.register("generateTemplates", Copy) { task ->
+    def props = [
+        'version': styledVersion
+    ]
+
+    task.inputs.properties props
+
+    task.from file('src/main/templates')
+    task.into layout.buildDirectory.dir('generated/sources/templates')
+    task.expand props
+}
+
+sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
+
+rootProject.idea.project.settings.taskTriggers.afterSync generateTemplates
 
 import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -95,7 +112,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 processResources {
     filesMatching("*.yml") {
         duplicatesStrategy(DuplicatesStrategy.INCLUDE)
-        filter ReplaceTokens, tokens: [version: "git-" + project.name + "-" + (versionDetails().branchName != null ? versionDetails().branchName : System.getenv("BRANCH_NAME")) + "-" + versionDetails().gitHash[0..7]]
+        filter ReplaceTokens, tokens: [version: styledVersion]
     }
 }
 
@@ -106,7 +123,7 @@ application {
 jar {
     archiveFileName = "original-" + archiveBaseName.get() + "." + archiveExtension.get()
     manifest {
-        attributes 'Version': "git-" + project.name + "-" + (versionDetails().branchName != null ? versionDetails().branchName : System.getenv("BRANCH_NAME")) + "-" + versionDetails().gitHash[0..7]
+        attributes 'Version': styledVersion
     }
 }
 
