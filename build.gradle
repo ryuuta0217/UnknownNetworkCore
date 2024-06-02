@@ -105,6 +105,9 @@ application {
 
 jar {
     archiveFileName = "original-" + archiveBaseName.get() + "." + archiveExtension.get()
+    manifest {
+        attributes 'Version': "git-" + project.name + "-" + (versionDetails().branchName != null ? versionDetails().branchName : System.getenv("BRANCH_NAME")) + "-" + versionDetails().gitHash[0..7]
+    }
 }
 
 shadowJar {
