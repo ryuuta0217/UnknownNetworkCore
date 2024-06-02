@@ -34,18 +34,18 @@ package net.unknown.proxy;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.lifecycle.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
-import net.md_5.bungee.api.config.ServerInfo;
-import net.md_5.bungee.api.plugin.Plugin;
-import net.md_5.bungee.config.Configuration;
-import net.md_5.bungee.config.YamlConfiguration;
 import net.unknown.proxy.fml.ForgeListener;
 import net.unknown.shared.SharedConstants;
-import org.slf4j.Logger;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.logging.Logger;
 
 @Plugin(id = "unknown-network-core", name = "UnknownNetworkCore", version = SharedConstants.VERSION)
 public class UnknownNetworkProxyCore {
@@ -54,14 +54,11 @@ public class UnknownNetworkProxyCore {
 
     private static UnknownNetworkProxyCore INSTANCE;
 
-    private static Configuration CONFIG;
+    private static YamlConfigurationLoader CONFIG_LOADER;
+    private static CommentedConfigurationNode CONFIG;
 
     public static UnknownNetworkProxyCore getInstance() {
         return UnknownNetworkProxyCore.INSTANCE;
-    }
-
-    public static YamlConfiguration getConfigProvider() {
-        return (YamlConfiguration) YamlConfiguration.getProvider(YamlConfiguration.class);
     }
 
     public static ServerInfo getLobbyServer() {
@@ -72,14 +69,21 @@ public class UnknownNetworkProxyCore {
         return SURVIVAL;
     }
 
-    public static Configuration getConfig() {
+    public static CommentedConfigurationNode getConfig() {
         return CONFIG;
     }
 
+    public static YamlConfigurationLoader createConfigLoader(File configFile) {
+        return YamlConfigurationLoader.builder().file(configFile).build();
+    }
+
+    public static YamlConfigurationLoader createConfigLoader(Path configFilePath) {
+        return YamlConfigurationLoader.builder().path(configFilePath).build();
+    }
+
     public static void saveConfig() {
-        File configFile = new File(getInstance().getDataFolder(), "config.yml");
         try {
-            getConfigProvider().save(CONFIG, configFile);
+            CONFIG_LOADER.save(CONFIG);
         } catch (IOException e) {
             getInstance().getLogger().warning("Failed to save configuration file!");
         }
@@ -88,20 +92,32 @@ public class UnknownNetworkProxyCore {
     private static void loadConfig() throws IOException {
         File configFile = new File(getInstance().getDataFolder(), "config.yml");
         if ((configFile.getParentFile().exists() || configFile.getParentFile().mkdirs()) && (configFile.exists() || configFile.createNewFile())) {
-            CONFIG = getConfigProvider().load(configFile);
+            CONFIG_LOADER = createConfigLoader(configFile);
+            CONFIG = CONFIG_LOADER.load();
         } else {
             throw new IOException("Failed to create configuration file!");
         }
     }
 
-    private final ProxyServer server;
+    @Inject
+    @DataDirectory
+    private Path dataDir;
+    private final ProxyServer proxy;
     private final Logger logger;
 
     @Inject
-    public UnknownNetworkProxyCore(ProxyServer server, Logger logger) {
-        this.server = server;
+    public UnknownNetworkProxyCore(ProxyServer proxy, Logger logger) {
+        this.proxy = proxy;
         this.logger = logger;
         INSTANCE = this;
+    }
+
+    public File getDataFolder() {
+        return this.dataDir.toFile();
+    }
+
+    public java.util.logging.Logger getLogger() {
+        return this.logger;
     }
 
     @Subscribe
@@ -109,7 +125,6 @@ public class UnknownNetworkProxyCore {
 
     }
 
-    @Override
     public void onLoad() {
         ModdedInitialHandler.injectModdedInitialHandler();
         try {
