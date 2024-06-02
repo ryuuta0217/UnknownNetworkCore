@@ -135,50 +135,6 @@ task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
     systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
 }
 
-task downloadWaterfall(type: Task) {
-    var wf = new File("libs/standalone/waterfall.jar")
-
-    if (!wf.exists()) {
-        download.run {
-            src "https://api.papermc.io/v2/projects/waterfall/versions/1.20/builds/565/downloads/waterfall-1.20-565.jar"
-            dest 'libs/standalone/waterfall.jar'
-        }
-
-        println "Downloaded waterfall.jar"
-    }
-
-    if (wf.exists()) {
-        if(!file("libs/waterfall").exists()) {
-            println "Extracting waterfall"
-
-            copy {
-                from zipTree(file("libs/standalone/waterfall.jar"))
-                into file("libs/waterfall/")
-            }
-
-            println "Extracted waterfall"
-        }
-
-        if(file("libs/waterfall/com/mojang/brigadier").exists()) {
-            println "Removing brigadier from extracted waterfall"
-
-            delete {
-                delete file("libs/waterfall/com/mojang/brigadier")
-            }
-
-            println "Removed brigadier from extracted waterfall"
-        }
-    }
-}
-
-task reCompressWaterfall(type: Zip, dependsOn: downloadWaterfall) {
-    from "libs/waterfall/"
-    destinationDirectory = file("libs")
-    archiveFileName = "waterfall.jar"
-}
-
-compileJava.dependsOn(reCompressWaterfall)
-
 task copyArtifactToProxy(type: Copy) {
     from project.file("build/libs/UnknownNetworkCore.jar")
     into project.file("testProxy/plugins")
