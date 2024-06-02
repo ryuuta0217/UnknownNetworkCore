@@ -23,7 +23,7 @@ jobs:
           BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
           NEXUS_USERNAME: ${{secrets.NEXUS_USERNAME}}
           NEXUS_PASSWORD: ${{secrets.NEXUS_PASSWORD}}
-        run: ./gradlew clean downloadWaterfall reCompressWaterfall compileJava jar shadowJar reobfJar publish
+        run: ./gradlew clean compileJava jar shadowJar reobfJar publish
       - name: Save artifacts
         uses: actions/upload-artifact@v2
         with:
