@@ -31,26 +31,30 @@
 
 package net.unknown.proxy;
 
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.lifecycle.ProxyInitializeEvent;
+import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.proxy.ProxyServer;
 import net.md_5.bungee.api.config.ServerInfo;
 import net.md_5.bungee.api.plugin.Plugin;
 import net.md_5.bungee.config.Configuration;
 import net.md_5.bungee.config.YamlConfiguration;
 import net.unknown.proxy.fml.ForgeListener;
+import net.unknown.shared.SharedConstants;
+import org.slf4j.Logger;
 
+import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 
-public class UnknownNetworkProxyCore extends Plugin {
+@Plugin(id = "unknown-network-core", name = "UnknownNetworkCore", version = SharedConstants.VERSION)
+public class UnknownNetworkProxyCore {
     private static ServerInfo LOBBY;
     private static ServerInfo SURVIVAL;
 
     private static UnknownNetworkProxyCore INSTANCE;
 
     private static Configuration CONFIG;
-
-    public UnknownNetworkProxyCore() {
-        INSTANCE = this;
-    }
 
     public static UnknownNetworkProxyCore getInstance() {
         return UnknownNetworkProxyCore.INSTANCE;
@@ -88,6 +92,21 @@ public class UnknownNetworkProxyCore extends Plugin {
         } else {
             throw new IOException("Failed to create configuration file!");
         }
+    }
+
+    private final ProxyServer server;
+    private final Logger logger;
+
+    @Inject
+    public UnknownNetworkProxyCore(ProxyServer server, Logger logger) {
+        this.server = server;
+        this.logger = logger;
+        INSTANCE = this;
+    }
+
+    @Subscribe
+    public void onProxyInitialization(ProxyInitializeEvent event) {
+
     }
 
     @Override
