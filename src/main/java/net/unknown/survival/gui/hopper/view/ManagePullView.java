@@ -46,7 +46,7 @@ public class ManagePullView extends ConfigureHopperViewBase {
     @Override
     public void initialize() {
         this.getGui().getInventory().setItem(22, new ItemStackBuilder(this.getGui().getMixinHopper().isEnabledFindItem() ? Material.LIME_WOOL : Material.RED_WOOL)
-                .displayName(this.getGui().getMixinHopper().isEnabledFindItem() ? Component.text("吸引: 有効", DefinedTextColor.GREEN) : Component.text("", DefinedTextColor.RED))
+                .displayName(this.getGui().getMixinHopper().isEnabledFindItem() ? Component.text("吸引: 有効", DefinedTextColor.GREEN) : Component.text("吸引: 無効", DefinedTextColor.RED))
                 .build());
 
         if (this.getParentView() != null) {
