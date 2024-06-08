@@ -36,6 +36,7 @@ import com.velocitypowered.api.event.lifecycle.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import net.unknown.proxy.fml.ForgeListener;
 import net.unknown.shared.SharedConstants;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -49,8 +50,8 @@ import java.util.logging.Logger;
 
 @Plugin(id = "unknown-network-core", name = "UnknownNetworkCore", version = SharedConstants.VERSION)
 public class UnknownNetworkProxyCore {
-    private static ServerInfo LOBBY;
-    private static ServerInfo SURVIVAL;
+    private static RegisteredServer LOBBY;
+    private static RegisteredServer SURVIVAL;
 
     private static UnknownNetworkProxyCore INSTANCE;
 
@@ -61,11 +62,11 @@ public class UnknownNetworkProxyCore {
         return UnknownNetworkProxyCore.INSTANCE;
     }
 
-    public static ServerInfo getLobbyServer() {
+    public static RegisteredServer getLobbyServer() {
         return LOBBY;
     }
 
-    public static ServerInfo getSurvivalServer() {
+    public static RegisteredServer getSurvivalServer() {
         return SURVIVAL;
     }
 
@@ -120,11 +121,6 @@ public class UnknownNetworkProxyCore {
         return this.logger;
     }
 
-    @Subscribe
-    public void onProxyInitialization(ProxyInitializeEvent event) {
-
-    }
-
     public void onLoad() {
         ModdedInitialHandler.injectModdedInitialHandler();
         try {
@@ -134,18 +130,13 @@ public class UnknownNetworkProxyCore {
         }
     }
 
-    @Override
-    public void onEnable() {
-        getProxy().getPluginManager().registerListener(this, new ForgeListener());
-        getProxy().getPluginManager().registerListener(this, new PingListener());
-        getProxy().getPluginManager().registerListener(this, new ChatLogging());
-        //getProxy().getPluginManager().registerListener(this, new ServerDisconnectListener());
-        LOBBY = getProxy().getServerInfo("lobby");
-        SURVIVAL = getProxy().getServerInfo("survival");
-    }
-
-    @Override
-    public void onDisable() {
-
+    @Subscribe
+    public void onProxyInit(ProxyInitializeEvent event) {
+        this.proxy.eventManager().register(this, new ForgeListener());
+        this.proxy.eventManager().register(this, new PingListener());
+        this.proxy.eventManager().register(this, new ChatLogging());
+        //this.proxy.eventManager().register(this, new ServerDisconnectListener());
+        LOBBY = this.proxy.server("lobby");
+        SURVIVAL = this.proxy.server("survival");
     }
 }
