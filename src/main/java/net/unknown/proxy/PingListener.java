@@ -31,34 +31,39 @@
 
 package net.unknown.proxy;
 
-import net.md_5.bungee.api.ServerPing;
-import net.md_5.bungee.api.event.ProxyPingEvent;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.config.Configuration;
-import net.md_5.bungee.event.EventHandler;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class PingListener implements Listener {
+public class PingListener {
     private static final String PROTOCOL_NAME;
     private static final int BASE_SUPPORTED_PROTOCOL_NUMBER;
     private static final Set<Integer> SUPPORTED_PROTOCOL_NUMBERS;
 
     static {
-        Configuration config = UnknownNetworkProxyCore.getConfig();
-        if (!config.contains("protocol-name")) {
-            config.set("protocol-name", "Minecraft 1.20.x");
+        CommentedConfigurationNode config = UnknownNetworkProxyCore.getConfig();
+        if (!config.hasChild("protocol-name")) {
+            try {
+                config.node("protocol-name").set("Minecraft 1.20.x");
+            } catch (SerializationException ignored) {}
         }
 
-        if (!config.contains("supported-protocol-numbers")) {
-            config.set("supported-protocol-numbers", List.of(763, 764, 765, 766)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6
+        if (!config.hasChild("supported-protocol-numbers")) {
+            try {
+                config.node("supported-protocol-number").setList(Integer.class, List.of(763, 764, 765, 766)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6
+            } catch (SerializationException ignored) {}
         }
 
-        PROTOCOL_NAME = config.getString("protocol-name");
+        PROTOCOL_NAME = config.node("protocol-name").getString();
 
-        List<Integer> protocolNumbers = config.getIntList("supported-protocol-numbers");
+        List<Integer> protocolNumbers = Collections.emptyList();
+        try {
+            protocolNumbers = config.node("supported-protocol-numbers").getList(Integer.class);
+        } catch (SerializationException e) {}
         BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(766); // if failed to get min, use default (defined default)
         protocolNumbers.remove((Integer) BASE_SUPPORTED_PROTOCOL_NUMBER);
         SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>(protocolNumbers);
