@@ -60,9 +60,11 @@ public class CreateItemFilterView extends ConfigureHopperViewBase {
     private ItemStack filterItem = null;
     private boolean useTag = false;
     private DataComponentPatch componentPatch = null;
+    private final boolean incoming;
 
-    public CreateItemFilterView(ConfigureHopperView parentView) {
+    public CreateItemFilterView(ConfigureHopperView parentView,boolean incoming) {
         super(parentView);
+        this.incoming = incoming;
     }
 
     @Override
@@ -182,10 +184,14 @@ public class CreateItemFilterView extends ConfigureHopperViewBase {
             case 40 -> {
                 if (event.getCurrentItem() != null && event.getCurrentItem().getType() == Material.LIME_WOOL) {
                     ItemFilter filter = new ItemFilter(CraftMagicNumbers.getItem(this.filterItem.getType()), this.useTag ? this.componentPatch : null);
-                    this.getGui().getMixinHopper().addFilter(filter);
+                    if (this.incoming) {
+                        this.getGui().getMixinHopper().addIncomingFilter(filter);
+                    } else {
+                        this.getGui().getMixinHopper().addOutgoingFilter(filter);
+                    }
                     NewMessageUtil.sendMessage(event.getWhoClicked(), "アイテムフィルターを作成しました。", false);
                     if (this.getParentView() instanceof FiltersView filters) {
-                        filters.setData(this.getGui().getMixinHopper().getFilters(), false); // update data on filters view.
+                        filters.setData(this.incoming ? this.getGui().getMixinHopper().getIncomingFilters() : this.getGui().getMixinHopper().getOutgoingFilters(), false); // update data on filters view.
                     }
                     this.getGui().setView(this.getParentView());
                     return; // avoid execute #checkInput method.
