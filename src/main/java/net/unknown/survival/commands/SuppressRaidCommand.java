@@ -234,7 +234,7 @@ public class SuppressRaidCommand extends ConfigurationBase implements Listener {
             ConfigurationSection suppressRaidsSection = this.getConfig().getConfigurationSection("suppress-raids");
             suppressRaidsSection.getKeys(false).forEach(levelKey -> {
                 ConfigurationSection levelSection = suppressRaidsSection.getConfigurationSection(levelKey);
-                ResourceKey<Level> level = ResourceKey.create(Registries.DIMENSION, new ResourceLocation(levelKey));
+                ResourceKey<Level> level = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(levelKey));
                 Set<Pair<BlockPos, Double>> leveledSuppressRaids = new HashSet<>();
                 levelSection.getKeys(false).forEach(centerPosKey -> {
                     ConfigurationSection suppressRaidSection = levelSection.getConfigurationSection(centerPosKey);

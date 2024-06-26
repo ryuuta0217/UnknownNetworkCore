@@ -140,7 +140,7 @@ public class FlyModule implements GNModule {
 
     @Override
     public ResourceLocation getId() {
-        return ResourceLocation.of("gnarms:fly", ':');
+        return ResourceLocation.tryBySeparator("gnarms:fly", ':');
     }
 
     @Override

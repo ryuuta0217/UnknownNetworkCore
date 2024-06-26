@@ -41,9 +41,9 @@ import net.minecraft.resources.ResourceLocation;
 import java.util.List;
 
 public class CustomChatTypes {
-    public static final ResourceKey<ChatType> OUTGOING_CUSTOM_CHANNEL_CHAT = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("custom_chat_channel_outgoing"));
-    public static final ResourceKey<ChatType> INCOMING_CUSTOM_CHANNEL_CHAT = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("custom_chat_channel_incoming"));
-    public static final ResourceKey<ChatType> FREEDOM = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("freedom"));
+    public static final ResourceKey<ChatType> OUTGOING_CUSTOM_CHANNEL_CHAT = ResourceKey.create(Registries.CHAT_TYPE, ResourceLocation.tryParse("custom_chat_channel_outgoing"));
+    public static final ResourceKey<ChatType> INCOMING_CUSTOM_CHANNEL_CHAT = ResourceKey.create(Registries.CHAT_TYPE, ResourceLocation.tryParse("custom_chat_channel_incoming"));
+    public static final ResourceKey<ChatType> FREEDOM = ResourceKey.create(Registries.CHAT_TYPE, ResourceLocation.tryParse("freedom"));
 
     public static void bootstrap() {
         net.unknown.core.chat.CustomChatTypes.register(Registries.CHAT_TYPE, OUTGOING_CUSTOM_CHANNEL_CHAT, new ChatType(

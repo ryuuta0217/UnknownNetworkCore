@@ -34,6 +34,11 @@ package net.unknown.survival.item;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -42,7 +47,9 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.SnowGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
+import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.item.UnknownNetworkItem;
 import net.unknown.core.item.UnknownNetworkItemStack;
@@ -149,12 +156,13 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
         float damage = (float) source.getAttributeValue(Attributes.ATTACK_DAMAGE);
         float knockback = (float) source.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
 
-        if (target instanceof net.minecraft.world.entity.LivingEntity) {
-            damage += EnchantmentHelper.getDamageBonus(source.getMainHandItem(), ((net.minecraft.world.entity.LivingEntity) target).getType());
-            knockback += EnchantmentHelper.getKnockbackBonus(source);
+        if (target instanceof net.minecraft.world.entity.LivingEntity && source.level() instanceof ServerLevel level) {
+            damage = EnchantmentHelper.modifyDamage(level, source.getMainHandItem(), target, source.damageSources().mobAttack(source), damage);
+            knockback = EnchantmentHelper.modifyKnockback(level, source.getMainHandItem(), target, source.damageSources().mobAttack(source), knockback);
         }
 
-        int fireAspect = EnchantmentHelper.getFireAspect(source);
+        HolderLookup.RegistryLookup<Enchantment> enchRegistryLookup = MinecraftServer.getServer().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
+        int fireAspect = EnchantmentHelper.getEnchantmentLevel(enchRegistryLookup.getOrThrow(Enchantments.FIRE_ASPECT), source);
 
         if (fireAspect > 0) {
             // CraftBukkit start - Call a combust event when somebody hits with a fire enchanted item
@@ -183,7 +191,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
                 net.minecraft.world.item.ItemStack playerStack = player.isUsingItem() ? player.getUseItem() : net.minecraft.world.item.ItemStack.EMPTY;
 
                 if (!mobStack.isEmpty() && !playerStack.isEmpty() && mobStack.getItem() instanceof AxeItem && playerStack.is(net.minecraft.world.item.Items.SHIELD)) {
-                    float f = 0.25F + (float) EnchantmentHelper.getBlockEfficiency(source) * 0.05F;
+                    float f = 0.25F + (float) EnchantmentHelper.getEnchantmentLevel(enchRegistryLookup.getOrThrow(Enchantments.EFFICIENCY), source) * 0.05F;
 
                     if (source.getRandom().nextFloat() < f) {
                         player.getCooldowns().addCooldown(net.minecraft.world.item.Items.SHIELD, 100);
@@ -192,7 +200,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
                 }
             }
 
-            source.doEnchantDamageEffects(source, target);
+            //source.doEnchantDamageEffects(source, target);
             source.setLastHurtMob(target);
         }
     }
@@ -202,7 +210,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             setUpgradeLevel(snowman, upgradeLevel);
 
             /* Damage */
-            String damageAttributeModifierName = "UNC:DamageModifier";
+            ResourceLocation damageAttributeModifierName = ResourceLocation.parse("UNC:DamageModifier");
 
             if (!golem.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE)) {
                 golem.getAttributes().registerAttribute(Attributes.ATTACK_DAMAGE);
@@ -213,7 +221,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             if (damageAttr != null) {
                 damageAttr.getModifiers().forEach(modifier -> {
                     if (modifier.operation() == AttributeModifier.Operation.ADD_VALUE) {
-                        if (modifier.name().equals(damageAttributeModifierName)) {
+                        if (modifier.id().equals(damageAttributeModifierName)) {
                             damageAttr.removeModifier(modifier);
                         }
                     }
@@ -226,7 +234,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             /* End of Damage */
 
             /* KnockBack */
-            String kbAttributeModifierName = "UNC:KBModifier";
+            ResourceLocation kbAttributeModifierName = ResourceLocation.parse("UNC:KBModifier");
 
             if (!golem.getAttributes().hasAttribute(Attributes.ATTACK_KNOCKBACK)) {
                 golem.getAttributes().registerAttribute(Attributes.ATTACK_KNOCKBACK);
@@ -237,7 +245,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             if (kbAttr != null) {
                 kbAttr.getModifiers().forEach(modifier -> {
                     if (modifier.operation() == AttributeModifier.Operation.ADD_VALUE) {
-                        if (modifier.name().equals(kbAttributeModifierName)) {
+                        if (modifier.id().equals(kbAttributeModifierName)) {
                             kbAttr.removeModifier(modifier);
                         }
                     }

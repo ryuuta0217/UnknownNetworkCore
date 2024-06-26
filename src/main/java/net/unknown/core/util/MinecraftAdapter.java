@@ -150,7 +150,7 @@ public class MinecraftAdapter {
     public static net.minecraft.network.chat.ChatType chatType(net.kyori.adventure.chat.ChatType adventure) {
         Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().registry(Registries.CHAT_TYPE).orElse(null);
         if (chatTypes != null) {
-            return chatTypes.get(ResourceLocation.of(adventure.key().asString(), ':'));
+            return chatTypes.get(ResourceLocation.tryBySeparator(adventure.key().asString(), ':'));
         }
         throw new IllegalStateException("Failed to get Minecraft's ChatType registry, early access?");
     }

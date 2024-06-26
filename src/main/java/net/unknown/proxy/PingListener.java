@@ -49,17 +49,17 @@ public class PingListener implements Listener {
     static {
         Configuration config = UnknownNetworkProxyCore.getConfig();
         if (!config.contains("protocol-name")) {
-            config.set("protocol-name", "Minecraft 1.20.x");
+            config.set("protocol-name", "Minecraft 1.20-1.21");
         }
 
         if (!config.contains("supported-protocol-numbers")) {
-            config.set("supported-protocol-numbers", List.of(763, 764, 765, 766)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6
+            config.set("supported-protocol-numbers", List.of(763, 764, 765, 766, 767)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6, 1.21
         }
 
         PROTOCOL_NAME = config.getString("protocol-name");
 
         List<Integer> protocolNumbers = config.getIntList("supported-protocol-numbers");
-        BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(766); // if failed to get min, use default (defined default)
+        BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(767); // if failed to get min, use default (defined default)
         protocolNumbers.remove((Integer) BASE_SUPPORTED_PROTOCOL_NUMBER);
         SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>(protocolNumbers);
     }

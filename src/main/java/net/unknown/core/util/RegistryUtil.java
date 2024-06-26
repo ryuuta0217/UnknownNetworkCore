@@ -107,6 +107,16 @@ public class RegistryUtil {
         return registry.get(id) != null ? value : null;
     }
 
+    /**
+     * Force replace object in Registry.
+     *
+     * @deprecated Use Paper's bootstrap API instead.
+     * @param registry Registry to replace object
+     * @param id ResourceLocation of object to replace
+     * @param objectTo Object to replace
+     * @return true if successfully replaced, false otherwise
+     */
+    @Deprecated
     @SuppressWarnings("rawtypes")
     public static <B extends Keyed, T> boolean forceReplace(Registry<T> registry, ResourceLocation id, T objectTo) {
         String logPrefix = "[forceReplace] [" + id.toString() + "] ";

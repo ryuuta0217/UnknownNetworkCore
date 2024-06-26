@@ -35,6 +35,8 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.item.enchantment.EnchantedItemInUse;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.unknown.core.define.DefinedTextColor;
@@ -140,10 +142,11 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
 
     // Copied from net.minecraft.world.entity.ExperienceOrb#repairPlayerItems(Player, int) and modified
     private int applyMending0(Player player, int amount, boolean useAll, @Nullable ExperienceOrb dummyExpOrb) {
-        Map.Entry<net.minecraft.world.entity.EquipmentSlot, net.minecraft.world.item.ItemStack> mendingTargetItemEntry = EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, MinecraftAdapter.player(player), net.minecraft.world.item.ItemStack::isDamaged);
+        Optional<EnchantedItemInUse> mendingTargetItemEntryOptional = EnchantmentHelper.getRandomItemWith(EnchantmentEffectComponents.REPAIR_WITH_XP, MinecraftAdapter.player(player), net.minecraft.world.item.ItemStack::isDamaged);
 
-        if (mendingTargetItemEntry != null) {
-            net.minecraft.world.item.ItemStack mendingTargetItem = mendingTargetItemEntry.getValue();
+        if (mendingTargetItemEntryOptional.isPresent()) {
+            EnchantedItemInUse mendingTargetItemEntry = mendingTargetItemEntryOptional.get();
+            net.minecraft.world.item.ItemStack mendingTargetItem = mendingTargetItemEntry.itemStack();
 
             // Unknown Network start
             if (dummyExpOrb == null) { // if provided dummyExpOrb is null (first call, maybe?), create new orb.
@@ -158,10 +161,11 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
                 // ExperienceOrb Initialization
                 // Unknown Network end
 
-                int repairAmount = Math.min(dummyExpOrb.xpToDurability(amount), mendingTargetItem.getDamageValue()); // デフォルトでは経験値ポイントの2倍の値が耐久値の回復量になる。耐久値の回復量がダメージ量を上回る場合は、ダメージを全て回復する。
+                int repairAmountFull = EnchantmentHelper.modifyDurabilityToRepairFromXp(MinecraftAdapter.level(player.getWorld()), mendingTargetItem, amount);
+                int repairAmount = Math.min(repairAmountFull, mendingTargetItem.getDamageValue()); // デフォルトでは経験値ポイントの2倍の値が耐久値の回復量になる。耐久値の回復量がダメージ量を上回る場合は、ダメージを全て回復する。
 
                 // CraftBukkit start
-                PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(MinecraftAdapter.player(player), dummyExpOrb, mendingTargetItem, mendingTargetItemEntry.getKey(), repairAmount, dummyExpOrb::durabilityToXp);
+                PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(MinecraftAdapter.player(player), dummyExpOrb, mendingTargetItem, mendingTargetItemEntry.inSlot(), repairAmount, dummyExpOrb.value);
                 repairAmount = event.getRepairAmount();
                 if (event.isCancelled()) {
                     return amount;
@@ -170,7 +174,7 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
 
                 mendingTargetItem.setDamageValue(mendingTargetItem.getDamageValue() - repairAmount);
 
-                int remainingAmount = amount - event.getDurabilityToXpOperation().applyAsInt(repairAmount); // Paper
+                int remainingAmount = amount - repairAmount; // Paper
 
                 // Paper start
                 if (repairAmount == 0 && amount == remainingAmount) { // if repair amount is 0 and no xp was removed, don't do recursion; treat as cancelled
@@ -181,7 +185,7 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
                 // dummyExpOrb.value = remainingAmount; // CraftBukkit - update exp value of orb for PlayerItemMendEvent calls // Unknown Network - disabled, because it's not needed. if recursive called, it will be updated in next call.
 
                 // Unknown Network start
-                amount -= event.getDurabilityToXpOperation().applyAsInt(repairAmount); // Unknown Network - update amount for recursion
+                amount -= repairAmount; // Unknown Network - update amount for recursion
             }
             // Unknown Network end
 
@@ -192,7 +196,7 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
     }
 
     private static boolean isAvailableToMendItem(Player player) {
-        return EnchantmentHelper.getRandomItemWith(Enchantments.MENDING, MinecraftAdapter.player(player), net.minecraft.world.item.ItemStack::isDamaged) != null;
+        return EnchantmentHelper.getRandomItemWith(EnchantmentEffectComponents.REPAIR_WITH_XP, MinecraftAdapter.player(player), net.minecraft.world.item.ItemStack::isDamaged) != null;
     }
 
     public static int getXpNeededForNextLevel(int level) {

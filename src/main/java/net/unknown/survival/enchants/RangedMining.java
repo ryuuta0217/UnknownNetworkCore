@@ -152,47 +152,4 @@ public class RangedMining implements Listener {
             }
         });
     }
-
-    public static class RangedMiningEnchantment extends Enchantment {
-        private static RangedMiningEnchantment INSTANCE;
-
-        protected RangedMiningEnchantment() {
-            super(Enchantment.definition(
-                    ItemTags.MINING_ENCHANTABLE,
-                    ItemTags.PICKAXES, 11,
-                    3,
-                    Enchantment.dynamicCost(1, 15),
-                    Enchantment.dynamicCost(30, 15),
-                    1,
-                    net.minecraft.world.entity.EquipmentSlot.MAINHAND
-            ));
-            this.descriptionId = "範囲破壊";
-        }
-
-        public static RangedMiningEnchantment instance() {
-            if (INSTANCE == null) INSTANCE = new RangedMiningEnchantment();
-            return INSTANCE;
-        }
-
-        @Override
-        public boolean canEnchant(net.minecraft.world.item.ItemStack stack) {
-            return stack.getItem() instanceof PickaxeItem && super.canEnchant(stack);
-        }
-
-        @Override
-        public net.minecraft.network.chat.Component getFullname(int level) {
-            MutableComponent mutableComponent = net.minecraft.network.chat.Component.literal(this.getDescriptionId());
-            if (this.isCurse()) {
-                mutableComponent.withStyle(ChatFormatting.RED);
-            } else {
-                mutableComponent.withStyle(ChatFormatting.GRAY);
-            }
-
-            if (level != 1 || this.getMaxLevel() != 1) {
-                mutableComponent.append(" ").append(net.minecraft.network.chat.Component.translatable("enchantment.level." + level));
-            }
-
-            return mutableComponent;
-        }
-    }
 }
