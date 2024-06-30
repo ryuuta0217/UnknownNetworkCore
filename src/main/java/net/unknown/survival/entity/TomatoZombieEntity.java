@@ -222,7 +222,7 @@ public class TomatoZombieEntity extends Zombie {
                             }
 
                             for (int i = 0; i < 1; ++i) {
-                                SmallFireball smallFireball = new SmallFireball(this.zombie.level(), this.zombie, x + (this.zombie.getRandom().nextGaussian() / 2), y, z + (this.zombie.getRandom().nextGaussian() / 2));
+                                SmallFireball smallFireball = new SmallFireball(this.zombie.level(), this.zombie, new Vec3(x + (this.zombie.getRandom().nextGaussian() / 2), y, z + (this.zombie.getRandom().nextGaussian() / 2)));
                                 smallFireball.setPos(smallFireball.getX(), this.zombie.getY(0.5D) + 0.5D, smallFireball.getZ());
                                 this.zombie.level().addFreshEntity(smallFireball);
                             }

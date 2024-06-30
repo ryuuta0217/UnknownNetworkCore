@@ -140,7 +140,7 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
     @Override
     public void performRangedAttack(LivingEntity target, float pullProgress) {
         ItemStack bow = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW)));
-        AbstractArrow arrow = ProjectileUtil.getMobArrow(this, bow, pullProgress);
+        AbstractArrow arrow = ProjectileUtil.getMobArrow(this, new ItemStack(Items.ARROW), pullProgress, bow);
         double x = target.getX() - this.getX();
         double y = target.getY(0.3333333333333333D) - arrow.getY();
         double z = target.getZ() - this.getZ();

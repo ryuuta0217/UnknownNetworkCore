@@ -62,7 +62,7 @@ public class TPSBar implements Listener {
     private static final Set<UUID> SELECTED_HIDE_PLAYERS = new HashSet<>();
 
     public static final CustomBossEvent BAR = new CustomBossEvent(
-            ResourceLocation.of("unknown-network:tps", ':'), buildDisplayName(0, 0));
+            ResourceLocation.tryBySeparator("unknown-network:tps", ':'), buildDisplayName(0, 0));
 
     private static double LAST_MSPT = 0;
 

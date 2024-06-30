@@ -56,7 +56,7 @@ import java.util.List;
 public class BlueMapBar implements Listener {
     private static final BlueMapBar INSTANCE = new BlueMapBar();
     public static final CustomBossEvent BAR = new CustomBossEvent(
-            ResourceLocation.of("unknown-network:bluemap_progress", ':'), buildDisplayName(Collections.emptyList(), null));
+            ResourceLocation.tryBySeparator("unknown-network:bluemap_progress", ':'), buildDisplayName(Collections.emptyList(), null));
     public static BukkitTask UPDATE_TASK;
 
     public static void initialize() {
