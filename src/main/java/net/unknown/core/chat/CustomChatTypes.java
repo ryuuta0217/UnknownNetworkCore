@@ -46,7 +46,7 @@ import org.bukkit.NamespacedKey;
 import java.util.List;
 
 public class CustomChatTypes {
-    public static final ResourceKey<ChatType> PRIVATE_MESSAGE_INCOMING = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("private_message_incoming"));
+    public static final ResourceKey<ChatType> PRIVATE_MESSAGE_INCOMING = ResourceKey.create(Registries.CHAT_TYPE, ResourceLocation.tryParse("private_message_incoming"));
     public static final ChatType VALUE_PRIVATE_MESSAGE_INCOMING = new ChatType(
             new ChatTypeDecoration( // for chat view
                     "§b[PM]§r [%s] %s",
@@ -58,7 +58,7 @@ public class CustomChatTypes {
                     Style.EMPTY));
     public static final net.kyori.adventure.chat.ChatType PRIVATE_MESSAGE_INCOMING_ADVENTURE = net.kyori.adventure.chat.ChatType.chatType(NamespacedKey.fromString(PRIVATE_MESSAGE_INCOMING.location().toString()));
 
-    public static final ResourceKey<ChatType> PRIVATE_MESSAGE_OUTGOING = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("private_message_outgoing"));
+    public static final ResourceKey<ChatType> PRIVATE_MESSAGE_OUTGOING = ResourceKey.create(Registries.CHAT_TYPE, ResourceLocation.tryParse("private_message_outgoing"));
     public static final ChatType VALUE_PRIVATE_MESSAGE_OUTGOING = new ChatType(
             new ChatTypeDecoration( // for chat view
                     "§b[PM]§r [→ %s] %s",
@@ -70,7 +70,7 @@ public class CustomChatTypes {
                     Style.EMPTY));
     public static final net.kyori.adventure.chat.ChatType PRIVATE_MESSAGE_OUTGOING_ADVENTURE = net.kyori.adventure.chat.ChatType.chatType(NamespacedKey.fromString(PRIVATE_MESSAGE_OUTGOING.location().toString()));
 
-    public static final ResourceKey<ChatType> PRIVATE_MESSAGE = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("private_message"));
+    public static final ResourceKey<ChatType> PRIVATE_MESSAGE = ResourceKey.create(Registries.CHAT_TYPE, ResourceLocation.tryParse("private_message"));
     public static final ChatType VALUE_PRIVATE_MESSAGE = new ChatType(
             new ChatTypeDecoration( // for chat view
                     "§b[PM]§r [%s -> %s] %s",
@@ -83,7 +83,7 @@ public class CustomChatTypes {
     public static final net.kyori.adventure.chat.ChatType PRIVATE_MESSAGE_ADVENTURE = net.kyori.adventure.chat.ChatType.chatType(NamespacedKey.fromString(PRIVATE_MESSAGE.location().toString()));
 
     // Example: CommandSpy> Yncryption: /gamemode creative
-    public static final ResourceKey<ChatType> COMMAND_SPY = ResourceKey.create(Registries.CHAT_TYPE, new ResourceLocation("command_spy"));
+    public static final ResourceKey<ChatType> COMMAND_SPY = ResourceKey.create(Registries.CHAT_TYPE, ResourceLocation.tryParse("command_spy"));
     public static final ChatType VALUE_COMMAND_SPY = new ChatType(
             new ChatTypeDecoration( // for chat view
                     "CommandSpy> %s: %s",

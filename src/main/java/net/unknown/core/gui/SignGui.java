@@ -43,9 +43,11 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 import net.unknown.core.packet.event.PacketReceivedEvent;
+import net.unknown.core.packet.event.PacketSendingEvent;
 import net.unknown.core.packet.listener.IncomingPacketListener;
 import net.unknown.core.packet.PacketManager;
 import net.unknown.core.managers.RunnableManager;
+import net.unknown.core.packet.listener.OutgoingPacketListener;
 import net.unknown.core.util.MessageUtil;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -55,6 +57,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
@@ -64,6 +67,7 @@ public class SignGui {
     private final Logger logger = Logger.getLogger("UNC/SignGui@" + this.hashCode());
     private Player target;
     private Material signType = Material.OAK_SIGN;
+    @Nullable private BlockPos dummySignPos = null;
     private Component[] defaultLines$adventure = new Component[] {Component.empty(), Component.empty(), Component.empty(), Component.empty()};
     private net.minecraft.network.chat.Component[] defaultLines = new net.minecraft.network.chat.Component[] {net.minecraft.network.chat.Component.empty(), net.minecraft.network.chat.Component.empty(), net.minecraft.network.chat.Component.empty(), net.minecraft.network.chat.Component.empty()};
     private Consumer<List<Component>> completeHandler;
@@ -107,15 +111,15 @@ public class SignGui {
             ServerPlayer nmsTarget = ((CraftPlayer) this.target).getHandle();
 
             ServerLevel level = nmsTarget.serverLevel();
-            BlockPos blockPos = nmsTarget.blockPosition().above(2);
+            this.dummySignPos = nmsTarget.blockPosition().above(2);
             BlockState signBlock = CraftMagicNumbers.getBlock(this.signType).defaultBlockState();
 
             /* Place “Virtual Sign” that are visible only to the target  */
-            ClientboundBlockUpdatePacket blockUpdatePacket = new ClientboundBlockUpdatePacket(blockPos, signBlock);
+            ClientboundBlockUpdatePacket blockUpdatePacket = new ClientboundBlockUpdatePacket(this.dummySignPos, signBlock);
             nmsTarget.connection.send(blockUpdatePacket); // set sign block
 
             /* Create instance "Virtual Sign" */
-            SignBlockEntity sign = new SignBlockEntity(blockPos, signBlock);
+            SignBlockEntity sign = new SignBlockEntity(this.dummySignPos, signBlock);
             sign.setAllowedPlayerEditor(this.target.getUniqueId());
 
             /* Set virtual sign lines */
@@ -124,6 +128,7 @@ public class SignGui {
                 signText = signText.setMessage(i, this.defaultLines[i]); // set lines
             }
             sign.setText(signText, true);
+            sign.setLevel(level);
             nmsTarget.connection.send(sign.getUpdatePacket()); // set lines
 
             /* Rollback BlockState */
@@ -132,13 +137,12 @@ public class SignGui {
                 if (completeHandlerCopy != null) completeHandlerCopy.accept(lines); // First, process user-defined completeHandler
 
                 // rollback block.
-                ClientboundBlockUpdatePacket rollbackBlockUpdatePacket = new ClientboundBlockUpdatePacket(blockPos, level.getBlockState(blockPos));
+                ClientboundBlockUpdatePacket rollbackBlockUpdatePacket = new ClientboundBlockUpdatePacket(this.dummySignPos, level.getBlockState(this.dummySignPos));
                 nmsTarget.connection.send(rollbackBlockUpdatePacket);
             });
 
             /* Open SignGUI */
-            ClientboundOpenSignEditorPacket signEditorPacket = new ClientboundOpenSignEditorPacket(blockPos, true);
-
+            ClientboundOpenSignEditorPacket signEditorPacket = new ClientboundOpenSignEditorPacket(this.dummySignPos, true);
             nmsTarget.connection.send(signEditorPacket); // show sign editor
 
             this.isOpened = true;

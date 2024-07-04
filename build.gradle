@@ -65,13 +65,13 @@ repositories {
 }
 
 dependencies {
-    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.20.6-R0.1-SNAPSHOT")
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.21-R0.1-SNAPSHOT")
     compileOnly fileTree(dir: "libs", include: "*.jar")
     compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '+'
     compileOnly group: 'com.github.MilkBowl', name: 'VaultAPI', version: '+'
     compileOnly group: 'net.luckperms', name: 'api', version: '+'
-    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: '015a8a79'
-    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: '015a8a79'
+    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'c88c0d57'
+    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'c88c0d57'
     implementation group: 'org.mozilla', name: 'rhino', version: '+'
     compileOnly group: 'com.github.NuVotifier', name: 'NuVotifier', version: '+'
     implementation group: 'net.dv8tion', name: 'JDA', version: '+'
@@ -154,7 +154,7 @@ task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
     classpath(configurations.launchwrapper)
     args("--nogui", "--add-plugin=../build/libs/UnknownNetworkCore.jar")
     workingDir(project.file("testServer"))
-    systemProperty "UnknownNetworkMagic", "bundle,update_1_21"
+    systemProperty "UnknownNetworkMagic", "bundle"
     systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
 }
 

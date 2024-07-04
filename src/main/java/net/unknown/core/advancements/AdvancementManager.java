@@ -174,7 +174,7 @@ public class AdvancementManager {
                         .icon(new ItemStack(Items.TORCH))
                         .title(Component.literal("UN Pass"))
                         .description(Component.literal("Unknown Network Pass"))
-                        .background(ResourceLocation.of("minecraft:textures/block/dirt.png", ':'))
+                        .background(ResourceLocation.tryBySeparator("minecraft:textures/block/dirt.png", ':'))
                         .announceChat(false)
                         .showToast(false)
                         .build());
@@ -183,7 +183,7 @@ public class AdvancementManager {
             builder.addCriterion(String.valueOf(i), CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance()));
         });
 
-        AdvancementHolder adv = builder.build(ResourceLocation.of("unpass:root", ':'));
+        AdvancementHolder adv = builder.build(ResourceLocation.tryBySeparator("unpass:root", ':'));
         register(adv);
     }
 

@@ -99,7 +99,7 @@ public class BlockDisassembler implements Listener {
 
                 if (bbEvent.isCancelled()) return;
 
-                shootItem.hurtAndBreak(1, level.random, null, () -> {});
+                shootItem.hurtAndBreak(1, level, null, (i) -> {}, false);
 
                 destroyBlockWithDrops(level, targetPos, shootItem).forEach(dropItem -> {
                     if (bbEvent.isDropItems()) Block.popResource(level, targetPos, dropItem);
