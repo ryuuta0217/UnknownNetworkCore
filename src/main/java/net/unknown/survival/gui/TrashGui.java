@@ -72,6 +72,7 @@ public class TrashGui extends GuiBase {
         }, true);
         this.player = player;
         this.opener = opener;
+        this.passOnlyThisInventory = false;
     }
 
     @Override
@@ -86,7 +87,7 @@ public class TrashGui extends GuiBase {
 
     @Override
     public void onClick(InventoryClickEvent event) {
-        if (event.getSlot() == 53) {
+        if (event.getInventory().equals(this.inventory) && event.getSlot() == 53) {
             // Clear the items button
             IntStream.rangeClosed(0, 52).forEach(this.getInventory()::clear);
             this.save();

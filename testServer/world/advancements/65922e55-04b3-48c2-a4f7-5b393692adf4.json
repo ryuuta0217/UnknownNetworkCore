@@ -1613,17 +1613,11 @@
     },
     "done": true
   },
-  "us:collector/spawn_egg": {
+  "minecraft:story/shiny_gear": {
     "criteria": {
-      "zombie": "2024-05-31 04:01:45 +0900"
-    },
-    "done": false
-  },
-  "us:collector/collector": {
-    "criteria": {
-      "main": "2024-05-31 04:01:45 +0900"
+      "diamond_helmet": "2024-07-01 16:48:33 +0900"
     },
     "done": true
   },
-  "DataVersion": 3839
+  "DataVersion": 3953
 }
