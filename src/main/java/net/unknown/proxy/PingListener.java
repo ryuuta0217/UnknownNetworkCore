@@ -31,6 +31,9 @@
 
 package net.unknown.proxy;
 
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyPingEvent;
+import com.velocitypowered.api.proxy.server.ServerPing;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 
@@ -48,13 +51,13 @@ public class PingListener {
         CommentedConfigurationNode config = UnknownNetworkProxyCore.getConfig();
         if (!config.hasChild("protocol-name")) {
             try {
-                config.node("protocol-name").set("Minecraft 1.20.x");
+                config.node("protocol-name").set("Minecraft 1.20-1.21");
             } catch (SerializationException ignored) {}
         }
 
         if (!config.hasChild("supported-protocol-numbers")) {
             try {
-                config.node("supported-protocol-number").setList(Integer.class, List.of(763, 764, 765, 766)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6
+                config.node("supported-protocol-number").setList(Integer.class, List.of(763, 764, 765, 766, 767)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6, 1.21
             } catch (SerializationException ignored) {}
         }
 
@@ -63,23 +66,33 @@ public class PingListener {
         List<Integer> protocolNumbers = Collections.emptyList();
         try {
             protocolNumbers = config.node("supported-protocol-numbers").getList(Integer.class);
-        } catch (SerializationException e) {}
-        BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(766); // if failed to get min, use default (defined default)
+        } catch (SerializationException ignored) {}
+        BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(767); // if failed to get min, use default (defined default)
         protocolNumbers.remove((Integer) BASE_SUPPORTED_PROTOCOL_NUMBER);
         SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>(protocolNumbers);
     }
 
-    @EventHandler
+    @Subscribe
     public void onPing(ProxyPingEvent event) {
-        ServerPing sp = event.getResponse();
+        ServerPing currentPing = event.getPing();
 
-        int playerProtocolVersion = event.getConnection().getVersion();
+        int playerProtocolVersion = event.getConnection().getProtocolVersion().getProtocol();
         int protocolVersion = BASE_SUPPORTED_PROTOCOL_NUMBER;
         if (SUPPORTED_PROTOCOL_NUMBERS.contains(playerProtocolVersion)) {
             protocolVersion = playerProtocolVersion;
         }
-        sp.setVersion(new ServerPing.Protocol(PROTOCOL_NAME, protocolVersion));
 
-        event.setResponse(sp);
+        ServerPing.Builder newPingBuilder = ServerPing.builder();
+        newPingBuilder.version(new ServerPing.Version(protocolVersion, PROTOCOL_NAME));
+        newPingBuilder.description(currentPing.getDescriptionComponent());
+        currentPing.getPlayers().ifPresent(players -> {
+            newPingBuilder.onlinePlayers(players.getOnline());
+            newPingBuilder.maximumPlayers(players.getMax());
+            newPingBuilder.samplePlayers(players.getSample().toArray(new ServerPing.SamplePlayer[0]));
+        });
+        currentPing.getModinfo().ifPresent(newPingBuilder::mods);
+        currentPing.getFavicon().ifPresent(newPingBuilder::favicon);
+
+        event.setPing(newPingBuilder.build());
     }
 }

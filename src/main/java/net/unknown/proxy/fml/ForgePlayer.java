@@ -33,26 +33,22 @@ package net.unknown.proxy.fml;
 
 import com.ryuuta0217.packets.forge.v4.ModVersions;
 import com.ryuuta0217.util.MinecraftPacketReader;
+import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.connection.PreLoginEvent;
+import com.velocitypowered.api.proxy.InboundConnection;
+import com.velocitypowered.api.proxy.Player;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
-import net.md_5.bungee.UserConnection;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.PluginMessageEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
-import net.md_5.bungee.protocol.DefinedPacket;
-import net.md_5.bungee.protocol.packet.LoginPayloadResponse;
-import net.md_5.bungee.protocol.packet.PluginMessage;
-import net.unknown.proxy.ModdedInitialHandler;
-import net.unknown.shared.enums.ConnectionEnvironment;
 import net.unknown.shared.fml.ModClientInformation;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
 public class ForgePlayer extends ModdedPlayer implements ModdedHandshakeProcessor {
     private String logPrefix;
-    private ModdedInitialHandler handler;
-    private UserConnection player;
+    private InboundConnection connection;
+    private Player player;
     private ModVersions mods;
     private Map<String, String> channels;
     private Map<String, String> registries;
@@ -73,74 +69,69 @@ public class ForgePlayer extends ModdedPlayer implements ModdedHandshakeProcesso
 
     @Override
     public void onPluginMessageReceived(PluginMessageEvent event) {
-        event.setCancelled(true);
+        event.setResult(PluginMessageEvent.ForwardResult.handled());
 
-        UserConnection connection = (UserConnection) event.getSender();
+        if (event.getSource() instanceof Player player) {
+            ByteBuf buf = Unpooled.wrappedBuffer(event.getData());
 
-        ByteBuf buf = event.getData() != null ? Unpooled.wrappedBuffer(event.getData()) : Unpooled.buffer();
-
-        switch (this.currentPhase) {
-            case 0 -> {
-                String brand = MinecraftPacketReader.readString(buf, 32767);
-                LOGGER.info(this.logPrefix + "  -> Brand " + brand + " received (phase " + this.currentPhase + ")");
-                this.currentPhase++;
-                connection.unsafe().sendPacket(this.createModVersions());
-                LOGGER.info(this.logPrefix + " <-  ModVersions sent");
-            }
-            case 1 -> {
-                int phase = MinecraftPacketReader.readVarInt(buf);
-                this.mods = ModVersions.decode(buf);
-                LOGGER.info(this.logPrefix + "  -> ModVersions reply received with mods " + this.mods.mods().keySet() + " (phase " + this.currentPhase + ")");
-
-                if (this.currentPhase == phase) {
+            switch (this.currentPhase) {
+                case 0 -> {
+                    String brand = MinecraftPacketReader.readString(buf, 32767);
+                    LOGGER.info(this.logPrefix + "  -> Brand " + brand + " received (phase " + this.currentPhase + ")");
                     this.currentPhase++;
-                    connection.unsafe().sendPacket(this.createChannelVersions());
-                    LOGGER.info(this.logPrefix + " <-  ChannelVersions sent");
+                    player.sendPluginMessage(ForgeListener.FORGE_HANDSHAKE_IDENTIFIER, this.createModVersions());
+                    LOGGER.info(this.logPrefix + " <-  ModVersions sent");
                 }
-            }
-            case 2 -> {
-                int phase = MinecraftPacketReader.readVarInt(buf);
-                int channelCount = MinecraftPacketReader.readVarInt(buf);
-                Map<String, String> channels = new HashMap<>();
-                for (int i = 0; i < channelCount; i++) {
-                    String channelName = MinecraftPacketReader.readString(buf, 32767);
-                    int channelVersion = MinecraftPacketReader.readVarInt(buf);
-                    channels.put(channelName, String.valueOf(channelVersion));
-                }
-                this.channels = Collections.unmodifiableMap(channels);
-                LOGGER.info(this.logPrefix + "  -> ChannelVersions reply received with channels " + channels.keySet() + " (phase " + this.currentPhase + ")");
+                case 1 -> {
+                    int phase = MinecraftPacketReader.readVarInt(buf);
+                    this.mods = ModVersions.decode(buf);
+                    LOGGER.info(this.logPrefix + "  -> ModVersions reply received with mods " + this.mods.mods().keySet() + " (phase " + this.currentPhase + ")");
 
-                if (this.currentPhase == phase) { // unused?
-                    this.currentPhase++;
-                    connection.unsafe().sendPacket(this.createRegistryList());
-                    LOGGER.info(this.logPrefix + " <-  RegistryList sent");
+                    if (this.currentPhase == phase) {
+                        this.currentPhase++;
+                        player.sendPluginMessage(ForgeListener.FORGE_HANDSHAKE_IDENTIFIER, this.createChannelVersions());
+                        LOGGER.info(this.logPrefix + " <-  ChannelVersions sent");
+                    }
                 }
-            }
-            case 3 -> {
-                int identifier = MinecraftPacketReader.readVarInt(buf); // always 0
-                int token = MinecraftPacketReader.readVarInt(buf); // 0 .. registry size
-                LOGGER.info(this.logPrefix + "  -> RegistryList reply received with token " + token + " (phase " + this.currentPhase + ")");
+                case 2 -> {
+                    int phase = MinecraftPacketReader.readVarInt(buf);
+                    int channelCount = MinecraftPacketReader.readVarInt(buf);
+                    Map<String, String> channels = new HashMap<>();
+                    for (int i = 0; i < channelCount; i++) {
+                        String channelName = MinecraftPacketReader.readString(buf, 32767);
+                        int channelVersion = MinecraftPacketReader.readVarInt(buf);
+                        channels.put(channelName, String.valueOf(channelVersion));
+                    }
+                    this.channels = Collections.unmodifiableMap(channels);
+                    LOGGER.info(this.logPrefix + "  -> ChannelVersions reply received with channels " + channels.keySet() + " (phase " + this.currentPhase + ")");
 
-                ForgeListener.ESTABLISHING_MODDED_PLAYERS.remove(connection.getName());
-                ModdedInitialHandler.FORGE_PLAYERS.put(connection.getName(), this);
+                    if (this.currentPhase == phase) { // unused?
+                        this.currentPhase++;
+                        player.sendPluginMessage(ForgeListener.FORGE_HANDSHAKE_IDENTIFIER, this.createRegistryList());
+                        LOGGER.info(this.logPrefix + " <-  RegistryList sent");
+                    }
+                }
+                case 3 -> {
+                    int identifier = MinecraftPacketReader.readVarInt(buf); // always 0
+                    int token = MinecraftPacketReader.readVarInt(buf); // 0 .. registry size
+                    LOGGER.info(this.logPrefix + "  -> RegistryList reply received with token " + token + " (phase " + this.currentPhase + ")");
+
+                    ForgeListener.ESTABLISHING_MODDED_PLAYERS.remove(player.getUsername());
+                    ForgeListener.MODDED_PLAYERS.put(player.getUsername(), this);
+                }
             }
         }
     }
 
     @Override
     public void onPreLogin(PreLoginEvent event) {
-        this.handler = (ModdedInitialHandler) event.getConnection();
-        this.logPrefix = "[" + this.handler.getName() + "|" + this.handler.getSocketAddress() + "]";
+        this.logPrefix = "[" + event.getUsername() + "|" + event.getConnection().getRemoteAddress() + "]";
 
         LOGGER.info(this.logPrefix + "  -> Connected as using FORGE protocol");
         LOGGER.info(this.logPrefix + "  -  Initializing FORGE Handshake");
     }
 
-    @Override
-    public void onLoginPayloadResponseReceived(LoginPayloadResponse response) {
-    }
-
-    private PluginMessage createModVersions() { // phase 1
+    private byte[] createModVersions() { // phase 1
         ByteBuf buf = Unpooled.buffer();
 
         // Write phase
@@ -156,10 +147,10 @@ public class ForgePlayer extends ModdedPlayer implements ModdedHandshakeProcesso
         LOGGER.info(this.logPrefix + "  -  Initializing ModVersions with mods " + serverInstalledModsDummy.keySet());
         new ModVersions(serverInstalledModsDummy).encode(buf);
 
-        return new PluginMessage("forge:handshake", buf, false);
+        return ByteBufUtil.getBytes(buf);
     }
 
-    private PluginMessage createChannelVersions() { // phase 2
+    private byte[] createChannelVersions() { // phase 2
         ByteBuf buf = Unpooled.buffer();
 
         // Write phase
@@ -182,10 +173,10 @@ public class ForgePlayer extends ModdedPlayer implements ModdedHandshakeProcesso
             MinecraftPacketReader.writeVarInt(v, buf);
         });
 
-        return new PluginMessage("forge:handshake", buf, false);
+        return ByteBufUtil.getBytes(buf);
     }
 
-    private PluginMessage createRegistryList() { // phase 3
+    private byte[] createRegistryList() { // phase 3
         ByteBuf buf = Unpooled.buffer();
 
         // Write phase
@@ -204,10 +195,10 @@ public class ForgePlayer extends ModdedPlayer implements ModdedHandshakeProcesso
         MinecraftPacketReader.writeVarInt(serverDataPackRegistriesDummy.size(), buf);
         serverDataPackRegistriesDummy.forEach(s -> MinecraftPacketReader.writeString(s, buf));
 
-        return new PluginMessage("forge:handshake", buf, false);
+        return ByteBufUtil.getBytes(buf);
     }
 
-    private PluginMessage createRegistryData() { // phase 4
+    private byte[] createRegistryData() { // phase 4
         ByteBuf buf = Unpooled.buffer();
 
         // Write phase
@@ -221,24 +212,35 @@ public class ForgePlayer extends ModdedPlayer implements ModdedHandshakeProcesso
             buf.writeBytes(v);
         });
 
-        return new PluginMessage("forge:handshake", buf, false);
+        return ByteBufUtil.getBytes(buf);
     }
 
     @Override
-    public void setProxiedPlayer(UserConnection player) {
+    public void setPlayer(Player player) {
         this.player = player;
     }
 
-    @Nullable
     @Override
-    public ProxiedPlayer getProxiedPlayer() {
+    public Player getPlayer() {
         return this.player;
+    }
+
+    @Override
+    public void setConnection(InboundConnection connection) {
+        this.connection = connection;
+        if (connection instanceof Player player) this.setPlayer(player);
+    }
+
+    @NotNull
+    @Override
+    public InboundConnection getConnection() {
+        return this.connection;
     }
 
     @Override
     public void getData(ByteBuf buf) {
         MinecraftPacketReader.writeVarInt(4, buf);
-        DefinedPacket.writeUUID(this.player.getUniqueId(), buf);
+        MinecraftPacketReader.writeUUID(this.player.getUniqueId(), buf);
 
         this.mods.encode(buf);
 

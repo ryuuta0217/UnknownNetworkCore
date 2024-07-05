@@ -32,7 +32,7 @@
 package net.unknown.proxy;
 
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.lifecycle.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -46,6 +46,7 @@ import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Plugin(id = "unknown-network-core", name = "UnknownNetworkCore", version = SharedConstants.VERSION)
@@ -117,26 +118,26 @@ public class UnknownNetworkProxyCore {
         return this.dataDir.toFile();
     }
 
-    public java.util.logging.Logger getLogger() {
+    public Logger getLogger() {
         return this.logger;
-    }
-
-    public void onLoad() {
-        ModdedInitialHandler.injectModdedInitialHandler();
-        try {
-            loadConfig();
-        } catch (IOException e) {
-            getLogger().warning("Failed to load configuration file!");
-        }
     }
 
     @Subscribe
     public void onProxyInit(ProxyInitializeEvent event) {
-        this.proxy.eventManager().register(this, new ForgeListener());
-        this.proxy.eventManager().register(this, new PingListener());
-        this.proxy.eventManager().register(this, new ChatLogging());
-        //this.proxy.eventManager().register(this, new ServerDisconnectListener());
-        LOBBY = this.proxy.server("lobby");
-        SURVIVAL = this.proxy.server("survival");
+        try {
+            loadConfig();
+        } catch (IOException e) {
+            this.getLogger().log(Level.SEVERE, "Failed to load configuration file!", e);
+        }
+        this.proxy.getEventManager().register(this, new ForgeListener());
+        this.proxy.getEventManager().register(this, new PingListener());
+        this.proxy.getEventManager().register(this, new ChatLogging());
+        this.proxy.getEventManager().register(this, new ServerDisconnectListener());
+        LOBBY = this.proxy.getServer("lobby").orElse(null);
+        SURVIVAL = this.proxy.getServer("survival").orElse(null);
+    }
+
+    public ProxyServer getProxy() {
+        return this.proxy;
     }
 }
