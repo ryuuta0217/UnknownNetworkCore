@@ -114,6 +114,11 @@ processResources {
         duplicatesStrategy(DuplicatesStrategy.INCLUDE)
         filter ReplaceTokens, tokens: [version: styledVersion]
     }
+
+    filesMatching("*.json") {
+        duplicatesStrategy(DuplicatesStrategy.INCLUDE)
+        filter ReplaceTokens, tokens: [version: styledVersion]
+    }
 }
 
 application {
@@ -163,6 +168,7 @@ task copyArtifactToProxy(type: Copy) {
     into project.file("testProxy/plugins")
 }
 
+copyArtifactToProxy.dependsOn(shadowJar, reobfJar)
 publish.dependsOn(shadowJar)
 
 artifacts {
