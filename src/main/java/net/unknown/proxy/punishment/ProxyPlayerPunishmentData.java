@@ -38,7 +38,6 @@ import net.unknown.shared.punishment.interfaces.TemporaryPunishment;
 import net.unknown.shared.punishment.PunishmentState;
 import net.unknown.shared.punishment.PunishmentType;
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
