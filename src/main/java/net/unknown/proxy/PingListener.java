@@ -57,7 +57,7 @@ public class PingListener {
 
         if (!config.hasChild("supported-protocol-numbers")) {
             try {
-                config.node("supported-protocol-number").setList(Integer.class, List.of(763, 764, 765, 766, 767)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6, 1.21
+                config.node("supported-protocol-numbers").setList(Integer.class, List.of(763, 764, 765, 766, 767)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6, 1.21
             } catch (SerializationException ignored) {}
         }
 
