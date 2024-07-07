@@ -111,9 +111,11 @@ public class ForgeListener {
                     if (handshakeField.trySetAccessible()) {
                         Object handshakePacket = handshakeField.get(initialInboundConnection);
                         Field serverAddressField = handshakePacket.getClass().getDeclaredField("serverAddress");
-                        String serverAddress = (String) serverAddressField.get(handshakePacket);
-                        String[] splitAddress = serverAddress.split("\0", 2);
-                        return splitAddress.length == 2 ? splitAddress[1] : "";
+                        if (serverAddressField.trySetAccessible()) {
+                            String serverAddress = (String) serverAddressField.get(handshakePacket);
+                            String[] splitAddress = serverAddress.split("\0", 2);
+                            return splitAddress.length == 2 ? splitAddress[1] : "";
+                        }
                     }
                 }
             } catch(NoSuchFieldException | IllegalAccessException e) {
