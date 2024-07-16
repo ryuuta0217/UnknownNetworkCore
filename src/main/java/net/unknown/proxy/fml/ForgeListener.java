@@ -31,10 +31,12 @@
 
 package net.unknown.proxy.fml;
 
+import com.ryuuta0217.util.MinecraftPacketReader;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.connection.PluginMessageEvent;
-import com.velocitypowered.api.event.connection.PreLoginEvent;
+import com.velocitypowered.api.event.connection.*;
+import com.velocitypowered.api.event.player.PlayerChannelRegisterEvent;
+import com.velocitypowered.api.event.player.PlayerClientBrandEvent;
+import com.velocitypowered.api.event.player.PlayerSettingsChangedEvent;
 import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.proxy.InboundConnection;
@@ -43,16 +45,55 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufHolder;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import net.unknown.proxy.NetworkDirection;
+import net.unknown.proxy.UnknownNetworkProxyCore;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class ForgeListener {
     public static final Map<String, ModdedPlayer> MODDED_PLAYERS = new HashMap<>();
     public static final Map<String, ModdedHandshakeProcessor> ESTABLISHING_MODDED_PLAYERS = new HashMap<>();
     public static final ChannelIdentifier FORGE_HANDSHAKE_IDENTIFIER = MinecraftChannelIdentifier.create("forge", "handshake");
+    public static final ChannelIdentifier FORGE_LOGIN_IDENTIFIER = MinecraftChannelIdentifier.create("forge", "login");
+
+    public ForgeListener() {
+        UnknownNetworkProxyCore.registerPacketListener("PluginMessagePacket", NetworkDirection.CLIENT_TO_SERVER, "Forge", (player, rawPacket) -> {
+            try {
+                String channel = (String) rawPacket.getClass().getDeclaredMethod("getChannel").invoke(rawPacket);
+                ByteBuf content = ((ByteBufHolder) rawPacket).content();
+                if (ESTABLISHING_MODDED_PLAYERS.containsKey(player)) {
+                    if (ESTABLISHING_MODDED_PLAYERS.get(player) instanceof ForgePlayer p) {
+                        p.handlePluginMessage(UnknownNetworkProxyCore.getInstance().getProxy().getPlayer(player).orElse(null), channel, content);
+                    }
+                }
+
+                return channel.equals("minecraft:brand");
+            } catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+
+            return false;
+        });
+    }
+
+    @Subscribe
+    public void onPlayerChannelRegister(PlayerChannelRegisterEvent event) {
+        if (ESTABLISHING_MODDED_PLAYERS.containsKey(event.getPlayer().getUsername())) {
+            if (event.getChannels().contains(FORGE_HANDSHAKE_IDENTIFIER)) {
+                ModdedHandshakeProcessor processor = ESTABLISHING_MODDED_PLAYERS.get(event.getPlayer().getUsername());
+                if (processor instanceof ForgePlayer p) {
+                    // p.onPlayerChannelRegister(event);
+                    System.out.println("Player channel register: " + event.getChannels());
+                }
+            }
+        }
+    }
 
     @Subscribe
     public void onPluginMessageReceived(PluginMessageEvent event) {

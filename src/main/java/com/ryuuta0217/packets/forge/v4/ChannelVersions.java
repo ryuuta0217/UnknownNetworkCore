@@ -16,40 +16,36 @@
 
 package com.ryuuta0217.packets.forge.v4;
 
-import com.ryuuta0217.packets.Packet;
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
 import net.unknown.proxy.NetworkDirection;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public record ModVersions(Map<String, Info> mods) implements Packet {
-    public static final int PACKET_ID = 1;
+public record ChannelVersions(Map<String, Integer> channels) {
+    public static final int PACKET_ID = ModVersions.PACKET_ID + 1; // maybe; 2
 
-    public static ModVersions decode(ByteBuf buf) {
-        int modCount = MinecraftPacketReader.readVarInt(buf);
-        HashMap<String, Info> mods = new HashMap<>(modCount);
-        for (int i = 0; i < modCount; i++) {
-            mods.put(MinecraftPacketReader.readUtf(buf), new Info(MinecraftPacketReader.readUtf(buf), MinecraftPacketReader.readUtf(buf)));
+    public static ChannelVersions decode(ByteBuf buf) {
+        int channelCount = MinecraftPacketReader.readVarInt(buf);
+        Map<String, Integer> channels = new HashMap<>(channelCount);
+        for (int i = 0; i < channelCount; i++) {
+            channels.put(MinecraftPacketReader.readString(buf), MinecraftPacketReader.readVarInt(buf));
         }
-        return new ModVersions(mods);
+        return new ChannelVersions(channels);
     }
 
-    public static ModVersions decode(ForgePayload payload) {
+    public static ChannelVersions decode(ForgePayload payload) {
         if (payload.packetId() != PACKET_ID) throw new IllegalStateException("Invalid packet ID: " + payload.packetId());
         return decode(payload.data());
     }
 
     public void encode(ByteBuf out) {
-        MinecraftPacketReader.writeVarInt(this.mods.size(), out);
-        this.mods.forEach((k, v) -> {
+        MinecraftPacketReader.writeVarInt(this.channels.size(), out);
+        this.channels.forEach((k, v) -> {
             MinecraftPacketReader.writeString(k, out);
-
-            MinecraftPacketReader.writeString(v.name(), out);
-            MinecraftPacketReader.writeString(v.version(), out);
+            MinecraftPacketReader.writeVarInt(v, out);
         });
     }
 
@@ -58,6 +54,4 @@ public record ModVersions(Map<String, Info> mods) implements Packet {
         encode(buf);
         return new ForgePayload(PACKET_ID, buf);
     }
-
-    public record Info(String name, String version) {}
 }

@@ -29,14 +29,9 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.proxy.fml;
+package net.unknown.proxy;
 
-import com.velocitypowered.api.event.connection.PluginMessageEvent;
-import com.velocitypowered.api.event.connection.PreLoginEvent;
-import com.velocitypowered.api.event.player.PlayerClientBrandEvent;
-
-public interface ModdedHandshakeProcessor {
-    default void onClientBrandReceived(PlayerClientBrandEvent event) {}
-    void onPluginMessageReceived(PluginMessageEvent event);
-    void onPreLogin(PreLoginEvent event);
+public enum NetworkDirection {
+    CLIENT_TO_SERVER,
+    SERVER_TO_CLIENT
 }

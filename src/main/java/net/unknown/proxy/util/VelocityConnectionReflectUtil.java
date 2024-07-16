@@ -29,14 +29,37 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.proxy.fml;
+package net.unknown.proxy.util;
 
-import com.velocitypowered.api.event.connection.PluginMessageEvent;
-import com.velocitypowered.api.event.connection.PreLoginEvent;
-import com.velocitypowered.api.event.player.PlayerClientBrandEvent;
+import com.velocitypowered.api.proxy.InboundConnection;
+import com.velocitypowered.api.proxy.LoginPhaseConnection;
+import com.velocitypowered.api.proxy.Player;
+import io.netty.channel.Channel;
 
-public interface ModdedHandshakeProcessor {
-    default void onClientBrandReceived(PlayerClientBrandEvent event) {}
-    void onPluginMessageReceived(PluginMessageEvent event);
-    void onPreLogin(PreLoginEvent event);
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+
+public class VelocityConnectionReflectUtil {
+    public static Channel getNettyChannel(InboundConnection connection) {
+        try {
+            if (connection instanceof LoginPhaseConnection) {
+                Field delegateField = connection.getClass().getDeclaredField("delegate");
+                if (delegateField.trySetAccessible()) {
+                    return getNettyChannel((InboundConnection) delegateField.get(connection));
+                } else {
+                    throw new IllegalArgumentException("Failed to access delegate field in " + connection.getClass().getName());
+                }
+            } else {
+                Object minecraftConnection = connection.getClass().getDeclaredMethod("getConnection").invoke(connection);
+                Field channelField = minecraftConnection.getClass().getDeclaredField("channel");
+                if (channelField.trySetAccessible()) {
+                    return (Channel) channelField.get(minecraftConnection);
+                } else {
+                    throw new IllegalArgumentException("Failed to access channel field in " + minecraftConnection.getClass().getName());
+                }
+            }
+        } catch (NoSuchFieldException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalArgumentException("Failed to access", e);
+        }
+    }
 }
