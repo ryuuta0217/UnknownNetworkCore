@@ -40,6 +40,8 @@ import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.player.PlayerClientBrandEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -49,6 +51,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 public class ForgePlayer extends ModdedPlayer implements ModdedHandshakeProcessor {
+    public static final ChannelIdentifier FORGE_HANDSHAKE_IDENTIFIER = MinecraftChannelIdentifier.create("forge", "handshake");
+    public static final ChannelIdentifier FORGE_LOGIN_IDENTIFIER = MinecraftChannelIdentifier.create("forge", "login");
     private String logPrefix;
     private InboundConnection connection;
     private Player player;
@@ -107,7 +111,7 @@ public class ForgePlayer extends ModdedPlayer implements ModdedHandshakeProcesso
                 String brand = MinecraftPacketReader.readString(buf, 32767);
                 LOGGER.info(this.logPrefix + "  -> Brand " + brand + " received (phase " + handshakePhase + ")");
                 handshakePhase++;
-                player.sendPluginMessage(ForgeListener.FORGE_HANDSHAKE_IDENTIFIER, this.createModVersions());
+                player.sendPluginMessage(FORGE_HANDSHAKE_IDENTIFIER, this.createModVersions());
                 LOGGER.info(this.logPrefix + " <-  ModVersions sent");
             }
             case 1 -> {
@@ -117,7 +121,7 @@ public class ForgePlayer extends ModdedPlayer implements ModdedHandshakeProcesso
 
                 if (handshakePhase == payload.packetId()) {
                     handshakePhase++;
-                    player.sendPluginMessage(ForgeListener.FORGE_HANDSHAKE_IDENTIFIER, this.createChannelVersions());
+                    player.sendPluginMessage(FORGE_HANDSHAKE_IDENTIFIER, this.createChannelVersions());
                     LOGGER.info(this.logPrefix + " <-  ChannelVersions sent");
                 }
             }

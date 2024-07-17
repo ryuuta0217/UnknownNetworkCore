@@ -40,6 +40,7 @@ import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.proxy.InboundConnection;
 import com.velocitypowered.api.proxy.LoginPhaseConnection;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
@@ -91,7 +92,7 @@ public class FML2Player extends ModdedPlayer implements ModdedHandshakeProcessor
         packet.encode(outgoingBuf);
 
         if (event.getConnection() instanceof LoginPhaseConnection loginConnection) {
-            loginConnection.sendLoginPluginMessage(ForgeListener.FORGE_HANDSHAKE_IDENTIFIER, ByteBufUtil.getBytes(outgoingBuf), (response) -> {
+            loginConnection.sendLoginPluginMessage(MinecraftChannelIdentifier.create("fml", "handshake"), ByteBufUtil.getBytes(outgoingBuf), (response) -> {
                 ByteBuf incomingBuf = Unpooled.wrappedBuffer(response != null ? response : new byte[0]);
 
                 try {
