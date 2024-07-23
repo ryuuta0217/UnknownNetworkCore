@@ -14,12 +14,14 @@ plugins {
     id 'org.cadixdev.licenser' version '+' // Add License Header to source code headers.
     id "de.undercouch.download" version "+" // File Downloader
     id 'com.palantir.git-version' version '+' // Git Information Getter
+    id "org.jetbrains.gradle.plugin.idea-ext" version "1.0.1" // IntelliJ IDEA Plugin
 }
 
 //apply plugin: xyz.jpenilla.runpaper.RunPaper
 
 group 'net.unknown'
 version versionDetails().gitHash[0..7]
+def styledVersion = "git-" + project.name + "-" + (versionDetails().branchName != null ? versionDetails().branchName : System.getenv("BRANCH_NAME")) + "-" + versionDetails().gitHash[0..7];
 
 compileJava.dependsOn = ["licenseFormat"]
 compileJava.options.encoding = "UTF-8"
@@ -59,6 +61,7 @@ repositories {
     maven { url = "https://repo.ryuuta0217.com/repository/unknown-network/" }
     maven { url = "https://repo.onarandombox.com/content/groups/public/" } // Multiverse-(Core|Inventories|Portals|NetherPortals) repo
     maven { url = "https://maven.playpro.com/" } // CoreProtect
+    maven { url = "https://repo.papermc.io/repository/maven-public/" } // Velocity
 }
 
 dependencies {
@@ -79,12 +82,29 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
+    compileOnly group: 'com.velocitypowered', name: 'velocity-api', version: '3.+'
+    annotationProcessor group: 'com.velocitypowered', name: 'velocity-api', version: '+'
 }
 
 paperweight {
     reobfArtifactConfiguration = ReobfArtifactConfiguration.getMOJANG_PRODUCTION()
 }
 
+def generateTemplates = tasks.register("generateTemplates", Copy) { task ->
+    def props = [
+        'version': styledVersion
+    ]
+
+    task.inputs.properties props
+
+    task.from file('src/main/templates')
+    task.into layout.buildDirectory.dir('generated/sources/templates')
+    task.expand props
+}
+
+sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
+
+rootProject.idea.project.settings.taskTriggers.afterSync generateTemplates
 
 import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
 import org.apache.tools.ant.filters.ReplaceTokens
@@ -92,7 +112,12 @@ import org.apache.tools.ant.filters.ReplaceTokens
 processResources {
     filesMatching("*.yml") {
         duplicatesStrategy(DuplicatesStrategy.INCLUDE)
-        filter ReplaceTokens, tokens: [version: "git-" + project.name + "-" + (versionDetails().branchName != null ? versionDetails().branchName : System.getenv("BRANCH_NAME")) + "-" + versionDetails().gitHash[0..7]]
+        filter ReplaceTokens, tokens: [version: styledVersion]
+    }
+
+    filesMatching("*.json") {
+        duplicatesStrategy(DuplicatesStrategy.INCLUDE)
+        filter ReplaceTokens, tokens: [version: styledVersion]
     }
 }
 
@@ -102,6 +127,9 @@ application {
 
 jar {
     archiveFileName = "original-" + archiveBaseName.get() + "." + archiveExtension.get()
+    manifest {
+        attributes 'Version': styledVersion
+    }
 }
 
 shadowJar {
@@ -135,55 +163,12 @@ task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
     systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
 }
 
-task downloadWaterfall(type: Task) {
-    var wf = new File("libs/standalone/waterfall.jar")
-
-    if (!wf.exists()) {
-        download.run {
-            src "https://api.papermc.io/v2/projects/waterfall/versions/1.20/builds/565/downloads/waterfall-1.20-565.jar"
-            dest 'libs/standalone/waterfall.jar'
-        }
-
-        println "Downloaded waterfall.jar"
-    }
-
-    if (wf.exists()) {
-        if(!file("libs/waterfall").exists()) {
-            println "Extracting waterfall"
-
-            copy {
-                from zipTree(file("libs/standalone/waterfall.jar"))
-                into file("libs/waterfall/")
-            }
-
-            println "Extracted waterfall"
-        }
-
-        if(file("libs/waterfall/com/mojang/brigadier").exists()) {
-            println "Removing brigadier from extracted waterfall"
-
-            delete {
-                delete file("libs/waterfall/com/mojang/brigadier")
-            }
-
-            println "Removed brigadier from extracted waterfall"
-        }
-    }
-}
-
-task reCompressWaterfall(type: Zip, dependsOn: downloadWaterfall) {
-    from "libs/waterfall/"
-    destinationDirectory = file("libs")
-    archiveFileName = "waterfall.jar"
-}
-
-compileJava.dependsOn(reCompressWaterfall)
-
 task copyArtifactToProxy(type: Copy) {
     from project.file("build/libs/UnknownNetworkCore.jar")
     into project.file("testProxy/plugins")
 }
 
+copyArtifactToProxy.dependsOn(shadowJar, reobfJar)
 publish.dependsOn(shadowJar)
 
 artifacts {

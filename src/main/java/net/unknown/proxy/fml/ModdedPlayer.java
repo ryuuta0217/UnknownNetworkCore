@@ -31,25 +31,30 @@
 
 package net.unknown.proxy.fml;
 
+import com.velocitypowered.api.proxy.InboundConnection;
+import com.velocitypowered.api.proxy.Player;
 import io.netty.buffer.ByteBuf;
-import net.md_5.bungee.UserConnection;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.unknown.proxy.UnknownNetworkProxyCore;
 import net.unknown.shared.fml.ModClientInformation;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Random;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 public abstract class ModdedPlayer {
-    protected static final Logger LOGGER = ProxyServer.getInstance().getLogger();
+    protected static final Logger LOGGER = UnknownNetworkProxyCore.getInstance().getLogger();
     protected static final Random RANDOM = new Random();
 
-    public abstract void setProxiedPlayer(UserConnection player);
+    public abstract void setPlayer(Player player);
 
     @Nullable
-    public abstract ProxiedPlayer getProxiedPlayer();
+    public abstract Player getPlayer();
+
+    public abstract void setConnection(InboundConnection connection);
+
+    @Nonnull
+    public abstract InboundConnection getConnection();
 
     /**
      * Forgeのバージョンを返します

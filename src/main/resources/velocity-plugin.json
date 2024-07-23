@@ -1,0 +1,7 @@
+{
+  "id": "unknown-network-core",
+  "name": "UnknownNetworkCore",
+  "version": "@version@",
+  "authors": [ "ryuuta0217" ],
+  "main": "net.unknown.proxy.UnknownNetworkProxyCore"
+}

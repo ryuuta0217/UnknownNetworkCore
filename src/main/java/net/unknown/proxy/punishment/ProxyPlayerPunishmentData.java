@@ -31,32 +31,34 @@
 
 package net.unknown.proxy.punishment;
 
-import net.md_5.bungee.config.Configuration;
-import net.md_5.bungee.config.ConfigurationProvider;
-import net.md_5.bungee.config.YamlConfiguration;
+import net.unknown.proxy.UnknownNetworkProxyCore;
 import net.unknown.shared.punishment.PlayerPunishmentData;
 import net.unknown.shared.punishment.interfaces.Punishment;
 import net.unknown.shared.punishment.interfaces.TemporaryPunishment;
 import net.unknown.shared.punishment.PunishmentState;
 import net.unknown.shared.punishment.PunishmentType;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
 import java.util.UUID;
 
 public class ProxyPlayerPunishmentData extends PlayerPunishmentData {
-    private Configuration data;
+    private YamlConfigurationLoader loader;
+    private CommentedConfigurationNode data;
     public ProxyPlayerPunishmentData(UUID uniqueId) {
         super(uniqueId);
     }
 
-    private static PunishmentState getStateFromConfigSection(Configuration section) {
-        if (section != null && section.contains("type")) {
-            PunishmentType type = PunishmentType.valueOf(section.getString("type").toUpperCase());
+    private static PunishmentState getStateFromConfigSection(CommentedConfigurationNode section) {
+        if (section != null && section.hasChild("type")) {
+            PunishmentType type = PunishmentType.valueOf(section.node("type").getString().toUpperCase());
             if (type != PunishmentType.NONE) {
-                UUID target = UUID.fromString(section.getString("target"));
-                UUID executor = UUID.fromString(section.getString("executor"));
-                String reason = section.getString("reason");
-                long expiresIn = section.contains("expires_in") ? section.getLong("expires_in") : -1;
+                UUID target = UUID.fromString(section.node("target").getString());
+                UUID executor = UUID.fromString(section.node("executor").getString());
+                String reason = section.node("reason").getString();
+                long expiresIn = section.hasChild("expires_in") ? section.node("expires_in").getLong() : -1;
 
                 if (type == PunishmentType.MUTE) return new PunishmentState.Mute(target, executor, reason);
                 if (type == PunishmentType.TEMP_MUTE)
@@ -70,34 +72,39 @@ public class ProxyPlayerPunishmentData extends PlayerPunishmentData {
         return PunishmentState.Default.getInstance();
     }
 
-    private static void writeStateToConfiguration(PunishmentState state, String key, Configuration config) {
-        Configuration section = new Configuration();
-        section.set("type", state.getType().name().toLowerCase());
-        if (state instanceof Punishment data) {
-            section.set("target", data.getTarget().toString());
-            section.set("executor", data.getExecutor().toString());
-            section.set("reason", data.getReason());
+    private static void writeStateToConfiguration(PunishmentState state, String[] paths, CommentedConfigurationNode config) {
+        try {
+            CommentedConfigurationNode section = CommentedConfigurationNode.root();
+            section.node("type").set(state.getType().name().toLowerCase());
+            if (state instanceof Punishment data) {
+                section.node("target").set(data.getTarget().toString());
+                section.node("executor").set(data.getExecutor().toString());
+                section.node("reason").set(data.getReason());
 
-            if (data instanceof TemporaryPunishment temp) {
-                section.set("expires_in", temp.getExpiresIn());
+                if (data instanceof TemporaryPunishment temp) {
+                    section.node("expires_in").set(temp.getExpiresIn());
+                }
             }
+            config.node(paths).set(section);
+        } catch (SerializationException e) {
+            e.printStackTrace();
         }
-        config.set(key, section);
     }
 
     public void load() {
         try {
             if (!this.source.exists() && !this.source.createNewFile())
                 throw new IOException("ファイルの作成に失敗しました: " + this.source);
-            this.data = ConfigurationProvider.getProvider(YamlConfiguration.class).load(this.source);
-            if (this.data.contains("current_state"))
-                this.currentState = getStateFromConfigSection(this.data.getSection("current_state"));
-            if (this.data.contains("histories")) {
-                Configuration histories = this.data.getSection("histories");
+            this.loader = UnknownNetworkProxyCore.createConfigLoader(this.source);
+            this.data = this.loader.load();
+            if (this.data.hasChild("current_state"))
+                this.currentState = getStateFromConfigSection(this.data.node("current_state"));
+            if (this.data.hasChild("histories")) {
+                CommentedConfigurationNode histories = this.data.node("histories");
                 if (histories != null) {
-                    histories.getKeys().forEach(timeStampStr -> {
-                        long executedTimeStamp = Long.parseLong(timeStampStr);
-                        this.punishmentHistories.put(executedTimeStamp, getStateFromConfigSection(histories.getSection(timeStampStr)));
+                    histories.childrenMap().forEach((timeStampObj, section) -> {
+                        long executedTimeStamp = Long.parseLong(timeStampObj.toString());
+                        this.punishmentHistories.put(executedTimeStamp, getStateFromConfigSection(section));
                     });
                 }
             }
@@ -108,16 +115,16 @@ public class ProxyPlayerPunishmentData extends PlayerPunishmentData {
 
     @Override
     public void write() {
-        this.data.set("current_state", null);
-        writeStateToConfiguration(this.currentState, "current_state", this.data);
+        this.data.removeChild("current_state");
+        writeStateToConfiguration(this.currentState, new String[] {"current_state"}, this.data);
 
-        this.data.set("histories", null);
+        this.data.removeChild("histories");
         this.punishmentHistories.forEach((executedTimeStamp, state) -> {
-            writeStateToConfiguration(state, "histories." + executedTimeStamp, this.data);
+            writeStateToConfiguration(state, new String[] {"histories", String.valueOf(executedTimeStamp)}, this.data);
         });
 
         try {
-            ConfigurationProvider.getProvider(YamlConfiguration.class).save(this.data, this.source);
+            this.loader.save(this.data);
         } catch (IOException e) {
             e.printStackTrace();
         }

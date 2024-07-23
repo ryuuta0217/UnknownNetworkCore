@@ -29,30 +29,51 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
+import com.ryuuta0217.packets.forge.v4.ModVersions;
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import net.unknown.proxy.NetworkDirection;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Debug {
     public static void main(String[] args) {
-        byte[] bytes = new byte[]{2, 5, 11, 102, 111, 114, 103, 101, 58, 108, 111, 103, 105, 110, 0, 20, 109, 105, 110, 101, 99, 114, 97, 102, 116, 58, 117, 110, 114, 101, 103, 105, 115, 116, 101, 114, 0, 15, 102, 111, 114, 103, 101, 58, 104, 97, 110, 100, 115, 104, 97, 107, 101, 0, 18, 102, 111, 114, 103, 101, 58, 116, 105, 101, 114, 95, 115, 111, 114, 116, 105, 110, 103, 1, 18, 109, 105, 110, 101, 99, 114, 97, 102, 116, 58, 114, 101, 103, 105, 115, 116, 101, 114, 0};
+        /*byte[] bytes = new byte[]{
+                1, // packet id?
+                15, // string length
+                102, 111, 114, 103, 101, 58, 104, 97, 110, 100, 115, 104, 97, 107, 101, // forge:handshake
+                1, // packet id (2nd?)
+                3, // mods count
+                9, // string length
+                109, 105, 110, 101, 99, 114, 97, 102, 116, // minecraft
+                9, // string length
+                77, 105, 110, 101, 99, 114, 97, 102, 116, // Minecraft
+                4, // string length
+                49, 46, 50, 49, // 1.21
+                5, 102, 111, 114, 103, 101, 5, 70, 111, 114, 103, 101, 7, 53, 49, 46, 48, 46, 50, 50, 12, 102, 109, 108, 104, 97, 110, 100, 115, 104, 97, 107, 101, 12, 70, 77, 76, 72, 97, 110, 100, 115, 104, 97, 107, 101, 5, 49, 46, 48, 46, 48};
+        */
+        byte[] bytes = new byte[] {
+                1, // packet id?
+                3, // mod count
+                9, // string length
+                109, 105, 110, 101, 99, 114, 97, 102, 116, // minecraft
+                9, // string length
+                77, 105, 110, 101, 99, 114, 97, 102, 116, // Minecraft
+                4, 49, 46, 50, 49, 5, 102, 111, 114, 103, 101, 5, 70, 111, 114, 103, 101, 7, 53, 49, 46, 48, 46, 50, 50, 12, 102, 109, 108, 104, 97, 110, 100, 115, 104, 97, 107, 101, 12, 70, 77, 76, 72, 97, 110, 100, 115, 104, 97, 107, 101, 5, 49, 46, 48, 46, 48
+        };
+
+        System.out.println("Input: " + new String(bytes, StandardCharsets.UTF_8));
         ByteBuf buf = Unpooled.wrappedBuffer(bytes);
-        int phase = MinecraftPacketReader.readVarInt(buf);
-        int elementsCount = MinecraftPacketReader.readVarInt(buf);
-        Map<String, Integer> elements = new HashMap<>();
-        for (int i = 0; i < elementsCount; i++) {
-            String element = MinecraftPacketReader.readString(buf, 32767);
-            int elementLength = MinecraftPacketReader.readVarInt(buf);
-            elements.put(element, elementLength);
+        int packetId = MinecraftPacketReader.readVarInt(buf);
+        if (packetId == 1) {
+            ModVersions modVersions = ModVersions.decode(buf);
+            System.out.println(modVersions);
         }
-        System.out.println("Phase: " + phase);
-        System.out.println("Elements count: " + elementsCount);
-        System.out.println("Elements: " + elements);
     }
 
     public static Unsafe getUnsafe() {
