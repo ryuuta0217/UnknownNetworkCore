@@ -51,6 +51,13 @@ public class UnknownNetworkCorePluginBootstrap implements PluginBootstrap {
             }
         });
 
+        ctx.getLogger().info(Component.text("Registering handler for smite enchantment max level set to 10"));
+        ctx.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd(), event -> {
+            if (event.key().key().equals(Key.key("minecraft:smite"))) {
+                event.builder().maxLevel(10);
+            }
+        });
+
         /*ctx.getLogger().info(Component.text("Registering handler for unknown enchantment"));
         ctx.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.freeze(), e -> {
             Conversions conversions = BuiltInRegistries.BUILT_IN_CONVERSIONS;
