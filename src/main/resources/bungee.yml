@@ -1,4 +1,0 @@
-name: UnknownNetworkCore
-main: net.unknown.proxy.UnknownNetworkProxyCore
-author: ryuuta0217
-version: "@version@"

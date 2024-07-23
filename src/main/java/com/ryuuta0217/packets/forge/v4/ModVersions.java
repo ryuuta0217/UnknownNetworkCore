@@ -19,18 +19,28 @@ package com.ryuuta0217.packets.forge.v4;
 import com.ryuuta0217.packets.Packet;
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import net.unknown.proxy.NetworkDirection;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public record ModVersions(Map<String, Info> mods) implements Packet {
+    public static final int PACKET_ID = 1;
+
     public static ModVersions decode(ByteBuf buf) {
         int modCount = MinecraftPacketReader.readVarInt(buf);
         HashMap<String, Info> mods = new HashMap<>(modCount);
         for (int i = 0; i < modCount; i++) {
-            mods.put(MinecraftPacketReader.readString(buf), new Info(MinecraftPacketReader.readString(buf), MinecraftPacketReader.readString(buf)));
+            mods.put(MinecraftPacketReader.readUtf(buf), new Info(MinecraftPacketReader.readUtf(buf), MinecraftPacketReader.readUtf(buf)));
         }
         return new ModVersions(mods);
+    }
+
+    public static ModVersions decode(ForgePayload payload) {
+        if (payload.packetId() != PACKET_ID) throw new IllegalStateException("Invalid packet ID: " + payload.packetId());
+        return decode(payload.data());
     }
 
     public void encode(ByteBuf out) {
@@ -41,6 +51,12 @@ public record ModVersions(Map<String, Info> mods) implements Packet {
             MinecraftPacketReader.writeString(v.name(), out);
             MinecraftPacketReader.writeString(v.version(), out);
         });
+    }
+
+    public ForgePayload encode() {
+        ByteBuf buf = Unpooled.buffer();
+        encode(buf);
+        return new ForgePayload(PACKET_ID, buf);
     }
 
     public record Info(String name, String version) {}

@@ -33,6 +33,7 @@ package net.unknown.shared.fml;
 
 import com.ryuuta0217.packets.Packet;
 import com.ryuuta0217.packets.forge.v2.FML2HandshakePacket;
+import com.ryuuta0217.packets.forge.v4.ChannelVersions;
 import com.ryuuta0217.packets.forge.v4.ModVersions;
 import com.ryuuta0217.util.MinecraftPacketReader;
 import io.netty.buffer.ByteBuf;
@@ -48,8 +49,8 @@ public record ModClientInformation(ConnectionEnvironment version, UUID uniqueId,
         this(ConnectionEnvironment.FML2, uniqueId, fml2.getMods().stream().collect(Collectors.toMap(modId -> modId, modId -> Map.entry(modId, "0.0"))), fml2.getChannels());
     }
 
-    public ModClientInformation(UUID uniqueId, ModVersions fml4, Map<String, String> channels) {
-        this(ConnectionEnvironment.FORGE, uniqueId, fml4.mods().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> Map.entry(entry.getKey(), entry.getValue().version()))), channels);
+    public ModClientInformation(UUID uniqueId, ModVersions fml4Mods, ChannelVersions channels) {
+        this(ConnectionEnvironment.FORGE, uniqueId, fml4Mods.mods().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> Map.entry(entry.getKey(), entry.getValue().version()))), channels.channels().entrySet().stream().map(e -> Map.entry(e.getKey(), String.valueOf(e.getValue()))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
     public static ModClientInformation decode(ByteBuf buf) {

@@ -31,12 +31,12 @@
 
 package net.unknown.proxy.fml;
 
-import net.md_5.bungee.api.event.PluginMessageEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
-import net.md_5.bungee.protocol.packet.LoginPayloadResponse;
+import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.connection.PreLoginEvent;
+import com.velocitypowered.api.event.player.PlayerClientBrandEvent;
 
 public interface ModdedHandshakeProcessor {
+    default void onClientBrandReceived(PlayerClientBrandEvent event) {}
     void onPluginMessageReceived(PluginMessageEvent event);
     void onPreLogin(PreLoginEvent event);
-    void onLoginPayloadResponseReceived(LoginPayloadResponse response);
 }
