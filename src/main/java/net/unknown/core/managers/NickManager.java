@@ -33,7 +33,7 @@ package net.unknown.core.managers;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import com.ryuuta0217.util.MojangApi;
-import io.papermc.paper.util.TickThread;
+import ca.spottedleaf.moonrise.common.util.TickThread;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
