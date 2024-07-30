@@ -214,7 +214,7 @@ public class FlightManager {
         private void runOnGroundTimeTask() {
             if (this.onGroundTimeUpdateTask == null || this.onGroundTimeUpdateTask.isCancelled()) {
                 this.onGroundTimeUpdateTask = RunnableManager.runAsyncRepeating(() -> {
-                    this.onGroundTicks++;
+                    if (this.player.isOnGround()) this.onGroundTicks++;
                     if (this.onGroundTicks >= MAX_ON_GROUND_TICKS) {
                         this.onGroundTimeUpdateTask.cancel();
                         this.onGroundTimeUpdateTask = null;

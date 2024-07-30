@@ -239,6 +239,11 @@ public class PlayerData extends ConfigurationBase {
             return this.registry.get(namespace).get(key);
         }
 
+        public String getOrDefault(NamespacedKey namespace, String key, String fallback) {
+            if (!this.containsKey(namespace, key)) return fallback;
+            return this.registry.get(namespace).get(key);
+        }
+
         /*
          * Example file:
          * "unknown-network:spawn_configuration":
