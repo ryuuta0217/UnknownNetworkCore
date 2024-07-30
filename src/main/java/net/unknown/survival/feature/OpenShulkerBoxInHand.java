@@ -134,7 +134,7 @@ public class OpenShulkerBoxInHand implements Listener {
     }
 
     public static OpenMode getOpenMode(UUID uniqueId) {
-        return OpenMode.valueOf(PlayerData.of(uniqueId).getRegistries().getOrDefault(PLAYER_DATA_REGISTRY_KEY, "open-mode", OpenMode.SHIFT_RIGHT_CLICK.name()));
+        return OpenMode.valueOf(PlayerData.of(uniqueId).getRegistries().getOrDefault(PLAYER_DATA_REGISTRY_KEY, "open-mode", OpenMode.SHIFT_RIGHT_CLICK_AIR.name()));
     }
 
     public static void setOpenMode(Player player, OpenMode mode) {
