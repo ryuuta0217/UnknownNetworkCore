@@ -79,9 +79,9 @@ public class DemolitionGun implements Listener {
                                     arrow.setGlowing(false);
                                     Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
                                         arrow.remove();
+                                        bukkitPlayer.playSound(bukkitPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.8f);
                                         return null;
                                     });
-                                    bukkitPlayer.playSound(bukkitPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.8f);
                                     this.cancel();
                                 }
                             }
@@ -108,7 +108,7 @@ public class DemolitionGun implements Listener {
         }
 
         public static BukkitTask boot() {
-            TASK = new BowPullIndicator().runTaskTimerAsynchronously(UnknownNetworkCorePlugin.getInstance(), 0L, 1L);
+            TASK = new BowPullIndicator().runTaskTimer(UnknownNetworkCorePlugin.getInstance(), 0L, 1L);
             return TASK;
         }
 
