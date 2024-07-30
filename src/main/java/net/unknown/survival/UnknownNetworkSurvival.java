@@ -133,6 +133,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new PlayerJoinListener());
         ListenerManager.registerListener(new MinecraftToDiscordMessageListener());
         ListenerManager.registerListener(new LocalLoginListener());
+        ListenerManager.registerListener(new OpenShulkerBoxInHand());
         SuppressRaidCommand.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {

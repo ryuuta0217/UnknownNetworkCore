@@ -78,5 +78,7 @@ public class Commands {
         SuppressRaidCommand.register(UnknownNetworkCorePlugin.getBrigadier());
 
         VoteCommand.register(UnknownNetworkCorePlugin.getBrigadier(), buildContext);
+
+        ShulkerBoxCommand.register(UnknownNetworkCorePlugin.getBrigadier());
     }
 }
