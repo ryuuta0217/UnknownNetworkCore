@@ -97,7 +97,6 @@ public class NBTRemoveGui extends GuiBase {
         if (clickedInventory != null && !clickedInventory.equals(this.getInventory()) && event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY) {
             // プレイヤーが自身のインベントリから開いているGUIに向かってアイテムを挿入しようとした時 (Shiftクリックと思われる)
             if (this.getSource() == null) {
-                System.out.println("L89");
                 event.setCancelled(false);
             }
         }
