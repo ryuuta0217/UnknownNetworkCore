@@ -109,6 +109,7 @@ public class OpenShulkerBoxInHand implements Listener {
     public static boolean openShulkerBox(Player whoOpen, ItemStack stack) {
         if (stack != null && stack.getItemMeta() instanceof BlockStateMeta blockStateMeta) {
             if (blockStateMeta.getBlockState() instanceof org.bukkit.block.ShulkerBox shulkerBox) {
+                whoOpen.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
                 Inventory shulkerBoxInventory = shulkerBox.getInventory();
                 Listener closeEventListener = new Listener() {};
                 ListenerManager.registerEventListener(InventoryCloseEvent.class, closeEventListener, EventPriority.MONITOR, false, (listener, rawEvent) -> {
