@@ -34,7 +34,6 @@ package net.unknown.survival.feature;
 import net.kyori.adventure.text.Component;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.managers.ListenerManager;
-import net.unknown.core.managers.RunnableManager;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.ShulkerBox;
@@ -138,7 +137,7 @@ public class OpenShulkerBoxInHand implements Listener {
                         (e) -> e.getPlayer().getUniqueId().equals(whoOpen.getUniqueId()) && e.getInventory().equals(shulkerBoxInventory),
                         (e) -> stack.editMeta(meta -> meta.getPersistentDataContainer().set(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN, true)),
                         1, ListenerManager.TimeType.MINUTES, () -> {});
-                RunnableManager.runDelayed(() -> whoOpen.openInventory(shulkerBoxInventory), 1L);
+                whoOpen.openInventory(shulkerBoxInventory);
                 return true;
             }
         }
