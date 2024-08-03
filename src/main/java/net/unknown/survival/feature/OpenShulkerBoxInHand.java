@@ -44,18 +44,25 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.UUID;
 
 public class OpenShulkerBoxInHand implements Listener {
     private static final NamespacedKey PLAYER_DATA_REGISTRY_KEY = new NamespacedKey("unknown-network", "open_shulker_box_in_hand");
+    private static final NamespacedKey PERSISTENT_DATA_CONTAINER_KEY = new NamespacedKey("unknown-network", "opened_in_hand");
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
+        if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta().getPersistentDataContainer().has(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN) && event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN)) {
+            event.setCancelled(true);
+            return;
+        }
         if (event.getWhoClicked().getInventory().equals(event.getClickedInventory())) {
             if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() instanceof BlockStateMeta blockStateMeta) {
                 if (blockStateMeta.getBlockState() instanceof ShulkerBox) {
@@ -110,6 +117,9 @@ public class OpenShulkerBoxInHand implements Listener {
     public static boolean openShulkerBox(Player whoOpen, ItemStack stack) {
         if (stack != null && stack.getItemMeta() instanceof BlockStateMeta blockStateMeta) {
             if (blockStateMeta.getBlockState() instanceof org.bukkit.block.ShulkerBox shulkerBox) {
+                if (blockStateMeta.getPersistentDataContainer().has(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN) && blockStateMeta.getPersistentDataContainer().get(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN)) {
+                    return false;
+                }
                 whoOpen.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
                 Inventory shulkerBoxInventory = shulkerBox.getInventory();
                 Listener closeEventListener = new Listener() {};
@@ -117,6 +127,7 @@ public class OpenShulkerBoxInHand implements Listener {
                     if (rawEvent instanceof InventoryCloseEvent e) {
                         if (e.getPlayer().getUniqueId().equals(whoOpen.getUniqueId())) {
                             if (e.getInventory().equals(shulkerBoxInventory)) {
+                                blockStateMeta.getPersistentDataContainer().remove(PERSISTENT_DATA_CONTAINER_KEY);
                                 blockStateMeta.setBlockState(shulkerBox);
                                 stack.setItemMeta(blockStateMeta);
                                 ListenerManager.unregisterListener(closeEventListener);
@@ -124,6 +135,10 @@ public class OpenShulkerBoxInHand implements Listener {
                         }
                     }
                 });
+                ListenerManager.waitForEvent(InventoryOpenEvent.class, false, EventPriority.MONITOR,
+                        (e) -> e.getPlayer().getUniqueId().equals(whoOpen.getUniqueId()) && e.getInventory().equals(shulkerBoxInventory),
+                        (e) -> stack.editMeta(meta -> meta.getPersistentDataContainer().set(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN, true)),
+                        1, ListenerManager.TimeType.MINUTES, () -> {});
                 RunnableManager.runDelayed(() -> whoOpen.openInventory(shulkerBoxInventory), 1L);
                 return true;
             }
