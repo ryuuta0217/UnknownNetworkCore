@@ -59,7 +59,7 @@ public class OpenShulkerBoxInHand implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta().getPersistentDataContainer().has(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN) && event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN)) {
+        if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null && event.getCurrentItem().getItemMeta().getPersistentDataContainer().has(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN) && event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN)) {
             event.setCancelled(true);
             return;
         }
@@ -120,7 +120,6 @@ public class OpenShulkerBoxInHand implements Listener {
                 if (blockStateMeta.getPersistentDataContainer().has(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN) && blockStateMeta.getPersistentDataContainer().get(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN)) {
                     return false;
                 }
-                whoOpen.closeInventory(InventoryCloseEvent.Reason.OPEN_NEW);
                 Inventory shulkerBoxInventory = shulkerBox.getInventory();
                 Listener closeEventListener = new Listener() {};
                 ListenerManager.registerEventListener(InventoryCloseEvent.class, closeEventListener, EventPriority.MONITOR, false, (listener, rawEvent) -> {
