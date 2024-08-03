@@ -45,4 +45,16 @@ public abstract class PlayerBalanceChangedEvent extends Event {
         this.beforeBalance = beforeBalance;
         this.afterBalance = afterBalance;
     }
+
+    public OfflinePlayer getPlayer() {
+        return this.player;
+    }
+
+    public double getBeforeBalance() {
+        return this.beforeBalance;
+    }
+
+    public double getAfterBalance() {
+        return this.afterBalance;
+    }
 }
