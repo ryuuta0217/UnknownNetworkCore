@@ -32,8 +32,10 @@
 package net.unknown.survival.feature;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.managers.ListenerManager;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.ShulkerBox;
@@ -79,8 +81,10 @@ public class OpenShulkerBoxInHand implements Listener {
                     };
 
                     if (canExec) {
+                        AbstractContainerMenu oldMenu = MinecraftAdapter.player((Player) event.getWhoClicked()).containerMenu;
                         boolean success = openShulkerBox((Player) event.getWhoClicked(), event.getCurrentItem());
                         event.setCancelled(success);
+                        if (success) oldMenu.resumeRemoteUpdates();
                     }
                 }
             }
