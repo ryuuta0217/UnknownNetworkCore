@@ -92,6 +92,11 @@ public class ItemStackBuilder {
         return this;
     }
 
+    public ItemStackBuilder maxStackSize(int maxStackSize) {
+        MinecraftAdapter.ItemStack.itemStack(this.original).set(DataComponents.MAX_STACK_SIZE, maxStackSize);
+        return this;
+    }
+
     public ItemStackBuilder displayName(Component displayName) {
         ItemMeta meta = this.original.getItemMeta();
         if (!displayName.style().hasDecoration(TextDecoration.ITALIC)) displayName = displayName.decoration(TextDecoration.ITALIC, false);
