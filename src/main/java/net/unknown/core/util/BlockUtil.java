@@ -35,10 +35,23 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.FallingBlock;
+
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public class BlockUtil {
+    public static FallingBlock replaceBlockAsEntity(Location location, Consumer<FallingBlock> function) {
+        return location.getWorld().spawn(location.add(0, 0.1, 0), FallingBlock.class, fallingBlock -> {
+            fallingBlock.setBlockState(location.getBlock().getState());
+            function.accept(fallingBlock);
+            location.getBlock().setType(Material.AIR);
+        });
+    }
+
     public static void searchBlock(BlockPos center, int maxBlockCount, Level level, Block searchTarget, Set<BlockPos> data) {
         if (searchTarget == Blocks.AIR) return;
         Set<BlockPos> foundPositions = new HashSet<>();
