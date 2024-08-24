@@ -109,8 +109,12 @@ public class LifterItem extends UnknownNetworkItem implements Listener {
 
     @EventHandler
     public void onEntityDismount(EntityDismountEvent event) {
-        if (event.getEntity() instanceof Player player) {
-
+        if (event.getDismounted().getPersistentDataContainer().has(WHO_CARRYING_KEY)) {
+            if (event.getEntity() instanceof AreaEffectCloud && event.getEntity().getVehicle() instanceof Player player) {
+                event.getDismounted().getPersistentDataContainer().remove(WHO_CARRYING_KEY);
+                event.getDismounted().teleport(player.getLocation());
+                event.getEntity().remove();
+            }
         }
     }
 
