@@ -34,7 +34,9 @@ package net.unknown.core.builder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.core.component.DataComponents;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
@@ -47,18 +49,18 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class ItemStackBuilder {
-    private final ItemStack original;
+    private ItemStack original;
 
     public ItemStackBuilder(ItemStack stack) {
-        this.original = stack.clone();
+        this.original = MinecraftAdapter.ItemStack.itemStack(MinecraftAdapter.ItemStack.itemStack(stack.clone()), true);
     }
 
     public ItemStackBuilder(Material material) {
-        this.original = new ItemStack(material);
+        this.original = MinecraftAdapter.ItemStack.itemStack(MinecraftAdapter.ItemStack.itemStack(new ItemStack(material)), true);
     }
 
     public ItemStackBuilder(Material material, int amount) {
-        this.original = new ItemStack(material, amount);
+        this.original = MinecraftAdapter.ItemStack.itemStack(MinecraftAdapter.ItemStack.itemStack(new ItemStack(material, amount)), true);
     }
 
     public ItemStackBuilder enchantments(Map<Enchantment, Integer> enchantments) {
@@ -87,6 +89,11 @@ public class ItemStackBuilder {
 
     public ItemStackBuilder amount(int amount) {
         this.original.setAmount(amount);
+        return this;
+    }
+
+    public ItemStackBuilder maxStackSize(int maxStackSize) {
+        MinecraftAdapter.ItemStack.itemStack(this.original).set(DataComponents.MAX_STACK_SIZE, maxStackSize);
         return this;
     }
 
