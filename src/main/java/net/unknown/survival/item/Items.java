@@ -48,12 +48,14 @@ public class Items {
     public static MendingSupportStickItem MENDING_SUPPORT_STICK;
     public static UpgradeSnowGolemItem UPGRADE_SNOW_GOLEM_ITEM;
     public static PotionEffectItem POTION_EFFECT_ITEM;
+    public static LifterItem LIFTER_ITEM;
 
     public static void init() {
         if (FROZEN && !REGISTRY.isEmpty()) throw new IllegalStateException("Can't init items twice!");
         MENDING_SUPPORT_STICK = register(new MendingSupportStickItem());
         UPGRADE_SNOW_GOLEM_ITEM = register(new UpgradeSnowGolemItem());
         POTION_EFFECT_ITEM = register(new PotionEffectItem());
+        LIFTER_ITEM = register(new LifterItem());
         FROZEN = true;
     }
 
