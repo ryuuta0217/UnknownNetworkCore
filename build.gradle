@@ -84,6 +84,7 @@ dependencies {
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
     compileOnly group: 'com.velocitypowered', name: 'velocity-api', version: '3.+'
     annotationProcessor group: 'com.velocitypowered', name: 'velocity-api', version: '+'
+    implementation group: 'io.ipinfo', name: 'ipinfo-api', version: '+'
 }
 
 paperweight {

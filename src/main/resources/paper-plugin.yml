@@ -104,3 +104,4 @@ permissions:
       unknown.survival.command.sethomecount: true
       unknown.survival.command.vote.manage: true
       unknown.survival.notify.mod: true
+      unknown.survival.notify.whois: true
