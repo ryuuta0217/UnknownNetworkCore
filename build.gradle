@@ -62,6 +62,7 @@ repositories {
     maven { url = "https://repo.onarandombox.com/content/groups/public/" } // Multiverse-(Core|Inventories|Portals|NetherPortals) repo
     maven { url = "https://maven.playpro.com/" } // CoreProtect
     maven { url = "https://repo.papermc.io/repository/maven-public/" } // Velocity
+    maven { url = "https://repo.viaversion.com" } // ViaVersion
 }
 
 dependencies {
@@ -84,6 +85,8 @@ dependencies {
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
     compileOnly group: 'com.velocitypowered', name: 'velocity-api', version: '3.+'
     annotationProcessor group: 'com.velocitypowered', name: 'velocity-api', version: '+'
+    implementation group: 'io.ipinfo', name: 'ipinfo-api', version: '+'
+    compileOnly group: "com.viaversion", name: "viaversion-api", version: "+"
 }
 
 paperweight {

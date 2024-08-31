@@ -31,21 +31,30 @@
 
 package net.unknown.survival.listeners;
 
+import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
+import io.ipinfo.api.model.IPResponse;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.SharedConstants;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.dependency.MultiverseCore;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.NewMessageUtil;
+import net.unknown.shared.whois.Whois;
+import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class PlayerJoinListener implements Listener {
     private final Map<UUID, Long> LAST_SEEN = new HashMap<>();
@@ -78,6 +87,40 @@ public class PlayerJoinListener implements Listener {
             }
         }
         LAST_SEEN.remove(event.getPlayer().getUniqueId());
+        if (!event.getPlayer().hasPermission(Permissions.FEATURE_WHOIS.getPermissionNode())) {
+            IPResponse ipInfo = Whois.getIpInformation(event.getPlayer().getAddress().getAddress());
+            Set<UUID> sameIpPlayers = Whois.getUsersByIp(event.getPlayer().getAddress().getAddress()).keySet();
+
+            Bukkit.getOnlinePlayers()
+                    .stream()
+                    .filter(player -> player.hasPermission(Permissions.FEATURE_WHOIS.getPermissionNode()))
+                    .forEach(player -> {
+                        Date firstPlayed = new Date(event.getPlayer().getFirstPlayed());
+                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+                        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
+                        String firstPlayedFormatted = sdf.format(firstPlayed);
+                        Duration relativeTime = Duration.between(firstPlayed.toInstant(), new Date().toInstant());
+                        player.sendMessage(Component.empty()
+                                .append(Component.text("===== Whois Information =====", DefinedTextColor.AQUA)).appendNewline()
+                                .append(Component.text("ID: " + event.getPlayer().getName() + "(" + event.getPlayer().getUniqueId() + ")", DefinedTextColor.YELLOW)).appendNewline()
+                                .append(Component.text("IPアドレス: " + Whois.maskIpAddress(event.getPlayer().getAddress().getAddress()), DefinedTextColor.YELLOW)).appendNewline()
+                                .append(Component.text("ホスト名: " + (ipInfo != null ? Whois.maskHostName(ipInfo.getHostname()) : "不明"), DefinedTextColor.YELLOW)).appendNewline()
+                                .append(Component.text("国: " + (ipInfo != null ? ipInfo.getCountryName() + ", " + ipInfo.getRegion() : "不明"), DefinedTextColor.YELLOW)).appendNewline()
+                                .append(Component.text("初回ログイン: " + firstPlayedFormatted + " (" + relativeTime.toDays() + "日前)", DefinedTextColor.YELLOW)).appendNewline()
+                                .append(Component.text("同じIPの他のプレイヤー: " + (!sameIpPlayers.isEmpty() ? sameIpPlayers.stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull).collect(Collectors.joining(", ")) : "なし"))));
+                    });
+        }
+
+        int playerUsedProtocolVersion = Via.getAPI().getPlayerVersion(event.getPlayer().getUniqueId());
+        int serverProtocolVersion = SharedConstants.getProtocolVersion();
+        ProtocolVersion viaPlayerUsedProtocolVersion = ProtocolVersion.getProtocol(playerUsedProtocolVersion);
+        ProtocolVersion viaServerProtocolVersion = ProtocolVersion.getProtocol(serverProtocolVersion);
+        if (Via.getAPI().getPlayerVersion(event.getPlayer().getUniqueId()) != SharedConstants.getProtocolVersion()) {
+            RunnableManager.runDelayed(() -> event.getPlayer().sendMessage(Component.text("あなたは現在、互換機能を使用してサーバーに接続しています。", DefinedTextColor.RED, TextDecoration.BOLD).appendNewline()
+                    .append(Component.text("Unknown Networkは、これを起因として起こった問題に対処しません。")).appendNewline()
+                    .append(Component.text("あなたが接続に使用しているバージョン: " + playerUsedProtocolVersion + "(" + viaPlayerUsedProtocolVersion.getName() + ")")).appendNewline()
+                    .append(Component.text("サーバーのバージョン: " + serverProtocolVersion + "(" + viaServerProtocolVersion.getName() + ")"))), 1L);
+        }
     }
 
     private static String getFormattedTime(long time) {
