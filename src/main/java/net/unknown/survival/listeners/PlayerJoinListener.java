@@ -31,8 +31,12 @@
 
 package net.unknown.survival.listeners;
 
+import com.viaversion.viaversion.api.Via;
+import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.ipinfo.api.model.IPResponse;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.SharedConstants;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.dependency.MultiverseCore;
 import net.unknown.core.managers.RunnableManager;
@@ -105,6 +109,17 @@ public class PlayerJoinListener implements Listener {
                                 .append(Component.text("初回ログイン: " + firstPlayedFormatted + " (" + relativeTime.toDays() + "日前)", DefinedTextColor.YELLOW)).appendNewline()
                                 .append(Component.text("同じIPの他のプレイヤー: " + (!sameIpPlayers.isEmpty() ? sameIpPlayers.stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull).collect(Collectors.joining(", ")) : "なし"))));
                     });
+        }
+
+        int playerUsedProtocolVersion = Via.getAPI().getPlayerVersion(event.getPlayer().getUniqueId());
+        int serverProtocolVersion = SharedConstants.getProtocolVersion();
+        ProtocolVersion viaPlayerUsedProtocolVersion = ProtocolVersion.getProtocol(playerUsedProtocolVersion);
+        ProtocolVersion viaServerProtocolVersion = ProtocolVersion.getProtocol(serverProtocolVersion);
+        if (Via.getAPI().getPlayerVersion(event.getPlayer().getUniqueId()) != SharedConstants.getProtocolVersion()) {
+            RunnableManager.runDelayed(() -> event.getPlayer().sendMessage(Component.text("あなたは現在、互換機能を使用してサーバーに接続しています。", DefinedTextColor.RED, TextDecoration.BOLD).appendNewline()
+                    .append(Component.text("Unknown Networkは、これを起因として起こった問題に対処しません。")).appendNewline()
+                    .append(Component.text("あなたが接続に使用しているバージョン: " + playerUsedProtocolVersion + "(" + viaPlayerUsedProtocolVersion.getName() + ")")).appendNewline()
+                    .append(Component.text("サーバーのバージョン: " + serverProtocolVersion + "(" + viaServerProtocolVersion.getName() + ")"))), 1L);
         }
     }
 
