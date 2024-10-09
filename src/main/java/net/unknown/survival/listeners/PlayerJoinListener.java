@@ -107,7 +107,7 @@ public class PlayerJoinListener implements Listener {
                                 .append(Component.text("ホスト名: " + (ipInfo != null ? Whois.maskHostName(ipInfo.getHostname()) : "不明"), DefinedTextColor.YELLOW)).appendNewline()
                                 .append(Component.text("国: " + (ipInfo != null ? ipInfo.getCountryName() + ", " + ipInfo.getRegion() : "不明"), DefinedTextColor.YELLOW)).appendNewline()
                                 .append(Component.text("初回ログイン: " + firstPlayedFormatted + " (" + relativeTime.toDays() + "日前)", DefinedTextColor.YELLOW)).appendNewline()
-                                .append(Component.text("同じIPの他のプレイヤー: " + (!sameIpPlayers.isEmpty() ? sameIpPlayers.stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull).collect(Collectors.joining(", ")) : "なし"))));
+                                .append(Component.text("同じIPの他のプレイヤー: " + (!sameIpPlayers.isEmpty() ? sameIpPlayers.stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull).collect(Collectors.joining(", ")) : "なし"), DefinedTextColor.YELLOW)));
                     });
             Whois.addUserByIp(event.getPlayer().getAddress().getAddress(), event.getPlayer().getUniqueId(), System.currentTimeMillis());
         }
