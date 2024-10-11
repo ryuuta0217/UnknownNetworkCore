@@ -117,7 +117,7 @@ public class ForgeListener {
             if (fp.getPlayer() != null) {
                 ByteBuf buf = Unpooled.buffer();
                 fp.toModClientInformation().encode(buf);
-                event.getServer().sendPluginMessage(MinecraftChannelIdentifier.create("unknown", "forge"), ByteBufUtil.getBytes(buf));
+                event.getPlayer().sendPluginMessage(MinecraftChannelIdentifier.create("unknown", "forge"), ByteBufUtil.getBytes(buf));
             }
         }
     }
