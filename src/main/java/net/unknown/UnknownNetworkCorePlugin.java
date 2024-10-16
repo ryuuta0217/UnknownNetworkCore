@@ -41,6 +41,7 @@ import net.unknown.core.bossbar.TPSBar;
 import net.unknown.core.chat.CustomChatTypes;
 import net.unknown.core.commands.Commands;
 import net.unknown.core.feature.PrivateMessageListener;
+import net.unknown.core.feature.WhoisListener;
 import net.unknown.core.feature.admin.spy.Spy;
 import net.unknown.core.feature.admin.spy.modules.CommandSpy;
 import net.unknown.core.feature.admin.spy.modules.PrivateMessageSpy;
@@ -139,6 +140,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         ListenerManager.registerListener(new MultiPageChest.Listener());
         ListenerManager.registerListener(SkinManager.INSTANCE);
         ListenerManager.registerListener(new PrivateMessageListener());
+        ListenerManager.registerListener(new WhoisListener());
         TPSBar.initialize();
         TabListPingManager.startTask();
         PlayerPrefixes.loadAll();

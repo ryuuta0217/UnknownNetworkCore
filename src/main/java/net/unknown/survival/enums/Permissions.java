@@ -41,7 +41,6 @@ import net.unknown.survival.commands.home.HomeCommand;
 import net.unknown.survival.commands.home.HomesCommand;
 import net.unknown.survival.commands.home.SetHomeCommand;
 import net.unknown.survival.commands.home.admin.*;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 
 public enum Permissions {
@@ -68,8 +67,7 @@ public enum Permissions {
 
     NOTIFY_MODDED_PLAYER("unknown.survival.notify.mod", 2, null),
     ENTITY_EDITOR("unknown.survival.entity_editor", 2, null),
-    OPEN_GUI("unknown.survival.open_gui", 0, null),
-    FEATURE_WHOIS("unknown.survival.notify.whois", 2, null);
+    OPEN_GUI("unknown.survival.open_gui", 0, null);
 
     private final int opLevel;
     private final String[] permissionNodes;
