@@ -86,6 +86,9 @@ public class Whois {
                 .setCache(IPINFO_CACHE)
                 .build();
 
+        LOGGER.info("Loading IP to players database...");
+        USERS_BY_IP.clear();
+        USERS_BY_IP.putAll(loadUsersByIp());
     }
 
     public static Cache getIpInfoCache() {
