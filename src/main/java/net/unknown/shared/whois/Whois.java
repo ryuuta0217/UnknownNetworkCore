@@ -37,6 +37,8 @@ import io.ipinfo.api.errors.RateLimitedException;
 import io.ipinfo.api.model.IPResponse;
 import net.unknown.shared.SharedConstants;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,12 +53,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class Whois {
+    private static final Logger LOGGER = LoggerFactory.getLogger("UNC/Whois");
     private static final String IPINFO_ACCESS_TOKEN;
     private static final IPinfo IPINFO_CLIENT;
     private static final File USERS_BY_IP_FILE = new File(SharedConstants.DATA_FOLDER, "users_by_ip.json");
     private static final Map<InetAddress, Map<UUID, Long>> USERS_BY_IP = new HashMap<>();
 
     static {
+        LOGGER.info("Reading ipinfo.io API access token from tokens.txt...");
         String ipInfoApiTokenTemp = null;
         try {
             File tokensFile = new File(SharedConstants.DATA_FOLDER, "tokens.txt");
@@ -73,6 +77,7 @@ public class Whois {
         }
         IPINFO_ACCESS_TOKEN = ipInfoApiTokenTemp;
 
+        LOGGER.info("Initializing ipinfo.io API client...");
         IPINFO_CLIENT = new IPinfo.Builder()
                 .setToken(IPINFO_ACCESS_TOKEN)
                 .setCache(new SimpleCache(Duration.ofDays(3)))
