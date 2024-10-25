@@ -32,6 +32,7 @@
 package net.unknown.shared.whois;
 
 import io.ipinfo.api.IPinfo;
+import io.ipinfo.api.cache.Cache;
 import io.ipinfo.api.cache.SimpleCache;
 import io.ipinfo.api.errors.RateLimitedException;
 import io.ipinfo.api.model.IPResponse;
@@ -56,6 +57,7 @@ public class Whois {
     private static final Logger LOGGER = LoggerFactory.getLogger("UNC/Whois");
     private static final String IPINFO_ACCESS_TOKEN;
     private static final IPinfo IPINFO_CLIENT;
+    private static final Cache IPINFO_CACHE;
     private static final File USERS_BY_IP_FILE = new File(SharedConstants.DATA_FOLDER, "users_by_ip.json");
     private static final Map<InetAddress, Map<UUID, Long>> USERS_BY_IP = new HashMap<>();
 
@@ -78,12 +80,16 @@ public class Whois {
         IPINFO_ACCESS_TOKEN = ipInfoApiTokenTemp;
 
         LOGGER.info("Initializing ipinfo.io API client...");
+        IPINFO_CACHE = new SimpleCache(Duration.ofDays(3));
         IPINFO_CLIENT = new IPinfo.Builder()
                 .setToken(IPINFO_ACCESS_TOKEN)
-                .setCache(new SimpleCache(Duration.ofDays(3)))
+                .setCache(IPINFO_CACHE)
                 .build();
 
+    }
 
+    public static Cache getIpInfoCache() {
+        return IPINFO_CACHE;
     }
 
     /**
