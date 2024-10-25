@@ -198,8 +198,10 @@ public class Whois {
                     JSONObject users = json.getJSONObject(ip);
 
                     try {
-                        usersByIp.put(InetAddress.getByName(ip), users.toMap().entrySet().stream().map(e -> Map.entry(UUID.fromString(e.getKey()), Long.parseLong(String.valueOf(e.getValue())))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                    } catch (UnknownHostException ignored) {}
+                        usersByIp.put(InetAddress.getByName(ip.substring(1)), users.toMap().entrySet().stream().map(e -> Map.entry(UUID.fromString(e.getKey()), Long.parseLong(String.valueOf(e.getValue())))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    } catch (UnknownHostException e) {
+                        LOGGER.error("Failed to read IP address from database: " + "{\"" + ip + "\": " + users.toString() + "}", e);
+                    }
                 });
                 return Collections.unmodifiableMap(usersByIp);
             }
