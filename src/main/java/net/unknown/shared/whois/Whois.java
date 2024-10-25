@@ -119,6 +119,15 @@ public class Whois {
         return Collections.unmodifiableMap(USERS_BY_IP.getOrDefault(ip.getHostAddress(), Collections.emptyMap()));
     }
 
+    /**
+     * IPとUUID、最終ログイン日時の紐づけデータベースを取得します。
+     *
+     * @return データベース
+     */
+    public static Map<InetAddress, Map<UUID, Long>> getIpDatabase() {
+        return Collections.unmodifiableMap(USERS_BY_IP);
+    }
+
     public static String maskIpAddress(InetAddress address) {
         if (address instanceof Inet4Address v4Addr) return maskV4Address(v4Addr.getHostAddress());
         return maskV6Address(address.getHostAddress());
