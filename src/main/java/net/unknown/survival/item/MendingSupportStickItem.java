@@ -87,6 +87,10 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
         event.setCancelled(true);
 
         Stack stack = new Stack(event.getItem());
+        if (stack.getUses() >= stack.getMaxUses()) {
+            NewMessageUtil.sendErrorMessage(event.getPlayer(), "このアイテムはもう使用できません");
+            return;
+        }
 
         if (isAvailableToMendItem(event.getPlayer())) {
             int result = this.processMending(event.getPlayer(), stack);
