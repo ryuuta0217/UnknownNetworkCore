@@ -60,7 +60,9 @@ public enum Permissions {
 
     FEATURE_USE_COLOR_CODE("unknown.feature.use_color_code", 2, null),
     FEATURE_SEE_VANISHED_PLAYERS("unknown.feature.see_vanished_players", 2, null),
-    FEATURE_SPY("unknown.feature.spy", 2, null);
+    FEATURE_SPY("unknown.feature.spy", 2, null),
+    FEATURE_WHOIS("unknown.feature.whois", 2, null),
+    FEATURE_WHOIS_UNMASKED("unknown.feature.whois.unmasked", 4, null);
 
     private final int opLevel;
     private final String[] permissionNodes;

@@ -48,7 +48,7 @@ public class MultiverseCore {
 
     public static Location getSpawnLocation(World world) {
         if (!MULTIVERSE_CORE_ENABLED) return world.getSpawnLocation();
-        return getInstance().getMVWorldManager().getMVWorld(world).getSpawnLocation();
+        return getInstance().getMVWorldManager().getMVWorld(world.getName(), false).getSpawnLocation();
     }
 
     public static Location getSpawnLocation(Level level) {

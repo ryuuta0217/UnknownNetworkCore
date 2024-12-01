@@ -47,6 +47,8 @@ import net.unknown.core.item.UnknownNetworkItemStack;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -87,6 +89,10 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
         event.setCancelled(true);
 
         Stack stack = new Stack(event.getItem());
+        if (stack.getUses() >= stack.getMaxUses()) {
+            NewMessageUtil.sendErrorMessage(event.getPlayer(), "このアイテムはもう使用できません");
+            return;
+        }
 
         if (isAvailableToMendItem(event.getPlayer())) {
             int result = this.processMending(event.getPlayer(), stack);
@@ -133,6 +139,9 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
         if (player.isOp()) NewMessageUtil.sendVerboseMessage(player, price + " 円を支払いました");
 
         stack.setUses(stack.getUses() + 1); // 使用回数++
+        double usePercent = (double) stack.getUses() / (double) stack.getMaxUses();
+        float pitch = 2.0f - (((float) usePercent) * 2);
+        player.playSound(player, stack.getUses() != stack.getMaxUses() ? Sound.BLOCK_ANVIL_USE : Sound.BLOCK_ANVIL_BREAK, SoundCategory.PLAYERS, 0.5f, pitch);
         return 0;
     }
 

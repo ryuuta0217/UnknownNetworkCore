@@ -32,11 +32,14 @@
 package net.unknown.shared.whois;
 
 import io.ipinfo.api.IPinfo;
+import io.ipinfo.api.cache.Cache;
 import io.ipinfo.api.cache.SimpleCache;
 import io.ipinfo.api.errors.RateLimitedException;
 import io.ipinfo.api.model.IPResponse;
 import net.unknown.shared.SharedConstants;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,12 +54,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 public class Whois {
+    private static final Logger LOGGER = LoggerFactory.getLogger("UNC/Whois");
     private static final String IPINFO_ACCESS_TOKEN;
     private static final IPinfo IPINFO_CLIENT;
+    private static final Cache IPINFO_CACHE;
     private static final File USERS_BY_IP_FILE = new File(SharedConstants.DATA_FOLDER, "users_by_ip.json");
     private static final Map<InetAddress, Map<UUID, Long>> USERS_BY_IP = new HashMap<>();
 
     static {
+        LOGGER.info("Reading ipinfo.io API access token from tokens.txt...");
         String ipInfoApiTokenTemp = null;
         try {
             File tokensFile = new File(SharedConstants.DATA_FOLDER, "tokens.txt");
@@ -73,12 +79,20 @@ public class Whois {
         }
         IPINFO_ACCESS_TOKEN = ipInfoApiTokenTemp;
 
+        LOGGER.info("Initializing ipinfo.io API client...");
+        IPINFO_CACHE = new SimpleCache(Duration.ofDays(3));
         IPINFO_CLIENT = new IPinfo.Builder()
                 .setToken(IPINFO_ACCESS_TOKEN)
-                .setCache(new SimpleCache(Duration.ofDays(3)))
+                .setCache(IPINFO_CACHE)
                 .build();
 
+        LOGGER.info("Loading IP to players database...");
+        USERS_BY_IP.clear();
+        USERS_BY_IP.putAll(loadUsersByIp());
+    }
 
+    public static Cache getIpInfoCache() {
+        return IPINFO_CACHE;
     }
 
     /**
@@ -103,6 +117,15 @@ public class Whois {
      */
     public static Map<UUID, Long> getUsersByIp(InetAddress ip) {
         return Collections.unmodifiableMap(USERS_BY_IP.getOrDefault(ip.getHostAddress(), Collections.emptyMap()));
+    }
+
+    /**
+     * IPとUUID、最終ログイン日時の紐づけデータベースを取得します。
+     *
+     * @return データベース
+     */
+    public static Map<InetAddress, Map<UUID, Long>> getIpDatabase() {
+        return Collections.unmodifiableMap(USERS_BY_IP);
     }
 
     public static String maskIpAddress(InetAddress address) {
@@ -175,8 +198,10 @@ public class Whois {
                     JSONObject users = json.getJSONObject(ip);
 
                     try {
-                        usersByIp.put(InetAddress.getByName(ip), users.toMap().entrySet().stream().map(e -> Map.entry(UUID.fromString(e.getKey()), Long.parseLong(String.valueOf(e.getValue())))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
-                    } catch (UnknownHostException ignored) {}
+                        usersByIp.put(InetAddress.getByName(ip.substring(1)), users.toMap().entrySet().stream().map(e -> Map.entry(UUID.fromString(e.getKey()), Long.parseLong(String.valueOf(e.getValue())))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                    } catch (UnknownHostException e) {
+                        LOGGER.error("Failed to read IP address from database: " + "{\"" + ip + "\": " + users.toString() + "}", e);
+                    }
                 });
                 return Collections.unmodifiableMap(usersByIp);
             }

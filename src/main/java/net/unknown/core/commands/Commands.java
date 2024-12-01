@@ -55,5 +55,6 @@ public class Commands {
         SwapLocationCommand.register(UnknownNetworkCorePlugin.getBrigadier());
         ProgrammedFireworksCommand.register(UnknownNetworkCorePlugin.getBrigadier());
         VanishCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+        WhoisCommand.register(UnknownNetworkCorePlugin.getBrigadier());
     }
 }

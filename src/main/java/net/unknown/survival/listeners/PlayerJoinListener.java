@@ -87,30 +87,6 @@ public class PlayerJoinListener implements Listener {
             }
         }
         LAST_SEEN.remove(event.getPlayer().getUniqueId());
-        if (!event.getPlayer().hasPermission(Permissions.FEATURE_WHOIS.getPermissionNode())) {
-            IPResponse ipInfo = Whois.getIpInformation(event.getPlayer().getAddress().getAddress());
-            Set<UUID> sameIpPlayers = Whois.getUsersByIp(event.getPlayer().getAddress().getAddress()).keySet();
-
-            Bukkit.getOnlinePlayers()
-                    .stream()
-                    .filter(player -> player.hasPermission(Permissions.FEATURE_WHOIS.getPermissionNode()))
-                    .forEach(player -> {
-                        Date firstPlayed = new Date(event.getPlayer().getFirstPlayed());
-                        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
-                        sdf.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
-                        String firstPlayedFormatted = sdf.format(firstPlayed);
-                        Duration relativeTime = Duration.between(firstPlayed.toInstant(), new Date().toInstant());
-                        player.sendMessage(Component.empty()
-                                .append(Component.text("===== Whois Information =====", DefinedTextColor.AQUA)).appendNewline()
-                                .append(Component.text("ID: " + event.getPlayer().getName() + "(" + event.getPlayer().getUniqueId() + ")", DefinedTextColor.YELLOW)).appendNewline()
-                                .append(Component.text("IPアドレス: " + Whois.maskIpAddress(event.getPlayer().getAddress().getAddress()), DefinedTextColor.YELLOW)).appendNewline()
-                                .append(Component.text("ホスト名: " + (ipInfo != null ? Whois.maskHostName(ipInfo.getHostname()) : "不明"), DefinedTextColor.YELLOW)).appendNewline()
-                                .append(Component.text("国: " + (ipInfo != null ? ipInfo.getCountryName() + ", " + ipInfo.getRegion() : "不明"), DefinedTextColor.YELLOW)).appendNewline()
-                                .append(Component.text("初回ログイン: " + firstPlayedFormatted + " (" + relativeTime.toDays() + "日前)", DefinedTextColor.YELLOW)).appendNewline()
-                                .append(Component.text("同じIPの他のプレイヤー: " + (!sameIpPlayers.isEmpty() ? sameIpPlayers.stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull).collect(Collectors.joining(", ")) : "なし"))));
-                    });
-            Whois.addUserByIp(event.getPlayer().getAddress().getAddress(), event.getPlayer().getUniqueId(), System.currentTimeMillis());
-        }
 
         int playerUsedProtocolVersion = Via.getAPI().getPlayerVersion(event.getPlayer().getUniqueId());
         int serverProtocolVersion = SharedConstants.getProtocolVersion();
