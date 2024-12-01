@@ -1,3 +1,34 @@
+/*
+ * Copyright (c) 2023 Unknown Network Developers and contributors.
+ *
+ * All rights reserved.
+ *
+ * NOTICE: This license is subject to change without prior notice.
+ *
+ * Redistribution and use in source and binary forms, *without modification*,
+ *     are permitted provided that the following conditions are met:
+ *
+ * I. Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
+ *
+ * II. Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * III. Neither the name of Unknown Network nor the names of its contributors may be used to
+ *     endorse or promote products derived from this software without specific prior written permission.
+ *
+ * IV. This source code and binaries is provided by the copyright holders and contributors "AS-IS" and
+ *     any express or implied warranties, including, but not limited to, the implied warranties of
+ *     merchantability and fitness for a particular purpose are disclaimed.
+ *     In not event shall the copyright owner or contributors be liable for
+ *     any direct, indirect, incidental, special, exemplary, or consequential damages
+ *     (including but not limited to procurement of substitute goods or services;
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
+ *     whether in contract, strict liability, or tort (including negligence or otherwise)
+ *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
+ */
+
 package net.unknown.core.feature;
 
 import io.ipinfo.api.model.IPResponse;
@@ -23,7 +54,7 @@ public class WhoisListener implements Listener {
         Whois.addUserByIp(event.getPlayer().getAddress().getAddress(), event.getPlayer().getUniqueId(), System.currentTimeMillis());
 
         if (!event.getPlayer().hasPermission(Permissions.FEATURE_WHOIS.getPermissionNode())) {
-            Component whoisMessage = buildWhoisInformationMessage(event.getPlayer());
+            Component whoisMessage = buildWhoisInformationMessage(event.getPlayer(), true); // Automatic show whois message is always masked
             Bukkit.getOnlinePlayers()
                     .stream()
                     .filter(player -> player.hasPermission(Permissions.FEATURE_WHOIS.getPermissionNode()))
@@ -32,6 +63,10 @@ public class WhoisListener implements Listener {
     }
 
     public static Component buildWhoisInformationMessage(Player target) {
+        return buildWhoisInformationMessage(target, true); // default masked
+    }
+
+    public static Component buildWhoisInformationMessage(Player target, boolean mask) {
         IPResponse ipInfo = Whois.getIpInformation(target.getAddress().getAddress());
         Set<UUID> sameIpPlayers = Whois.getUsersByIp(target.getAddress().getAddress()).keySet();
 
@@ -43,8 +78,8 @@ public class WhoisListener implements Listener {
         return Component.empty()
                 .append(Component.text("===== Whois Information =====", DefinedTextColor.AQUA)).appendNewline()
                 .append(Component.text("ID: " + target.getName() + " (" + target.getUniqueId() + ")", DefinedTextColor.YELLOW)).appendNewline()
-                .append(Component.text("IPアドレス: " + Whois.maskIpAddress(target.getAddress().getAddress()), DefinedTextColor.YELLOW)).appendNewline()
-                .append(Component.text("ホスト名: " + (ipInfo != null ? Whois.maskHostName(ipInfo.getHostname()) + " (" + ipInfo.getCompany().getName() + ")" : "不明"), DefinedTextColor.YELLOW)).appendNewline()
+                .append(Component.text("IPアドレス: " + (mask ? Whois.maskIpAddress(target.getAddress().getAddress()) : target.getAddress().getAddress().getHostAddress()), DefinedTextColor.YELLOW)).appendNewline()
+                .append(Component.text("ホスト名: " + (ipInfo != null ? (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()) + " (" + ipInfo.getCompany().getName() + ")" : "不明"), DefinedTextColor.YELLOW)).appendNewline()
                 .append(Component.text("国/地域: " + (ipInfo != null ? ipInfo.getCountryName() + ", " + ipInfo.getRegion() : "不明"), DefinedTextColor.YELLOW)).appendNewline()
                 .append(Component.text("初回ログイン: " + firstPlayedFormatted + " (" + relativeTime.toDays() + "日前)", DefinedTextColor.YELLOW)).appendNewline()
                 .append(Component.text("同じIPの他のプレイヤー: " + (!sameIpPlayers.isEmpty() ? sameIpPlayers.stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull).collect(Collectors.joining(", ")) : "なし"), DefinedTextColor.YELLOW));
