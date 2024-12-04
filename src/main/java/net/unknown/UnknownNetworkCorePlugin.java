@@ -57,6 +57,7 @@ import net.unknown.core.tab.TabListPingManager;
 import net.unknown.core.util.Languages;
 import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.shared.VersionInfo;
+import net.unknown.shared.util.NameHistory;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.event.HandlerList;
@@ -125,6 +126,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         CustomChatTypes.bootstrap();
         Commands.init();
         MultiverseInventoriesFixer.fixAll();
+        NameHistory.loadNameHistory();
         UnknownNetworkCore.getEnvironment().onLoad();
         long end = System.nanoTime();
         getLogger().info("Plugin was loaded in " + (end - start) / 1000000 + "ms");

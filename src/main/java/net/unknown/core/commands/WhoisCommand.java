@@ -115,8 +115,7 @@ public class WhoisCommand {
             if (ipInfo != null) {
                 ipBlock = Component.text(mask ? Whois.maskIpAddress(db.getKey()) : ipInfo.getIp()).hoverEvent(HoverEvent.showText(
                         Component.text("Country/Region: " + ipInfo.getRegion() + ", " + ipInfo.getCity() + ", " + ipInfo.getCountryName()).appendNewline()
-                                .append(Component.text("Hostname: " + (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()))).appendNewline()
-                                .append(Component.text("Company: " + ipInfo.getCompany().getName()).append(Component.text(ipInfo.getCompany().getType(), DefinedTextColor.GRAY)))));
+                                .append(Component.text("Hostname: " + (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname())))));
             } else {
                 ipBlock = Component.text(db.getKey().getHostAddress());
             }
@@ -167,9 +166,7 @@ public class WhoisCommand {
                         ? Component.text(mask ? Whois.maskIpAddress(ipEntry.getKey()) : ipInfo.getIp())
                                 .hoverEvent(HoverEvent.showText(Component.text("Country/Region: " + ipInfo.getRegion() + ", " + ipInfo.getCity() + ", " + ipInfo.getCountryName())
                                 .appendNewline()
-                                .append(Component.text("Hostname: " + (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname())))
-                                .appendNewline()
-                                .append(Component.text("Company: " + ipInfo.getCompany().getName()).append(Component.text(ipInfo.getCompany().getType(), DefinedTextColor.GRAY)))))
+                                .append(Component.text("Hostname: " + (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname())))))
                         : Component.text(ipEntry.getKey().getHostAddress());
                 l = l.append(ipBlock).append(Component.text(":", DefinedTextColor.WHITE)).appendSpace();
                 ipIndex++;
@@ -204,8 +201,7 @@ public class WhoisCommand {
             if (ipInfo != null) {
                 ipBlock = Component.text(mask ? Whois.maskIpAddress(db.getKey()) : ipInfo.getIp()).hoverEvent(HoverEvent.showText(
                         Component.text("Country/Region: " + ipInfo.getRegion() + ", " + ipInfo.getCity() + ", " + ipInfo.getCountryName()).appendNewline()
-                                .append(Component.text("Hostname: " + (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()))).appendNewline()
-                                .append(Component.text("Company: " + ipInfo.getCompany().getName()).append(Component.text(ipInfo.getCompany().getType(), DefinedTextColor.GRAY)))));
+                                .append(Component.text("Hostname: " + (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname())))));
             } else {
                 ipBlock = Component.text(db.getKey().getHostAddress());
             }
