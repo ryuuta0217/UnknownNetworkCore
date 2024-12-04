@@ -79,7 +79,7 @@ public class WhoisListener implements Listener {
                 .append(Component.text("===== Whois Information =====", DefinedTextColor.AQUA)).appendNewline()
                 .append(Component.text("ID: " + target.getName() + " (" + target.getUniqueId() + ")", DefinedTextColor.YELLOW)).appendNewline()
                 .append(Component.text("IPアドレス: " + (mask ? Whois.maskIpAddress(target.getAddress().getAddress()) : target.getAddress().getAddress().getHostAddress()), DefinedTextColor.YELLOW)).appendNewline()
-                .append(Component.text("ホスト名: " + (ipInfo != null ? (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()) + " (" + ipInfo.getCompany().getName() + ")" : "不明"), DefinedTextColor.YELLOW)).appendNewline()
+                .append(Component.text("ホスト名: " + (ipInfo != null ? (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()) : "不明"), DefinedTextColor.YELLOW)).appendNewline()
                 .append(Component.text("国/地域: " + (ipInfo != null ? ipInfo.getCountryName() + ", " + ipInfo.getRegion() : "不明"), DefinedTextColor.YELLOW)).appendNewline()
                 .append(Component.text("初回ログイン: " + firstPlayedFormatted + " (" + relativeTime.toDays() + "日前)", DefinedTextColor.YELLOW)).appendNewline()
                 .append(Component.text("同じIPの他のプレイヤー: " + (!sameIpPlayers.isEmpty() ? sameIpPlayers.stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull).collect(Collectors.joining(", ")) : "なし"), DefinedTextColor.YELLOW));
