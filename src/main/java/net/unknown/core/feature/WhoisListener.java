@@ -31,10 +31,13 @@
 
 package net.unknown.core.feature;
 
+import com.ryuuta0217.util.ComponentCollector;
 import io.ipinfo.api.model.IPResponse;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
+import net.unknown.shared.util.NameHistory;
 import net.unknown.shared.whois.Whois;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -45,6 +48,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -78,8 +84,9 @@ public class WhoisListener implements Listener {
         return Component.empty()
                 .append(Component.text("===== Whois Information =====", DefinedTextColor.AQUA)).appendNewline()
                 .append(Component.text("ID: " + target.getName() + " (" + target.getUniqueId() + ")", DefinedTextColor.YELLOW)).appendNewline()
+                .append(NameHistory.getNameHistory(target.getUniqueId()).isEmpty() ? Component.empty() : Component.text("以前の名前: " + NameHistory.getNameHistory(target.getUniqueId()).entrySet().stream().map(e -> Component.text(e.getKey()).hoverEvent(HoverEvent.showText(Component.text("最終ログイン: " + DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(Instant.ofEpochMilli(e.getValue()).atZone(ZoneId.of("Asia/Tokyo"))))))).collect(ComponentCollector.toComponent(Component.text(", "))).asComponent().appendNewline()))
                 .append(Component.text("IPアドレス: " + (mask ? Whois.maskIpAddress(target.getAddress().getAddress()) : target.getAddress().getAddress().getHostAddress()), DefinedTextColor.YELLOW)).appendNewline()
-                .append(Component.text("ホスト名: " + (ipInfo != null ? (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()) + " (" + ipInfo.getCompany().getName() + ")" : "不明"), DefinedTextColor.YELLOW)).appendNewline()
+                .append(Component.text("ホスト名: " + (ipInfo != null ? (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()) : "不明"), DefinedTextColor.YELLOW)).appendNewline()
                 .append(Component.text("国/地域: " + (ipInfo != null ? ipInfo.getCountryName() + ", " + ipInfo.getRegion() : "不明"), DefinedTextColor.YELLOW)).appendNewline()
                 .append(Component.text("初回ログイン: " + firstPlayedFormatted + " (" + relativeTime.toDays() + "日前)", DefinedTextColor.YELLOW)).appendNewline()
                 .append(Component.text("同じIPの他のプレイヤー: " + (!sameIpPlayers.isEmpty() ? sameIpPlayers.stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull).collect(Collectors.joining(", ")) : "なし"), DefinedTextColor.YELLOW));
