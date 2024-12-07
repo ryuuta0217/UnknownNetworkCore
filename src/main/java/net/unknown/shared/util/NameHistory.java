@@ -50,7 +50,7 @@ public class NameHistory {
     private static final File NAME_HISTORY_FILE = new File(SharedConstants.DATA_FOLDER, "name_history.json");
     private static final Map<UUID, Map<String, Long>> NAME_HISTORY = new HashMap<>();
 
-    static {
+    public static void init() {
         ListenerManager.registerEventListener(PlayerQuitEvent.class, null, EventPriority.MONITOR, false, (l, e) -> {
             if (e instanceof PlayerQuitEvent event) {
                 updateLastSeen(event.getPlayer().getUniqueId(), event.getPlayer().getName(), System.currentTimeMillis());
