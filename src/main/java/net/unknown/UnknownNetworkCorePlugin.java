@@ -126,7 +126,6 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         CustomChatTypes.bootstrap();
         Commands.init();
         MultiverseInventoriesFixer.fixAll();
-        NameHistory.loadNameHistory();
         UnknownNetworkCore.getEnvironment().onLoad();
         long end = System.nanoTime();
         getLogger().info("Plugin was loaded in " + (end - start) / 1000000 + "ms");
@@ -152,6 +151,8 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         ThirdPartyPluginPermissionsFixer.scheduleNextTick();
         Spy.registerModule(new CommandSpy());
         Spy.registerModule(new PrivateMessageSpy());
+        NameHistory.loadNameHistory();
+        NameHistory.init();
         getLogger().info("");
         getLogger().info("");
         getLogger().info("""
