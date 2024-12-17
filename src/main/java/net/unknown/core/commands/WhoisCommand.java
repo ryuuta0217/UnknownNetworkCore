@@ -150,7 +150,7 @@ public class WhoisCommand {
         int showPage = BrigadierUtil.getArgumentOrDefault(ctx, Integer.class, "page", 1);
         boolean mask = ctx.getSource().isPlayer() && ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
 
-        Map<UUID, Map<InetAddress, Long>> entries = Whois.getIpDatabase().entrySet().stream().flatMap(e -> e.getValue().entrySet().stream().filter(p -> hasWildcard ? (Bukkit.getOfflinePlayer(p.getKey()).getName() != null && processWildcard(player, Bukkit.getOfflinePlayer(p.getKey()).getName())) : Bukkit.getOfflinePlayer(p.getKey()).getName() != null && Bukkit.getOfflinePlayer(p.getKey()).getName().equals(player)).map(p -> Map.entry(p.getKey(), Map.of(e.getKey(), p.getValue())))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<UUID, Map<InetAddress, Long>> entries = Whois.getIpDatabase().entrySet().stream().flatMap(entry -> entry.getValue().entrySet().stream().map(playerEntry -> Map.entry(playerEntry.getKey(), Map.entry(entry.getKey(), playerEntry.getValue())))).collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.toMap(e -> e.getValue().getKey(), e -> e.getValue().getValue())));
 
         TextBasePagination<Map.Entry<UUID, Map<InetAddress, Long>>> page = new TextBasePagination<>(entries.entrySet(), (db, i) -> {
             Component l = Component.empty();
