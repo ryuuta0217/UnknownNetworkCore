@@ -35,6 +35,7 @@ import com.ryuuta0217.util.ComponentCollector;
 import io.ipinfo.api.model.IPResponse;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
@@ -84,7 +85,7 @@ public class WhoisListener implements Listener {
         Duration relativeTime = Duration.between(firstPlayed.toInstant(), new Date().toInstant());
 
         TextComponent headerComponent = Component.text("===== Whois Information =====", DefinedTextColor.AQUA);
-        TextComponent idComponent = Component.text("ID: " + target.getName() + " (" + target.getUniqueId() + ")", DefinedTextColor.YELLOW);
+        TextComponent idComponent = Component.text("ID: ", DefinedTextColor.YELLOW).append(Component.text(target.getName()).hoverEvent(HoverEvent.showText(Component.text("UUID: " + target.getUniqueId() + "\n" + "クリックでIDとUUIDをコピー"))).clickEvent(ClickEvent.copyToClipboard(target.getName() + " (" + target.getUniqueId() + ")")));
         TextComponent nameHistoryComponent = Component.empty();
         if (!NameHistory.getNameHistory(target.getUniqueId()).isEmpty()) {
             nameHistoryComponent = Component.text("以前の名前: ").append(NameHistory.getNameHistory(target.getUniqueId())
