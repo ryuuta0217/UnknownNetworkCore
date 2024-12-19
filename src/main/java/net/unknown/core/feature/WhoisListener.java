@@ -94,7 +94,8 @@ public class WhoisListener implements Listener {
                             .stream()
                             .map(e -> Component.text(e.getKey()).hoverEvent(HoverEvent.showText(Component.text("最終ログイン: " + DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(Instant.ofEpochMilli(e.getValue()).atZone(ZoneId.of("Asia/Tokyo")))))))
                             .collect(ComponentCollector.toComponent(Component.text(", ")))
-                            .asComponent());
+                            .asComponent())
+                    .appendNewline();
         }
         Component ipAddrComponent = Component.text("IPアドレス: " + (mask ? Whois.maskIpAddress(target.getAddress().getAddress()) : target.getAddress().getAddress().getHostAddress()), DefinedTextColor.YELLOW);
         Component hostNameComponent = Component.text("ホスト名: " + (ipInfo != null ? (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()) : "不明"), DefinedTextColor.YELLOW);
