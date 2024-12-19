@@ -85,7 +85,16 @@ public class WhoisListener implements Listener {
 
         TextComponent headerComponent = Component.text("===== Whois Information =====", DefinedTextColor.AQUA);
         TextComponent idComponent = Component.text("ID: " + target.getName() + " (" + target.getUniqueId() + ")", DefinedTextColor.YELLOW);
-        TextComponent nameHistoryComponent = NameHistory.getNameHistory(target.getUniqueId()).isEmpty() ? Component.empty() : Component.text("以前の名前: " + NameHistory.getNameHistory(target.getUniqueId()).entrySet().stream().map(e -> Component.text(e.getKey()).hoverEvent(HoverEvent.showText(Component.text("最終ログイン: " + DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(Instant.ofEpochMilli(e.getValue()).atZone(ZoneId.of("Asia/Tokyo"))))))).collect(ComponentCollector.toComponent(Component.text(", "))).asComponent().appendNewline());
+        TextComponent nameHistoryComponent = Component.empty();
+        if (!NameHistory.getNameHistory(target.getUniqueId()).isEmpty()) {
+            nameHistoryComponent = Component.text("以前の名前: ").append(NameHistory.getNameHistory(target.getUniqueId())
+                    .entrySet()
+                    .stream()
+                    .map(e -> Component.text(e.getKey()).hoverEvent(HoverEvent.showText(Component.text("最終ログイン: " + DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss").format(Instant.ofEpochMilli(e.getValue()).atZone(ZoneId.of("Asia/Tokyo")))))))
+                    .collect(ComponentCollector.toComponent(Component.text(", ")))
+                    .asComponent()
+                    .appendNewline());
+        }
         TextComponent ipAddrComponent = Component.text("IPアドレス: " + (mask ? Whois.maskIpAddress(target.getAddress().getAddress()) : target.getAddress().getAddress().getHostAddress()), DefinedTextColor.YELLOW);
         TextComponent hostNameComponent = Component.text("ホスト名: " + (ipInfo != null ? (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()) : "不明"), DefinedTextColor.YELLOW);
         TextComponent countryComponent = Component.text("国/地域: " + (ipInfo != null ? ipInfo.getCountryName() + ", " + ipInfo.getRegion() : "不明"), DefinedTextColor.YELLOW);
