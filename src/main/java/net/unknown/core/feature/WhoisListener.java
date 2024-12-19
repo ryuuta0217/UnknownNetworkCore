@@ -84,9 +84,9 @@ public class WhoisListener implements Listener {
         String firstPlayedFormatted = sdf.format(firstPlayed);
         Duration relativeTime = Duration.between(firstPlayed.toInstant(), new Date().toInstant());
 
-        TextComponent headerComponent = Component.text("===== Whois Information =====", DefinedTextColor.AQUA);
-        TextComponent idComponent = Component.text("ID: ", DefinedTextColor.YELLOW).append(Component.text(target.getName()).hoverEvent(HoverEvent.showText(Component.text("UUID: " + target.getUniqueId() + "\n" + "クリックでIDとUUIDをコピー"))).clickEvent(ClickEvent.copyToClipboard(target.getName() + " (" + target.getUniqueId() + ")")));
-        TextComponent nameHistoryComponent = Component.empty();
+        Component headerComponent = Component.text("===== Whois Information =====", DefinedTextColor.AQUA);
+        Component idComponent = Component.text("ID: ", DefinedTextColor.YELLOW).append(Component.text(target.getName()).hoverEvent(HoverEvent.showText(Component.text("UUID: " + target.getUniqueId() + "\n" + "クリックでIDとUUIDをコピー"))).clickEvent(ClickEvent.copyToClipboard(target.getName() + " (" + target.getUniqueId() + ")")));
+        Component nameHistoryComponent = Component.empty();
         if (!NameHistory.getNameHistory(target.getUniqueId(), target.getName()).isEmpty()) {
             nameHistoryComponent = Component.text("以前の名前: ")
                     .append(NameHistory.getNameHistory(target.getUniqueId(), target.getName())
@@ -96,11 +96,11 @@ public class WhoisListener implements Listener {
                             .collect(ComponentCollector.toComponent(Component.text(", ")))
                             .asComponent());
         }
-        TextComponent ipAddrComponent = Component.text("IPアドレス: " + (mask ? Whois.maskIpAddress(target.getAddress().getAddress()) : target.getAddress().getAddress().getHostAddress()), DefinedTextColor.YELLOW);
-        TextComponent hostNameComponent = Component.text("ホスト名: " + (ipInfo != null ? (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()) : "不明"), DefinedTextColor.YELLOW);
-        TextComponent countryComponent = Component.text("国/地域: " + (ipInfo != null ? ipInfo.getCountryName() + ", " + ipInfo.getRegion() : "不明"), DefinedTextColor.YELLOW);
-        TextComponent firstLoginComponent = Component.text("初回ログイン: " + firstPlayedFormatted + " (" + relativeTime.toDays() + "日前)", DefinedTextColor.YELLOW);
-        TextComponent sameIpOtherPlayerComponent = Component.text("同じIPの他のプレイヤー: " + (!sameIpPlayers.isEmpty() ? sameIpPlayers.stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull).collect(Collectors.joining(", ")) : "なし"), DefinedTextColor.YELLOW);
+        Component ipAddrComponent = Component.text("IPアドレス: " + (mask ? Whois.maskIpAddress(target.getAddress().getAddress()) : target.getAddress().getAddress().getHostAddress()), DefinedTextColor.YELLOW);
+        Component hostNameComponent = Component.text("ホスト名: " + (ipInfo != null ? (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()) : "不明"), DefinedTextColor.YELLOW);
+        Component countryComponent = Component.text("国/地域: " + (ipInfo != null ? ipInfo.getCountryName() + ", " + ipInfo.getRegion() : "不明"), DefinedTextColor.YELLOW);
+        Component firstLoginComponent = Component.text("初回ログイン: " + firstPlayedFormatted + " (" + relativeTime.toDays() + "日前)", DefinedTextColor.YELLOW);
+        Component sameIpOtherPlayerComponent = Component.text("同じIPの他のプレイヤー: " + (!sameIpPlayers.isEmpty() ? sameIpPlayers.stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull).collect(Collectors.joining(", ")) : "なし"), DefinedTextColor.YELLOW);
 
         return Component.empty()
                 .append(headerComponent).appendNewline()
