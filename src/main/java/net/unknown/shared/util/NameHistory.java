@@ -80,7 +80,7 @@ public class NameHistory {
     }
 
     public static Map<String, Long> getNameHistory(UUID uniqueId) {
-        return NAME_HISTORY.getOrDefault(uniqueId, Collections.emptyMap());
+        return Collections.unmodifiableMap(NAME_HISTORY.getOrDefault(uniqueId, Collections.emptyMap()));
     }
 
     public static void updateLastSeen(UUID uniqueId, String playerName, long lastSeen) {
