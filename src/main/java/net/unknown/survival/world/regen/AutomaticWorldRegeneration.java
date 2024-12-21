@@ -31,6 +31,7 @@
 
 package net.unknown.survival.world.regen;
 
+import com.ryuuta0217.file.ArchiveUtil;
 import net.unknown.core.configurations.ConfigurationBase;
 import net.unknown.core.dependency.MultiverseCore;
 import net.unknown.core.managers.RunnableManager;
@@ -271,31 +272,8 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
             String backupFilePath = backupFile.getPath();
 
             try {
-                if ((backupFolder.exists() || backupFolder.mkdirs()) && (backupFile.exists() || backupFile.createNewFile())) {
-                    FileOutputStream fileOut = new FileOutputStream(backupFilePath, false);
-                    ZstdCompressorOutputStream compressorOut = new ZstdCompressorOutputStream(fileOut, 22);
-                    TarArchiveOutputStream archiveOut = new TarArchiveOutputStream(compressorOut);
-
-                    Path worldPath = this.worldPaths.getOrDefault(worldName, new File(Bukkit.getWorldContainer().getParentFile(), worldName).toPath());
-                    try (Stream<Path> fileTree = Files.walk(worldPath)) {
-                        fileTree.parallel()
-                                .filter(Files::isRegularFile)
-                                .map(path -> new TarArchiveEntry(path.toFile(), worldPath.relativize(path).toString()))
-                                .forEach(entry -> {
-                                    try {
-                                        archiveOut.putArchiveEntry(entry);
-                                        Files.copy(entry.getPath(), archiveOut);
-                                        archiveOut.closeArchiveEntry();
-                                    } catch (IOException e) {
-                                        this.logger.warn("An exception occurred while writing data.", e);
-                                    }
-                                });
-                    }
-
-                    archiveOut.close();
-                    compressorOut.close();
-                    fileOut.close();
-                }
+                Path worldPath = this.worldPaths.getOrDefault(worldName, new File(Bukkit.getWorldContainer().getParentFile(), worldName).toPath());
+                ArchiveUtil.createArchiveWithZstd(Files.walk(worldPath).map(Path::toAbsolutePath).map(Path::toFile).toList(), backupFile, worldPath.toFile());
             } catch(IOException e) {
                 this.logger.warn("An exception occurred while opening the backup file.", e);
             }
