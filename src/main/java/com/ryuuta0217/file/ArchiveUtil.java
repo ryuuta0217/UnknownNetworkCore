@@ -43,7 +43,6 @@ public class ArchiveUtil {
                     .map(f -> new TarArchiveEntry(f, absoluteArchiveParentPath.relativize(f.toPath().toAbsolutePath()).toString()))
                     .forEach(e -> {
                         try {
-                            System.out.println("Adding " + e.getName() + " to " + e.getPath());
                             archiveOut.putArchiveEntry(e);
                             Files.copy(e.getPath(), archiveOut);
                             archiveOut.closeArchiveEntry();
