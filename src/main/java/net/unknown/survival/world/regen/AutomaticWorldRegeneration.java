@@ -41,6 +41,8 @@ import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStr
 import org.bukkit.Bukkit;
 import org.bukkit.GameRule;
 import org.bukkit.World;
+import org.bukkit.WorldType;
+import org.bukkit.configuration.ConfigurationSection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,9 +52,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -69,8 +69,11 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
     private String backupFolderPattern;
     private String backupFilePattern;
 
+    private final Map<String, Map<ScriptTiming, List<File>>> scripts = new HashMap<>();
+
     private long lastExec;
 
+    private final Timer timer = new Timer();
     private final Map<Long, Task> tasks = new HashMap<>();
 
     private AutomaticWorldRegeneration() {
@@ -81,6 +84,92 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
     public void onLoad() {
         this.backupFolderPattern = this.getConfig().getString("backup.folder-pattern");
         this.backupFilePattern = this.getConfig().getString("backup.file-pattern");
+        // Start script configuration load logic
+        this.scripts.clear();
+        ConfigurationSection scriptsSection = this.getConfig().getConfigurationSection("scripts");
+        scriptsSection.getKeys(false).forEach(worldName -> {
+            ConfigurationSection scriptsWorldSection = scriptsSection.getConfigurationSection(worldName);
+            Map<ScriptTiming, List<File>> worldScripts = new HashMap<>();
+            for (ScriptTiming timing : ScriptTiming.values()) {
+                if (!scriptsWorldSection.contains(timing.name().toLowerCase())) {
+                    this.getLogger().warning("Script configuration for " + worldName + " at " + timing.name().toLowerCase() + " is not found. But proceeding.");
+                }
+
+                if (scriptsWorldSection.isList(timing.name().toLowerCase())) {
+                    // Multiple script file detected (list)
+                    List<File> scriptFiles = scriptsWorldSection.getStringList(timing.name().toLowerCase())
+                            .stream()
+                            .map(File::new)
+                            .filter(file -> {
+                                if (!file.isFile()) {
+                                    this.getLogger().severe("Script file " + file.getName() + " for " + worldName + " at " + timing.name().toLowerCase() + " is not found or not a file.");
+                                    return false;
+                                }
+
+                                if (!file.exists()) {
+                                    this.getLogger().severe("Script file " + file.getName() + " for " + worldName + " at " + timing.name().toLowerCase() + " is not found.");
+                                    return false;
+                                }
+
+                                return true;
+                            })
+                            .toList();
+                    worldScripts.put(timing, scriptFiles);
+                } else {
+                    // Single script file detected
+                    File scriptFile = new File(scriptsWorldSection.getString(timing.name().toLowerCase()));
+                    if (!scriptFile.exists()) {
+                        this.getLogger().severe("Script file " + scriptFile.getName() + " for " + worldName + " at " + timing.name().toLowerCase() + " is not found.");
+                        return;
+                    }
+                    worldScripts.put(timing, Collections.singletonList(scriptFile));
+                }
+            }
+            this.scripts.put(worldName, worldScripts);
+        });
+        // End script configuration load logic
+        // Start schedules(tasks) load logic
+        this.tasks.entrySet().removeIf(e -> e.getValue().cancel());
+        if (this.tasks.isEmpty()) {
+            ConfigurationSection schedulesSection = this.getConfig().getConfigurationSection("schedules");
+            schedulesSection.getKeys(false).forEach(dateStr -> {
+                LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                ConfigurationSection dateSection = schedulesSection.getConfigurationSection(dateStr);
+                List<String> worlds;
+                if (dateSection.isList("worlds")) {
+                    worlds = dateSection.getStringList("worlds");
+                } else {
+                    worlds = Collections.singletonList(dateSection.getString("worlds"));
+                }
+
+                String seed;
+                if (dateSection.isString("seed")) {
+                    seed = dateSection.getString("seed");
+                } else {
+                    seed = null;
+                }
+
+                boolean keepGameRules;
+                if (dateSection.isBoolean("keep-game-rules")) {
+                    keepGameRules = dateSection.getBoolean("keep-game-rules");
+                } else {
+                    keepGameRules = true;
+                }
+
+                boolean preGenerate;
+                if (dateSection.isBoolean("pre-generate")) {
+                    preGenerate = dateSection.getBoolean("pre-generate");
+                } else {
+                    preGenerate = false;
+                }
+
+                Task task = new Task(worlds.toArray(String[]::new), seed, keepGameRules, preGenerate);
+                LocalDateTime execTime = LocalDateTime.of(date, LocalTime.of(0, 0));
+                this.timer.schedule(task, new Date(execTime.atZone(ZoneId.of("Asia/Tokyo")).toInstant().toEpochMilli()));
+            });
+        } else {
+            this.getLogger().warning("Something went wrong. " + this.tasks.size() + " task(s) are still running, failed to cancel. Please try cold boot to fix.");
+        }
         this.lastExec = this.getConfig().getLong("last-execution-time");
     }
 
@@ -132,7 +221,9 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         private final Map<String, Path> worldPaths;
         private final String seed;
         private final boolean keepGameRules;
-        private boolean preGenerated;
+        private final boolean preGenerate;
+
+        private final Map<String, Boolean> preGenerated = new HashMap<>();
         private boolean running = false;
 
         /**
@@ -141,9 +232,9 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
          * @param worldNames 再生成対象のワールド名 (複数指定可能)
          * @param seed 再生成時に使用するシード値
          * @param keepGameRules 再生成時にゲームルールを保持するかどうか
-         * @param preGenerated ワールドがすでに生成されているかどうか
+         * @param preGenerate 事前生成を行うかどうか
          */
-        public Task(String[] worldNames, @Nullable String seed, boolean keepGameRules, boolean preGenerated) {
+        public Task(String[] worldNames, @Nullable String seed, boolean keepGameRules, boolean preGenerate) {
             this.worldNames = worldNames;
             this.worldPaths = Arrays.stream(this.worldNames).parallel()
                     .map(worldName -> Map.entry(worldName, Bukkit.getWorld(worldName)))
@@ -152,16 +243,30 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
                     .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
             this.seed = seed;
             this.keepGameRules = keepGameRules;
-            this.preGenerated = preGenerated;
+            this.preGenerate = preGenerate;
+            this.checkPreGenerated();
+        }
+
+        public boolean isPreGenerated(String worldName) {
+            if (this.preGenerate) return false;
+            File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
+            return worldFolder.exists() && worldFolder.isDirectory() && new File(worldFolder, "level.dat").exists();
         }
 
         public void checkPreGenerated() {
-            this.preGenerated = Arrays.stream(this.worldNames)
+            this.preGenerated.clear();
+            this.preGenerated.putAll(Arrays.stream(this.worldNames)
                     .map(worldName -> String.format(PRE_WORLD_NAME_FORMAT, worldName))
-                    .allMatch(worldName -> {
-                        File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
-                        return worldFolder.exists() && worldFolder.isDirectory() && new File(worldFolder, "level.dat").exists();
-                    });
+                    .collect(Collectors.toMap(worldName -> worldName, this::isPreGenerated)));
+        }
+
+        public boolean runPreGenerate(String worldName) {
+            if (this.isWorldLoaded(worldName)) return false;
+            World.Environment env = Bukkit.getWorld(worldName).getEnvironment();
+
+            boolean result = this.isPreGenerated(worldName) || MultiverseCore.getInstance().getMVWorldManager().addWorld(String.format(PRE_WORLD_NAME_FORMAT, worldName), env, this.seed, WorldType.NORMAL, true, null, true);
+            this.checkPreGenerated();
+            return result;
         }
 
         /**
@@ -174,7 +279,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
 
             // TODO: execBeforeScript
 
-            if (this.preGenerated) {
+            if (this.preGenerate && this.preGenerated.entrySet().stream().allMatch(e -> e.getValue() || this.runPreGenerate(e.getKey()))) {
                 Map<String, Map<String, String>> gameRules = Arrays.stream(this.worldNames)
                         .map(worldName -> Map.entry(worldName, Arrays.stream(GameRule.values())
                                 .map(rule -> Map.entry(rule.getName(), Bukkit.getWorld(worldName).getGameRuleValue(rule.getName())))
@@ -250,7 +355,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         }
 
         public boolean regenerateWorld(String worldName) {
-            return (this.isWorldLoaded(worldName) || this.loadWorld(worldName)) && MultiverseCore.getInstance().getMVWorldManager().regenWorld(worldName, this.seed != null, this.seed == null, this.seed, this.keepGameRules);
+            return this.isPreGenerated(worldName) || ((this.isWorldLoaded(worldName) || this.loadWorld(worldName)) && MultiverseCore.getInstance().getMVWorldManager().regenWorld(worldName, this.seed != null, this.seed == null, this.seed, this.keepGameRules));
         }
 
         public boolean regenerateWorlds() {
@@ -284,5 +389,11 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
                 this.backupWorld(worldName);
             }
         }
+    }
+
+    private enum ScriptTiming {
+        PRE_GENERATED,
+        BEFORE,
+        AFTER
     }
 }
