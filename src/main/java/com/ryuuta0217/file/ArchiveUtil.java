@@ -40,6 +40,7 @@ public class ArchiveUtil {
             TarArchiveOutputStream archiveOut = new TarArchiveOutputStream(compressorOut);
 
             files.stream()
+                    .filter(File::isFile)
                     .map(f -> new TarArchiveEntry(f, absoluteArchiveParentPath.relativize(f.toPath().toAbsolutePath()).toString()))
                     .forEach(e -> {
                         try {
