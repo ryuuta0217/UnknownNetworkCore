@@ -32,6 +32,7 @@
 package net.unknown.survival.world.regen;
 
 import com.ryuuta0217.file.ArchiveUtil;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.configurations.ConfigurationBase;
 import net.unknown.core.dependency.MultiverseCore;
 import net.unknown.core.managers.RunnableManager;
@@ -55,12 +56,14 @@ import java.nio.file.Path;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AutomaticWorldRegeneration extends ConfigurationBase {
-    private static final AutomaticWorldRegeneration INSTANCE = new AutomaticWorldRegeneration();
     private static final String PRE_WORLD_NAME_FORMAT = "%s_PRE";
+    private static final LocalTime EXEC_TIME = LocalTime.of(0, 0);
+    private static final AutomaticWorldRegeneration INSTANCE = new AutomaticWorldRegeneration();
 
     public static AutomaticWorldRegeneration getInstance() {
         return INSTANCE;
@@ -69,12 +72,12 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
     private String backupFolderPattern;
     private String backupFilePattern;
 
-    private final Map<String, Map<ScriptTiming, List<File>>> scripts = new HashMap<>();
+    private Map<String, Map<ScriptTiming, List<File>>> scripts;
 
     private long lastExec;
 
-    private final Timer timer = new Timer();
-    private final Map<Long, Task> tasks = new HashMap<>();
+    private Timer timer;
+    private Map<Long, Task> tasks;
 
     private AutomaticWorldRegeneration() {
         super("automatic-world-regeneration.yml", true, "UNC/AutomaticWorldRegeneration");
@@ -85,7 +88,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         this.backupFolderPattern = this.getConfig().getString("backup.folder-pattern");
         this.backupFilePattern = this.getConfig().getString("backup.file-pattern");
         // Start script configuration load logic
-        this.scripts.clear();
+        this.scripts = new HashMap<>();
         ConfigurationSection scriptsSection = this.getConfig().getConfigurationSection("scripts");
         scriptsSection.getKeys(false).forEach(worldName -> {
             ConfigurationSection scriptsWorldSection = scriptsSection.getConfigurationSection(worldName);
@@ -129,11 +132,60 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         });
         // End script configuration load logic
         // Start schedules(tasks) load logic
-        this.tasks.entrySet().removeIf(e -> e.getValue().cancel());
+        if (this.tasks != null) this.tasks.entrySet().removeIf(e -> e.getValue().cancel());
+        else this.tasks = new HashMap<>();
+
+        if (this.timer == null) this.timer = new Timer();
+
         if (this.tasks.isEmpty()) {
             ConfigurationSection schedulesSection = this.getConfig().getConfigurationSection("schedules");
             schedulesSection.getKeys(false).forEach(dateStr -> {
-                LocalDate date = LocalDate.parse(dateStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                String[] dateStrSplit = dateStr.split(" ", 2);
+
+                LocalDate execDate;
+                if(dateStrSplit[0].matches("\\d{4}/\\d{2}/\\d{2}")) {
+                    execDate = LocalDate.parse(dateStrSplit[0], DateTimeFormatter.ofPattern("yyyy/MM/dd"));
+                } else if (dateStrSplit[0].matches("\\d{4}/\\d/\\d")) {
+                    execDate = LocalDate.parse(dateStrSplit[0], DateTimeFormatter.ofPattern("yyyy/M/d"));
+                } else {
+                    this.getLogger().warning("Invalid date format: " + dateStr + ". Skipping.");
+                    return;
+                }
+
+                LocalTime execTime = EXEC_TIME;
+                if (dateStrSplit.length == 2) {
+                    String[] timeSplit = dateStrSplit[1].split(":", 3);
+
+                    for (int i = 0; i < timeSplit.length; i++) {
+                        if (!timeSplit[i].matches("\\d{1,2}")) {
+                            this.getLogger().warning("Invalid time format: " + dateStrSplit[1] + ". Skipping.");
+                            break;
+                        }
+                        int value = Integer.parseInt(timeSplit[i]);
+
+                        if (i == 0 && value > 23) { // hour
+                            this.getLogger().warning("Invalid hour value: " + value + ". Skipping.");
+                            break;
+                        } else if (i == 1 && value > 59) { // minute
+                            this.getLogger().warning("Invalid minute value: " + value + ". Skipping.");
+                            break;
+                        } else if (i == 2 && value > 59) { // second
+                            this.getLogger().warning("Invalid second value: " + value + ". Skipping.");
+                            break;
+                        }
+
+                        execTime = switch (i) {
+                            case 0 -> execTime.withHour(value);
+                            case 1 -> execTime.withMinute(value);
+                            case 2 -> execTime.withSecond(value);
+                            default -> execTime;
+                        };
+                    }
+                }
+
+                LocalDateTime execDateTime = LocalDateTime.of(execDate, execTime);
+                long execTimeEpoch = execDateTime.atZone(ZoneId.of("Asia/Tokyo")).toInstant().toEpochMilli();
+
                 ConfigurationSection dateSection = schedulesSection.getConfigurationSection(dateStr);
                 List<String> worlds;
                 if (dateSection.isList("worlds")) {
@@ -163,14 +215,38 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
                     preGenerate = false;
                 }
 
-                Task task = new Task(worlds.toArray(String[]::new), seed, keepGameRules, preGenerate);
-                LocalDateTime execTime = LocalDateTime.of(date, LocalTime.of(0, 0));
-                this.timer.schedule(task, new Date(execTime.atZone(ZoneId.of("Asia/Tokyo")).toInstant().toEpochMilli()));
+                Task task = new Task(dateStr, execTimeEpoch, worlds.toArray(String[]::new), seed, keepGameRules, preGenerate);
+                this.timer.schedule(task, new Date(execTimeEpoch));
+                this.tasks.put(execTimeEpoch, task);
             });
         } else {
             this.getLogger().warning("Something went wrong. " + this.tasks.size() + " task(s) are still running, failed to cancel. Please try cold boot to fix.");
         }
-        this.lastExec = this.getConfig().getLong("last-execution-time");
+        this.lastExec = this.getConfig().getLong("last-exec");
+    }
+
+    @Override
+    public synchronized void save() {
+        ConfigurationSection schedulesSection;
+        if (this.getConfig().isConfigurationSection("schedules")) {
+            schedulesSection = this.getConfig().getConfigurationSection("schedules");
+            schedulesSection.getKeys(false).forEach(key -> schedulesSection.set(key, null));
+        } else {
+            schedulesSection = this.getConfig().createSection("schedules");
+        }
+        this.tasks.forEach((execTimeEpoch, task) -> {
+            ZonedDateTime execDateTime = LocalDateTime.ofEpochSecond(execTimeEpoch, 0, ZoneOffset.ofHours(9)).atZone(ZoneId.of("Asia/Tokyo"));
+            DateTimeFormatter formatter = execDateTime.toLocalTime() == EXEC_TIME ? DateTimeFormatter.ofPattern("yyyy/MM/dd") : DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+            String dateStr = execDateTime.format(formatter);
+
+            ConfigurationSection scheduleSection = schedulesSection.createSection(dateStr);
+            scheduleSection.set("worlds", Arrays.asList(task.worldNames));
+            if (task.seed != null) scheduleSection.set("seed", task.seed);
+            scheduleSection.set("keep-game-rules", task.keepGameRules);
+            scheduleSection.set("pre-generate", task.preGenerate);
+        });
+        this.getConfig().set("last-exec", this.lastExec);
+        super.save();
     }
 
     public String getBackupFolderPattern() {
@@ -216,6 +292,8 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
     public static class Task extends TimerTask {
         private static int TASK_ID = 0;
 
+        private final String configKey;
+        private final long execTimeEpoch;
         private final Logger logger = LoggerFactory.getLogger("AutomaticWorldRegenerationTask #" + TASK_ID++);
         private final String[] worldNames;
         private final Map<String, Path> worldPaths;
@@ -234,7 +312,9 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
          * @param keepGameRules 再生成時にゲームルールを保持するかどうか
          * @param preGenerate 事前生成を行うかどうか
          */
-        public Task(String[] worldNames, @Nullable String seed, boolean keepGameRules, boolean preGenerate) {
+        public Task(String configKey, long execTimeEpoch, String[] worldNames, @Nullable String seed, boolean keepGameRules, boolean preGenerate) {
+            this.configKey = configKey;
+            this.execTimeEpoch = execTimeEpoch;
             this.worldNames = worldNames;
             this.worldPaths = Arrays.stream(this.worldNames).parallel()
                     .map(worldName -> Map.entry(worldName, Bukkit.getWorld(worldName)))
@@ -248,8 +328,8 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         }
 
         public boolean isPreGenerated(String worldName) {
-            if (this.preGenerate) return false;
-            File worldFolder = new File(Bukkit.getWorldContainer(), worldName);
+            if (!this.preGenerate) return false;
+            File worldFolder = new File(Bukkit.getWorldContainer(), String.format(PRE_WORLD_NAME_FORMAT, worldName));
             return worldFolder.exists() && worldFolder.isDirectory() && new File(worldFolder, "level.dat").exists();
         }
 
@@ -303,12 +383,19 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
             }
 
             // TODO: execAfterScript
+            AutomaticWorldRegeneration.getInstance().tasks.remove(this.execTimeEpoch);
             AutomaticWorldRegeneration.getInstance().setLastExecutionTime(System.currentTimeMillis());
+            this.cancel();
             this.running = false;
         }
 
         public boolean unloadWorld(String worldName) {
-            return this.isWorldLoaded(worldName) && MultiverseCore.getInstance().getMVWorldManager().unloadWorld(worldName, true);
+            try {
+                return this.isWorldLoaded(worldName) && Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> MultiverseCore.getInstance().getMVWorldManager().unloadWorld(worldName, true)).get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
 
         public boolean unloadWorlds() {
@@ -320,7 +407,12 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         }
 
         public boolean loadWorld(String worldName) {
-            return this.isWorldLoaded(worldName) || MultiverseCore.getInstance().getMVWorldManager().loadWorld(worldName);
+            try {
+                return this.isWorldLoaded(worldName) || Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> MultiverseCore.getInstance().getMVWorldManager().loadWorld(worldName)).get();
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+                return false;
+            }
         }
 
         public boolean loadWorlds() {
@@ -355,7 +447,25 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         }
 
         public boolean regenerateWorld(String worldName) {
-            return this.isPreGenerated(worldName) || ((this.isWorldLoaded(worldName) || this.loadWorld(worldName)) && MultiverseCore.getInstance().getMVWorldManager().regenWorld(worldName, this.seed != null, this.seed == null, this.seed, this.keepGameRules));
+            if (this.isPreGenerated(worldName)) {
+                this.logger.info("World {} is already pre-generated. Skipping regeneration.", worldName);
+                return true;
+            }
+            if (!this.isWorldLoaded(worldName) && !this.loadWorld(worldName)) {
+                this.logger.error("Failed to load world {}.", worldName);
+                return false;
+            }
+            this.logger.info("Regenerating world {} with seed {}...", worldName, this.seed);
+            boolean result;
+            try {
+                result = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> MultiverseCore.getInstance().getMVWorldManager().regenWorld(worldName, true, this.seed == null, this.seed, this.keepGameRules)).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new RuntimeException(e);
+            }
+            if (!result) {
+                this.logger.error("Failed to regenerate world {}.", worldName);
+            }
+            return result;
         }
 
         public boolean regenerateWorlds() {
@@ -372,6 +482,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
 
         public void backupWorld(String worldName) {
             // TODO: if installed Multiverse-Inventories plugin, include inventories (grab from "plugins/Multiverse-Inventories/worlds/<worldName>/**"
+            System.out.println("LastExec: " + AutomaticWorldRegeneration.getInstance().getLastExecuteTime());
             File backupFolder = new File(AutomaticWorldRegeneration.getInstance().getBackupFolderFormatted(worldName, AutomaticWorldRegeneration.getInstance().getLastExecuteTime(), LocalDateTime.now()));
             File backupFile = new File(backupFolder, AutomaticWorldRegeneration.getInstance().getBackupFileFormatted(worldName, AutomaticWorldRegeneration.getInstance().getLastExecuteTime(), LocalDateTime.now(), "tar.zst"));
             String backupFilePath = backupFile.getPath();
