@@ -274,6 +274,28 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         RunnableManager.runAsync(this::save);
     }
 
+    public static Map<Long, Task> getSchedules() {
+        return Collections.unmodifiableMap(getInstance().tasks);
+    }
+
+    public static boolean addSchedule(long execEpochMillis, String[] worlds, @Nullable String seed, boolean keepGameRules, boolean preGenerate) {
+        LocalDateTime execDateTime = convertEpochMillisToLocalDateTime(execEpochMillis);
+        if (Duration.between(execDateTime, LocalDateTime.now()).isNegative()) return false;
+
+        getInstance().tasks.put(execEpochMillis, new Task(execEpochMillis, worlds, seed, keepGameRules, preGenerate));
+        getInstance().timer.schedule(getInstance().tasks.get(execEpochMillis), new Date(execEpochMillis));
+        RunnableManager.runAsync(getInstance()::save);
+        return true;
+    }
+
+    public static boolean remove(long execEpochMillis) {
+        if (getInstance().tasks.containsKey(execEpochMillis)) return false;
+        Task task = getInstance().tasks.remove(execEpochMillis);
+        task.cancel();
+        RunnableManager.runAsync(getInstance()::save);
+        return true;
+    }
+
     private static LocalDateTime convertEpochMillisToLocalDateTime(long epochMillis) {
         return Instant.ofEpochMilli(epochMillis).atZone(ZoneId.of("Asia/Tokyo")).toLocalDateTime();
     }
