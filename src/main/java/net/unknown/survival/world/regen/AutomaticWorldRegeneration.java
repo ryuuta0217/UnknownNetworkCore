@@ -215,7 +215,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
                     preGenerate = false;
                 }
 
-                Task task = new Task(dateStr, execTimeEpoch, worlds.toArray(String[]::new), seed, keepGameRules, preGenerate);
+                Task task = new Task(execTimeEpoch, worlds.toArray(String[]::new), seed, keepGameRules, preGenerate);
                 this.timer.schedule(task, new Date(execTimeEpoch));
                 this.tasks.put(execTimeEpoch, task);
             });
@@ -292,7 +292,6 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
     public static class Task extends TimerTask {
         private static int TASK_ID = 0;
 
-        private final String configKey;
         private final long execTimeEpoch;
         private final Logger logger = LoggerFactory.getLogger("AutomaticWorldRegenerationTask #" + TASK_ID++);
         private final String[] worldNames;
@@ -312,8 +311,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
          * @param keepGameRules 再生成時にゲームルールを保持するかどうか
          * @param preGenerate 事前生成を行うかどうか
          */
-        public Task(String configKey, long execTimeEpoch, String[] worldNames, @Nullable String seed, boolean keepGameRules, boolean preGenerate) {
-            this.configKey = configKey;
+        public Task(long execTimeEpoch, String[] worldNames, @Nullable String seed, boolean keepGameRules, boolean preGenerate) {
             this.execTimeEpoch = execTimeEpoch;
             this.worldNames = worldNames;
             this.worldPaths = Arrays.stream(this.worldNames).parallel()
