@@ -62,6 +62,7 @@ import net.unknown.survival.listeners.*;
 import net.unknown.survival.update.UNCUpdateCheckTask;
 import net.unknown.survival.queue.ItemGiveQueue;
 import net.unknown.survival.vote.VoteManager;
+import net.unknown.survival.world.regen.AutomaticWorldRegeneration;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -109,6 +110,7 @@ public class UnknownNetworkSurvival {
         //AntiVillagerLag.startLoopTask();
         PlayerDeathListener.load();
         UnknownNetworkEconomy.init();
+        AutomaticWorldRegeneration.getInstance();
 
         CustomEnchantments.initialize();
         GNArms.initialize();

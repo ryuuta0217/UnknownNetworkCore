@@ -80,7 +80,13 @@ public class NameHistory {
     }
 
     public static Map<String, Long> getNameHistory(UUID uniqueId) {
-        return NAME_HISTORY.getOrDefault(uniqueId, Collections.emptyMap());
+        return Collections.unmodifiableMap(NAME_HISTORY.getOrDefault(uniqueId, Collections.emptyMap()));
+    }
+
+    public static Map<String, Long> getNameHistory(UUID uniqueId, String currentName) {
+        HashMap<String, Long> nameHistory = new HashMap<>(NAME_HISTORY.getOrDefault(uniqueId, Collections.emptyMap()));
+        nameHistory.entrySet().removeIf(e -> e.getKey().equalsIgnoreCase(currentName));
+        return Collections.unmodifiableMap(nameHistory);
     }
 
     public static void updateLastSeen(UUID uniqueId, String playerName, long lastSeen) {

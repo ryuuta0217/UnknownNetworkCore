@@ -86,7 +86,7 @@ public class ForgeListener {
 
     @Subscribe
     public void onPreLogin(PreLoginEvent event) {
-        if (event.getConnection().getProtocolVersion().greaterThan(ProtocolVersion.MINECRAFT_1_13)) {
+        if (event.getConnection().getProtocolVersion().getProtocol() >= ProtocolVersion.MINECRAFT_1_13.getProtocol()) {
             ModdedHandshakeProcessor player = null;
 
             String extraDataInHandshake = getExtraDataInHandshake(event.getConnection());

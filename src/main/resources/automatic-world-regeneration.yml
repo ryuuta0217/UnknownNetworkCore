@@ -24,7 +24,7 @@ scripts: {}
 #
 # 例:
 # schedules:
-#  2024-04-15:
+#  2024/04/15:
 #    worlds: ["resource", "resource_nether", "resource_the_end"]
 #    seed: HelloWorldNewWorld
 #    keep-game-rules: true
