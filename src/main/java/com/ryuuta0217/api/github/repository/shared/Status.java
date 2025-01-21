@@ -17,6 +17,7 @@
 package com.ryuuta0217.api.github.repository.shared;
 
 public enum Status {
+    PENDING,
     QUEUED,
     IN_PROGRESS,
     COMPLETED
