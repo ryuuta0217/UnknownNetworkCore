@@ -73,7 +73,7 @@ dependencies {
     compileOnly group: 'net.luckperms', name: 'api', version: '+'
     compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'c88c0d57'
     launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'c88c0d57'
-    implementation group: 'org.mozilla', name: 'rhino', version: '+'
+    implementation group: 'org.mozilla', name: 'rhino', version: '1.7.15'
     compileOnly group: 'com.github.NuVotifier', name: 'NuVotifier', version: '+'
     implementation group: 'net.dv8tion', name: 'JDA', version: '+'
     implementation group: 'org.json', name: 'json', version: '+'
