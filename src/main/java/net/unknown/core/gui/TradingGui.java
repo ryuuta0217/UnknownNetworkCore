@@ -263,7 +263,7 @@ public class TradingGui {
             private boolean showProgressBar;
             private SoundEvent notifyTradeSound;
             private boolean canRestock;
-            private final CraftMerchant craftMerchant = new CraftMerchant(this);
+            private final CraftMerchant craftMerchant = () -> Merchant.this;
 
             public Merchant(@Nullable org.bukkit.entity.Player tradingPlayer, List<MerchantRecipe> offers, int villagerXp, boolean showProgressBar, SoundEvent notifyTradeSound, boolean canRestock) {
                 this.tradingPlayer = MinecraftAdapter.player(tradingPlayer);
@@ -351,6 +351,11 @@ public class TradingGui {
             @Override
             public boolean isClientSide() {
                 return false;
+            }
+
+            @Override
+            public boolean stillValid(Player player) {
+                return true;
             }
 
             @Override

@@ -39,6 +39,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.unknown.core.define.DefinedTextColor;
@@ -59,7 +60,9 @@ public class NewMessageUtil {
     }
 
     public static void sendMessage(Player player, Component component, boolean broadcastToOps) {
-        sendMessage(player.createCommandSourceStack(), component, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendMessage(sPlayer.createCommandSourceStack(), component, broadcastToOps);
+        }
     }
 
     public static void sendMessage(Player player, Component component) {
@@ -93,7 +96,9 @@ public class NewMessageUtil {
     }
 
     public static void sendMessage(Player player, net.kyori.adventure.text.Component component, boolean broadcastToOps) {
-        sendMessage(player.createCommandSourceStack(), component, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendMessage(sPlayer.createCommandSourceStack(), component, broadcastToOps);
+        }
     }
 
     public static void sendMessage(Player player, net.kyori.adventure.text.Component component) {
@@ -127,7 +132,9 @@ public class NewMessageUtil {
     }
 
     public static void sendMessage(Player player, String message, boolean broadcastToOps) {
-        sendMessage(player.createCommandSourceStack(), message, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendMessage(sPlayer.createCommandSourceStack(), message, broadcastToOps);
+        }
     }
 
     public static void sendMessage(Player player, String message) {
@@ -164,7 +171,9 @@ public class NewMessageUtil {
     }
 
     public static void sendErrorMessage(Player player, Component component, boolean broadcastToOps) {
-        sendErrorMessage(player.createCommandSourceStack(), component, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendErrorMessage(sPlayer.createCommandSourceStack(), component, broadcastToOps);
+        }
     }
 
     public static void sendErrorMessage(Player player, Component component) {
@@ -232,7 +241,9 @@ public class NewMessageUtil {
     }
 
     public static void sendErrorMessage(Player player, String message, boolean broadcastToOps) {
-        sendErrorMessage(player.createCommandSourceStack(), message, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendErrorMessage(sPlayer.createCommandSourceStack(), message, broadcastToOps);
+        }
     }
 
     public static void sendErrorMessage(Player player, String message) {
@@ -268,7 +279,9 @@ public class NewMessageUtil {
     }
 
     public static void sendVerboseMessage(Player player, Component component, boolean broadcastToOps) {
-        sendVerboseMessage(player.createCommandSourceStack(), component, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendVerboseMessage(sPlayer.createCommandSourceStack(), component, broadcastToOps);
+        }
     }
 
     public static void sendVerboseMessage(Player player, Component component) {
@@ -302,7 +315,9 @@ public class NewMessageUtil {
     }
 
     public static void sendVerboseMessage(Player player, net.kyori.adventure.text.Component component, boolean broadcastToOps) {
-        sendVerboseMessage(player.createCommandSourceStack(), component, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendVerboseMessage(sPlayer.createCommandSourceStack(), component, broadcastToOps);
+        }
     }
 
     public static void sendVerboseMessage(Player player, net.kyori.adventure.text.Component component) {
@@ -337,7 +352,9 @@ public class NewMessageUtil {
     }
 
     public static void sendVerboseMessage(Player player, String message, boolean broadcastToOps) {
-        sendVerboseMessage(player.createCommandSourceStack(), message, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendVerboseMessage(sPlayer.createCommandSourceStack(), message, broadcastToOps);
+        }
     }
 
     public static void sendVerboseMessage(Player player, String message) {

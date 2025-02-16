@@ -81,7 +81,7 @@ public class SpawnCommand {
             }
 
             Location whereToTeleport = MultiverseCore.getSpawnLocation(whereToSpawn);
-            ctx.getSource().getEntityOrException().teleportTo(whereToSpawn, whereToTeleport.getX(), whereToTeleport.getY(), whereToTeleport.getZ(), Set.of(), whereToTeleport.getYaw(), whereToTeleport.getPitch(), PlayerTeleportEvent.TeleportCause.COMMAND);
+            ctx.getSource().getEntityOrException().teleportTo(whereToSpawn, whereToTeleport.getX(), whereToTeleport.getY(), whereToTeleport.getZ(), Set.of(), whereToTeleport.getYaw(), whereToTeleport.getPitch(), false, PlayerTeleportEvent.TeleportCause.COMMAND);
             NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
                     .append(Component.text(MessageUtil.getWorldName(whereToSpawn.getWorld())))
                     .append(Component.text("ワールドのスポーン地点にテレポートしました")));

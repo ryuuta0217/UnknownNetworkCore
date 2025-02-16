@@ -38,6 +38,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.chat.SignedMessage;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -69,6 +70,7 @@ import org.jetbrains.annotations.Contract;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.Optional;
 
 @ParametersAreNonnullByDefault
 public class MinecraftAdapter {
@@ -148,15 +150,15 @@ public class MinecraftAdapter {
     }
 
     public static net.minecraft.network.chat.ChatType chatType(net.kyori.adventure.chat.ChatType adventure) {
-        Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().registry(Registries.CHAT_TYPE).orElse(null);
+        Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().lookup(Registries.CHAT_TYPE).orElse(null);
         if (chatTypes != null) {
-            return chatTypes.get(ResourceLocation.tryBySeparator(adventure.key().asString(), ':'));
+            return chatTypes.get(ResourceLocation.tryBySeparator(adventure.key().asString(), ':')).map(Holder.Reference::value).orElse(null);
         }
         throw new IllegalStateException("Failed to get Minecraft's ChatType registry, early access?");
     }
 
     public static net.kyori.adventure.chat.ChatType chatType(@Nonnull net.minecraft.network.chat.ChatType minecraft) {
-        Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().registry(Registries.CHAT_TYPE).orElse(null);
+        Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().lookup(Registries.CHAT_TYPE).orElse(null);
         if (chatTypes != null) {
             ResourceLocation minecraftKey = chatTypes.getKey(minecraft);
             if (minecraftKey != null) {
@@ -168,9 +170,9 @@ public class MinecraftAdapter {
     }
 
     public static net.kyori.adventure.chat.ChatType chatType(ResourceKey<net.minecraft.network.chat.ChatType> minecraft) {
-        Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().registry(Registries.CHAT_TYPE).orElse(null);
+        Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().lookup(Registries.CHAT_TYPE).orElse(null);
         if (chatTypes != null) {
-            ChatType chatType = chatTypes.get(minecraft);
+            ChatType chatType = chatTypes.get(minecraft).map(Holder.Reference::value).orElse(null);
             if (chatType != null) {
                 return chatType(chatType);
             }

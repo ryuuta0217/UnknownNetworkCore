@@ -35,6 +35,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -112,7 +113,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             }
 
             upgradeSnowman(snowman, newUpgradeLevel);
-            MinecraftAdapter.player(event.getPlayer()).getCooldowns().addCooldown(net.minecraft.world.item.Items.IRON_BLOCK, 20 * newUpgradeLevel);
+            MinecraftAdapter.player(event.getPlayer()).getCooldowns().addCooldown(MinecraftAdapter.ItemStack.itemStack(stack.getHandle()), 20 * newUpgradeLevel);
             NewMessageUtil.sendMessage(event.getPlayer(), Component.empty()
                     .append(snowman.name())
                     .appendSpace()
@@ -176,7 +177,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
         }
 
         // Use #thrown, Yes, weapon is snowball.
-        boolean hurtSuccess = target.hurt(weapon.damageSources().thrown(weapon, source), damage);
+        boolean hurtSuccess = target.hurtServer(target.level().getMinecraftWorld(), weapon.damageSources().thrown(weapon, source), damage);
 
         if (hurtSuccess) {
             if (knockback > 0.0F && target instanceof net.minecraft.world.entity.LivingEntity livingTarget) {
@@ -194,7 +195,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
                     float f = 0.25F + (float) EnchantmentHelper.getEnchantmentLevel(enchRegistryLookup.getOrThrow(Enchantments.EFFICIENCY), source) * 0.05F;
 
                     if (source.getRandom().nextFloat() < f) {
-                        player.getCooldowns().addCooldown(net.minecraft.world.item.Items.SHIELD, 100);
+                        player.getCooldowns().addCooldown(BuiltInRegistries.ITEM.getKey(net.minecraft.world.item.Items.SHIELD), 100);
                         source.level().broadcastEntityEvent(player, (byte) 30);
                     }
                 }

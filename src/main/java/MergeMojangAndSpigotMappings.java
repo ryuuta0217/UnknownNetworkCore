@@ -49,7 +49,7 @@ public class MergeMojangAndSpigotMappings {
         Map<String, List<MethodInfo>> mojang2methods = new LinkedHashMap<>();
 
         System.out.println("Loading Mojang Mapping");
-        List<String> mojangMapping = Files.readAllLines(Path.of("1.21-server-mojang.txt"));
+        List<String> mojangMapping = Files.readAllLines(Path.of("1.21.4-server-mojang.txt"));
 
         String currentClass = "";
 
@@ -93,7 +93,7 @@ public class MergeMojangAndSpigotMappings {
         System.out.println("Mojang Mapping Loaded");
 
         System.out.println("Loading Spigot Mapping");
-        List<String> spigotMapping = Files.readAllLines(Path.of("1.21-server-spigot.txt"));
+        List<String> spigotMapping = Files.readAllLines(Path.of("1.21.4-server-spigot.txt"));
 
         Map<String, String> obf2spigot = new LinkedHashMap<>();
         Map<String, String> mojang2spigot = new LinkedHashMap<>();

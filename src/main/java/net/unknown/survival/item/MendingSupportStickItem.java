@@ -33,6 +33,7 @@ package net.unknown.survival.item;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.item.enchantment.EnchantedItemInUse;
@@ -159,7 +160,7 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
 
             // Unknown Network start
             if (dummyExpOrb == null) { // if provided dummyExpOrb is null (first call, maybe?), create new orb.
-                dummyExpOrb = EntityType.EXPERIENCE_ORB.create(MinecraftAdapter.level(player.getWorld()));
+                dummyExpOrb = EntityType.EXPERIENCE_ORB.create(MinecraftAdapter.level(player.getWorld()), EntitySpawnReason.COMMAND);
             }
 
             if (dummyExpOrb != null) { // if dummyExpOrb is still null, something went wrong.

@@ -116,7 +116,7 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
 
     @Nullable
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnReason, @Nullable SpawnGroupData entityData) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData entityData) {
         if (!this.level().isClientSide) this.reassessWeaponGoal();
         return super.finalizeSpawn(world, difficulty, spawnReason, entityData);
     }
