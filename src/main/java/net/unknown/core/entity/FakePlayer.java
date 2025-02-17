@@ -169,7 +169,7 @@ public class FakePlayer extends ServerPlayer {
                 boolean flag2 = flag && super.fallDistance > 0.0F && !this.onGround() && !this.onClimbable() && !this.isInWater() && !this.hasEffect(MobEffects.BLINDNESS) && !this.isPassenger() && target instanceof LivingEntity && !this.isSprinting();
                 flag2 = flag2 && !this.level().paperConfig().entities.behavior.disablePlayerCrits;
                 if (flag2) {
-                    damageSource = damageSource.critical(true);
+                    damageSource = damageSource.critical();
                     f *= 1.5F;
                 }
 
@@ -213,7 +213,7 @@ public class FakePlayer extends ServerPlayer {
                         for(LivingEntity livingEntity2 : this.level().getEntitiesOfClass(LivingEntity.class, target.getBoundingBox().inflate((double)1.0F, (double)0.25F, (double)1.0F))) {
                             if (livingEntity2 != this && livingEntity2 != target && !this.isAlliedTo(livingEntity2) && (!(livingEntity2 instanceof ArmorStand) || !((ArmorStand)livingEntity2).isMarker()) && this.distanceToSqr(livingEntity2) < (double)9.0F) {
                                 float f6 = this.getEnchantedDamage(livingEntity2, f5, damageSource) * attackStrengthScale;
-                                if (livingEntity2.hurtServer((ServerLevel)this.level(), this.damageSources().playerAttack(this).sweep().critical(flag2), f6)) {
+                                if (livingEntity2.hurtServer((ServerLevel)this.level(), this.damageSources().playerAttack(this).critical(), f6)) {
                                     livingEntity2.knockback((double)0.4F, (double)Mth.sin(this.getYRot() * ((float)Math.PI / 180F)), (double)(-Mth.cos(this.getYRot() * ((float)Math.PI / 180F))), this, io.papermc.paper.event.entity.EntityKnockbackEvent.Cause.SWEEP_ATTACK);
                                     Level var23 = this.level();
                                     if (var23 instanceof ServerLevel) {
