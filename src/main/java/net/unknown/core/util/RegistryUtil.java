@@ -83,6 +83,18 @@ public class RegistryUtil {
 
     public static <T> Registry<T> freeze(Registry<T> registry) {
         if (registry instanceof MappedRegistry<T>) {
+            try {
+                Field allTagsField = MappedRegistry.class.getDeclaredField("allTags");
+                if (allTagsField.trySetAccessible()) {
+                    Class<?> tagSetClass = Class.forName(MappedRegistry.class.getName() + "$TagSet");
+                    Method unboundMethod = tagSetClass.getDeclaredMethod("unbound");
+                    if (unboundMethod.trySetAccessible()) {
+                        allTagsField.set(registry, unboundMethod.invoke(null));
+                    }
+                }
+            } catch(ClassNotFoundException | NoSuchFieldException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
             return registry.freeze();
         }
         return null;
