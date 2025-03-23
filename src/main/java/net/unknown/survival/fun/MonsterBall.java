@@ -85,7 +85,7 @@ public class MonsterBall implements Listener {
 
                             ItemEntity e = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), spawnEgg);
                             mob.level().addFreshEntity(e, CreatureSpawnEvent.SpawnReason.EGG);
-                            mob.kill();
+                            mob.kill(mob.level().getMinecraftWorld());
                             mob.level().explode(null, mob.getX(), mob.getY(), mob.getZ(), 0.1F, Level.ExplosionInteraction.NONE);
                         }
                     }

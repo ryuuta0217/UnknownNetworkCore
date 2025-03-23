@@ -333,7 +333,7 @@ public class ChannelCommand {
                                         .suggests(Suggestions.JOINED_CHANNELS_SUGGEST)
                                         .executes(ChannelCommand::inviteToChannel)))) // invite specified channel
          */
-        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof ServerPlayer player) {
             ServerPlayer inviteTarget = EntityArgument.getPlayer(ctx, "対象");
             String inviteChannelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
             if (inviteChannelName != null && !CustomChannels.isChannelFound(inviteChannelName)) {

@@ -106,13 +106,13 @@ public class TomatoZombieEntity extends Zombie {
     }
 
     @Override
-    protected void customServerAiStep() {
+    protected void customServerAiStep(ServerLevel level) {
         LivingEntity livingEntity = this.getTarget();
         if (livingEntity != null && this.canAttack(livingEntity)) {
             this.hasImpulse = true;
         }
 
-        super.customServerAiStep();
+        super.customServerAiStep(level);
     }
 
     @Override
@@ -199,7 +199,7 @@ public class TomatoZombieEntity extends Zombie {
 
                     if (this.attackTime <= 0) {
                         this.attackTime = 20;
-                        this.zombie.doHurtTarget(attackTarget);
+                        this.zombie.doHurtTarget(this.zombie.level().getMinecraftWorld(), attackTarget);
                     }
                 } else if (distance < this.getFollowDistance() * this.getFollowDistance() && lineOfSight) {
                     double x = attackTarget.getX() - this.zombie.getX();

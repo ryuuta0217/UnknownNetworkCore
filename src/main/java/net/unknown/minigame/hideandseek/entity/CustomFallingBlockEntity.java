@@ -33,6 +33,8 @@ package net.unknown.minigame.hideandseek.entity;
 
 import net.minecraft.network.protocol.game.ClientboundTeleportEntityPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.PositionMoveRotation;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -43,6 +45,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+
+import java.util.EnumSet;
 
 public class CustomFallingBlockEntity extends FallingBlockEntity {
     private final ServerPlayer srcPlayer;
@@ -83,7 +87,7 @@ public class CustomFallingBlockEntity extends FallingBlockEntity {
         if (!this.srcPlayer.position().equals(this.lastPos)) {
             this.copyPosition(this.srcPlayer);
             this.setDeltaMovement(Vec3.ZERO);
-            this.srcPlayer.connection.send(new ClientboundTeleportEntityPacket(this));
+            this.srcPlayer.connection.send(new ClientboundTeleportEntityPacket(this.getId(), PositionMoveRotation.of(this), EnumSet.noneOf(Relative.class), false));
             this.lastPos = this.position();
         }
         //this.copyPosition(this.srcPlayer);

@@ -41,7 +41,7 @@ import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.RelativeMovement;
+import net.minecraft.world.entity.Relative;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
@@ -69,11 +69,11 @@ public class SwapLocationCommand {
         float bYRot = b.getYRot();
         float bXRot = b.getXRot();
 
-        if (a.teleportTo(bLevel, bPos.x(), bPos.y(), bPos.z(), EnumSet.noneOf(RelativeMovement.class), bYRot, bXRot)) {
+        if (a.teleportTo(bLevel, bPos.x(), bPos.y(), bPos.z(), EnumSet.noneOf(Relative.class), bYRot, bXRot, false)) {
             if (a instanceof ServerPlayer player) player.connection.send(new ClientboundSetActionBarTextPacket(Component.empty().append(b.getName()).append(" と場所が入れ替わりました")));
         }
 
-        if (b.teleportTo(aLevel, aPos.x(), aPos.y(), aPos.z(), EnumSet.noneOf(RelativeMovement.class), aYRot, aXRot)) {
+        if (b.teleportTo(aLevel, aPos.x(), aPos.y(), aPos.z(), EnumSet.noneOf(Relative.class), aYRot, aXRot, false)) {
             if (b instanceof ServerPlayer player) player.connection.send(new ClientboundSetActionBarTextPacket(Component.empty().append(a.getName()).append(" と場所が入れ替わりました")));
         }
 

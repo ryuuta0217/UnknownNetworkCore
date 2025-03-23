@@ -62,11 +62,11 @@ public class CustomChatTypes {
     public static final ChatType VALUE_PRIVATE_MESSAGE_OUTGOING = new ChatType(
             new ChatTypeDecoration( // for chat view
                     "§b[PM]§r [→ %s] %s",
-                    List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT),
+                    List.of(ChatTypeDecoration.Parameter.TARGET, ChatTypeDecoration.Parameter.CONTENT),
                     Style.EMPTY),
             new ChatTypeDecoration( // for narration
                     "あなたが %s に %s と言いました",
-                    List.of(ChatTypeDecoration.Parameter.SENDER, ChatTypeDecoration.Parameter.CONTENT),
+                    List.of(ChatTypeDecoration.Parameter.TARGET, ChatTypeDecoration.Parameter.CONTENT),
                     Style.EMPTY));
     public static final net.kyori.adventure.chat.ChatType PRIVATE_MESSAGE_OUTGOING_ADVENTURE = net.kyori.adventure.chat.ChatType.chatType(NamespacedKey.fromString(PRIVATE_MESSAGE_OUTGOING.location().toString()));
 
@@ -105,7 +105,7 @@ public class CustomChatTypes {
 
     @SuppressWarnings("unchecked")
     public static ResourceKey<ChatType> register(ResourceKey<Registry<ChatType>> registry, ResourceKey<ChatType> key, ChatType type) {
-        Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().registry(Registries.CHAT_TYPE).orElse(null);
+        Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().lookup(Registries.CHAT_TYPE).orElse(null);
         if (chatTypes != null) {
             RegistryUtil.forceRegister(chatTypes, key.location(), type);
             return key;

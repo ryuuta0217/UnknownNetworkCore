@@ -82,9 +82,9 @@ public class AutoSmelting implements Listener {
 
         List<ItemStack> newDrops = Block.getDrops(blockState, level, blockPos, blockEntity).stream()
                 .map(minecraftDropStack -> {
-                    List<RecipeHolder<SmeltingRecipe>> recipes = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, new SingleRecipeInput(minecraftDropStack), level);
+                    List<RecipeHolder<SmeltingRecipe>> recipes = MinecraftServer.getServer().getRecipeManager().recipes.getRecipesFor(RecipeType.SMELTING, new SingleRecipeInput(minecraftDropStack), level).toList();
                     if (recipes.size() > 0) {
-                        ItemStack smeltingResult = recipes.get(0).value().getResultItem(level.registryAccess());
+                        ItemStack smeltingResult = recipes.get(0).value().assemble(new SingleRecipeInput(minecraftDropStack), level.registryAccess());
                         smeltingResult.setCount(minecraftDropStack.getCount());
                         return smeltingResult;
                     }

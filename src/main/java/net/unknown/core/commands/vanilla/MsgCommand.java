@@ -199,7 +199,7 @@ public class MsgCommand {
 
             boolean filtered;
 
-            ChatType.Bound outgoingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, receiver).withTargetName(receiver.getDisplayName());
+            ChatType.Bound outgoingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, source.getEntity()).withTargetName(receiver.getDisplayName());
             source.sendChatMessage(outMessage, false, outgoingBound);
             boolean filterMask = source.shouldFilterMessageTo(receiver);
             receiver.sendChatMessage(outMessage, filterMask, incomingBound);
