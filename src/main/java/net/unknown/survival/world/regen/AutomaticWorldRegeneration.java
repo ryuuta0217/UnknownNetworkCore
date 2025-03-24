@@ -280,7 +280,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
 
     public static boolean addSchedule(long execEpochMillis, String[] worlds, @Nullable String seed, boolean keepGameRules, boolean preGenerate) {
         LocalDateTime execDateTime = convertEpochMillisToLocalDateTime(execEpochMillis);
-        if (Duration.between(execDateTime, LocalDateTime.now()).isNegative()) return false;
+        if (Duration.between(LocalDateTime.now(), execDateTime).isNegative()) return false;
 
         getInstance().tasks.put(execEpochMillis, new Task(execEpochMillis, worlds, seed, keepGameRules, preGenerate));
         getInstance().timer.schedule(getInstance().tasks.get(execEpochMillis), new Date(execEpochMillis));
