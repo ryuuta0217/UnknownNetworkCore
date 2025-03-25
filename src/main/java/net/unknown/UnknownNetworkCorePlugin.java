@@ -39,7 +39,6 @@ import net.unknown.core.athletic.Athletics;
 import net.unknown.core.block.MultiPageChest;
 import net.unknown.core.bossbar.TPSBar;
 import net.unknown.core.chat.CustomChatTypes;
-import net.unknown.core.commands.Commands;
 import net.unknown.core.feature.PrivateMessageListener;
 import net.unknown.core.feature.WhoisListener;
 import net.unknown.core.feature.admin.spy.Spy;
@@ -124,7 +123,6 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
             }
         });*/
         CustomChatTypes.bootstrap();
-        Commands.init();
         MultiverseInventoriesFixer.fixAll();
         UnknownNetworkCore.getEnvironment().onLoad();
         long end = System.nanoTime();
