@@ -31,6 +31,7 @@
 
 package net.unknown.core.util;
 
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.tree.CommandNode;
@@ -83,7 +84,7 @@ public class BrigadierUtil {
         return def;
     }
 
-    public static void forceUnregisterCommand(String commandName) {
+    public static void forceUnregisterCommand(CommandDispatcher<CommandSourceStack> dispatcher, String commandName) {
         try {
             Field childrenField = CommandNode.class.getDeclaredField("children");
             childrenField.trySetAccessible();
@@ -97,7 +98,7 @@ public class BrigadierUtil {
             toRemoveCommands.forEach(children::remove);
 
             children.remove(commandName);
-            UnknownNetworkCorePlugin.getBrigadier().getRoot().removeCommand(commandName);
+            dispatcher.getRoot().removeCommand(commandName);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }
