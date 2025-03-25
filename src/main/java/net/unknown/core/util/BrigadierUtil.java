@@ -89,7 +89,7 @@ public class BrigadierUtil {
             Field childrenField = CommandNode.class.getDeclaredField("children");
             childrenField.trySetAccessible();
 
-            Map<String, CommandNode<CommandSourceStack>> children = (Map<String, CommandNode<CommandSourceStack>>) childrenField.get(UnknownNetworkCorePlugin.getBrigadier().getRoot());
+            Map<String, CommandNode<CommandSourceStack>> children = (Map<String, CommandNode<CommandSourceStack>>) childrenField.get(dispatcher.getRoot());
             Set<String> toRemoveCommands = new HashSet<>();
             children.keySet().stream()
                     .filter(command -> command.contains(":"))
