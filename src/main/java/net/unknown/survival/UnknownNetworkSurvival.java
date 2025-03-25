@@ -40,7 +40,6 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
-import net.unknown.survival.commands.SuppressRaidCommand;
 import net.unknown.survival.vote.data.VoteTicketExchangeItems;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
@@ -135,7 +134,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new LocalLoginListener());
         ListenerManager.registerListener(new OpenShulkerBoxInHand());
         ListenerManager.registerListener(new EconomyListener());
-        SuppressRaidCommand.registerListener();
+        SuppressRaids.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");
