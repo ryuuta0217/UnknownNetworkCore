@@ -110,7 +110,7 @@ public enum Permissions {
     }
 
     public boolean checkAndIsPlayer(CommandSourceStack clw) {
-        if (!(clw.source instanceof Player)) return false;
+        if (!(clw.isPlayer())) return false;
         return check(clw);
     }
 }
