@@ -74,9 +74,9 @@ public class MsgCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         // FORCE UNREGISTER [minecraft:msg, minecraft:tell, minecraft:w] COMMAND FROM COMMAND DISPATCHER
-        BrigadierUtil.forceUnregisterCommand("msg");
-        BrigadierUtil.forceUnregisterCommand("tell");
-        BrigadierUtil.forceUnregisterCommand("w");
+        BrigadierUtil.forceUnregisterCommand(dispatcher, "msg");
+        BrigadierUtil.forceUnregisterCommand(dispatcher, "tell");
+        BrigadierUtil.forceUnregisterCommand(dispatcher, "w");
         // FORCE UNREGISTER END
 
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("msg");

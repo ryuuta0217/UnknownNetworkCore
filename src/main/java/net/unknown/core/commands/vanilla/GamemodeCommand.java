@@ -51,7 +51,7 @@ import java.util.Collections;
 public class GamemodeCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         // FORCE UNREGISTER minecraft:gamemode COMMAND FROM COMMAND DISPATCHER
-        BrigadierUtil.forceUnregisterCommand("gamemode");
+        BrigadierUtil.forceUnregisterCommand(dispatcher, "gamemode");
         // FORCE UNREGISTER END
 
         for (String command : new String[] {"gamemode", "gm"}) {
