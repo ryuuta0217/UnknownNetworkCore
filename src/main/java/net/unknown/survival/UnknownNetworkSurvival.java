@@ -40,7 +40,6 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
-import net.unknown.survival.commands.Commands;
 import net.unknown.survival.commands.SuppressRaidCommand;
 import net.unknown.survival.vote.data.VoteTicketExchangeItems;
 import net.unknown.survival.data.Warps;
@@ -82,7 +81,6 @@ public class UnknownNetworkSurvival {
     private static boolean VOTIFIER_ENABLED = false;
 
     public static void onLoad() {
-        Commands.init();
         //DamageEnchant.register();
         try {
             Class.forName("net.unknown.launchwrapper.Main");

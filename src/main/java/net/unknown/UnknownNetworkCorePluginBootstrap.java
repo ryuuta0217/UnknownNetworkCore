@@ -31,11 +31,18 @@
 
 package net.unknown;
 
+import com.mojang.brigadier.CommandDispatcher;
+import io.papermc.paper.command.brigadier.ApiMirrorRootNode;
+import io.papermc.paper.command.brigadier.PaperCommands;
 import io.papermc.paper.plugin.bootstrap.BootstrapContext;
 import io.papermc.paper.plugin.bootstrap.PluginBootstrap;
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents;
 import io.papermc.paper.registry.event.RegistryEvents;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
+import net.unknown.core.commands.Commands;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -43,6 +50,23 @@ public class UnknownNetworkCorePluginBootstrap implements PluginBootstrap {
     @Override
     public void bootstrap(@NotNull BootstrapContext ctx) {
         ctx.getLogger().info(Component.text("Bootstrapping UnknownNetworkCore"));
+
+        ctx.getLifecycleManager().registerEventHandler(LifecycleEvents.COMMANDS, (e) -> {
+            if (e.registrar() instanceof PaperCommands reg) {
+                CommandBuildContext buildContext = reg.getBuildContext();
+                CommandDispatcher<CommandSourceStack> minecraftDispatcher = null;
+                if (reg.getDispatcherInternal().getRoot() instanceof ApiMirrorRootNode mirror) {
+                    minecraftDispatcher = mirror.getDispatcher();
+                }
+
+                if (buildContext != null && minecraftDispatcher != null) {
+                    Commands.init(minecraftDispatcher, buildContext);
+                    switch (UnknownNetworkCore.getEnvironment()) {
+                        case SURVIVAL -> net.unknown.survival.commands.Commands.init(minecraftDispatcher, buildContext);
+                    }
+                }
+            }
+        });
 
         ctx.getLogger().info(Component.text("Registering handler for sharpness enchantment max level set to 10"));
         ctx.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd(), event -> {

@@ -31,6 +31,9 @@
 
 package net.unknown.core.commands;
 
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.commands.vanilla.GamemodeCommand;
 import net.unknown.core.commands.vanilla.MsgCommand;
@@ -38,23 +41,23 @@ import net.unknown.core.commands.vanilla.TimeCommand;
 import net.unknown.core.fireworks.ProgrammedFireworksCommand;
 
 public class Commands {
-    public static void init() {
-        CrashCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        EvalCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        PacketCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        SkinCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        NickCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        SetPoseCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        GamemodeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        MsgCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        TeleportWorldCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        DeepFakeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        SkullCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        TrashCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        TimeCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        SwapLocationCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        ProgrammedFireworksCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        VanishCommand.register(UnknownNetworkCorePlugin.getBrigadier());
-        WhoisCommand.register(UnknownNetworkCorePlugin.getBrigadier());
+    public static void init(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
+        CrashCommand.register(dispatcher);
+        EvalCommand.register(dispatcher);
+        PacketCommand.register(dispatcher);
+        SkinCommand.register(dispatcher);
+        NickCommand.register(dispatcher);
+        SetPoseCommand.register(dispatcher);
+        GamemodeCommand.register(dispatcher);
+        MsgCommand.register(dispatcher);
+        TeleportWorldCommand.register(dispatcher);
+        DeepFakeCommand.register(dispatcher);
+        SkullCommand.register(dispatcher);
+        TrashCommand.register(dispatcher);
+        TimeCommand.register(dispatcher);
+        SwapLocationCommand.register(dispatcher);
+        ProgrammedFireworksCommand.register(dispatcher);
+        VanishCommand.register(dispatcher);
+        WhoisCommand.register(dispatcher);
     }
 }
