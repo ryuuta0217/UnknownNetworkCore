@@ -60,6 +60,7 @@ commands:
   spam-exclusions:
   - /skill
   silent-commandblock-console: false
+  enable-spam-exclusions: false
 stats:
   disable-saving: false
   forced-stats: {}
