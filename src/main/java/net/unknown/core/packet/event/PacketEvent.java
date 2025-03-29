@@ -39,7 +39,7 @@ import org.bukkit.event.Cancellable;
 public class PacketEvent<P extends Packet<?>> implements Cancellable {
 
     private final ServerPlayer player;
-    private final P packet;
+    private P packet;
 
     private boolean cancelled = false;
 
@@ -56,8 +56,12 @@ public class PacketEvent<P extends Packet<?>> implements Cancellable {
         return player.getBukkitEntity();
     }
 
-    protected P getPacket() {
+    public P getPacket() {
         return this.packet;
+    }
+
+    public void setPacket(P packet) {
+        this.packet = packet;
     }
 
     @Override

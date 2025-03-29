@@ -36,23 +36,26 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.FilteredText;
+import net.minecraft.server.network.TextFilter;
 import net.unknown.core.packet.event.PacketReceivedEvent;
 import net.unknown.core.packet.event.PacketSendingEvent;
 import net.unknown.core.packet.listener.IncomingPacketListener;
 import net.unknown.core.packet.listener.OutgoingPacketListener;
+import net.unknown.core.util.ReflectionUtil;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 public class PacketManager implements Listener {
     private static final Logger LOGGER = LoggerFactory.getLogger("UNC/PacketManager");
@@ -106,51 +109,70 @@ public class PacketManager implements Listener {
         return false;
     }
 
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerLogin(PlayerLoginEvent event) {
+        if (event.getResult() != PlayerLoginEvent.Result.ALLOWED) return;
         ServerPlayer player = ((CraftPlayer) event.getPlayer()).getHandle();
-        ChannelDuplexHandler packetHandler = new ChannelDuplexHandler() {
+        TextFilter oTextFilter = player.getTextFilter();
+        WrappedTextFilter wTextFilter = new WrappedTextFilter(oTextFilter) {
             @Override
-            public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
-                if (msg instanceof Packet packet) {
-                    PacketSendingEvent event = new PacketSendingEvent(player, packet);
-                    if (REGISTERED_OUTGOING_S2C_LISTENERS.containsKey(packet.getClass().getName())) {
-                        REGISTERED_OUTGOING_S2C_LISTENERS.get(packet.getClass().getName()).forEach(listener -> {
-                            if (listener.isIgnoreCancelled() && event.isCancelled()) return;
-                            listener.onSendingPacket(event);
-                        });
+            public void join() {
+                ChannelDuplexHandler packetHandler = new ChannelDuplexHandler() {
+                    @Override
+                    public void write(ChannelHandlerContext ctx, Object msg, ChannelPromise promise) throws Exception {
+                        if (msg instanceof Packet packet) {
+                            PacketSendingEvent event = new PacketSendingEvent(player, packet);
+                            if (REGISTERED_OUTGOING_S2C_LISTENERS.containsKey(packet.getClass().getName())) {
+                                REGISTERED_OUTGOING_S2C_LISTENERS.get(packet.getClass().getName()).forEach(listener -> {
+                                    if (listener.isIgnoreCancelled() && event.isCancelled()) return;
+                                    listener.onSendingPacket(event);
+                                });
+                            }
+                            if (event.isCancelled()) return;
+                            super.write(ctx, event.getPacket(), promise);
+                            return;
+                        } else {
+                            LOGGER.info("PacketManager detected unknown instance packet: " + msg.getClass().getName());
+                        }
+                        super.write(ctx, msg, promise);
                     }
-                    if (event.isCancelled()) return;
-                } else {
-                    LOGGER.info("PacketManager detected unknown instance packet: " + msg.getClass().getName());
-                }
-                super.write(ctx, msg, promise);
-            }
 
-            @Override
-            public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-                //long start = System.nanoTime();
-                if (msg instanceof Packet packet) {
-                    PacketReceivedEvent event = new PacketReceivedEvent(player, packet);
-                    if (REGISTERED_INCOMING_C2S_LISTENERS.containsKey(packet.getClass().getName())) {
-                        REGISTERED_INCOMING_C2S_LISTENERS.get(packet.getClass().getName()).forEach(listener -> {
-                            if (listener.isIgnoreCancelled() && event.isCancelled()) return;
-                            listener.onPacketReceived(event);
-                        });
+                    @Override
+                    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+                        //long start = System.nanoTime();
+                        if (msg instanceof Packet packet) {
+                            PacketReceivedEvent event = new PacketReceivedEvent(player, packet);
+                            if (REGISTERED_INCOMING_C2S_LISTENERS.containsKey(packet.getClass().getName())) {
+                                REGISTERED_INCOMING_C2S_LISTENERS.get(packet.getClass().getName()).forEach(listener -> {
+                                    if (listener.isIgnoreCancelled() && event.isCancelled()) return;
+                                    listener.onPacketReceived(event);
+                                });
+                            }
+                            if (event.isCancelled()) return;
+                            super.channelRead(ctx, event.getPacket());
+                            return;
+                        } else {
+                            LOGGER.info("PacketManager detected unknown instance packet: " + msg.getClass().getName());
+                        }
+                        // long end = System.nanoTime();
+                        // LOGGER.info("PacketManager took " + (end - start) + "ns (" + (end - start) / 1000000 + "ms) to handle packet!");
+                        // on Listeners non-registered: took 3000-5000 ns, in this injection code.
+
+                        super.channelRead(ctx, msg);
                     }
-                    if (event.isCancelled()) return;
-                } else {
-                    LOGGER.info("PacketManager detected unknown instance packet: " + msg.getClass().getName());
-                }
-                // long end = System.nanoTime();
-                // LOGGER.info("PacketManager took " + (end - start) + "ns (" + (end - start) / 1000000 + "ms) to handle packet!");
-                // on Listeners non-registered: took 3000-5000 ns, in this injection code.
-
-                super.channelRead(ctx, msg);
+                };
+                ChannelPipeline pipeline = player.connection.connection.channel.pipeline();
+                System.out.println(pipeline.names());
+                pipeline.addBefore("packet_handler", PacketManager.getPacketHandlerName(event.getPlayer().getName()), packetHandler);
+                oTextFilter.join();
             }
         };
-        ChannelPipeline pipeline = player.connection.connection.channel.pipeline();
-        pipeline.addAfter("encoder", PacketManager.getPacketHandlerName(event.getPlayer().getName()), packetHandler);
+
+        try {
+            ReflectionUtil.setFinalObject(ServerPlayer.class.getDeclaredField("textFilter"), player, wTextFilter);
+        } catch (NoSuchFieldException e) {
+            LOGGER.warn("Failed to inject TextFilter into player {}. PacketListener will not work for this player.", player.getName());
+        }
     }
 
     @EventHandler
@@ -161,5 +183,48 @@ public class PacketManager implements Listener {
 
     private static String getPacketHandlerName(String playerName) {
         return PACKET_HANDLER_NAME_FORMAT.replace("%player%", playerName);
+    }
+
+    private static class WrappedTextFilter implements TextFilter {
+        private final TextFilter textFilter;
+
+        public WrappedTextFilter(TextFilter textFilter) {
+            this.textFilter = textFilter;
+        }
+
+        @Override
+        public void join() {
+            this.textFilter.join();
+        }
+
+        @Override
+        public void leave() {
+            this.textFilter.leave();
+        }
+
+        @Override
+        public CompletableFuture<FilteredText> processStreamMessage(String s) {
+            return this.textFilter.processStreamMessage(s);
+        }
+
+        @Override
+        public CompletableFuture<List<FilteredText>> processMessageBundle(List<String> list) {
+            return this.textFilter.processMessageBundle(list);
+        }
+
+        @Override
+        public int hashCode() {
+            return this.textFilter.hashCode();
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return this.textFilter.equals(obj);
+        }
+
+        @Override
+        public String toString() {
+            return this.textFilter.toString();
+        }
     }
 }

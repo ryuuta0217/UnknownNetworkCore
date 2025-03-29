@@ -47,8 +47,4 @@ public class PacketSendingEvent<P extends Packet<?>> extends PacketEvent<P> {
     public Player getPlayer() {
         return this.getBukkitPlayer();
     }
-
-    public P getPacket() {
-        return super.getPacket();
-    }
 }
