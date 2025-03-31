@@ -152,7 +152,7 @@ public class PacketManager implements Listener {
                             super.channelRead(ctx, event.getPacket());
                             return;
                         } else {
-                            LOGGER.info("PacketManager detected unknown instance packet: " + msg.getClass().getName());
+                            if (!msg.getClass().isSynthetic()) LOGGER.info("PacketManager detected unknown instance packet: " + msg.getClass().getName());
                         }
                         // long end = System.nanoTime();
                         // LOGGER.info("PacketManager took " + (end - start) + "ns (" + (end - start) / 1000000 + "ms) to handle packet!");
