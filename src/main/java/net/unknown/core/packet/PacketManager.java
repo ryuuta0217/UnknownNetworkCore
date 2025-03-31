@@ -162,7 +162,6 @@ public class PacketManager implements Listener {
                     }
                 };
                 ChannelPipeline pipeline = player.connection.connection.channel.pipeline();
-                System.out.println(pipeline.names());
                 pipeline.addBefore("packet_handler", PacketManager.getPacketHandlerName(event.getPlayer().getName()), packetHandler);
                 oTextFilter.join();
             }
