@@ -29,40 +29,55 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown;
+package net.unknown.anarchyhardcore.ban;
 
-import net.unknown.anarchyhardcore.UnknownNetworkAnarchyHardcore;
-import net.unknown.lobby.UnknownNetworkLobby;
-import net.unknown.minigame.UnknownNetworkMiniGame;
-import net.unknown.survival.UnknownNetworkSurvival;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import org.bukkit.OfflinePlayer;
 
-public enum Environment {
-    PROXY,
-    LOBBY,
-    MINIGAME,
-    SURVIVAL,
-    ANARCHY_HARDCORE,
-    STANDALONE,
-    UNKNOWN;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+import java.util.UUID;
 
-    public void onLoad() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onLoad();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onLoad();
-        if (this == LOBBY) UnknownNetworkLobby.onLoad();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onLoad();
+public class IPBanData extends BanData<InetAddress> {
+    public static final String IDENTIFIER = "IPBan";
+
+    public IPBanData(InetAddress addr, long timestamp, Component reason) {
+        super(addr, timestamp, reason);
     }
 
-    public void onEnable() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onEnable();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onEnable();
-        if (this == LOBBY) UnknownNetworkLobby.onEnable();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onEnable();
+    @Override
+    public String toString() {
+        return IDENTIFIER + "|" + this.target().getHostAddress() + "|" + this.timestamp() + "|" + GsonComponentSerializer.gson().serialize(this.reason());
     }
 
-    public void onDisable() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onDisable();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onDisable();
-        if (this == LOBBY) UnknownNetworkLobby.onDisable();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onDisable();
+    @Override
+    public boolean validatePlayer(OfflinePlayer player) {
+        return player.isOnline() && this.validate(player.getPlayer().getAddress().getAddress());
+    }
+
+    @Override
+    public boolean validate(InetAddress address, UUID uniqueId, String name) {
+        return this.validate(address);
+    }
+
+    public static BanData<InetAddress> fromString(String str) {
+        try {
+            String[] strs = str.split("\\|", 4);
+            if (strs[0].equals(IDENTIFIER) && strs.length == 4) {
+                String ipStr = strs[1];
+                InetAddress ip = InetAddress.getByName(ipStr);
+
+                String timestampStr = strs[2];
+                long timestamp = Long.parseLong(timestampStr);
+
+                String reasonStr = strs[3];
+                Component reason = GsonComponentSerializer.gson().deserialize(reasonStr);
+
+                return new IPBanData(ip, timestamp, reason);
+            }
+        } catch (UnknownHostException ignored) {
+        }
+        return null;
     }
 }

@@ -29,40 +29,61 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown;
+package net.unknown.anarchyhardcore.ban;
 
-import net.unknown.anarchyhardcore.UnknownNetworkAnarchyHardcore;
-import net.unknown.lobby.UnknownNetworkLobby;
-import net.unknown.minigame.UnknownNetworkMiniGame;
-import net.unknown.survival.UnknownNetworkSurvival;
+import net.kyori.adventure.text.Component;
+import org.bukkit.OfflinePlayer;
 
-public enum Environment {
-    PROXY,
-    LOBBY,
-    MINIGAME,
-    SURVIVAL,
-    ANARCHY_HARDCORE,
-    STANDALONE,
-    UNKNOWN;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.util.Objects;
+import java.util.UUID;
 
-    public void onLoad() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onLoad();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onLoad();
-        if (this == LOBBY) UnknownNetworkLobby.onLoad();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onLoad();
+public abstract class BanData<T> implements Serializable {
+    private final T target;
+    private final long timestamp;
+    private final Component reason;
+
+    public BanData(T target, long timestamp, Component reason) {
+        this.target = target;
+        this.timestamp = timestamp;
+        this.reason = reason;
     }
 
-    public void onEnable() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onEnable();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onEnable();
-        if (this == LOBBY) UnknownNetworkLobby.onEnable();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onEnable();
+    @Override
+    public abstract String toString();
+
+    public T target() {
+        return this.target;
     }
 
-    public void onDisable() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onDisable();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onDisable();
-        if (this == LOBBY) UnknownNetworkLobby.onDisable();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onDisable();
+    public abstract boolean validatePlayer(OfflinePlayer player);
+
+    public abstract boolean validate(InetAddress address, UUID uniqueId, String name);
+
+    public boolean validate(T other) {
+        return Objects.equals(this.target, other);
+    }
+
+    public long timestamp() {
+        return this.timestamp;
+    }
+
+    public Component reason() {
+        return this.reason;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (BanData<?>) obj;
+        return Objects.equals(this.target, that.target) &&
+                Objects.equals(this.reason, that.reason);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.target, this.reason);
     }
 }
