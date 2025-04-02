@@ -38,7 +38,7 @@ public class ComponentCollector {
     }
 
     public void add(Component component) {
-        if (this.delimiter != null) {
+        if (this.delimiter != null && !this.component.equals(Component.empty())) {
             this.component = this.component.append(this.delimiter);
         }
         this.component = this.component.append(component);
