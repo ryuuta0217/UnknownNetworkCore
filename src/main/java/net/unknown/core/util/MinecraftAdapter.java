@@ -189,7 +189,7 @@ public class MinecraftAdapter {
                 CompoundTag tag = TagParser.parseTag(json);
                 if (!tag.contains("components") && tag.contains("tag")) {
                     // Need to convert old NBT format to new format (DataComponent)
-                    tag = MCDataConverter.convertTag(MCTypeRegistry.ITEM_STACK, tag, MCVersions.V1_20_4, MCVersions.V1_20_6);
+                    tag = MCDataConverter.convertTag(MCTypeRegistry.ITEM_STACK, tag, MCVersions.V1_20_4, MCVersions.V1_21_4);
                 }
                 return net.minecraft.world.item.ItemStack.parse(MinecraftServer.getDefaultRegistryAccess(), tag).orElse(null);
             } catch (CommandSyntaxException e) {
