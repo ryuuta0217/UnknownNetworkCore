@@ -58,6 +58,7 @@ repositories {
     maven { url = "https://maven.quiltmc.org/repository/release/" }
     maven { url = "https://maven.enginehub.org/repo/" }
     maven { url = "https://jitpack.io" }
+    maven { url = "https://repo.codemc.io/" } // VaultAPI
     maven { url = "https://repo.ryuuta0217.com/repository/unknown-network/" }
     maven { url = "https://repo.onarandombox.com/content/groups/public/" } // Multiverse-(Core|Inventories|Portals|NetherPortals) repo
     maven { url = "https://maven.playpro.com/" } // CoreProtect
@@ -73,7 +74,7 @@ dependencies {
         exclude group: 'com.google.guava', module: 'guava'
         exclude group: 'it.unimi.dsi', module: 'fastutil'
     }
-    compileOnly group: 'com.github.MilkBowl', name: 'VaultAPI', version: '+'
+    compileOnly group: 'net.milkbowl.vault', name: 'VaultAPI', version: '1.7'
     compileOnly group: 'net.luckperms', name: 'api', version: '+'
     compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'c88c0d57'
     launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'c88c0d57'
