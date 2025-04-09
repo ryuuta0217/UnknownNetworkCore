@@ -33,12 +33,10 @@ package net.unknown.core.managers;
 
 import net.unknown.UnknownNetworkCorePlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -64,7 +62,7 @@ public class ListenerManager {
         return REGISTERED_LISTENERS.contains(listener);
     }
 
-    public static Listener registerEventListener(Class<? extends Event> eventClass, Listener listener, EventPriority priority, boolean ignoreCancelled, EventExecutor eventExecutor) {
+    public static <E extends Event> Listener registerEventListener(Class<E> eventClass, Listener listener, EventPriority priority, boolean ignoreCancelled, EventExecutor<E> eventExecutor) {
         if (listener == null) listener = new Listener() {
         };
         Bukkit.getPluginManager().registerEvent(eventClass, listener, priority, eventExecutor, UnknownNetworkCorePlugin.getInstance(), ignoreCancelled);
@@ -109,5 +107,16 @@ public class ListenerManager {
         public long toTick(long input) {
             return input * i;
         }
+    }
+
+    @FunctionalInterface
+    public interface EventExecutor<E extends Event> extends org.bukkit.plugin.EventExecutor {
+        default void execute(@NotNull Listener listener, @NotNull Event event) throws EventException {
+            try {
+                exec(listener, (E) event);
+            } catch(ClassCastException ignored) {}
+        }
+
+        void exec(@NotNull Listener listener, @NotNull E event) throws EventException;
     }
 }

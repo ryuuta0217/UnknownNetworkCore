@@ -1,0 +1,6 @@
+# This is a configuration file for a Server Selector Compass.
+
+servers:
+  13:
+    server-name: "survival"
+    item: '{"id": "minecraft:grass_block", count: 1, components: {"minecraft:display_name": ''{"text": "生活鯖", "color":"gold", "italic":false}''}}'

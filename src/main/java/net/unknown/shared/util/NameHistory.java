@@ -32,8 +32,8 @@
 package net.unknown.shared.util;
 
 import net.unknown.core.managers.ListenerManager;
+import net.unknown.core.managers.RunnableManager;
 import net.unknown.shared.SharedConstants;
-import org.bukkit.Bukkit;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.json.JSONObject;
@@ -91,6 +91,7 @@ public class NameHistory {
 
     public static void updateLastSeen(UUID uniqueId, String playerName, long lastSeen) {
         NAME_HISTORY.computeIfAbsent(uniqueId, k -> new HashMap<>()).put(playerName, lastSeen);
+        RunnableManager.runAsync(NameHistory::save);
     }
 
     public static synchronized void save() {

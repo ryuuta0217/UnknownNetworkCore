@@ -8,7 +8,7 @@ dependencies:
   server:
     Vault:
       load: BEFORE
-      required: true
+      required: false
       join-classpath: true
     WorldGuard:
       load: BEFORE

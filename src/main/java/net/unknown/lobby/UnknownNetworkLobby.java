@@ -42,13 +42,15 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.lobby.feature.RealTimeSynchronizer;
 import net.unknown.lobby.listeners.Blocker;
 import net.unknown.lobby.listeners.PlayerJoinListener;
-import net.unknown.lobby.listeners.ServerSelector;
+import net.unknown.lobby.feature.ServerSelector;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
 public class UnknownNetworkLobby {
+    private static final ServerSelector SERVER_SELECTOR = new ServerSelector();
+
     public static void onLoad() {
 
     }
@@ -57,7 +59,7 @@ public class UnknownNetworkLobby {
         Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "BungeeCord");
         ListenerManager.registerListener(new Blocker());
         ListenerManager.registerListener(new PlayerJoinListener());
-        ListenerManager.registerListener(new ServerSelector());
+        ListenerManager.registerListener(SERVER_SELECTOR);
         RealTimeSynchronizer.start();
     }
 
@@ -65,11 +67,8 @@ public class UnknownNetworkLobby {
 
     }
 
-    public static ItemStack getServerSelectorCompass() {
-        return new ItemStackBuilder(Material.COMPASS)
-                .displayName(Component.text("サーバーをえらぶ", Style.style(DefinedTextColor.AQUA, TextDecoration.BOLD.withState(true))))
-                .lore(Component.text("右クリックでサーバー選択画面を開きます", DefinedTextColor.GOLD))
-                .build();
+    public static ServerSelector getServerSelector() {
+        return SERVER_SELECTOR;
     }
 
     public static ItemStack getBook() {

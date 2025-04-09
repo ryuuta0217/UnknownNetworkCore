@@ -31,6 +31,7 @@
 
 package net.unknown;
 
+import net.unknown.anarchyhardcore.UnknownNetworkAnarchyHardcore;
 import net.unknown.lobby.UnknownNetworkLobby;
 import net.unknown.minigame.UnknownNetworkMiniGame;
 import net.unknown.survival.UnknownNetworkSurvival;
@@ -40,23 +41,27 @@ public enum Environment {
     LOBBY,
     MINIGAME,
     SURVIVAL,
+    ANARCHY_HARDCORE,
     STANDALONE,
     UNKNOWN;
 
     public void onLoad() {
         if (this == SURVIVAL) UnknownNetworkSurvival.onLoad();
+        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onLoad();
         if (this == LOBBY) UnknownNetworkLobby.onLoad();
         if (this == MINIGAME) UnknownNetworkMiniGame.onLoad();
     }
 
     public void onEnable() {
         if (this == SURVIVAL) UnknownNetworkSurvival.onEnable();
+        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onEnable();
         if (this == LOBBY) UnknownNetworkLobby.onEnable();
         if (this == MINIGAME) UnknownNetworkMiniGame.onEnable();
     }
 
     public void onDisable() {
         if (this == SURVIVAL) UnknownNetworkSurvival.onDisable();
+        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onDisable();
         if (this == LOBBY) UnknownNetworkLobby.onDisable();
         if (this == MINIGAME) UnknownNetworkMiniGame.onDisable();
     }
