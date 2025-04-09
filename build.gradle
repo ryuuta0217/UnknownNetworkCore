@@ -53,6 +53,7 @@ license {
 
 repositories {
     mavenCentral()
+    maven { url = "https://repo.papermc.io/repository/maven-public/" } // Paper, Velocity
     maven { url = "https://repo.spongepowered.org/maven/" }
     maven { url = "https://files.minecraftforge.net/maven/" }
     maven { url = "https://maven.quiltmc.org/repository/release/" }
@@ -62,7 +63,6 @@ repositories {
     maven { url = "https://repo.ryuuta0217.com/repository/unknown-network/" }
     maven { url = "https://repo.onarandombox.com/content/groups/public/" } // Multiverse-(Core|Inventories|Portals|NetherPortals) repo
     maven { url = "https://maven.playpro.com/" } // CoreProtect
-    maven { url = "https://repo.papermc.io/repository/maven-public/" } // Velocity
     maven { url = "https://repo.viaversion.com" } // ViaVersion
 }
 
