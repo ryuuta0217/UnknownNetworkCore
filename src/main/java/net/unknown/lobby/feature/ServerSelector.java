@@ -57,7 +57,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ServerSelector extends ConfigurationBase implements Listener {
-    private final Map<Integer, Map.Entry<ItemStack, String>> servers = new HashMap<>();
+    private Map<Integer, Map.Entry<ItemStack, String>> servers;
 
     public ServerSelector() {
         super("server_selector.yml", true, "UNC/ServerSelector");
@@ -65,7 +65,7 @@ public class ServerSelector extends ConfigurationBase implements Listener {
 
     @Override
     public void onLoad() {
-        this.servers.clear();
+        this.servers = new HashMap<>();
         if (this.getConfig().isSet("servers")) {
             ConfigurationSection section = this.getConfig().getConfigurationSection("servers");
             if (section != null) {
