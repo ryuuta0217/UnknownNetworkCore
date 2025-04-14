@@ -32,6 +32,7 @@
 package net.unknown;
 
 import net.unknown.anarchyhardcore.UnknownNetworkAnarchyHardcore;
+import net.unknown.athletic.UnknownNetworkAthletic;
 import net.unknown.lobby.UnknownNetworkLobby;
 import net.unknown.minigame.UnknownNetworkMiniGame;
 import net.unknown.survival.UnknownNetworkSurvival;
@@ -42,6 +43,7 @@ public enum Environment {
     MINIGAME,
     SURVIVAL,
     ANARCHY_HARDCORE,
+    ATHLETIC,
     STANDALONE,
     UNKNOWN;
 
@@ -50,6 +52,7 @@ public enum Environment {
         if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onLoad();
         if (this == LOBBY) UnknownNetworkLobby.onLoad();
         if (this == MINIGAME) UnknownNetworkMiniGame.onLoad();
+        if (this == ATHLETIC) UnknownNetworkAthletic.onLoad();
     }
 
     public void onEnable() {
@@ -57,6 +60,7 @@ public enum Environment {
         if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onEnable();
         if (this == LOBBY) UnknownNetworkLobby.onEnable();
         if (this == MINIGAME) UnknownNetworkMiniGame.onEnable();
+        if (this == ATHLETIC) UnknownNetworkAthletic.onEnable();
     }
 
     public void onDisable() {
@@ -64,5 +68,6 @@ public enum Environment {
         if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onDisable();
         if (this == LOBBY) UnknownNetworkLobby.onDisable();
         if (this == MINIGAME) UnknownNetworkMiniGame.onDisable();
+        if (this == ATHLETIC) UnknownNetworkAthletic.onDisable();
     }
 }
