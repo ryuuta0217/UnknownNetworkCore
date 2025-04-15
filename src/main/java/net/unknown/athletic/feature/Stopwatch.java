@@ -37,6 +37,7 @@ import net.unknown.athletic.event.StopwatchStartEvent;
 import net.unknown.athletic.event.StopwatchStopEvent;
 import net.unknown.core.managers.ListenerManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -66,7 +67,7 @@ public class Stopwatch extends BukkitRunnable implements Listener {
         INSTANCE.runTaskTimerAsynchronously(UnknownNetworkCorePlugin.getInstance(), 0, 1L);
         ListenerManager.registerEventListener(PlayerQuitEvent.class, INSTANCE, EventPriority.MONITOR, false, (l, e) -> {
             if (isRunningStopwatch(e.getPlayer())) {
-                UnknownNetworkAthletic.getLogger().info("Player " + e.getPlayer().getName() + "(" + e.getPlayer().getUniqueId() + ") quit with stopwatch time " + stopStopwatch(e.getPlayer()));
+                UnknownNetworkAthletic.getLogger().info("Player " + e.getPlayer().getName() + "(" + e.getPlayer().getUniqueId() + ") quit with stopwatch time " + stopStopwatch(e.getPlayer(), null));
             }
         });
 
@@ -74,8 +75,8 @@ public class Stopwatch extends BukkitRunnable implements Listener {
             if (e.hasChangedBlock()) {
                 Block block = e.getTo().clone().toBlockLocation().add(0, -1, 0).getBlock();
                 switch(block.getType()) {
-                    case GOLD_BLOCK -> Stopwatch.startStopwatch(e.getPlayer());
-                    case EMERALD_BLOCK -> Stopwatch.stopStopwatch(e.getPlayer());
+                    case GOLD_BLOCK -> Stopwatch.startStopwatch(e.getPlayer(), block.getLocation());
+                    case EMERALD_BLOCK -> Stopwatch.stopStopwatch(e.getPlayer(), block.getLocation());
                 }
             }
         });
@@ -85,8 +86,8 @@ public class Stopwatch extends BukkitRunnable implements Listener {
         return player.getPersistentDataContainer().getOrDefault(RUNNING_KEY, PersistentDataType.BOOLEAN, false);
     }
 
-    public static void startStopwatch(Player player) {
-        StopwatchStartEvent event = new StopwatchStartEvent(player);
+    public static void startStopwatch(Player player, Location source) {
+        StopwatchStartEvent event = new StopwatchStartEvent(player, source);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
             return;
@@ -95,10 +96,10 @@ public class Stopwatch extends BukkitRunnable implements Listener {
         player.getPersistentDataContainer().set(RUNNING_KEY, PersistentDataType.BOOLEAN, true);
     }
 
-    public static int stopStopwatch(Player player) {
+    public static int stopStopwatch(Player player, Location source) {
         int time = player.getPersistentDataContainer().getOrDefault(TIME_KEY, PersistentDataType.INTEGER, 0);
         if (isRunningStopwatch(player)) {
-            StopwatchStopEvent event = new StopwatchStopEvent(player, time);
+            StopwatchStopEvent event = new StopwatchStopEvent(player, source, time);
             Bukkit.getPluginManager().callEvent(event);
             time = event.getTime();
             if (event.isCancelled()) {

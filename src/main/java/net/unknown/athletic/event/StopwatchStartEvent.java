@@ -31,9 +31,12 @@
 
 package net.unknown.athletic.event;
 
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.Nullable;
 
 /**
  * ストップウォッチが開始されたときに呼び出されます。
@@ -42,8 +45,8 @@ import org.jetbrains.annotations.NotNull;
 public class StopwatchStartEvent extends StopwatchEvent {
     private static final HandlerList HANDLERS = new HandlerList();
 
-    public StopwatchStartEvent(Player player) {
-        super(player);
+    public StopwatchStartEvent(Player player, @Nullable Location source) {
+        super(player, source);
     }
 
     @Override
