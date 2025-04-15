@@ -29,19 +29,27 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.athletic;
+package net.unknown.athletic.feature;
 
 import net.unknown.UnknownNetworkCorePlugin;
+import net.unknown.athletic.UnknownNetworkAthletic;
+import net.unknown.athletic.event.StopwatchStopEvent;
+import net.unknown.core.managers.ListenerManager;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Optional;
 
-public class Stopwatch extends BukkitRunnable  {
+public class Stopwatch extends BukkitRunnable implements Listener {
     private static Stopwatch INSTANCE = null;
     private static final NamespacedKey RUNNING_KEY = new NamespacedKey("athletic", "stopwatch_running");
     private static final NamespacedKey TIME_KEY = new NamespacedKey("athletic", "stopwatch_time");
@@ -49,19 +57,50 @@ public class Stopwatch extends BukkitRunnable  {
     public static void init() {
         if (INSTANCE != null && !INSTANCE.isCancelled()) {
             INSTANCE.cancel();
+            ListenerManager.unregisterListener(INSTANCE);
             INSTANCE = null;
         }
 
         INSTANCE = new Stopwatch();
         INSTANCE.runTaskTimerAsynchronously(UnknownNetworkCorePlugin.getInstance(), 0, 1L);
+        ListenerManager.registerEventListener(PlayerQuitEvent.class, INSTANCE, EventPriority.MONITOR, false, (l, e) -> {
+            if (isRunningStopwatch(e.getPlayer())) {
+                UnknownNetworkAthletic.getLogger().info("Player " + e.getPlayer().getName() + "(" + e.getPlayer().getUniqueId() + ") quit with stopwatch time " + stopStopwatch(e.getPlayer()));
+            }
+        });
+
+        ListenerManager.registerEventListener(PlayerMoveEvent.class, INSTANCE, EventPriority.MONITOR, false, (l, e) -> {
+            if (e.hasChangedBlock()) {
+                Block block = e.getTo().clone().toBlockLocation().add(0, -1, 0).getBlock();
+                switch(block.getType()) {
+                    case GOLD_BLOCK -> Stopwatch.startStopwatch(e.getPlayer());
+                    case EMERALD_BLOCK -> Stopwatch.stopStopwatch(e.getPlayer());
+                }
+            }
+        });
+    }
+
+    public static boolean isRunningStopwatch(Player player) {
+        return player.getPersistentDataContainer().getOrDefault(RUNNING_KEY, PersistentDataType.BOOLEAN, false);
     }
 
     public static void startStopwatch(Player player) {
+        player.getPersistentDataContainer().set(TIME_KEY, PersistentDataType.INTEGER, 0);
         player.getPersistentDataContainer().set(RUNNING_KEY, PersistentDataType.BOOLEAN, true);
     }
 
-    public static void stopStopwatch(Player player) {
+    public static int stopStopwatch(Player player) {
+        int time = player.getPersistentDataContainer().getOrDefault(TIME_KEY, PersistentDataType.INTEGER, 0);
+        if (isRunningStopwatch(player)) {
+            StopwatchStopEvent event = new StopwatchStopEvent(player, time);
+            Bukkit.getPluginManager().callEvent(event);
+            time = event.getTime();
+            if (event.isCancelled()) {
+                return -1;
+            }
+        }
         player.getPersistentDataContainer().set(RUNNING_KEY, PersistentDataType.BOOLEAN, false);
+        return time;
     }
 
     @Override
@@ -75,7 +114,7 @@ public class Stopwatch extends BukkitRunnable  {
                         ticks = Optional.ofNullable(dataContainer.get(TIME_KEY, PersistentDataType.INTEGER)).orElse(0);
                     }
                     ticks += 1;
-                    dataContainer.set(RUNNING_KEY, PersistentDataType.INTEGER, ticks);
+                    dataContainer.set(TIME_KEY, PersistentDataType.INTEGER, ticks);
                 }
             }
         });

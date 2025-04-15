@@ -31,7 +31,13 @@
 
 package net.unknown.athletic;
 
+import net.unknown.athletic.feature.Stopwatch;
+
+import java.util.logging.Logger;
+
 public class UnknownNetworkAthletic {
+    private static final Logger LOGGER = Logger.getLogger("UNC/Athletic");
+
     public static void onLoad() {
 
     }
@@ -42,5 +48,9 @@ public class UnknownNetworkAthletic {
 
     public static void onDisable() {
 
+    }
+
+    public static Logger getLogger() {
+        return LOGGER;
     }
 }
