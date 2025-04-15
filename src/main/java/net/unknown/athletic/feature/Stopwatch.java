@@ -33,6 +33,7 @@ package net.unknown.athletic.feature;
 
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.athletic.UnknownNetworkAthletic;
+import net.unknown.athletic.event.StopwatchStartEvent;
 import net.unknown.athletic.event.StopwatchStopEvent;
 import net.unknown.core.managers.ListenerManager;
 import org.bukkit.Bukkit;
@@ -85,6 +86,11 @@ public class Stopwatch extends BukkitRunnable implements Listener {
     }
 
     public static void startStopwatch(Player player) {
+        StopwatchStartEvent event = new StopwatchStartEvent(player);
+        Bukkit.getPluginManager().callEvent(event);
+        if (event.isCancelled()) {
+            return;
+        }
         player.getPersistentDataContainer().set(TIME_KEY, PersistentDataType.INTEGER, 0);
         player.getPersistentDataContainer().set(RUNNING_KEY, PersistentDataType.BOOLEAN, true);
     }
