@@ -86,6 +86,10 @@ public class Stopwatch extends BukkitRunnable implements Listener {
         return player.getPersistentDataContainer().getOrDefault(RUNNING_KEY, PersistentDataType.BOOLEAN, false);
     }
 
+    public static int getTime(Player player) {
+        return player.getPersistentDataContainer().getOrDefault(TIME_KEY, PersistentDataType.INTEGER, 0);
+    }
+
     public static void startStopwatch(Player player, Location source) {
         StopwatchStartEvent event = new StopwatchStartEvent(player, source);
         Bukkit.getPluginManager().callEvent(event);
