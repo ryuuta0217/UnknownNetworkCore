@@ -29,45 +29,23 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown;
+package net.unknown.athletic.listeners;
 
-import net.unknown.anarchyhardcore.UnknownNetworkAnarchyHardcore;
-import net.unknown.athletic.UnknownNetworkAthletic;
-import net.unknown.lobby.UnknownNetworkLobby;
-import net.unknown.minigame.UnknownNetworkMiniGame;
-import net.unknown.survival.UnknownNetworkSurvival;
+import net.unknown.athletic.event.StopwatchStartEvent;
+import net.unknown.athletic.event.StopwatchStopEvent;
+import org.bukkit.Sound;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
-public enum Environment {
-    PROXY,
-    LOBBY,
-    MINIGAME,
-    SURVIVAL,
-    ANARCHY_HARDCORE,
-    ATHLETIC,
-    STANDALONE,
-    UNKNOWN;
+public class StopwatchListener implements Listener {
+    @EventHandler
+    public void onStopwatchStart(StopwatchStartEvent event) {
+        event.getPlayer().playSound(event.getPlayer(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 0f);
 
-    public void onLoad() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onLoad();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onLoad();
-        if (this == LOBBY) UnknownNetworkLobby.onLoad();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onLoad();
-        if (this == ATHLETIC) UnknownNetworkAthletic.onLoad();
     }
 
-    public void onEnable() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onEnable();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onEnable();
-        if (this == LOBBY) UnknownNetworkLobby.onEnable();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onEnable();
-        if (this == ATHLETIC) UnknownNetworkAthletic.onEnable();
-    }
-
-    public void onDisable() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onDisable();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onDisable();
-        if (this == LOBBY) UnknownNetworkLobby.onDisable();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onDisable();
-        if (this == ATHLETIC) UnknownNetworkAthletic.onDisable();
+    @EventHandler
+    public void onStopwatchStop(StopwatchStopEvent event) {
+        event.getPlayer().playSound(event.getPlayer(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 2f);
     }
 }

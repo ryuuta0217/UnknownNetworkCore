@@ -29,45 +29,41 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown;
+package net.unknown.athletic.event;
 
-import net.unknown.anarchyhardcore.UnknownNetworkAnarchyHardcore;
-import net.unknown.athletic.UnknownNetworkAthletic;
-import net.unknown.lobby.UnknownNetworkLobby;
-import net.unknown.minigame.UnknownNetworkMiniGame;
-import net.unknown.survival.UnknownNetworkSurvival;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 
-public enum Environment {
-    PROXY,
-    LOBBY,
-    MINIGAME,
-    SURVIVAL,
-    ANARCHY_HARDCORE,
-    ATHLETIC,
-    STANDALONE,
-    UNKNOWN;
+import javax.annotation.Nullable;
 
-    public void onLoad() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onLoad();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onLoad();
-        if (this == LOBBY) UnknownNetworkLobby.onLoad();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onLoad();
-        if (this == ATHLETIC) UnknownNetworkAthletic.onLoad();
+/**
+ * ストップウォッチが停止されたときに呼び出されます。
+ */
+public class StopwatchStopEvent extends StopwatchEvent {
+    private static final HandlerList HANDLERS = new HandlerList();
+    private int time;
+
+    public StopwatchStopEvent(Player player, @Nullable Location source, int time) {
+        super(player, source);
+        this.time = time;
     }
 
-    public void onEnable() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onEnable();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onEnable();
-        if (this == LOBBY) UnknownNetworkLobby.onEnable();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onEnable();
-        if (this == ATHLETIC) UnknownNetworkAthletic.onEnable();
+    public int getTime() {
+        return this.time;
     }
 
-    public void onDisable() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onDisable();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onDisable();
-        if (this == LOBBY) UnknownNetworkLobby.onDisable();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onDisable();
-        if (this == ATHLETIC) UnknownNetworkAthletic.onDisable();
+    public void setTime(int time) {
+        this.time = time;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
+
+    @Override
+    public @NotNull HandlerList getHandlers() {
+        return HANDLERS;
     }
 }

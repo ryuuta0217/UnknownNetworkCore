@@ -29,45 +29,46 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown;
+package net.unknown.athletic.event;
 
-import net.unknown.anarchyhardcore.UnknownNetworkAnarchyHardcore;
-import net.unknown.athletic.UnknownNetworkAthletic;
-import net.unknown.lobby.UnknownNetworkLobby;
-import net.unknown.minigame.UnknownNetworkMiniGame;
-import net.unknown.survival.UnknownNetworkSurvival;
+import net.unknown.athletic.feature.Stopwatch;
+import org.bukkit.Location;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
 
-public enum Environment {
-    PROXY,
-    LOBBY,
-    MINIGAME,
-    SURVIVAL,
-    ANARCHY_HARDCORE,
-    ATHLETIC,
-    STANDALONE,
-    UNKNOWN;
+import javax.annotation.Nullable;
 
-    public void onLoad() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onLoad();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onLoad();
-        if (this == LOBBY) UnknownNetworkLobby.onLoad();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onLoad();
-        if (this == ATHLETIC) UnknownNetworkAthletic.onLoad();
+public abstract class StopwatchEvent extends Event implements Cancellable {
+    private final Player player;
+    private final Location source;
+    private boolean cancelled = false;
+
+    StopwatchEvent(Player player, @Nullable Location source) {
+        this.player = player;
+        this.source = source;
     }
 
-    public void onEnable() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onEnable();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onEnable();
-        if (this == LOBBY) UnknownNetworkLobby.onEnable();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onEnable();
-        if (this == ATHLETIC) UnknownNetworkAthletic.onEnable();
+    public Player getPlayer() {
+        return this.player;
     }
 
-    public void onDisable() {
-        if (this == SURVIVAL) UnknownNetworkSurvival.onDisable();
-        if (this == ANARCHY_HARDCORE) UnknownNetworkAnarchyHardcore.onDisable();
-        if (this == LOBBY) UnknownNetworkLobby.onDisable();
-        if (this == MINIGAME) UnknownNetworkMiniGame.onDisable();
-        if (this == ATHLETIC) UnknownNetworkAthletic.onDisable();
+    @Nullable
+    public Location getSource() {
+        return this.source.clone();
+    }
+
+    public boolean isRunning() {
+        return Stopwatch.isRunningStopwatch(this.player);
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return this.cancelled;
+    }
+
+    @Override
+    public void setCancelled(boolean cancel) {
+        this.cancelled = cancel;
     }
 }
