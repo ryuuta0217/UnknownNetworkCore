@@ -49,6 +49,10 @@ public class StopwatchStartEvent extends StopwatchEvent {
         super(player, source);
     }
 
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
+
     @Override
     public @NotNull HandlerList getHandlers() {
         return HANDLERS;

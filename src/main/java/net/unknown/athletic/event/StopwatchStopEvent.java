@@ -58,6 +58,10 @@ public class StopwatchStopEvent extends StopwatchEvent {
         this.time = time;
     }
 
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
+
     @Override
     public @NotNull HandlerList getHandlers() {
         return HANDLERS;
