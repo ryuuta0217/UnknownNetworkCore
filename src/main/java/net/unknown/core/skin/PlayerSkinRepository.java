@@ -224,7 +224,7 @@ public class PlayerSkinRepository extends SharedConfigurationBase {
             ListenerManager.waitForEvent(PlayerJoinEvent.class, false, EventPriority.MONITOR, (e) -> {
                 return e.getPlayer().getUniqueId().equals(event.getUniqueId());
             }, (e) -> {
-                if (e.getPlayer().hasPlayedBefore()) {
+                if (e.getPlayer().hasPlayedBefore() && !this.skinHistory.isEmpty()) {
                     RunnableManager.runAsyncDelayed(() -> NewMessageUtil.sendMessage(e.getPlayer(), "スキンが変更履歴に追加されました", false), 5);
                 } else {
                     // Newbie is ignored - no need to notify, its no data is stored

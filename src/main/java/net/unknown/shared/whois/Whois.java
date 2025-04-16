@@ -78,13 +78,17 @@ public class Whois {
             e.printStackTrace();
         }
         IPINFO_ACCESS_TOKEN = ipInfoApiTokenTemp;
-
-        LOGGER.info("Initializing ipinfo.io API client...");
-        IPINFO_CACHE = new SimpleCache(Duration.ofDays(3));
-        IPINFO_CLIENT = new IPinfo.Builder()
-                .setToken(IPINFO_ACCESS_TOKEN)
-                .setCache(IPINFO_CACHE)
-                .build();
+        if (IPINFO_ACCESS_TOKEN == null) {
+            IPINFO_CLIENT = null;
+            IPINFO_CACHE = null;
+        } else {
+            LOGGER.info("Initializing ipinfo.io API client...");
+            IPINFO_CACHE = new SimpleCache(Duration.ofDays(3));
+            IPINFO_CLIENT = new IPinfo.Builder()
+                    .setToken(IPINFO_ACCESS_TOKEN)
+                    .setCache(IPINFO_CACHE)
+                    .build();
+        }
 
         LOGGER.info("Loading IP to players database...");
         USERS_BY_IP.clear();
@@ -104,7 +108,7 @@ public class Whois {
     public static IPResponse getIpInformation(InetAddress ip) {
         try {
             return IPINFO_CLIENT.lookupIP(ip.getHostAddress());
-        } catch (RateLimitedException e) {
+        } catch (Throwable e) {
             return null;
         }
     }
@@ -192,6 +196,7 @@ public class Whois {
         try {
             if ((USERS_BY_IP_FILE.getParentFile().exists() || USERS_BY_IP_FILE.getParentFile().mkdirs()) && (USERS_BY_IP_FILE.exists() || USERS_BY_IP_FILE.createNewFile())) {
                 String plainJson = String.join("\n", Files.readAllLines(USERS_BY_IP_FILE.toPath()));
+                if (plainJson.isBlank()) plainJson = "{}";
                 Map<InetAddress, Map<UUID, Long>> usersByIp = new HashMap<>();
                 JSONObject json = new JSONObject(plainJson);
                 json.keySet().forEach(ip -> {

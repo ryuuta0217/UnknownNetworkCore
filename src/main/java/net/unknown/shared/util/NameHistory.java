@@ -63,6 +63,7 @@ public class NameHistory {
         try {
             if ((NAME_HISTORY_FILE.getParentFile().exists() || NAME_HISTORY_FILE.getParentFile().mkdirs()) && (NAME_HISTORY_FILE.exists() || NAME_HISTORY_FILE.createNewFile())) {
                 String jsonStr = String.join("\n", Files.readAllLines(NAME_HISTORY_FILE.toPath()));
+                if (jsonStr.isBlank()) jsonStr = "{}";
                 JSONObject json = new JSONObject(jsonStr);
                 json.keySet().forEach(uuidStr -> {
                     UUID uuid = UUID.fromString(uuidStr);

@@ -60,6 +60,7 @@ public class WhoisListener implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         Whois.addUserByIp(event.getPlayer().getAddress().getAddress(), event.getPlayer().getUniqueId(), System.currentTimeMillis());
+        if (Whois.getIpInfoCache() == null) return; // If not configured client
 
         if (!event.getPlayer().hasPermission(Permissions.FEATURE_WHOIS.getPermissionNode())) {
             Component whoisMessage = buildWhoisInformationMessage(event.getPlayer(), true); // Automatic show whois message is always masked

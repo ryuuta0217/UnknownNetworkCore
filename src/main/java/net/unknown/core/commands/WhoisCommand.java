@@ -197,7 +197,7 @@ public class WhoisCommand {
             Component l = Component.empty();
 
             Component ipBlock;
-            IPResponse ipInfo = (IPResponse) Whois.getIpInfoCache().get(IPinfo.cacheKey(db.getKey().getHostAddress()));
+            IPResponse ipInfo = Whois.getIpInfoCache() != null ? (IPResponse) Whois.getIpInfoCache().get(IPinfo.cacheKey(db.getKey().getHostAddress())) : null;
             if (ipInfo != null) {
                 ipBlock = Component.text(mask ? Whois.maskIpAddress(db.getKey()) : ipInfo.getIp()).hoverEvent(HoverEvent.showText(
                         Component.text("Country/Region: " + ipInfo.getRegion() + ", " + ipInfo.getCity() + ", " + ipInfo.getCountryName()).appendNewline()
@@ -245,7 +245,8 @@ public class WhoisCommand {
         }
 
         ServerPlayer finalTarget = target;
-        ctx.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(WhoisListener.buildWhoisInformationMessage(finalTarget.getBukkitEntity(), finalTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode()))), MinecraftServer.getDefaultRegistryAccess()), false);
+        if (Whois.getIpInfoCache() != null) ctx.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(WhoisListener.buildWhoisInformationMessage(finalTarget.getBukkitEntity(), finalTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode()))), MinecraftServer.getDefaultRegistryAccess()), false);
+        else ctx.getSource().sendFailure(net.minecraft.network.chat.Component.literal("Whois is disabled"));
         return 0;
     }
 
