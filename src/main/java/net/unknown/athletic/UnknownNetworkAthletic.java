@@ -32,6 +32,9 @@
 package net.unknown.athletic;
 
 import net.unknown.athletic.feature.Stopwatch;
+import net.unknown.athletic.feature.StopwatchActionBar;
+import net.unknown.athletic.listeners.StopwatchListener;
+import net.unknown.core.managers.ListenerManager;
 
 import java.util.logging.Logger;
 
@@ -44,6 +47,8 @@ public class UnknownNetworkAthletic {
 
     public static void onEnable() {
         Stopwatch.init();
+        StopwatchActionBar.init();
+        ListenerManager.registerListener(new StopwatchListener());
     }
 
     public static void onDisable() {
