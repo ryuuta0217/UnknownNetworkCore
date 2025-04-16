@@ -196,6 +196,7 @@ public class Whois {
         try {
             if ((USERS_BY_IP_FILE.getParentFile().exists() || USERS_BY_IP_FILE.getParentFile().mkdirs()) && (USERS_BY_IP_FILE.exists() || USERS_BY_IP_FILE.createNewFile())) {
                 String plainJson = String.join("\n", Files.readAllLines(USERS_BY_IP_FILE.toPath()));
+                if (plainJson.isBlank()) plainJson = "{}";
                 Map<InetAddress, Map<UUID, Long>> usersByIp = new HashMap<>();
                 JSONObject json = new JSONObject(plainJson);
                 json.keySet().forEach(ip -> {
