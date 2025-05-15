@@ -33,7 +33,9 @@ package net.unknown.proxy;
 
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
+import com.velocitypowered.api.proxy.ServerConnection;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.unknown.core.define.DefinedTextColor;
 
 import java.util.HashMap;
@@ -48,7 +50,13 @@ public class ServerDisconnectListener {
     @Subscribe
     public void onPlayerDisconnectedFromServer(KickedFromServerEvent event) {
         if (!event.getServer().getServerInfo().getName().equals("lobby")) {
-            event.setResult(KickedFromServerEvent.RedirectPlayer.create(UnknownNetworkProxyCore.getLobbyServer(), Component.text(event.getServer().getServerInfo().getName() + " から切断されました: ", DefinedTextColor.RED).append(event.getServerKickReason().orElse(Component.text("(理由は不明)")))));
+            ServerConnection current = event.getPlayer().getCurrentServer().orElse(null);
+            TextComponent reason = Component.text(event.getServer().getServerInfo().getName() + " から切断されました: ", DefinedTextColor.RED).append(event.getServerKickReason().orElse(Component.text("(理由は不明)")));
+            if (current != null && !current.getServerInfo().getName().equals("lobby")) {
+                event.setResult(KickedFromServerEvent.RedirectPlayer.create(UnknownNetworkProxyCore.getLobbyServer(), reason));
+            } else {
+                event.setResult(KickedFromServerEvent.Notify.create(reason));
+            }
             if (this.disconnectCounter.computeIfAbsent(event.getPlayer().getUniqueId(), uuid -> new AtomicInteger(0)).incrementAndGet() == 3) {
                 event.getPlayer().sendMessage(Component.text("何度もサーバーから切断されているようです。一度切断していただき、再度サーバーに参加することで改善する場合があります。", DefinedTextColor.YELLOW));
             }
