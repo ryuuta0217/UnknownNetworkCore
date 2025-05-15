@@ -31,35 +31,27 @@
 
 package net.unknown.athletic.event;
 
-import net.unknown.athletic.feature.Stopwatch;
-import org.bukkit.Location;
+import net.unknown.athletic.stopwatch.Stopwatch;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 
-import javax.annotation.Nullable;
-
 public abstract class StopwatchEvent extends Event implements Cancellable {
+    private final Stopwatch stopwatch;
     private final Player player;
-    private final Location source;
     private boolean cancelled = false;
 
-    StopwatchEvent(Player player, @Nullable Location source) {
+    StopwatchEvent(Stopwatch stopwatch, Player player) {
+        this.stopwatch = stopwatch;
         this.player = player;
-        this.source = source;
+    }
+
+    public Stopwatch getStopwatch() {
+        return this.stopwatch;
     }
 
     public Player getPlayer() {
         return this.player;
-    }
-
-    @Nullable
-    public Location getSource() {
-        return this.source.clone();
-    }
-
-    public boolean isRunning() {
-        return Stopwatch.isRunningStopwatch(this.player);
     }
 
     @Override
