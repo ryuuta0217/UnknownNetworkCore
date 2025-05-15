@@ -166,6 +166,10 @@ public class UnknownNetworkAnarchyHardcore {
         }
     }
 
+    public static Set<BanData<?>> getBanData() {
+        return BAN_DATA;
+    }
+
     public static boolean ban(OfflinePlayer player, Component deathMessage) {
         int playSeconds = player.getStatistic(Statistic.PLAY_ONE_MINUTE) / 20;
         Component reason = Component.empty()
