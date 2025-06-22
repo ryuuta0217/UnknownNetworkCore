@@ -31,6 +31,7 @@
 
 package net.unknown.core.configurations;
 
+import com.ryuuta0217.util.LocationRef;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.Location;
@@ -52,6 +53,14 @@ public class ConfigurationSerializer {
 
     public static void setLocationData(ConfigurationSection config, String path, Location loc) {
         Arrays.stream(LOCATION_VALUES).forEach(s -> config.set(path + "." + s, ConfigurationSerializer.getLocation(s, loc)));
+    }
+
+    public static void setLocationData(FileConfiguration config, String path, LocationRef locRef) {
+        Arrays.stream(LOCATION_VALUES).forEach(s -> config.set(path + "." + s, ConfigurationSerializer.getLocation(s, locRef)));
+    }
+
+    public static void setLocationData(ConfigurationSection config, String path, LocationRef locRef) {
+        Arrays.stream(LOCATION_VALUES).forEach(s -> config.set(path + "." + s, ConfigurationSerializer.getLocation(s, locRef)));
     }
 
     @Nullable
@@ -101,6 +110,31 @@ public class ConfigurationSerializer {
         return new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
     }
 
+    public static LocationRef getLocationRefData(ConfigurationSection config, String path) {
+        String worldName = null;
+        double x = 0.0D, y = 0.0D, z = 0.0D;
+        float yaw = 0F, pitch = 0F;
+
+        for (String s : LOCATION_VALUES) {
+            if (s.equalsIgnoreCase("world") && config.isSet(path + "." + s))
+                worldName = config.getString(path + "." + s);
+            else if (s.equalsIgnoreCase("x") && config.isSet(path + "." + s))
+                x = config.getDouble(path + "." + s);
+            else if (s.equalsIgnoreCase("y") && config.isSet(path + "." + s))
+                y = config.getDouble(path + "." + s);
+            else if (s.equalsIgnoreCase("z") && config.isSet(path + "." + s))
+                z = config.getDouble(path + "." + s);
+            else if (s.equalsIgnoreCase("yaw") && config.isSet(path + "." + s))
+                yaw = (float) config.getDouble(path + "." + s);
+            else if (s.equalsIgnoreCase("pitch") && config.isSet(path + "." + s))
+                pitch = (float) config.getDouble(path + "." + s);
+            else if (!config.isSet(path + "." + s))
+                LOGGER.warning(path + "." + s + " is not set, using default value!");
+        }
+
+        return new LocationRef(worldName, x, y, z, yaw, pitch);
+    }
+
     @Nullable
     private static Object getLocation(String s, Location loc) {
         if (s.equalsIgnoreCase("world")) return loc.getWorld().getName();
@@ -109,6 +143,17 @@ public class ConfigurationSerializer {
         else if (s.equalsIgnoreCase("z")) return loc.getZ();
         else if (s.equalsIgnoreCase("yaw")) return loc.getYaw();
         else if (s.equalsIgnoreCase("pitch")) return loc.getPitch();
+        else return null;
+    }
+
+    @Nullable
+    private static Object getLocation(String s, LocationRef locRef) {
+        if (s.equalsIgnoreCase("world")) return locRef.worldName();
+        else if (s.equalsIgnoreCase("x")) return locRef.x();
+        else if (s.equalsIgnoreCase("y")) return locRef.y();
+        else if (s.equalsIgnoreCase("z")) return locRef.z();
+        else if (s.equalsIgnoreCase("yaw")) return locRef.yaw();
+        else if (s.equalsIgnoreCase("pitch")) return locRef.pitch();
         else return null;
     }
 

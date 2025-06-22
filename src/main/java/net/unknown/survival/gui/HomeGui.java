@@ -277,11 +277,11 @@ public class HomeGui extends GuiBase {
 
         this.splitHomes.get(page - 1).forEach(home -> {
             this.slot2HomeMap.put(this.inventory.firstEmpty(), home);
-            this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(dimension2Material(home.location()))
-                    .displayName(Component.text(home.name(), Style.style(dimension2TextColor(home.location()), TextDecoration.ITALIC.withState(false))))
+            this.inventory.setItem(this.inventory.firstEmpty(), new ItemStackBuilder(dimension2Material(home.asLocation()))
+                    .displayName(Component.text(home.name(), Style.style(dimension2TextColor(home.asLocation()), TextDecoration.ITALIC.withState(false))))
                     .lore(Component.text("ワールド: " + MessageUtil.getWorldNameDisplay(home.world()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
-                            Component.text("座標: " + getCoordinateAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
-                            Component.text("向き: " + getRotationAsString(home.location()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
+                            Component.text("座標: " + getCoordinateAsString(home.asLocation()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
+                            Component.text("向き: " + getRotationAsString(home.asLocation()), Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
                             Component.text(""),
                             Component.text("クリックでテレポート", Style.style(TextColor.color(0, 255, 0), TextDecoration.ITALIC.withState(false))),
                             Component.text("Shiftキーを押しながら右クリックで削除", Style.style(TextColor.color(255, 0, 0), TextDecoration.ITALIC.withState(false))))

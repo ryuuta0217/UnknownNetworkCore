@@ -53,11 +53,11 @@ public class HomesView extends PaginationView<Home, HomeGui> {
     public HomesView(HomeGui gui, HomeGroupsView homeGroupsView, HomeGroup homeGroup) {
         super(gui,
                 homeGroup.getHomes().values(),
-                (home) -> new ItemStackBuilder(dimension2Material(home.location()))
-                        .displayName(Component.text(home.name(), Style.style(dimension2TextColor(home.location()))))
+                (home) -> new ItemStackBuilder(dimension2Material(home.asLocation()))
+                        .displayName(Component.text(home.name(), Style.style(dimension2TextColor(home.asLocation()))))
                         .lore(Component.text("ワールド: " + MessageUtil.getWorldNameDisplay(home.world()), Style.style(TextColor.color(0, 255, 0))),
-                                Component.text("座標: " + getCoordinateAsString(home.location()), Style.style(TextColor.color(0, 255, 0))),
-                                Component.text("向き: " + getRotationAsString(home.location()), Style.style(TextColor.color(0, 255, 0))),
+                                Component.text("座標: " + getCoordinateAsString(home.asLocation()), Style.style(TextColor.color(0, 255, 0))),
+                                Component.text("向き: " + getRotationAsString(home.asLocation()), Style.style(TextColor.color(0, 255, 0))),
                                 Component.text(""),
                                 Component.text("クリックでテレポート", Style.style(TextColor.color(0, 255, 0))),
                                 Component.text("Shiftキーを押しながら右クリックで削除", Style.style(TextColor.color(255, 0, 0))))
