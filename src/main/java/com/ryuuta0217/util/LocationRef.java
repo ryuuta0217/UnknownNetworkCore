@@ -72,6 +72,9 @@ public class LocationRef {
     }
 
     public Location asLocation() {
+        if (this.worldName == null || Bukkit.getWorld(this.worldName) == null) {
+            return null;
+        }
         return new Location(Bukkit.getWorld(this.worldName), this.x, this.y, this.z, this.yaw, this.pitch);
     }
 
