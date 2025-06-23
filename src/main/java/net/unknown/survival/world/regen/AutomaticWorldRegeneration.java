@@ -44,6 +44,10 @@ import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.WorldType;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.mvplugins.multiverse.core.world.LoadedMultiverseWorld;
+import org.mvplugins.multiverse.core.world.helpers.PlayerWorldTeleporter;
+import org.mvplugins.multiverse.core.world.options.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -361,10 +365,10 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         }
 
         public boolean runPreGenerate(String worldName) {
-            if (this.isWorldLoaded(worldName)) return false;
+            if (!this.isWorldLoaded(worldName)) return false;
             World.Environment env = Bukkit.getWorld(worldName).getEnvironment();
 
-            boolean result = this.isPreGenerated(worldName) || MultiverseCore.getInstance().getMVWorldManager().addWorld(String.format(PRE_WORLD_NAME_FORMAT, worldName), env, this.seed, WorldType.NORMAL, true, null, true);
+            boolean result = this.isPreGenerated(worldName) || MultiverseCore.getInstance().getWorldManager().createWorld(CreateWorldOptions.worldName(String.format(PRE_WORLD_NAME_FORMAT, worldName)).environment(env).seed(this.seed).worldType(WorldType.NORMAL).generateStructures(true).generator(null).useSpawnAdjust(true)).isSuccess();
             this.checkPreGenerated();
             return result;
         }
@@ -411,7 +415,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
 
         public boolean unloadWorld(String worldName) {
             try {
-                return this.isWorldLoaded(worldName) && Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> MultiverseCore.getInstance().getMVWorldManager().unloadWorld(worldName, true)).get();
+                return this.isWorldLoaded(worldName) && Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> !MultiverseCore.getInstance().getWorldManager().unloadWorld(UnloadWorldOptions.world(MultiverseCore.getInstance().getWorldManager().getLoadedWorld(worldName).getOrNull())).isSuccess()).get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
                 return false;
@@ -428,7 +432,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
 
         public boolean loadWorld(String worldName) {
             try {
-                return this.isWorldLoaded(worldName) || Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> MultiverseCore.getInstance().getMVWorldManager().loadWorld(worldName)).get();
+                return this.isWorldLoaded(worldName) || Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> MultiverseCore.getInstance().getWorldManager().loadWorld(worldName).isSuccess()).get();
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
                 return false;
@@ -444,11 +448,11 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         }
 
         public boolean deleteWorld(String worldName, boolean removeFromConfig, boolean deleteFolder) {
-            return this.isWorldLoaded(worldName) && MultiverseCore.getInstance().getMVWorldManager().deleteWorld(worldName, removeFromConfig, deleteFolder);
+            return this.isWorldLoaded(worldName) && MultiverseCore.getInstance().getWorldManager().deleteWorld(DeleteWorldOptions.world(MultiverseCore.getInstance().getWorldManager().getLoadedWorld(worldName).getOrNull())).isSuccess();
         }
 
         public boolean copyWorld(String fromWorldName, String toWorldName) {
-            return this.isWorldLoaded(fromWorldName) && MultiverseCore.getInstance().getMVWorldManager().cloneWorld(fromWorldName, toWorldName);
+            return this.isWorldLoaded(fromWorldName) && MultiverseCore.getInstance().getWorldManager().cloneWorld(CloneWorldOptions.fromTo(MultiverseCore.getInstance().getWorldManager().getLoadedWorld(fromWorldName).getOrNull(), toWorldName)).isSuccess();
         }
 
         public boolean replaceWorldWithPreGenerated(String worldName) {
@@ -478,7 +482,19 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
             this.logger.info("Regenerating world {} with seed {}...", worldName, this.seed);
             boolean result;
             try {
-                result = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> MultiverseCore.getInstance().getMVWorldManager().regenWorld(worldName, true, this.seed == null, this.seed, this.keepGameRules)).get();
+                result = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
+                    LoadedMultiverseWorld world = MultiverseCore.getInstance().getWorldManager().getLoadedWorld(worldName).getOrNull();
+                    if (world != null) {
+                        List<Player> players = world.getPlayers().getOrElse(Collections.emptyList());
+                        players.forEach(p -> p.teleport(Bukkit.getWorld("world").getSpawnLocation()));
+                        boolean execResult = MultiverseCore.getInstance().getWorldManager().regenWorld(RegenWorldOptions.world(world).randomSeed(this.seed == null).seed(this.seed).keepGameRule(true)).onFailure((t) -> {
+                            System.out.println(t.getFailureMessage());
+                        }).isSuccess();
+                        players.forEach(p -> p.teleport(world.getSpawnLocation()));
+                        return execResult;
+                    }
+                    return false;
+                }).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }
@@ -497,7 +513,7 @@ public class AutomaticWorldRegeneration extends ConfigurationBase {
         }
 
         public boolean isWorldLoaded(String worldName) {
-            return MultiverseCore.getInstance().getMVWorldManager().isMVWorld(worldName) && Bukkit.getWorld(worldName) != null;
+            return MultiverseCore.getInstance().getWorldManager().isLoadedWorld(worldName) && Bukkit.getWorld(worldName) != null;
         }
 
         public void backupWorld(String worldName) {

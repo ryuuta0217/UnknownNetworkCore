@@ -38,6 +38,9 @@ import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.mvplugins.multiverse.core.MultiverseCoreApi;
+import org.mvplugins.multiverse.core.world.MultiverseWorld;
+import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 
 public class MultiverseCore {
     private static final boolean MULTIVERSE_CORE_ENABLED = Bukkit.getPluginManager().getPlugin("Multiverse-Core") != null && Bukkit.getPluginManager().isPluginEnabled("Multiverse-Core");
@@ -48,7 +51,11 @@ public class MultiverseCore {
 
     public static Location getSpawnLocation(World world) {
         if (!MULTIVERSE_CORE_ENABLED) return world.getSpawnLocation();
-        return getInstance().getMVWorldManager().getMVWorld(world.getName(), false).getSpawnLocation();
+        MultiverseWorld mvWorld = getInstance().getWorldManager().getLoadedWorld(world.getName()).getOrNull();
+        if (mvWorld == null) {
+            return world.getSpawnLocation();
+        }
+        return null;
     }
 
     public static Location getSpawnLocation(Level level) {
@@ -62,7 +69,7 @@ public class MultiverseCore {
         return MinecraftAdapter.location(level, positionVector3, rotationVector2);
     }
 
-    public static com.onarandombox.MultiverseCore.MultiverseCore getInstance() {
-        return (com.onarandombox.MultiverseCore.MultiverseCore) Bukkit.getPluginManager().getPlugin("Multiverse-Core");
+    public static MultiverseCoreApi getInstance() {
+        return MultiverseCoreApi.get();
     }
 }
