@@ -40,6 +40,7 @@ import org.bukkit.Location;
 import org.bukkit.World;
 import org.mvplugins.multiverse.core.MultiverseCoreApi;
 import org.mvplugins.multiverse.core.world.MultiverseWorld;
+import org.mvplugins.multiverse.core.world.WorldManager;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 
 public class MultiverseCore {
@@ -71,5 +72,9 @@ public class MultiverseCore {
 
     public static MultiverseCoreApi getInstance() {
         return MultiverseCoreApi.get();
+    }
+
+    public static WorldManager getWorldManager() {
+        return getInstance().getWorldManager();
     }
 }
