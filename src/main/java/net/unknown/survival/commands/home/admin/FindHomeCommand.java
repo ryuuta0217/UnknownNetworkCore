@@ -35,7 +35,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.BuiltInExceptions;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -118,7 +117,7 @@ public class FindHomeCommand {
             resultsRaw.forEach((uniqueId, groupedHomes) -> {
                 groupedHomes.forEach((groupName, homes) -> {
                     homes.forEach(home -> {
-                        sb.append("\n§7§o(").append((long) home.location().distance(loc)).append(" blks away)§r §6").append(Bukkit.getOfflinePlayer(uniqueId).getName()).append(": §b").append(groupName).append(":").append(home.name()).append(" §6-§r §a").append(home.location().getBlockX()).append("§6, §a").append(home.location().getBlockY()).append("§6, §a").append(home.location().getBlockZ()).append("§6");
+                        sb.append("\n§7§o(").append((long) home.asLocation().distance(loc)).append(" blks away)§r §6").append(Bukkit.getOfflinePlayer(uniqueId).getName()).append(": §b").append(groupName).append(":").append(home.name()).append(" §6-§r §a").append(home.asLocation().getBlockX()).append("§6, §a").append(home.asLocation().getBlockY()).append("§6, §a").append(home.asLocation().getBlockZ()).append("§6");
                     });
                 });
             });
@@ -129,8 +128,8 @@ public class FindHomeCommand {
     }
 
     private static void searchHome(UUID uniqueId, Location centerLoc, double distance, HomeGroup group, Home home, Map<UUID, Map<HomeGroup, Set<Home>>> output) {
-        if (home.location().getWorld().getUID().equals(centerLoc.getWorld().getUID())) {
-            double d = home.location().distance(centerLoc);
+        if (home.asLocation().getWorld().getUID().equals(centerLoc.getWorld().getUID())) {
+            double d = home.asLocation().distance(centerLoc);
             if (d != -1 && d <= distance) {
                 Map<HomeGroup, Set<Home>> groupedHomes = output.getOrDefault(uniqueId, new HashMap<>());
                 Set<Home> homes = groupedHomes.getOrDefault(group, new HashSet<>());

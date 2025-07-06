@@ -63,6 +63,7 @@ public class UnknownNetworkCorePluginBootstrap implements PluginBootstrap {
                     Commands.init(minecraftDispatcher, buildContext);
                     switch (UnknownNetworkCore.getEnvironment()) {
                         case SURVIVAL -> net.unknown.survival.commands.Commands.init(minecraftDispatcher, buildContext);
+                        case ANARCHY_HARDCORE -> net.unknown.anarchyhardcore.commands.Commands.init(minecraftDispatcher, buildContext);
                     }
                 }
             }

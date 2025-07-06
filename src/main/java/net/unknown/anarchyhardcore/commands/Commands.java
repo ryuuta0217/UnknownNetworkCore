@@ -29,38 +29,14 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.athletic.event;
+package net.unknown.anarchyhardcore.commands;
 
-import net.unknown.athletic.stopwatch.Stopwatch;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
+import com.mojang.brigadier.CommandDispatcher;
+import net.minecraft.commands.CommandBuildContext;
+import net.minecraft.commands.CommandSourceStack;
 
-public abstract class StopwatchEvent extends Event implements Cancellable {
-    private final Stopwatch stopwatch;
-    private final Player player;
-    private boolean cancelled = false;
-
-    StopwatchEvent(Stopwatch stopwatch, Player player) {
-        this.stopwatch = stopwatch;
-        this.player = player;
-    }
-
-    public Stopwatch getStopwatch() {
-        return this.stopwatch;
-    }
-
-    public Player getPlayer() {
-        return this.player;
-    }
-
-    @Override
-    public boolean isCancelled() {
-        return this.cancelled;
-    }
-
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
+public class Commands {
+    public static void init(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
+        AnarchyHardcoreCommand.register(dispatcher);
     }
 }

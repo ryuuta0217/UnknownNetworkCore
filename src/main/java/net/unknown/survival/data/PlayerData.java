@@ -52,7 +52,9 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiPredicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -173,9 +175,23 @@ public class PlayerData extends ConfigurationBase {
 
     @Override
     public synchronized void save() {
-        this.homeData.save(this.getConfig());
-        this.chatData.save(this.getConfig());
-        this.registries.save(this.getConfig());
+        try {
+            this.homeData.save(this.getConfig());
+        } catch(Throwable t) {
+            t.printStackTrace();
+        }
+
+        try {
+            this.chatData.save(this.getConfig());
+        } catch(Throwable t) {
+            t.printStackTrace();
+        }
+
+        try {
+            this.registries.save(this.getConfig());
+        } catch(Throwable t) {
+            t.printStackTrace();
+        }
         super.save();
     }
 
@@ -433,13 +449,23 @@ public class PlayerData extends ConfigurationBase {
             config.set("homeGroupItems", null); // TODO in migrate v4, change to "home-group-items"
 
             ConfigurationSection groupItemsSection = config.createSection("homeGroupItems");
+            Map<String, Throwable> saveFailures = new HashMap<>();
             this.homeGroups.forEach((groupName, group) -> {
-                group.save(config.createSection("homes." + groupName), groupItemsSection);
+                try {
+                    group.save(config.createSection("homes." + groupName), groupItemsSection);
+                } catch (Throwable e) {
+                    saveFailures.put(groupName, e);
+                }
             });
 
             if (this.defaultGroupName != null) config.set("home-default-group", this.defaultGroupName);
             config.set("home-base-count", this.homeBaseCount);
             config.set("home-additional-count", this.homeAdditionalCount);
+
+            if (!saveFailures.isEmpty()) {
+                saveFailures.forEach((groupName, t) -> this.getLogger().log(Level.WARNING, "Failed to save home group " + groupName, t));
+                throw new IllegalStateException("Failed to save home group(s): " + saveFailures.keySet() + ".");
+            }
         }
 
         private void saveAsync() {
@@ -602,7 +628,7 @@ public class PlayerData extends ConfigurationBase {
                             config.set("homes", null);
 
                             /* PUT NEW HOMES */
-                            oldHomeMap.forEach((name, home) -> ConfigurationSerializer.setLocationData(config, "homes.uncategorized." + name, home.location()));
+                            oldHomeMap.forEach((name, home) -> ConfigurationSerializer.setLocationData(config, "homes.uncategorized." + name, home.asLocation()));
                         }
                     } else {
                         LOGGER.info("Migration for " + playerName + "'s homes skipped because no homes was found.");

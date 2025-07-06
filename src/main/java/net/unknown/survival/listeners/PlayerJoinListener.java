@@ -31,17 +31,22 @@
 
 package net.unknown.survival.listeners;
 
+import com.ryuuta0217.util.ComponentCollector;
 import com.viaversion.viaversion.api.Via;
 import com.viaversion.viaversion.api.protocol.version.ProtocolVersion;
 import io.ipinfo.api.model.IPResponse;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.SharedConstants;
+import net.unknown.core.define.DefinedComponents;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.dependency.MultiverseCore;
 import net.unknown.core.managers.RunnableManager;
+import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.shared.whois.Whois;
+import net.unknown.survival.data.PlayerData;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -98,6 +103,33 @@ public class PlayerJoinListener implements Listener {
                     .append(Component.text("あなたが接続に使用しているバージョン: " + playerUsedProtocolVersion + "(" + viaPlayerUsedProtocolVersion.getName() + ")")).appendNewline()
                     .append(Component.text("サーバーのバージョン: " + serverProtocolVersion + "(" + viaServerProtocolVersion.getName() + ")"))), 1L);
         }
+
+        RunnableManager.runDelayed(() -> {
+            PlayerData.of(event.getPlayer()).getHomeData().getGroups().forEach((groupName, group) -> {
+                group.getHomes().forEach((homeName, home) -> {
+                    if (!home.isAvailable()) {
+                        List<Component> hoverTextParts = new ArrayList<>() {{
+                            add(Component.text(home.name(), DefinedTextColor.AQUA));
+                            add(Component.text("-", DefinedTextColor.GOLD));
+
+                            List<Component> locationParts = new ArrayList<>() {{
+                                add(Component.text(MessageUtil.getWorldName(home.worldName()), DefinedTextColor.RED, TextDecoration.UNDERLINED));
+                                add(Component.text(home.x(), DefinedTextColor.GREEN));
+                                add(Component.text(home.y(), DefinedTextColor.GREEN));
+                                add(Component.text(home.z(), DefinedTextColor.GREEN));
+                                add(Component.text(home.yaw(), DefinedTextColor.LIGHT_PURPLE));
+                                add(Component.text(home.pitch(), DefinedTextColor.LIGHT_PURPLE));
+                            }};
+                            add(locationParts.stream().collect(ComponentCollector.toComponent(Component.text(", "))).asComponent());
+                        }};
+                        Component hoverText = hoverTextParts.stream().collect(ComponentCollector.toComponent(Component.text(" "))).asComponent();
+
+                        event.getPlayer().sendMessage(Component.text("不正なホーム " + homeName + " がグループ " + groupName + " に存在します。削除を推奨します。", DefinedTextColor.RED)
+                                .hoverEvent(HoverEvent.showText(hoverText)));
+                    }
+                });
+            });
+        }, 20L);
     }
 
     private static String getFormattedTime(long time) {

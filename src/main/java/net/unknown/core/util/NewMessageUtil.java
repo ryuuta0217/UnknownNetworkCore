@@ -391,7 +391,7 @@ public class NewMessageUtil {
                 .withStyle(error ? ChatFormatting.RED : ChatFormatting.GRAY, ChatFormatting.ITALIC);
 
         source.getServer().getPlayerList().getPlayers().forEach(player -> {
-            if (player != source.source && player.getBukkitEntity().hasPermission("minecraft.admin.command_feedback")) {
+            if (player.commandSource() != source.source && player.getBukkitEntity().hasPermission("minecraft.admin.command_feedback")) {
                 // TODO iterateの前にチェックを挟むか？
                 //  前にチェックを挟むと、
                 //  ワールドA(sendCommandFeedback: false) で実行されたコマンドがワールドB(sendCommandFeedback: true)のワールドで表示される

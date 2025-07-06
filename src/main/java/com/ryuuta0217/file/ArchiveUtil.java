@@ -30,7 +30,19 @@ import java.util.List;
 
 public class ArchiveUtil {
     public static void createArchiveWithZstd(List<File> files, File archive, @Nullable File baseDir) throws IOException {
-        if (archive.exists()) throw new IOException("Archive file \"" + archive.getName() + "\" already exists.");
+        int index = 1;
+        final File originalArchive = archive;
+        while(archive.exists()) {
+            String archiveName = originalArchive.getName();
+            int dotIndex = archiveName.indexOf('.');
+            if (dotIndex == -1) {
+                archiveName += "-" + index;
+            } else {
+                archiveName = archiveName.substring(0, dotIndex) + "-" + index + archiveName.substring(dotIndex);
+            }
+            archive = new File(archive.getParentFile(), archiveName);
+            index++;
+        }
 
         if ((archive.getParentFile() == null || archive.getParentFile().exists() || archive.getParentFile().mkdirs()) && archive.createNewFile()) {
             Path absoluteArchiveParentPath = baseDir == null ? archive.toPath().getParent().toAbsolutePath() : baseDir.toPath().toAbsolutePath();

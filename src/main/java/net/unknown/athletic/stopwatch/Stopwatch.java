@@ -29,38 +29,42 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.athletic.event;
+package net.unknown.athletic.stopwatch;
 
-import net.unknown.athletic.stopwatch.Stopwatch;
+import net.unknown.athletic.AthleticPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
 
-public abstract class StopwatchEvent extends Event implements Cancellable {
-    private final Stopwatch stopwatch;
-    private final Player player;
-    private boolean cancelled = false;
+import java.io.Serializable;
+import java.util.Map;
 
-    StopwatchEvent(Stopwatch stopwatch, Player player) {
-        this.stopwatch = stopwatch;
-        this.player = player;
+public interface Stopwatch extends Serializable {
+    default RealTimeBaseStopwatch ofRealTime() {
+        return new RealTimeBaseStopwatch();
     }
 
-    public Stopwatch getStopwatch() {
-        return this.stopwatch;
+    default TickTimeBaseStopwatch ofTickTime() {
+        return new TickTimeBaseStopwatch();
     }
 
-    public Player getPlayer() {
-        return this.player;
-    }
+    void reset();
 
-    @Override
-    public boolean isCancelled() {
-        return this.cancelled;
+    default void start(AthleticPlayer aPlayer) {
+        start(aPlayer.getBukkitPlayer());
     }
+    void start(Player player);
 
-    @Override
-    public void setCancelled(boolean cancel) {
-        this.cancelled = cancel;
+    default void stop(AthleticPlayer aPlayer) {
+        stop(aPlayer.getBukkitPlayer());
     }
+    void stop(Player player);
+
+    void increment();
+
+    boolean isRunning();
+
+    int getElapsedTimeSeconds();
+
+    String getElapsedTimeFormatted();
+
+    Map<String, Object> serialize();
 }
