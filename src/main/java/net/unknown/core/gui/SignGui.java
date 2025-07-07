@@ -110,7 +110,7 @@ public class SignGui {
         RunnableManager.runDelayed(() -> {
             ServerPlayer nmsTarget = ((CraftPlayer) this.target).getHandle();
 
-            ServerLevel level = nmsTarget.serverLevel();
+            ServerLevel level = nmsTarget.level();
             this.dummySignPos = nmsTarget.blockPosition().above(2);
             BlockState signBlock = CraftMagicNumbers.getBlock(this.signType).defaultBlockState();
 

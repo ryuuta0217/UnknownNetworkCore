@@ -35,6 +35,7 @@ import ca.spottedleaf.dataconverter.minecraft.MCDataConverter;
 import ca.spottedleaf.dataconverter.minecraft.MCVersions;
 import ca.spottedleaf.dataconverter.minecraft.datatypes.MCTypeRegistry;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.serialization.JsonOps;
 import net.kyori.adventure.chat.SignedMessage;
 import net.kyori.adventure.key.Key;
 import net.minecraft.core.Direction;
@@ -42,6 +43,8 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.PlayerChatMessage;
@@ -186,12 +189,8 @@ public class MinecraftAdapter {
         @Nullable
         public static net.minecraft.world.item.ItemStack json(String json) {
             try {
-                CompoundTag tag = TagParser.parseTag(json);
-                if (!tag.contains("components") && tag.contains("tag")) {
-                    // Need to convert old NBT format to new format (DataComponent)
-                    tag = MCDataConverter.convertTag(MCTypeRegistry.ITEM_STACK, tag, MCVersions.V1_20_4, MCVersions.V1_21_4);
-                }
-                return net.minecraft.world.item.ItemStack.parse(MinecraftServer.getDefaultRegistryAccess(), tag).orElse(null);
+                CompoundTag tag = TagParser.parseCompoundFully(json);
+                return tag(tag);
             } catch (CommandSyntaxException e) {
                 return null;
             }
@@ -199,11 +198,23 @@ public class MinecraftAdapter {
 
         @Nonnull
         public static String json(net.minecraft.world.item.ItemStack itemStack) {
-            return itemStack.save(MinecraftServer.getDefaultRegistryAccess(), new CompoundTag()).getAsString();
+            return net.minecraft.world.item.ItemStack.CODEC.encodeStart(JsonOps.INSTANCE, itemStack).getOrThrow().toString();
         }
 
         public static String json(org.bukkit.inventory.ItemStack bukkit) {
             return json(itemStack(bukkit));
+        }
+
+        public static net.minecraft.world.item.ItemStack tag(CompoundTag tag) {
+            if (!tag.contains("components") && tag.contains("tag")) {
+                // Need to convert old NBT format to new format (DataComponent)
+                tag = MCDataConverter.convertTag(MCTypeRegistry.ITEM_STACK, tag, MCVersions.V1_20_4, MCVersions.V1_21_7);
+            }
+            return net.minecraft.world.item.ItemStack.CODEC.parse(NbtOps.INSTANCE, tag).getOrThrow();
+        }
+
+        public static Tag tag(net.minecraft.world.item.ItemStack itemStack) {
+            return net.minecraft.world.item.ItemStack.CODEC.encodeStart(NbtOps.INSTANCE, itemStack).getOrThrow();
         }
 
         public static net.minecraft.world.item.ItemStack itemStack(org.bukkit.inventory.ItemStack bukkit) {

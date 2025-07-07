@@ -264,7 +264,7 @@ public class ChannelCommand {
                 return 1;
             }
 
-            Component displayName$minecraft = ComponentArgument.getComponent(ctx, "表示名");
+            Component displayName$minecraft = ComponentArgument.getRawComponent(ctx, "表示名");
             net.kyori.adventure.text.Component displayName$adv = NewMessageUtil.convertMinecraft2Adventure(displayName$minecraft);
             CustomChannel channel = CustomChannels.createChannel(internalChannelName, player.getUUID(), displayName$adv);
 
@@ -416,7 +416,7 @@ public class ChannelCommand {
                             .withColor(TextColor.fromLegacyFormat(ChatFormatting.AQUA))
                             .withBold(true)
                             .withUnderlined(true)
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/channel accept " + player.getScoreboardName() + " " + inviteChannelName)))));
+                            .withClickEvent(new ClickEvent.RunCommand("/channel accept " + player.getScoreboardName() + " " + inviteChannelName)))));
 
 
             NewMessageUtil.sendMessage(ctx.getSource(), Component.literal("")
@@ -670,7 +670,7 @@ public class ChannelCommand {
 
     private static int modifyChannelDisplayName(CommandContext<CommandSourceStack> ctx) {
         String channelName = StringArgumentType.getString(ctx, "チャンネル名");
-        Component displayName = ComponentArgument.getComponent(ctx, "表示名");
+        Component displayName = ComponentArgument.getRawComponent(ctx, "表示名");
         net.kyori.adventure.text.Component displayName$adventure = NewMessageUtil.convertMinecraft2Adventure(displayName);
 
         CustomChannel channel = CustomChannels.getChannel(channelName);

@@ -125,8 +125,7 @@ public class PlayerDeathListener implements Listener {
                 .withStyle(Style.EMPTY
                         .withColor(ChatFormatting.AQUA)
                         .withUnderlined(true)
-                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                Component.empty()
+                        .withHoverEvent(new HoverEvent.ShowText(Component.empty()
                                         .append(Component.literal("====== 墓の情報 =====\n").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD))
                                         .append(Component.literal("ワールド: " + MessageUtil.getWorldName(loc.getWorld()) + "\n").withStyle(ChatFormatting.YELLOW)
                                                 .append("座標: " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ())))));
@@ -255,7 +254,7 @@ public class PlayerDeathListener implements Listener {
         chest.update();
 
         List<String> itemJsonSet = items.stream().map(is -> {
-            return is.save(MinecraftServer.getDefaultRegistryAccess(), new CompoundTag()).getAsString(); // for load, use ItemStack.of(TagParser.parse(...))
+            return MinecraftAdapter.ItemStack.json(is); // for load, use ItemStack.of(TagParser.parse(...))
         }).toList();
 
         event.getDrops().clear();
@@ -297,13 +296,7 @@ public class PlayerDeathListener implements Listener {
                 deathBoxes.get(blockPos)
                         .stream()
                         .map(json -> {
-                            try {
-                                return ItemStack.parseOptional(MinecraftServer.getDefaultRegistryAccess(), TagParser.parseTag(json));
-                            } catch (CommandSyntaxException e) {
-                                e.printStackTrace();
-                                LOGGER.severe("Failed to parse Item from JSON");
-                            }
-                            return ItemStack.EMPTY;
+                            return MinecraftAdapter.ItemStack.json(json);
                         })
                         .map(is -> {
                             if (is.getItem() != null) {
@@ -369,7 +362,7 @@ public class PlayerDeathListener implements Listener {
                             .stream()
                             .map(json -> {
                                 try {
-                                    return ItemStack.of(TagParser.parseTag(json));
+                                    return ItemStack.of(TagParser.parseCompoundFully(json));
                                 } catch (CommandSyntaxException e) {
                                     e.printStackTrace();
                                     LOGGER.severe("Failed to parse Item from JSON");

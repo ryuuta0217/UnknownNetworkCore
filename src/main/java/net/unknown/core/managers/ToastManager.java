@@ -90,15 +90,15 @@ public class ToastManager {
                 .build(id);
 
         // Send new advancement to player
-        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Collections.emptySet(), Collections.emptyMap()));
+        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Collections.emptySet(), Collections.emptyMap(), true));
 
         // Grant the advancement to the player (show toast)
         AdvancementProgress progress = new AdvancementProgress();
         progress.update(advancement.value().requirements());
         progress.grantProgress("dummy");
-        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Map.of(id, progress)));
+        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Map.of(id, progress), true));
 
         // Remove advancement from the player
-        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Set.of(id), Collections.emptyMap()));
+        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Set.of(id), Collections.emptyMap(), true));
     }
 }

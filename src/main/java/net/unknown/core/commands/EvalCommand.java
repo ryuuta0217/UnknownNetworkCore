@@ -106,7 +106,7 @@ public class EvalCommand {
                         //e.printStackTrace(new PrintWriter(s));
 
                         Style modifier = Style.EMPTY.withColor(ChatFormatting.RED)
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, c));
+                                .withHoverEvent(new HoverEvent.ShowText(c));
                         ctx.getSource().sendFailure(Component.literal("コードの評価中にエラーが発生しました: " + e.getLocalizedMessage()).withStyle(modifier));
                         return e.hashCode();
                     }

@@ -38,7 +38,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeHolder;
@@ -71,7 +70,6 @@ public class AutoSmelting implements Listener {
 
         ItemStack selectedItem = player.getMainHandItem();
         org.bukkit.inventory.ItemStack selectedItemB = event.getPlayer().getInventory().getItemInMainHand();
-        if (!(selectedItem.getItem() instanceof DiggerItem)) return;
         if (selectedItemB.lore() == null) return;
         if (!CustomEnchantUtil.hasEnchantment("自動精錬", selectedItemB)) return;
 

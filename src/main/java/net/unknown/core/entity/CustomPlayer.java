@@ -44,11 +44,6 @@ public class CustomPlayer extends LivingEntity {
     }
 
     @Override
-    public Iterable<ItemStack> getArmorSlots() {
-        return null;
-    }
-
-    @Override
     public ItemStack getItemBySlot(EquipmentSlot slot) {
         return null;
     }

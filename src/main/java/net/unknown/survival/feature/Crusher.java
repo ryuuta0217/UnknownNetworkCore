@@ -42,6 +42,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
@@ -160,7 +161,7 @@ public class Crusher implements Listener {
         public FakePlayer(DispenserBlockEntity dispenser, @Nullable UUID uniqueId) {
             super((ServerLevel) dispenser.getLevel(), dispenser.getName().getString(), uniqueId);
             this.dispenser = dispenser;
-            this.moveTo(dispenser.getBlockPos(), 0.0f, 0.0f);
+            this.move(MoverType.SELF, Vec3.atCenterOf(dispenser.getBlockPos()));
         }
     }
 }

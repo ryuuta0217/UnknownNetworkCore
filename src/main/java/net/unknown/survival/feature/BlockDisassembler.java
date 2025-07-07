@@ -38,6 +38,7 @@ import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
@@ -47,6 +48,7 @@ import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.DropperBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.phys.Vec3;
 import net.unknown.launchwrapper.event.BlockDispenseBeforeEvent;
 import net.unknown.launchwrapper.mixininterfaces.IMixinBlockEntity;
 import org.bukkit.Bukkit;
@@ -123,7 +125,7 @@ public class BlockDisassembler implements Listener {
         public FakePlayer(DispenserBlockEntity dispenser, @Nullable UUID uniqueId) {
             super((ServerLevel) dispenser.getLevel(), dispenser.getName().getString(), uniqueId);
             this.dispenser = dispenser;
-            this.moveTo(dispenser.getBlockPos(), 0.0f, 0.0f);
+            this.move(MoverType.SELF, Vec3.atCenterOf(dispenser.getBlockPos()));
         }
 
         @Override

@@ -165,7 +165,7 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
 
             if (dummyExpOrb != null) { // if dummyExpOrb is still null, something went wrong.
                 // ExperienceOrb Initialization
-                dummyExpOrb.value = amount;
+                dummyExpOrb.setValue(amount);
                 dummyExpOrb.spawnReason = org.bukkit.entity.ExperienceOrb.SpawnReason.CUSTOM;
                 dummyExpOrb.setPosRaw(player.getX(), player.getY(), player.getZ());
                 // ExperienceOrb Initialization
@@ -175,7 +175,7 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
                 int repairAmount = Math.min(repairAmountFull, mendingTargetItem.getDamageValue()); // デフォルトでは経験値ポイントの2倍の値が耐久値の回復量になる。耐久値の回復量がダメージ量を上回る場合は、ダメージを全て回復する。
 
                 // CraftBukkit start
-                PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(MinecraftAdapter.player(player), dummyExpOrb, mendingTargetItem, mendingTargetItemEntry.inSlot(), repairAmount, dummyExpOrb.value);
+                PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(MinecraftAdapter.player(player), dummyExpOrb, mendingTargetItem, mendingTargetItemEntry.inSlot(), repairAmount, dummyExpOrb.getValue());
                 repairAmount = event.getRepairAmount();
                 if (event.isCancelled()) {
                     return amount;

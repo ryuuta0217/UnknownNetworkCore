@@ -33,6 +33,7 @@ package net.unknown.core.builder.advancement;
 
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.DisplayInfo;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -117,7 +118,7 @@ public class DisplayInfoBuilder {
         Objects.requireNonNull(this.description);
         Objects.requireNonNull(this.icon);
         Objects.requireNonNull(this.type);
-        DisplayInfo displayInfo = new DisplayInfo(icon, title, description, Optional.ofNullable(background), type, showToast, announceChat, hidden);
+        DisplayInfo displayInfo = new DisplayInfo(icon, title, description, Optional.ofNullable(new ClientAsset(background)), type, showToast, announceChat, hidden);
         displayInfo.setLocation(this.x, this.y);
         return displayInfo;
     }

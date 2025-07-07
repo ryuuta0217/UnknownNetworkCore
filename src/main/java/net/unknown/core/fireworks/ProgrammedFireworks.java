@@ -293,7 +293,7 @@ public class ProgrammedFireworks {
                         String minecraftCommand = cols[15];
                         String[] minecraftCommandParts = minecraftCommand.split(" ", 16);
                         String rawCompoundTag = minecraftCommandParts[15];
-                        CompoundTag compoundTag = TagParser.parseTag(rawCompoundTag);
+                        CompoundTag compoundTag = TagParser.parseCompoundFully(rawCompoundTag);
                         if (useProgram != null) {
                             useProgram.addFirework(tick, Firework.buildObject(compoundTag, useProgram, launchLocation, launchYOffset, randomizeLaunchLocation));
                             debug("プログラムをインポートしました: [" + scene + ", " + tick + ", " + cols[4] + ", " + cols[5] + ", " + cols[6] + "]", true);

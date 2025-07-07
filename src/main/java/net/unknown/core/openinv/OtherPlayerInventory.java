@@ -60,7 +60,7 @@ import org.bukkit.scheduler.BukkitTask;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class OtherPlayerInventory extends Inventory implements Listener {
+/*public class OtherPlayerInventory extends Inventory implements Listener {
     public static final Set<OtherPlayerInventory> INSTANCES = new HashSet<>();
 
     static {
@@ -235,4 +235,4 @@ public class OtherPlayerInventory extends Inventory implements Listener {
     private enum ConnectionType {
         DIRECT, MULTIVERSE_INVENTORIES
     }
-}
+}*/

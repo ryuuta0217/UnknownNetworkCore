@@ -31,7 +31,7 @@
 
 package net.unknown.athletic.stopwatch;
 
-import net.unknown.athletic.AthleticPlayer;
+//import net.unknown.athletic.AthleticPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.Serializable;
@@ -48,14 +48,14 @@ public interface Stopwatch extends Serializable {
 
     void reset();
 
-    default void start(AthleticPlayer aPlayer) {
+    /*default void start(AthleticPlayer aPlayer) {
         start(aPlayer.getBukkitPlayer());
-    }
+    }*/
     void start(Player player);
 
-    default void stop(AthleticPlayer aPlayer) {
+    /*default void stop(AthleticPlayer aPlayer) {
         stop(aPlayer.getBukkitPlayer());
-    }
+    }*/
     void stop(Player player);
 
     void increment();

@@ -36,9 +36,11 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.commands.data.BlockDataAccessor;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.ContainerHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.storage.TagValueOutput;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.ClickType;
@@ -54,7 +56,7 @@ public class MultiPageChest {
                 CompoundTag originalData = accessor.getData();
 
                 if (!originalData.contains("PublicBukkitValues")) return;
-                CompoundTag chestData = originalData.getCompound("PublicBukkitValues");
+                CompoundTag chestData = originalData.getCompoundOrEmpty("PublicBukkitValues");
 
                 //{
                 //  "MultiPageChest": {
@@ -80,16 +82,16 @@ public class MultiPageChest {
                     ClickActionPageDirection pageDirection = ClickActionPageDirection.valueOf(event);
                     if (pageDirection == ClickActionPageDirection.UNKNOWN) return;
 
-                    CompoundTag multiPageChestData = chestData.getCompound("MultiPageChest");
+                    CompoundTag multiPageChestData = chestData.getCompoundOrEmpty("MultiPageChest");
                     if (multiPageChestData.contains("CurrentPage") && multiPageChestData.contains("Pages")) {
-                        int currentPage = multiPageChestData.getInt("CurrentPage");
+                        int currentPage = multiPageChestData.getInt("CurrentPage").orElse(0);
                         if (currentPage == 0 && pageDirection == ClickActionPageDirection.PREVIOUS) return;
 
                         int nextPage = currentPage + (pageDirection == ClickActionPageDirection.NEXT ? 1 : -1);
 
                         // Save the current page
-                        ListTag pages = multiPageChestData.getList("Pages", CompoundTag.TAG_COMPOUND);
-                        ContainerHelper.saveAllItems(pages.getCompound(currentPage), (NonNullList<ItemStack>) chest.getContents(), MinecraftServer.getDefaultRegistryAccess());
+                        ListTag pages = multiPageChestData.getListOrEmpty("Pages");
+                        ContainerHelper.saveAllItems(TagValueOutput.createWrappingGlobal(ProblemReporter.DISCARDING, pages.getCompoundOrEmpty(currentPage)), (NonNullList<ItemStack>) chest.getContents(), true);
                         accessor.setData(originalData);
 
 

@@ -36,6 +36,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
@@ -45,6 +46,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.craftbukkit.entity.CraftEntity;
@@ -72,7 +74,7 @@ public class MonsterBall implements Listener {
                     if (((CraftEntity) event.getHitEntity()).getHandle() instanceof Mob mob) {
                         if (SpawnEggItem.byId(mob.getType()) != null && !RESTRICTED_ENTITY_TYPES.contains(mob.getType())) {
                             CompoundTag entityTag = new CompoundTag();
-                            mob.save(entityTag);
+                            mob.save(TagValueOutput.createWrappingGlobal(ProblemReporter.DISCARDING, entityTag));
                             mob.remove(Entity.RemovalReason.DISCARDED);
                             entityTag.remove("Pos");
                             entityTag.remove("Motion");

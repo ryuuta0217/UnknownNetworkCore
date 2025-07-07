@@ -85,12 +85,12 @@ public class OpenInvCommand {
         } else {
             CompoundTag data = loadPlayerData(playerUniqueId);
             if (data != null && data.contains("Inventory")) {
-                ListTag inventoryList = data.getList("Inventory", Tag.TAG_COMPOUND);
+                ListTag inventoryList = data.getListOrEmpty("Inventory");
 
                 for(int i = 0; i < inventoryList.size(); i++) {
-                    CompoundTag itemStackTag = inventoryList.getCompound(i);
-                    int slot = itemStackTag.getByte("Slot") & 255;
-                    ItemStack itemStack = ItemStack.parseOptional(MinecraftServer.getDefaultRegistryAccess(), itemStackTag);
+                    CompoundTag itemStackTag = inventoryList.getCompoundOrEmpty(i);
+                    int slot = itemStackTag.getByteOr("Slot", (byte) 0) & 255;
+                    ItemStack itemStack = MinecraftAdapter.ItemStack.tag(itemStackTag);
                     inv.setItem(convInvSlotMinecraft2Bukkit(slot), MinecraftAdapter.ItemStack.itemStack(itemStack));
                 }
             }
@@ -138,13 +138,13 @@ public class OpenInvCommand {
         } else {
             CompoundTag data = loadPlayerData(playerUniqueId);
             if (data != null && data.contains("Inventory")) {
-                ListTag inventoryList = data.getList("Inventory", Tag.TAG_COMPOUND);
+                ListTag inventoryList = data.getListOrEmpty("Inventory");
                 inventoryList.clear();
 
                 contents.forEach((slot, item) -> {
                     CompoundTag inventoryItemContainer = new CompoundTag();
                     inventoryItemContainer.putInt("Slot", slot);
-                    inventoryList.set(slot, item.save(MinecraftServer.getDefaultRegistryAccess(), new CompoundTag()));
+                    inventoryList.set(slot, MinecraftAdapter.ItemStack.tag(item));
                 });
             }
 
