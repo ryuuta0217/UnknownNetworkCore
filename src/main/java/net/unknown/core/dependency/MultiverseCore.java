@@ -44,14 +44,12 @@ import org.mvplugins.multiverse.core.world.WorldManager;
 import org.mvplugins.multiverse.external.jetbrains.annotations.NotNull;
 
 public class MultiverseCore {
-    private static final boolean MULTIVERSE_CORE_ENABLED = Bukkit.getPluginManager().getPlugin("Multiverse-Core") != null && Bukkit.getPluginManager().isPluginEnabled("Multiverse-Core");
-
     public static boolean isMultiverseCoreEnabled() {
-        return MULTIVERSE_CORE_ENABLED;
+        return Bukkit.getPluginManager().getPlugin("Multiverse-Core") != null && Bukkit.getPluginManager().isPluginEnabled("Multiverse-Core");
     }
 
     public static Location getSpawnLocation(World world) {
-        if (!MULTIVERSE_CORE_ENABLED) return world.getSpawnLocation();
+        if (!isMultiverseCoreEnabled()) return world.getSpawnLocation();
         MultiverseWorld mvWorld = getInstance().getWorldManager().getLoadedWorld(world.getName()).getOrNull();
         if (mvWorld != null) {
             return world.getSpawnLocation();
@@ -62,7 +60,7 @@ public class MultiverseCore {
     public static Location getSpawnLocation(Level level) {
         Vec3 positionVector3 = level.getSharedSpawnPos().getCenter();
         Vec2 rotationVector2 = new Vec2(level.getSharedSpawnAngle(), 0);
-        if (MULTIVERSE_CORE_ENABLED) {
+        if (isMultiverseCoreEnabled()) {
             Location multiverseSpawnLocation = getSpawnLocation(MinecraftAdapter.world(level));
             positionVector3 = MinecraftAdapter.vec3(multiverseSpawnLocation);
             rotationVector2 = MinecraftAdapter.vec2(multiverseSpawnLocation);
