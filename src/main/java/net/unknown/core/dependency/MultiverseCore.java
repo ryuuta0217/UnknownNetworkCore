@@ -53,7 +53,7 @@ public class MultiverseCore {
     public static Location getSpawnLocation(World world) {
         if (!MULTIVERSE_CORE_ENABLED) return world.getSpawnLocation();
         MultiverseWorld mvWorld = getInstance().getWorldManager().getLoadedWorld(world.getName()).getOrNull();
-        if (mvWorld == null) {
+        if (mvWorld != null) {
             return world.getSpawnLocation();
         }
         return null;
