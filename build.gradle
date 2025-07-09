@@ -84,7 +84,7 @@ dependencies {
     implementation group: 'org.json', name: 'json', version: '+'
     compileOnly group: 'org.mvplugins.multiverse.core', name: 'multiverse-core', version: '+'
 //    compileOnly group: 'com.onarandombox.multiversecore', name: 'Multiverse-Core', version: '+'
-    compileOnly group: 'com.onarandombox.multiverseinventories', name: 'Multiverse-Inventories', version: '+'
+    compileOnly group: 'org.mvplugins.multiverse.inventories', name: 'multiverse-inventories', version: '+'
     compileOnly group: 'net.coreprotect', name: 'coreprotect', version: '+'
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.25.0'
     implementation group: 'com.github.luben', name: 'zstd-jni', version: '+'

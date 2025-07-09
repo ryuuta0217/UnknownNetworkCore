@@ -32,10 +32,6 @@
 package net.unknown.core.openinv;
 
 import com.google.common.collect.ImmutableList;
-import com.onarandombox.multiverseinventories.MultiverseInventories;
-import com.onarandombox.multiverseinventories.profile.PlayerProfile;
-import com.onarandombox.multiverseinventories.profile.ProfileTypes;
-import com.onarandombox.multiverseinventories.share.Sharables;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
