@@ -119,6 +119,7 @@ public class TrashManager {
                     ConfigurationSection itemsSection = config.createSection("items");
                     items.entrySet()
                             .stream()
+                            .filter(e -> !Objects.isNull(e.getValue()))
                             .filter(e -> !e.getValue().is(Items.AIR))
                             .map(e -> Map.entry(e.getKey(), MinecraftAdapter.ItemStack.json(e.getValue())))
                             .forEach(e -> itemsSection.set(String.valueOf(e.getKey()), e.getValue()));
