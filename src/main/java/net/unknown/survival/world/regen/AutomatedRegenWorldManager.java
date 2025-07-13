@@ -68,6 +68,8 @@ import java.nio.file.Path;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 public class AutomatedRegenWorldManager extends ConfigurationBase implements Listener {
@@ -357,7 +359,7 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        RunnableManager.runDelayed(() -> {
+        RunnableManager.runAsyncDelayed(() -> {
             if (Bukkit.getOnlinePlayers().isEmpty()) {
                 this.tasks.values().forEach(task -> {
                     if (task.isNeedsToPreGenerate()) {
@@ -394,10 +396,9 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
                 @Override
                 public void run() {
                     Bukkit.broadcast(Component.text("30秒後に、ワールドの再生成が実行されます。対象のワールドは次の通りです: " + Arrays.stream(Task.this.getWorldNames()).map(MessageUtil::getWorldName).collect(Collectors.joining(", ")), DefinedTextColor.YELLOW, TextDecoration.BOLD));
-                    RunnableManager.runDelayed(() -> Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
+                    RunnableManager.runAsyncDelayed(() -> {
                         Task.this.run();
-                        return null;
-                    }), 20 * 30L);
+                    }, 20 * 30L);
                 }
             };
 
@@ -558,20 +559,58 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
             return MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrNull() != null;
         }
 
-        public boolean unloadWorld(String worldName) {
-            LoadedMultiverseWorld mvWorld = MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrElseThrow(() -> new IllegalArgumentException("World " + worldName + " is not loaded."));
+        public void unloadWorld(String worldName) {
+            if (!Bukkit.isPrimaryThread()) {
+                Future<Throwable> result = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
+                    try {
+                        this.unloadWorld(worldName);
+                    } catch (Throwable t) {
+                        return t;
+                    }
+                    return null;
+                });
 
-            UnloadWorldOptions options = UnloadWorldOptions.world(mvWorld);
+                try {
+                    if (result.get() != null) throw result.get(); // Redirect the exception to the current thread
+                } catch(Throwable t) {
+                    throw new IllegalStateException("Failed to unload world " + worldName, t);
+                }
+            } else {
+                LoadedMultiverseWorld mvWorld = MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrElseThrow(() -> new IllegalArgumentException("World " + worldName + " is not loaded."));
 
-            this.removePlayersFromWorld(worldName);
+                UnloadWorldOptions options = UnloadWorldOptions.world(mvWorld);
 
-            Attempt<MultiverseWorld, UnloadFailureReason> unloadResult = MultiverseCore.getWorldManager().unloadWorld(options);
-            return unloadResult.isSuccess();
+                this.removePlayersFromWorld(worldName);
+
+                Attempt<MultiverseWorld, UnloadFailureReason> unloadResult = MultiverseCore.getWorldManager().unloadWorld(options);
+                if (unloadResult.isFailure()) {
+                    throw new IllegalStateException(unloadResult.getFailureMessage().formatted() + ": " + unloadResult.getFailureReason());
+                }
+            }
         }
 
-        public boolean loadWorld(String worldName) {
-            Attempt<LoadedMultiverseWorld, LoadFailureReason> loadResult = MultiverseCore.getWorldManager().loadWorld(worldName);
-            return loadResult.isSuccess();
+        public void loadWorld(String worldName) {
+            if (!Bukkit.isPrimaryThread()) {
+                Future<Throwable> result = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
+                    try {
+                        this.loadWorld(worldName);
+                    } catch (Throwable t) {
+                        return t;
+                    }
+                    return null;
+                });
+
+                try {
+                    if (result.get() != null) throw result.get(); // Redirect the exception to the current thread
+                } catch(Throwable t) {
+                    throw new IllegalStateException("Failed to load world " + worldName, t);
+                }
+            } else {
+                Attempt<LoadedMultiverseWorld, LoadFailureReason> loadResult = MultiverseCore.getWorldManager().loadWorld(worldName);
+                if (loadResult.isFailure()) {
+                    throw new IllegalStateException(loadResult.getFailureMessage().formatted() + ": " + loadResult.getFailureReason());
+                }
+            }
         }
 
         public boolean backupWorld(String worldName, String backupFolderStr, String backupFileStr) throws IllegalArgumentException {
@@ -615,8 +654,12 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
         public boolean renameWorld(String from, String to, boolean overwrite) {
             MultiverseWorld fromWorld = MultiverseCore.getWorldManager().getWorld(from).getOrElseThrow(() -> new IllegalArgumentException("World " + from + " does not exist."));
             boolean loadAfter = fromWorld.isLoaded();
-            if (!fromWorld.isLoaded() && !this.loadWorld(from)) {
-                throw new IllegalArgumentException("World " + from + " is not loaded.");
+            if (!fromWorld.isLoaded()) {
+                try {
+                    this.loadWorld(from);
+                } catch(IllegalStateException e) {
+                    throw new IllegalArgumentException("World " + from + " is not loaded.", e);
+                }
             }
             fromWorld = MultiverseCore.getWorldManager().getLoadedWorld(from).getOrElseThrow(() -> new IllegalArgumentException("World " + from + " is not loaded."));
 
@@ -640,7 +683,7 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
             return false;
         }
 
-        public boolean regenerateWorld(String worldName, @Nullable String seed, boolean keepGameRule) throws IllegalArgumentException {
+        public synchronized boolean regenerateWorld(String worldName, @Nullable String seed, boolean keepGameRule) throws IllegalArgumentException {
             LoadedMultiverseWorld mvWorld = MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrElseThrow(() -> new IllegalArgumentException("World " + worldName + " is not loaded."));
 
             // Exec script before regeneration
@@ -658,7 +701,17 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
             options.keepGameRule(keepGameRule);
 
             this.removePlayersFromWorld(worldName);
-            boolean success = MultiverseCore.getWorldManager().regenWorld(options).isSuccess();
+            Attempt<LoadedMultiverseWorld, RegenFailureReason> regenResult;
+            if (!Bukkit.isPrimaryThread()) {
+                try {
+                    regenResult = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> MultiverseCore.getWorldManager().regenWorld(options)).get();
+                } catch (InterruptedException | ExecutionException e) {
+                    throw new IllegalStateException("Failed to regenerate world " + worldName, e);
+                }
+            } else {
+                regenResult = MultiverseCore.getWorldManager().regenWorld(options);
+            }
+            boolean success = regenResult.isSuccess();
 
             // Exec script after regeneration
             this.getManager().getScripts(worldName).getOrDefault(ScriptTiming.AFTER, Collections.emptyList()).forEach(scriptFile -> {
@@ -669,7 +722,7 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
         }
 
         public void executeScript(File scriptFile, MultiverseWorld world, Map<String, Object> vars) {
-            ScriptableObject scope = EvalManager.getRhinoContext().initStandardObjects();
+            ScriptableObject scope = EvalManager.getRhinoContextFactory().enterContext().initStandardObjects();
             ScriptableObject.putConstProperty(scope, "Bukkit", new NativeJavaClass(scope, Bukkit.class));
 
             ScriptableObject.putConstProperty(scope, "Storage", EvalManager.getGlobalStorage());
