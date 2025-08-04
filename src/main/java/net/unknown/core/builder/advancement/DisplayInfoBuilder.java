@@ -118,7 +118,7 @@ public class DisplayInfoBuilder {
         Objects.requireNonNull(this.description);
         Objects.requireNonNull(this.icon);
         Objects.requireNonNull(this.type);
-        DisplayInfo displayInfo = new DisplayInfo(icon, title, description, Optional.ofNullable(new ClientAsset(background)), type, showToast, announceChat, hidden);
+        DisplayInfo displayInfo = new DisplayInfo(icon, title, description, Optional.of(new ClientAsset(background == null ? ResourceLocation.tryParse("minecraft:air") : background)), type, showToast, announceChat, hidden);
         displayInfo.setLocation(this.x, this.y);
         return displayInfo;
     }
