@@ -72,6 +72,8 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
 
     private String preGenerateWorldNamePattern;
 
+    private String keepWorldWorldNamePattern;
+
     private String backupFolderPattern;
     private String backupFilePattern;
 
@@ -96,6 +98,7 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
         this.preGenerateWorldNamePattern = this.getConfig().getString("pre-gen.name-format", "${worldName}_PRE");
         this.backupFolderPattern = this.getConfig().getString("backup.folder-pattern", "./backups/${worldName}");
         this.backupFilePattern = this.getConfig().getString("backup.file-pattern", "${year}-${month}-${day}.${extension}");
+        this.keepWorldWorldNamePattern = this.getConfig().getString("keep-old-world.name-format", "old_${worldName}");
 
         this.scripts = new HashMap<>();
         ConfigurationSection scriptsSection = this.getConfig().getConfigurationSection("scripts");
@@ -223,6 +226,13 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
                 keepGameRules = true;
             }
 
+            boolean keepOldWorld;
+            if (dateSection.isBoolean("keep-old-world")) {
+                keepOldWorld = dateSection.getBoolean("keep-old-world");
+            } else {
+                keepOldWorld = false;
+            }
+
             boolean preGenerate;
             if (dateSection.isBoolean("pre-generate")) {
                 preGenerate = dateSection.getBoolean("pre-generate");
@@ -230,7 +240,7 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
                 preGenerate = false;
             }
 
-            Task task = new Task(execTimeEpoch, worlds.toArray(new String[0]), seed, keepGameRules, preGenerate, this);
+            Task task = new Task(execTimeEpoch, worlds.toArray(new String[0]), seed, keepGameRules, preGenerate, keepOldWorld, this);
             this.tasks.put(execTimeEpoch, task);
         });
     }
@@ -250,6 +260,7 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
             scheduleSection.set("worlds", Arrays.asList(task.getWorldNames()));
             scheduleSection.set("seed", task.getSeed());
             scheduleSection.set("keep-game-rules", task.keepGameRule());
+            scheduleSection.set("keep-old-world", task.keepOldWorld());
             scheduleSection.set("pre-generate", task.preGenerate());
         });
 
@@ -257,8 +268,8 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
         super.save();
     }
 
-    public void addTask(long execEpochMillis, String[] worldNames, @Nullable String seed, boolean keepGameRule, boolean preGenerate) {
-        Task task = new Task(execEpochMillis, worldNames, seed, keepGameRule, preGenerate, this);
+    public void addTask(long execEpochMillis, String[] worldNames, @Nullable String seed, boolean keepGameRule, boolean preGenerate, boolean keepOldWorld) {
+        Task task = new Task(execEpochMillis, worldNames, seed, keepGameRule, preGenerate, keepOldWorld, this);
         this.tasks.put(execEpochMillis, task);
         RunnableManager.runAsync(this::save);
     }
@@ -279,6 +290,15 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
 
     private String getPregenerateWorldName(String worldName) {
         return String.format(this.getPreGenerateWorldNamePattern()
+                .replace("${worldName}", worldName), worldName);
+    }
+
+    public String getKeepOldWorldNamePattern() {
+        return this.keepWorldWorldNamePattern;
+    }
+
+    public String getKeepOldWorldName(String worldName) {
+        return String.format(this.getKeepOldWorldNamePattern()
                 .replace("${worldName}", worldName), worldName);
     }
 
@@ -375,15 +395,17 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
         private final boolean keepGameRule;
 
         private final boolean preGenerate;
+        private final boolean keepOldWorld;
 
         private final AutomatedRegenWorldManager manager;
 
-        public Task(long execEpochMillis, String[] worldNames, String seed, boolean keepGameRule, boolean preGenerate, AutomatedRegenWorldManager manager) {
+        public Task(long execEpochMillis, String[] worldNames, String seed, boolean keepGameRule, boolean preGenerate, boolean keepOldWorld, AutomatedRegenWorldManager manager) {
             this.execEpochMillis = execEpochMillis;
             this.worldNames = worldNames;
             this.seed = seed;
             this.keepGameRule = keepGameRule;
             this.preGenerate = preGenerate;
+            this.keepOldWorld = keepOldWorld;
             this.manager = manager;
 
             this.regenerationTask = new TimerTask() {
@@ -409,7 +431,8 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
                     if (this.isPreGenerated(worldName)) {
                         this.logger.info("World \"{}\" is pre-generated, using it.", worldName);
                         MultiverseCore.compressWorld(worldName, this.manager.getBackupFolder(worldName, LocalDateTime.now(), this.manager.getLastExecDateTime()), this.manager.getBackupFile(worldName, LocalDateTime.now(), this.manager.getLastExecDateTime(), "tar.zst"), false);
-                        MultiverseCore.deleteWorld(worldName, Collections.emptyList(), true);
+                        if (this.keepOldWorld) MultiverseCore.renameWorld(worldName, this.manager.getKeepOldWorldName(worldName), true, true);
+                        else MultiverseCore.deleteWorld(worldName, Collections.emptyList(), true);
                         if (MultiverseCore.renameWorld(this.manager.getPregenerateWorldName(worldName), worldName, true, false) && !MultiverseCore.isWorldLoaded(worldName)) {
                             MultiverseCore.loadWorld(worldName);
                         }
@@ -419,6 +442,7 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
                         this.getManager().getScripts(worldName).getOrDefault(ScriptTiming.BEFORE, Collections.emptyList()).forEach(scriptFile -> {
                             this.executeScript(scriptFile, MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrNull(), Collections.emptyMap());
                         });
+                        if (this.keepOldWorld) MultiverseCore.cloneWorld(worldName, this.manager.getKeepOldWorldName(worldName), true, true, true, true, true, true);
                         MultiverseCore.regenerateWorld(worldName, this.seed, this.keepGameRule);
                         this.getManager().getScripts(worldName).getOrDefault(ScriptTiming.AFTER, Collections.emptyList()).forEach(scriptFile -> {
                             this.executeScript(scriptFile, MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrNull(), Collections.emptyMap());
@@ -456,6 +480,10 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
 
         public boolean preGenerate() {
             return this.preGenerate;
+        }
+
+        public boolean keepOldWorld() {
+            return this.keepOldWorld;
         }
 
         public AutomatedRegenWorldManager getManager() {

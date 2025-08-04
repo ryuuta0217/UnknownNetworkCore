@@ -59,7 +59,8 @@ public class AutomatedRegenWorldCommand {
                                 .then(Commands.argument("seed", StringArgumentType.string())
                                         .then(Commands.argument("keep-game-rule", BoolArgumentType.bool())
                                                 .then(Commands.argument("pre-generate", BoolArgumentType.bool())
-                                                        .executes(AutomatedRegenWorldCommand::addTask)))))))
+                                                        .then(Commands.argument("keep-old-world", BoolArgumentType.bool())
+                                                                .executes(AutomatedRegenWorldCommand::addTask))))))))
                 .then(Commands.literal("remove")
                         .then(Commands.argument("date", LongArgumentType.longArg(System.currentTimeMillis()))
                                 .suggests((ctx, suggestionsBuilder) -> SharedSuggestionProvider.suggest(AutomatedRegenWorldManager.getInstance().getTasks().keySet().stream().map(String::valueOf), suggestionsBuilder))
@@ -79,6 +80,7 @@ public class AutomatedRegenWorldCommand {
         if (seed.equals("null")) seed = null; // Handle "null" as a string))
         boolean keepGameRule = BoolArgumentType.getBool(ctx, "keep-game-rule");
         boolean preGenerate = BoolArgumentType.getBool(ctx, "pre-generate");
+        boolean keepOldWorld = BoolArgumentType.getBool(ctx, "keep-old-world");
 
         LocalDateTime dateTime;
         try {
@@ -109,7 +111,7 @@ public class AutomatedRegenWorldCommand {
         }
 
         long date = dateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli();
-        AutomatedRegenWorldManager.getInstance().addTask(date, worlds, seed, keepGameRule, preGenerate);
+        AutomatedRegenWorldManager.getInstance().addTask(date, worlds, seed, keepGameRule, preGenerate, keepOldWorld);
         ctx.getSource().sendSuccess(() -> Component.literal("追加しました: " + date + " (" + dateTime.format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")) + ")"), true);
         return 1;
     }
