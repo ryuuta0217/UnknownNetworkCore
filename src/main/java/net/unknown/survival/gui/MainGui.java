@@ -35,15 +35,19 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.gui.ConfirmationGui;
 import net.unknown.core.gui.GuiBase;
 import net.unknown.core.util.MessageUtil;
+import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.UnknownNetworkSurvival;
+import net.unknown.survival.feature.AdvancementRewards;
 import net.unknown.survival.gui.home.HomeGui;
 import net.unknown.survival.gui.prefix.PrefixGui;
 import net.unknown.survival.gui.protection.ProtectionGui;
 import net.unknown.survival.gui.warp.WarpGui;
 import net.unknown.survival.vote.gui.VoteTicketExchangeGui;
 import org.bukkit.Material;
+import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -98,6 +102,11 @@ public class MainGui extends GuiBase {
                             .lore(Component.text("アイテムを持ってここを左クリックで頭に被ります", TextColor.color(0xFF76A6)))
                             .build());
 
+                    inv.setItem(24, new ItemStackBuilder(Material.END_CRYSTAL)
+                            .displayName(Component.text("進捗のリセット", DefinedTextColor.RED))
+                            .lore(Component.text("すべての進捗をリセットします。再びすべての進捗を達成すれば、全進捗達成報酬を得られます。", DefinedTextColor.GREEN))
+                            .build());
+
                     inv.setItem(25, new ItemStackBuilder(Material.BRUSH)
                             .displayName(Component.text("NBT Remover"))
                             .lore(Component.text("NBTを吹き飛ばすためのGUIを開きます", DefinedTextColor.YELLOW))
@@ -134,6 +143,33 @@ public class MainGui extends GuiBase {
                 event.getWhoClicked().getInventory().setHelmet(newHead);
                 event.getView().setCursor(oldHead);
                 MessageUtil.sendMessage((Player) event.getWhoClicked(), "アイテムを頭に被りました");
+            }
+            case 24 -> {
+                event.getWhoClicked().closeInventory();
+                new ConfirmationGui(
+                        event.getWhoClicked(),
+                        Component.text("進捗をリセットしますか？", DefinedTextColor.DARK_GREEN),
+                        () -> new ItemStackBuilder(Material.OAK_SIGN)
+                                .displayName(Component.text("本当に進捗をリセットしますか？", DefinedTextColor.RED))
+                                .lore(Component.text("この操作は元に戻せません！", DefinedTextColor.RED))
+                                .build(),
+                        null,
+                        null,
+                        (e) -> {
+                            e.getWhoClicked().closeInventory();
+                            if (e.getWhoClicked() instanceof Player player) {
+                                AdvancementRewards.getAvailableAdvancements().forEach(advancement -> {
+                                    AdvancementProgress progress = player.getAdvancementProgress(advancement);
+                                    progress.getAwardedCriteria().forEach(progress::revokeCriteria);
+                                });
+                                NewMessageUtil.sendMessage(e.getWhoClicked(), Component.text("進捗をリセットしました", DefinedTextColor.YELLOW), true);
+                            }
+                        },
+                        (e) -> {
+                            e.getWhoClicked().closeInventory();
+                            this.open(event.getWhoClicked());
+                        }
+                ).open(event.getWhoClicked());
             }
             case 25 -> {
                 if (event.getWhoClicked() instanceof Player player) {
