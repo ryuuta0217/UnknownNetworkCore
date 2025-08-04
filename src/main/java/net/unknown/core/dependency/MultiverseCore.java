@@ -209,6 +209,12 @@ public class MultiverseCore {
         }
     }
 
+    public static boolean cloneWorld(String from, String to, boolean keepGameRule, boolean keepWorldBorder, boolean keepWorldConfig, boolean saveBeforeCloning, boolean movePlayers, boolean overwrite) throws IllegalArgumentException {
+        MultiverseWorld fromWorld = getWorldManager().getWorld(from).getOrElseThrow(() -> new IllegalArgumentException("World " + from + " does not exist."));
+        if (!fromWorld.isLoaded()) throw new IllegalArgumentException("World " + from + " is not loaded.");
+        return cloneWorld(getWorldManager().getLoadedWorld(fromWorld).getOrNull(), to, keepGameRule, keepWorldBorder, keepWorldConfig, saveBeforeCloning, movePlayers, overwrite);
+    }
+
     public static boolean cloneWorld(LoadedMultiverseWorld from, String to, boolean keepGameRule, boolean keepWorldBorder, boolean keepWorldConfig, boolean saveBeforeCloning, boolean movePlayers, boolean overwrite) throws IllegalArgumentException {
         if (!Bukkit.isPrimaryThread()) {
             try {
