@@ -32,6 +32,7 @@
 package net.unknown.survival.tips;
 
 import net.unknown.core.managers.RunnableManager;
+import org.bukkit.Bukkit;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -39,6 +40,7 @@ import java.util.function.Consumer;
 
 public class TimeCounteredTip implements Tip {
     private final Map<UUID, AtomicInteger> counts = new HashMap<>();
+    private final Map<UUID, AtomicInteger> ticks = new HashMap<>();
     private int ticksToDecreaseCount;
     private int requireCount;
     private Consumer<UUID> action;
@@ -49,17 +51,43 @@ public class TimeCounteredTip implements Tip {
         this.action = action;
     }
 
-    public void decrement(UUID player) {
-        if (this.counts.containsKey(player)) {
-            this.counts.get(player).decrementAndGet();
-        }
-        this.check(player);
+    @Override
+    public synchronized void tick() {
+        Bukkit.getOnlinePlayers().parallelStream().forEach(player -> {
+            UUID playerId = player.getUniqueId();
+            if (!counts.containsKey(playerId)) {
+                counts.put(playerId, new AtomicInteger(0));
+            }
+            if (!ticks.containsKey(playerId)) {
+                ticks.put(playerId, new AtomicInteger(0));
+            }
+
+            int currentTicks = ticks.get(playerId).incrementAndGet();
+            if (currentTicks >= ticksToDecreaseCount) {
+                ticks.get(playerId).set(0);
+                counts.get(playerId).decrementAndGet();
+            }
+
+            this.check(playerId);
+        });
+    }
+
+    @Override
+    public void onRemove() {
+        Bukkit.getOnlinePlayers().parallelStream().forEach(player -> clear(player.getUniqueId()));
     }
 
     public void increment(UUID player) {
         if (!counts.containsKey(player)) counts.put(player, new AtomicInteger(0));
         this.counts.get(player).incrementAndGet();
         RunnableManager.runAsyncDelayed(() -> counts.get(player).decrementAndGet(), ticksToDecreaseCount);
+        this.check(player);
+    }
+
+    public void decrement(UUID player) {
+        if (this.counts.containsKey(player)) {
+            this.counts.get(player).decrementAndGet();
+        }
         this.check(player);
     }
 

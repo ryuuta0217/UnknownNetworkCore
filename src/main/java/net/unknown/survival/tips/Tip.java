@@ -32,4 +32,6 @@
 package net.unknown.survival.tips;
 
 public interface Tip {
+    void tick();
+    void onRemove();
 }

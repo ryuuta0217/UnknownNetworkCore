@@ -32,4 +32,13 @@
 package net.unknown.survival.tips;
 
 public class ScheduledRepeatTip implements Tip {
+    @Override
+    public void tick() {
+
+    }
+
+    @Override
+    public void onRemove() {
+
+    }
 }
