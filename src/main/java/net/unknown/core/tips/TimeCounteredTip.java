@@ -39,8 +39,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class TimeCounteredTip implements Tip {
-    private final Map<UUID, AtomicInteger> counts = new HashMap<>();
-    private final Map<UUID, AtomicInteger> ticks = new HashMap<>();
+    protected final Map<UUID, AtomicInteger> counts = new HashMap<>();
+    protected final Map<UUID, AtomicInteger> ticks = new HashMap<>();
     private int ticksToDecreaseCount;
     private int requireCount;
     private Consumer<UUID> action;
