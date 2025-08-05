@@ -29,16 +29,7 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.tips;
+package net.unknown.core.tips;
 
-public class ScheduledRepeatTip implements Tip {
-    @Override
-    public void tick() {
-
-    }
-
-    @Override
-    public void onRemove() {
-
-    }
+public class AuditBasedTip {
 }

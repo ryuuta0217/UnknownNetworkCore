@@ -29,7 +29,30 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.tips;
+package net.unknown.core.tips;
 
-public class AuditBasedTip {
+import net.unknown.core.managers.RunnableManager;
+import org.bukkit.NamespacedKey;
+import org.bukkit.scheduler.BukkitTask;
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class TipsManager {
+    private static final Map<NamespacedKey, Tip> TIPS = new HashMap<>();
+    private static final Map<NamespacedKey, BukkitTask> TICKING_TASKS = new HashMap<>();
+
+    public static void register(NamespacedKey id, Tip tip) {
+        TIPS.put(id, tip);
+        TICKING_TASKS.put(id, RunnableManager.runRepeating(tip::tick, 1L, 1L));
+    }
+
+    public static void unregister(NamespacedKey id) {
+        Tip tip = TIPS.remove(id);
+        BukkitTask task = TICKING_TASKS.remove(id);
+        if (tip != null && task != null) {
+            task.cancel();
+            tip.onRemove();
+        }
+    }
 }
