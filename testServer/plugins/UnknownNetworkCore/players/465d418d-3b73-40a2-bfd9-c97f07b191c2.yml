@@ -5,6 +5,7 @@ reply-target: 65922e55-04b3-48c2-a4f7-5b393692adf4
 force-global-chat-prefix: g.
 use-kana-convert: false
 home-default-group: default
+use-minimessage: false
 homeGroupItems:
   default: ENDER_EYE
   dwadwadaw: WHITE_WOOL
@@ -333,3 +334,4 @@ homes:
       yaw: 91.83923
       pitch: 2.8164847
   dwadwadaw: {}
+registries: {}

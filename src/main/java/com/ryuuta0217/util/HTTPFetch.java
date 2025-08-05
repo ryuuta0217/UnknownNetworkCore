@@ -1,32 +1,17 @@
 /*
- * Copyright (c) 2023 Unknown Network Developers and contributors.
+ * Copyright (C) 2023 Ryuta Iwakura (ryuuta0217)
  *
- * All rights reserved.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation version 3 of the License.
  *
- * NOTICE: This license is subject to change without prior notice.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * Redistribution and use in source and binary forms, *without modification*,
- *     are permitted provided that the following conditions are met:
- *
- * I. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- * II. Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * III. Neither the name of Unknown Network nor the names of its contributors may be used to
- *     endorse or promote products derived from this software without specific prior written permission.
- *
- * IV. This source code and binaries is provided by the copyright holders and contributors "AS-IS" and
- *     any express or implied warranties, including, but not limited to, the implied warranties of
- *     merchantability and fitness for a particular purpose are disclaimed.
- *     In not event shall the copyright owner or contributors be liable for
- *     any direct, indirect, incidental, special, exemplary, or consequential damages
- *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
- *     whether in contract, strict liability, or tort (including negligence or otherwise)
- *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.ryuuta0217.util;
@@ -142,15 +127,7 @@ public class HTTPFetch {
     }
 
     public String sentAndReadAsString() throws IOException {
-        StringBuilder responseBuilder = new StringBuilder();
-        InputStream responseStream = this.sent();
-        InputStreamReader streamReader = new InputStreamReader(responseStream, this.connection.getContentEncoding() == null ? "UTF-8" : this.connection.getContentEncoding());
-        BufferedReader reader = new BufferedReader(streamReader);
-        reader.lines().forEach(responseBuilder::append);
-        streamReader.close();
-        reader.close();
-        responseStream.close();
-        return responseBuilder.toString();
+        return readStream(this.sent(), this.connection.getContentEncoding() == null ? "UTF-8" : this.connection.getContentEncoding());
     }
 
     public InputStream sent() throws IOException {
@@ -180,19 +157,20 @@ public class HTTPFetch {
         }
 
         // Error Handling
-        StringBuilder errorMessageBuilder = new StringBuilder();
-        if (this.connection.getInputStream() != null) {
-            InputStream responseStream = this.connection.getInputStream();
-            InputStreamReader streamReader = new InputStreamReader(responseStream, this.connection.getContentEncoding() == null ? "UTF-8" : this.connection.getContentEncoding());
-            BufferedReader reader = new BufferedReader(streamReader);
-
-            reader.lines().forEach(errorMessageBuilder::append);
-            streamReader.close();
-            reader.close();
-            responseStream.close();
-        }
-        String errorMessage = errorMessageBuilder.toString();
+        String errorMessage = readStream(this.connection.getInputStream(), this.connection.getContentEncoding() == null ? "UTF-8" : this.connection.getContentEncoding());
         throw new IllegalStateException("HTTP " + this.connection.getResponseCode() + (!errorMessage.isEmpty() && !errorMessage.isBlank() ? errorMessage : ""));
+    }
+
+    private static String readStream(InputStream stream, String charsetName) throws IOException {
+        if (stream == null || charsetName == null || charsetName.isEmpty() || charsetName.isBlank()) return null;
+        StringBuilder sb = new StringBuilder();
+        InputStreamReader streamReader = new InputStreamReader(stream, charsetName);
+        BufferedReader reader = new BufferedReader(streamReader);
+        reader.lines().forEach(sb::append);
+        streamReader.close();
+        reader.close();
+        stream.close();
+        return sb.toString();
     }
 
     public void sentAsync() {

@@ -31,11 +31,11 @@
 
 package net.unknown.core.athletic;
 
+import com.ryuuta0217.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.core.util.MessageUtil;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -161,7 +161,7 @@ public class Athletic {
 
     public static Athletic load(ConfigurationSection athleticSection) {
         String rawUniqueId = athleticSection.getName();
-        if (MessageUtil.isUUID(rawUniqueId)) {
+        if (StringUtil.isValidUUID(rawUniqueId)) {
             if (athleticSection.contains("name") && athleticSection.contains("display_name")) {
                 UUID uniqueId = UUID.fromString(rawUniqueId);
                 String name = athleticSection.getString("name");
@@ -243,7 +243,7 @@ public class Athletic {
 
         public static Checkpoint load(ConfigurationSection checkpointSection) {
             String rawUniqueId = checkpointSection.getName();
-            if (MessageUtil.isUUID(rawUniqueId)) {
+            if (StringUtil.isValidUUID(rawUniqueId)) {
                 if (checkpointSection.contains("name") && checkpointSection.contains("display_name") && checkpointSection.contains("location")) {
                     UUID uniqueId = UUID.fromString(rawUniqueId);
                     String name = checkpointSection.getString("name");

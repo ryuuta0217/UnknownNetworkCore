@@ -2,7 +2,7 @@ config-version: 3
 home-base-count: 5
 home-additional-count: 128
 force-global-chat-prefix: g.
-use-kana-convert: false
+use-kana-convert: true
 home-default-group: default
 reply-target: 65922e55-04b3-48c2-a4f7-5b393692adf4
 use-minimessage: true
@@ -14,14 +14,14 @@ homeGroupItems:
 homes:
   default:
     test:
-      world: world
+      world: world_Old
       x: 44.197328864986524
       y: 8.0
       z: 18.809215845276817
       yaw: 20.680578
       pitch: 1.5622655
     test2:
-      world: world
+      world: world2
       x: 43.89027358227601
       y: 8.0
       z: 29.91653797799488
@@ -195,6 +195,20 @@ homes:
       z: 1.5333604800998757
       yaw: -94.20767
       pitch: -0.9008331
+    wa:
+      world: resource
+      x: 22.431989065425668
+      y: 80.0
+      z: -49.30000001192093
+      yaw: 32.099976
+      pitch: 18.150036
+    lkfajssada:
+      world: resource
+      x: 18.866329604842658
+      y: 83.0
+      z: -62.79570710451603
+      yaw: 120.29998
+      pitch: 30.000036
   test: {}
   helloworld: {}
   testw: {}

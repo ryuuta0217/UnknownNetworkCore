@@ -31,34 +31,68 @@
 
 package net.unknown.proxy;
 
-import net.md_5.bungee.api.ChatColor;
-import net.md_5.bungee.api.ServerPing;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.event.ProxyPingEvent;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.event.EventHandler;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.proxy.ProxyPingEvent;
+import com.velocitypowered.api.proxy.server.ServerPing;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.serialize.SerializationException;
 
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
-public class PingListener implements Listener {
-    private static final int BASE_SUPPORTED_PROTOCOL_NUMBER = 762; // 1.19.4
-    private static final Set<Integer> SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>() {{
-        add(763); // 1.20, 1.20.1
-    }};
+public class PingListener {
+    private static final String PROTOCOL_NAME;
+    private static final int BASE_SUPPORTED_PROTOCOL_NUMBER;
+    private static final Set<Integer> SUPPORTED_PROTOCOL_NUMBERS;
 
-    @EventHandler
+    static {
+        CommentedConfigurationNode config = UnknownNetworkProxyCore.getConfig();
+        if (!config.hasChild("protocol-name")) {
+            try {
+                config.node("protocol-name").set("Minecraft 1.20-1.21");
+            } catch (SerializationException ignored) {}
+        }
+
+        if (!config.hasChild("supported-protocol-numbers")) {
+            try {
+                config.node("supported-protocol-numbers").setList(Integer.class, List.of(763, 764, 765, 766, 767)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6, 1.21
+            } catch (SerializationException ignored) {}
+        }
+
+        PROTOCOL_NAME = config.node("protocol-name").getString();
+
+        List<Integer> protocolNumbers = Collections.emptyList();
+        try {
+            protocolNumbers = config.node("supported-protocol-numbers").getList(Integer.class);
+        } catch (SerializationException ignored) {}
+        BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(767); // if failed to get min, use default (defined default)
+        protocolNumbers.remove((Integer) BASE_SUPPORTED_PROTOCOL_NUMBER);
+        SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>(protocolNumbers);
+    }
+
+    @Subscribe
     public void onPing(ProxyPingEvent event) {
-        ServerPing sp = event.getResponse();
+        ServerPing currentPing = event.getPing();
 
-        int playerProtocolVersion = event.getConnection().getVersion();
+        int playerProtocolVersion = event.getConnection().getProtocolVersion().getProtocol();
         int protocolVersion = BASE_SUPPORTED_PROTOCOL_NUMBER;
         if (SUPPORTED_PROTOCOL_NUMBERS.contains(playerProtocolVersion)) {
             protocolVersion = playerProtocolVersion;
         }
-        sp.setVersion(new ServerPing.Protocol("Minecraft 1.19.4 / 1.20.x", protocolVersion));
 
-        event.setResponse(sp);
+        ServerPing.Builder newPingBuilder = ServerPing.builder();
+        newPingBuilder.version(new ServerPing.Version(protocolVersion, PROTOCOL_NAME));
+        newPingBuilder.description(currentPing.getDescriptionComponent());
+        currentPing.getPlayers().ifPresent(players -> {
+            newPingBuilder.onlinePlayers(players.getOnline());
+            newPingBuilder.maximumPlayers(players.getMax());
+            newPingBuilder.samplePlayers(players.getSample().toArray(new ServerPing.SamplePlayer[0]));
+        });
+        currentPing.getModinfo().ifPresent(newPingBuilder::mods);
+        currentPing.getFavicon().ifPresent(newPingBuilder::favicon);
+
+        event.setPing(newPingBuilder.build());
     }
 }

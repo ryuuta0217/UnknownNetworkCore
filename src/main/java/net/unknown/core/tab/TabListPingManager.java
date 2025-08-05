@@ -31,25 +31,32 @@
 
 package net.unknown.core.tab;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.numbers.BlankFormat;
+import net.minecraft.network.chat.numbers.FixedFormat;
+import net.minecraft.network.chat.numbers.NumberFormat;
+import net.minecraft.network.chat.numbers.StyledFormat;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetScorePacket;
 import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.scores.DisplaySlot;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.managers.RunnableManager;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TabListPingManager implements Listener {
@@ -62,11 +69,13 @@ public class TabListPingManager implements Listener {
             PING_OBJECTIVE_NAME,
             ObjectiveCriteria.DUMMY,
             OBJECTIVE_DISPLAYNAME,
-            ObjectiveCriteria.RenderType.INTEGER
+            ObjectiveCriteria.RenderType.INTEGER,
+            true,
+            null
     );
 
     public static final ClientboundSetObjectivePacket CREATE_OBJECTIVE = new ClientboundSetObjectivePacket(OBJECTIVE, ClientboundSetObjectivePacket.METHOD_ADD);
-    public static final ClientboundSetDisplayObjectivePacket DISPLAY_OBJECTIVE = new ClientboundSetDisplayObjectivePacket(0, OBJECTIVE);
+    public static final ClientboundSetDisplayObjectivePacket DISPLAY_OBJECTIVE = new ClientboundSetDisplayObjectivePacket(DisplaySlot.LIST, OBJECTIVE);
     public static final ClientboundSetObjectivePacket REMOVE_OBJECTIVE = new ClientboundSetObjectivePacket(OBJECTIVE, ClientboundSetObjectivePacket.METHOD_REMOVE);
 
     private static BukkitTask UPDATE_TASK;
@@ -74,7 +83,7 @@ public class TabListPingManager implements Listener {
     public static BukkitTask startTask() {
         stopTask();
 
-        UnknownNetworkCore.getDedicatedServer()
+        UnknownNetworkCorePlugin.getDedicatedServer()
                 .getPlayerList()
                 .getPlayers()
                 .forEach(TabListPingManager::createDummyObjective);
@@ -87,7 +96,7 @@ public class TabListPingManager implements Listener {
     public static void stopTask() {
         if (UPDATE_TASK != null && !UPDATE_TASK.isCancelled()) UPDATE_TASK.cancel();
 
-        UnknownNetworkCore.getDedicatedServer()
+        UnknownNetworkCorePlugin.getDedicatedServer()
                 .getPlayerList()
                 .getPlayers()
                 .forEach(TabListPingManager::removeDummyObjective);
@@ -103,27 +112,36 @@ public class TabListPingManager implements Listener {
     }
 
     private static void sendLatencies() {
-        Map<String, Integer> latencies = UnknownNetworkCore.getDedicatedServer()
+        Map<String, Integer> latencies = UnknownNetworkCorePlugin.getDedicatedServer()
                 .getPlayerList()
                 .getPlayers()
                 .stream()
-                .collect(Collectors.toMap(p -> p.getScoreboardName(), p -> p.latency));
+                .collect(Collectors.toMap(p -> p.getScoreboardName(), p -> p.connection.latency()));
 
-        UnknownNetworkCore.getDedicatedServer()
+        UnknownNetworkCorePlugin.getDedicatedServer()
                 .getPlayerList()
                 .getPlayers()
                 .forEach(player -> {
                     latencies.entrySet().forEach(e -> {
                         ClientboundSetScorePacket setScore = new ClientboundSetScorePacket(
-                                ServerScoreboard.Method.CHANGE,
-                                PING_OBJECTIVE_NAME,
                                 e.getKey(),
-                                e.getValue()
+                                PING_OBJECTIVE_NAME,
+                                e.getValue(),
+                                Optional.of(Component.literal(e.getKey())),
+                                getDisplayFormatOptional(e.getValue())
                         );
 
                         player.connection.send(setScore);
                     });
                 });
+    }
+
+    public static Optional<NumberFormat> getDisplayFormatOptional(int ping) {
+        return Optional.of(getDisplayFormat(ping));
+    }
+
+    public static NumberFormat getDisplayFormat(int ping) {
+        return new FixedFormat(Component.literal(ping + "ms").withStyle(ping <= 50 ? ChatFormatting.GREEN : ping <= 150 ? ChatFormatting.YELLOW : ChatFormatting.RED));
     }
 
     @EventHandler

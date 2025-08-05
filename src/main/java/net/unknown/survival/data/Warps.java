@@ -32,7 +32,7 @@
 package net.unknown.survival.data;
 
 import net.kyori.adventure.text.Component;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.survival.data.model.Warp;
 import org.bukkit.Location;
@@ -52,7 +52,7 @@ import java.util.logging.Logger;
 public class Warps {
     private static final Logger LOGGER = Logger.getLogger("UNC/Warps");
 
-    private static final File FILE = new File(UnknownNetworkCore.getInstance().getDataFolder(), "warps.yml");
+    private static final File FILE = new File(UnknownNetworkCorePlugin.getInstance().getDataFolder(), "warps.yml");
     private static FileConfiguration CONFIG;
     private static final Map<String, Warp> WARPS = new LinkedHashMap<>();
 

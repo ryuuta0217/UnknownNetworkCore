@@ -33,7 +33,6 @@ package net.unknown.core.managers;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.unknown.UnknownNetworkCore;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.shared.SharedConstants;
 import org.bukkit.configuration.ConfigurationSection;
@@ -120,6 +119,7 @@ public class TrashManager {
                     ConfigurationSection itemsSection = config.createSection("items");
                     items.entrySet()
                             .stream()
+                            .filter(e -> !Objects.isNull(e.getValue()))
                             .filter(e -> !e.getValue().is(Items.AIR))
                             .map(e -> Map.entry(e.getKey(), MinecraftAdapter.ItemStack.json(e.getValue())))
                             .forEach(e -> itemsSection.set(String.valueOf(e.getKey()), e.getValue()));

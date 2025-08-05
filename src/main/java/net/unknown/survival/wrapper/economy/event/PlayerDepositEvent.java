@@ -37,13 +37,19 @@ import org.jetbrains.annotations.NotNull;
 
 public class PlayerDepositEvent extends PlayerBalanceChangedEvent {
     private static final HandlerList HANDLERS = new HandlerList();
+    private final double amount;
 
     public PlayerDepositEvent(boolean isAsync, OfflinePlayer player, double amount, double beforeBalance, double afterBalance) {
         super(isAsync, player, beforeBalance, afterBalance);
+        this.amount = amount;
     }
 
     public static HandlerList getHandlerList() {
         return HANDLERS;
+    }
+
+    public double getAmount() {
+        return this.amount;
     }
 
     @Override

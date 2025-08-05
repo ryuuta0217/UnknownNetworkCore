@@ -1,0 +1,3 @@
+[submodule "testServer/world/datapacks/UnknownServerPack"]
+	path = testServer/world/datapacks/UnknownServerPack
+	url = https://github.com/ryuuta0217/UnknownServerPack.git

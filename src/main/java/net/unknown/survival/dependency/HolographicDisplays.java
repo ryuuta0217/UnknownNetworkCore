@@ -32,10 +32,10 @@
 package net.unknown.survival.dependency;
 
 import me.filoghost.holographicdisplays.api.HolographicDisplaysAPI;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 
 public class HolographicDisplays {
     public static HolographicDisplaysAPI get() {
-        return HolographicDisplaysAPI.get(UnknownNetworkCore.getInstance());
+        return HolographicDisplaysAPI.get(UnknownNetworkCorePlugin.getInstance());
     }
 }

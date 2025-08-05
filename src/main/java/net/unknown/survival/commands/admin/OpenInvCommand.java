@@ -32,9 +32,7 @@
 package net.unknown.survival.commands.admin;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.*;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.Container;
@@ -46,7 +44,7 @@ import net.minecraft.world.item.ItemStack;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -87,12 +85,12 @@ public class OpenInvCommand {
         } else {
             CompoundTag data = loadPlayerData(playerUniqueId);
             if (data != null && data.contains("Inventory")) {
-                ListTag inventoryList = data.getList("Inventory", Tag.TAG_COMPOUND);
+                ListTag inventoryList = data.getListOrEmpty("Inventory");
 
                 for(int i = 0; i < inventoryList.size(); i++) {
-                    CompoundTag itemStackTag = inventoryList.getCompound(i);
-                    int slot = itemStackTag.getByte("Slot") & 255;
-                    ItemStack itemStack = ItemStack.of(itemStackTag);
+                    CompoundTag itemStackTag = inventoryList.getCompoundOrEmpty(i);
+                    int slot = itemStackTag.getByteOr("Slot", (byte) 0) & 255;
+                    ItemStack itemStack = MinecraftAdapter.ItemStack.tag(itemStackTag);
                     inv.setItem(convInvSlotMinecraft2Bukkit(slot), MinecraftAdapter.ItemStack.itemStack(itemStack));
                 }
             }
@@ -110,7 +108,7 @@ public class OpenInvCommand {
         File playerFile = new File(playerDir, playerUniqueId + ".dat");
         if (playerFile.exists()) {
             try {
-                return NbtIo.readCompressed(playerFile);
+                return NbtIo.readCompressed(playerFile.toPath(), NbtAccounter.unlimitedHeap());
             } catch (IOException ignored) {}
         }
 
@@ -122,7 +120,7 @@ public class OpenInvCommand {
         File playerFile = new File(playerDir, playerUniqueId + ".dat");
         if (playerFile.exists()) {
             try {
-                NbtIo.writeCompressed(playerData, playerFile);
+                NbtIo.writeCompressed(playerData, playerFile.toPath());
                 return true;
             } catch (IOException ignored) {}
         }
@@ -140,13 +138,13 @@ public class OpenInvCommand {
         } else {
             CompoundTag data = loadPlayerData(playerUniqueId);
             if (data != null && data.contains("Inventory")) {
-                ListTag inventoryList = data.getList("Inventory", Tag.TAG_COMPOUND);
+                ListTag inventoryList = data.getListOrEmpty("Inventory");
                 inventoryList.clear();
 
                 contents.forEach((slot, item) -> {
                     CompoundTag inventoryItemContainer = new CompoundTag();
                     inventoryItemContainer.putInt("Slot", slot);
-                    inventoryList.set(slot, item.save(new CompoundTag()));
+                    inventoryList.set(slot, MinecraftAdapter.ItemStack.tag(item));
                 });
             }
 

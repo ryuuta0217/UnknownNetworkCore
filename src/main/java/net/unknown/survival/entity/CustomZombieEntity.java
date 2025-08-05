@@ -54,8 +54,8 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
-import org.bukkit.craftbukkit.v1_20_R1.event.CraftEventFactory;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.event.CraftEventFactory;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityShootBowEvent;
 import org.jetbrains.annotations.Nullable;
@@ -116,17 +116,9 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
 
     @Nullable
     @Override
-    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, MobSpawnType spawnReason, @Nullable SpawnGroupData entityData, @Nullable CompoundTag entityNbt) {
+    public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData entityData) {
         if (!this.level().isClientSide) this.reassessWeaponGoal();
-        return super.finalizeSpawn(world, difficulty, spawnReason, entityData, entityNbt);
-    }
-
-    @Override
-    public void readAdditionalSaveData(CompoundTag nbt) {
-        super.readAdditionalSaveData(nbt);
-        if (!this.level().isClientSide) {
-            this.reassessWeaponGoal();
-        }
+        return super.finalizeSpawn(world, difficulty, spawnReason, entityData);
     }
 
     @Override
@@ -140,7 +132,7 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
     @Override
     public void performRangedAttack(LivingEntity target, float pullProgress) {
         ItemStack bow = this.getProjectile(this.getItemInHand(ProjectileUtil.getWeaponHoldingHand(this, Items.BOW)));
-        AbstractArrow arrow = ProjectileUtil.getMobArrow(this, bow, pullProgress);
+        AbstractArrow arrow = ProjectileUtil.getMobArrow(this, new ItemStack(Items.ARROW), pullProgress, bow);
         double x = target.getX() - this.getX();
         double y = target.getY(0.3333333333333333D) - arrow.getY();
         double z = target.getZ() - this.getZ();

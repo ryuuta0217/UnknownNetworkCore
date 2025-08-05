@@ -40,7 +40,7 @@ import net.unknown.launchwrapper.hopper.IMixinHopperBlockEntity;
 import net.unknown.survival.gui.hopper.view.ConfigureHopperView;
 import net.unknown.survival.gui.hopper.view.ConfigureHopperViewBase;
 import net.unknown.survival.gui.hopper.view.ManageHopperView;
-import org.bukkit.craftbukkit.v1_20_R1.block.CraftHopper;
+import org.bukkit.craftbukkit.block.CraftHopper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.Action;
@@ -83,7 +83,7 @@ public class ConfigureHopperGui extends ViewedGuiBase<ConfigureHopperView> {
             if (event.getItem() != null) return;
             if (!event.getPlayer().isSneaking()) return;
             event.setCancelled(true);
-            HopperBlockEntity hopper = ((CraftHopper) event.getClickedBlock().getState()).getTileEntity();
+            HopperBlockEntity hopper = ((CraftHopper) event.getClickedBlock().getState()).getBlockEntity();
             new ConfigureHopperGui(event.getPlayer(), hopper, (IMixinHopperBlockEntity) hopper).open(event.getPlayer());
         }
     }

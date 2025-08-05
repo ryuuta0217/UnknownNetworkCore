@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="Run Proxy" type="JarApplication">
-    <option name="JAR_PATH" value="$PROJECT_DIR$/libs/standalone/waterfall.jar" />
+    <option name="JAR_PATH" value="$PROJECT_DIR$/libs/standalone/velocity.jar" />
     <option name="WORKING_DIRECTORY" value="testProxy" />
     <option name="ALTERNATIVE_JRE_PATH" />
     <method v="2">

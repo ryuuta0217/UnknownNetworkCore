@@ -37,13 +37,14 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.item.enchantment.Enchantment;
-import net.minecraft.world.item.enchantment.EnchantmentCategory;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.BlockUtil;
 import net.unknown.core.util.MinecraftAdapter;
@@ -61,6 +62,19 @@ import java.util.*;
 
 public class RangedMining implements Listener {
     private static final Map<UUID, BlockFace> FACING = new HashMap<>();
+
+    private static final Set<Block> UNDESTORYABLE_BLOCKS = new HashSet<>() {{
+        add(Blocks.BARRIER);
+        add(Blocks.BEDROCK);
+        add(Blocks.END_PORTAL);
+        add(Blocks.END_PORTAL_FRAME);
+        add(Blocks.END_GATEWAY);
+        add(Blocks.COMMAND_BLOCK);
+        add(Blocks.REPEATING_COMMAND_BLOCK);
+        add(Blocks.CHAIN_COMMAND_BLOCK);
+        add(Blocks.STRUCTURE_BLOCK);
+        add(Blocks.JIGSAW);
+    }};
 
     private static Iterable<BlockPos> withinManhattan(Direction direction, BlockPos center, int range) {
         int x = 0;
@@ -121,6 +135,10 @@ public class RangedMining implements Listener {
         Iterable<BlockPos> toBreak = withinManhattan(direction, MinecraftAdapter.blockPos(event.getBlock().getLocation()), level);
         toBreak.forEach(blockPos -> {
             int durabilityRemaining = handItem.getMaxDamage() - handItem.getDamageValue();
+
+            // 破壊不能ブロックを無視する完璧なコード
+            if (UNDESTORYABLE_BLOCKS.contains(MinecraftAdapter.player(player).level().getBlockState(blockPos).getBlock())) return;
+
             if(durabilityRemaining != 1) {
                 IGNORE_EVENT.get(player.getUniqueId()).add(blockPos);
                 try {
@@ -132,55 +150,5 @@ public class RangedMining implements Listener {
                 player.sendActionBar(Component.text("耐久値が無くなりました", DefinedTextColor.RED));
             }
         });
-    }
-
-    public static class RangedMiningEnchantment extends Enchantment {
-        private static RangedMiningEnchantment INSTANCE;
-
-        protected RangedMiningEnchantment() {
-            super(Rarity.RARE, EnchantmentCategory.DIGGER, new net.minecraft.world.entity.EquipmentSlot[] {net.minecraft.world.entity.EquipmentSlot.MAINHAND});
-            this.descriptionId = "範囲破壊";
-        }
-
-        public static RangedMiningEnchantment instance() {
-            if (INSTANCE == null) INSTANCE = new RangedMiningEnchantment();
-            return INSTANCE;
-        }
-
-        @Override
-        public int getMaxLevel() {
-            return 3;
-        }
-
-        @Override
-        public int getMinCost(int level) {
-            return 15 * level;
-        }
-
-        @Override
-        public int getMaxCost(int level) {
-            return super.getMinCost(level) + 30;
-        }
-
-        @Override
-        public boolean canEnchant(net.minecraft.world.item.ItemStack stack) {
-            return stack.getItem() instanceof PickaxeItem && super.canEnchant(stack);
-        }
-
-        @Override
-        public net.minecraft.network.chat.Component getFullname(int level) {
-            MutableComponent mutableComponent = net.minecraft.network.chat.Component.literal(this.getDescriptionId());
-            if (this.isCurse()) {
-                mutableComponent.withStyle(ChatFormatting.RED);
-            } else {
-                mutableComponent.withStyle(ChatFormatting.GRAY);
-            }
-
-            if (level != 1 || this.getMaxLevel() != 1) {
-                mutableComponent.append(" ").append(net.minecraft.network.chat.Component.translatable("enchantment.level." + level));
-            }
-
-            return mutableComponent;
-        }
     }
 }

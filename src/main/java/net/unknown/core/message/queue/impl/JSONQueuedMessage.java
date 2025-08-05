@@ -31,8 +31,11 @@
 
 package net.unknown.core.message.queue.impl;
 
+import com.mojang.serialization.JsonOps;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.server.MinecraftServer;
 import net.unknown.core.message.queue.MessageType;
 import net.unknown.core.message.queue.interfaces.QueuedMessage;
 import org.bukkit.configuration.ConfigurationSection;
@@ -47,7 +50,7 @@ public class JSONQueuedMessage implements QueuedMessage {
     }
 
     public JSONQueuedMessage(Component minecraft) {
-        this.json = Component.Serializer.toJson(minecraft);
+        this.json = ComponentSerialization.CODEC.encodeStart(JsonOps.INSTANCE, minecraft).toString();
     }
 
     public JSONQueuedMessage(net.kyori.adventure.text.Component adventure) {

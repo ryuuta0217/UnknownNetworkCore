@@ -52,7 +52,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.unknown.core.managers.RunnableManager;
 import org.bukkit.Location;
-import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 
 import java.util.EnumSet;
@@ -106,13 +106,13 @@ public class TomatoZombieEntity extends Zombie {
     }
 
     @Override
-    protected void customServerAiStep() {
+    protected void customServerAiStep(ServerLevel level) {
         LivingEntity livingEntity = this.getTarget();
         if (livingEntity != null && this.canAttack(livingEntity)) {
             this.hasImpulse = true;
         }
 
-        super.customServerAiStep();
+        super.customServerAiStep(level);
     }
 
     @Override
@@ -199,7 +199,7 @@ public class TomatoZombieEntity extends Zombie {
 
                     if (this.attackTime <= 0) {
                         this.attackTime = 20;
-                        this.zombie.doHurtTarget(attackTarget);
+                        this.zombie.doHurtTarget(this.zombie.level().getMinecraftWorld(), attackTarget);
                     }
                 } else if (distance < this.getFollowDistance() * this.getFollowDistance() && lineOfSight) {
                     double x = attackTarget.getX() - this.zombie.getX();
@@ -222,7 +222,7 @@ public class TomatoZombieEntity extends Zombie {
                             }
 
                             for (int i = 0; i < 1; ++i) {
-                                SmallFireball smallFireball = new SmallFireball(this.zombie.level(), this.zombie, x + (this.zombie.getRandom().nextGaussian() / 2), y, z + (this.zombie.getRandom().nextGaussian() / 2));
+                                SmallFireball smallFireball = new SmallFireball(this.zombie.level(), this.zombie, new Vec3(x + (this.zombie.getRandom().nextGaussian() / 2), y, z + (this.zombie.getRandom().nextGaussian() / 2)));
                                 smallFireball.setPos(smallFireball.getX(), this.zombie.getY(0.5D) + 0.5D, smallFireball.getZ());
                                 this.zombie.level().addFreshEntity(smallFireball);
                             }

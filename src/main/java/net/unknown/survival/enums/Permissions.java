@@ -33,7 +33,6 @@ package net.unknown.survival.enums;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.world.entity.player.Player;
 import net.unknown.survival.commands.*;
 import net.unknown.survival.commands.admin.LastTpCommand;
 import net.unknown.survival.commands.home.DelHomeCommand;
@@ -41,7 +40,6 @@ import net.unknown.survival.commands.home.HomeCommand;
 import net.unknown.survival.commands.home.HomesCommand;
 import net.unknown.survival.commands.home.SetHomeCommand;
 import net.unknown.survival.commands.home.admin.*;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.bukkit.entity.LivingEntity;
 
 public enum Permissions {
@@ -116,7 +114,7 @@ public enum Permissions {
     }
 
     public boolean checkAndIsPlayer(CommandSourceStack clw) {
-        if (!(clw.source instanceof Player)) return false;
+        if (!(clw.isPlayer())) return false;
         return check(clw);
     }
 

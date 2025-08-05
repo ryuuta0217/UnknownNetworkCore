@@ -33,7 +33,6 @@ package net.unknown.survival.item;
 
 import net.unknown.core.item.UnknownNetworkItem;
 import net.unknown.core.managers.ListenerManager;
-import net.unknown.survival.feature.MendingSupportStick;
 import org.bukkit.NamespacedKey;
 import org.bukkit.event.Listener;
 
@@ -46,11 +45,17 @@ public class Items {
     private static final Map<NamespacedKey, UnknownNetworkItem> REGISTRY = new HashMap<>();
     private static boolean FROZEN = false;
 
-    public static MendingSupportStick MENDING_SUPPORT_STICK;
+    public static MendingSupportStickItem MENDING_SUPPORT_STICK;
+    public static UpgradeSnowGolemItem UPGRADE_SNOW_GOLEM_ITEM;
+    public static PotionEffectItem POTION_EFFECT_ITEM;
+    public static LifterItem LIFTER_ITEM;
 
     public static void init() {
         if (FROZEN && !REGISTRY.isEmpty()) throw new IllegalStateException("Can't init items twice!");
-        MENDING_SUPPORT_STICK = register(new MendingSupportStick());
+        MENDING_SUPPORT_STICK = register(new MendingSupportStickItem());
+        UPGRADE_SNOW_GOLEM_ITEM = register(new UpgradeSnowGolemItem());
+        POTION_EFFECT_ITEM = register(new PotionEffectItem());
+        LIFTER_ITEM = register(new LifterItem());
         FROZEN = true;
     }
 

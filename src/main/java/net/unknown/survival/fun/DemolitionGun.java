@@ -34,15 +34,14 @@ package net.unknown.survival.fun;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Arrow;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityShootBowEvent;
-import org.bukkit.projectiles.ProjectileSource;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -70,7 +69,7 @@ public class DemolitionGun implements Listener {
                             @Override
                             public void run() {
                                 if (!arrow.getLocation().getChunk().isLoaded()) {
-                                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> arrow.getLocation().getChunk().load());
+                                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> arrow.getLocation().getChunk().load());
                                 }
 
                                 if (!arrow.isDead() && !arrow.isOnGround()) {
@@ -78,15 +77,15 @@ public class DemolitionGun implements Listener {
                                     arrow.getLocation().getWorld().spawnParticle(Particle.SONIC_BOOM, arrow.getLocation(), 8);
                                 } else {
                                     arrow.setGlowing(false);
-                                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> {
+                                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
                                         arrow.remove();
+                                        bukkitPlayer.playSound(bukkitPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.8f);
                                         return null;
                                     });
-                                    bukkitPlayer.playSound(bukkitPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.8f);
                                     this.cancel();
                                 }
                             }
-                        }.runTaskTimerAsynchronously(UnknownNetworkCore.getInstance(), 0L, 1L);
+                        }.runTaskTimerAsynchronously(UnknownNetworkCorePlugin.getInstance(), 0L, 1L);
                     } else {
                         event.setCancelled(true);
                     }
@@ -109,7 +108,7 @@ public class DemolitionGun implements Listener {
         }
 
         public static BukkitTask boot() {
-            TASK = new BowPullIndicator().runTaskTimerAsynchronously(UnknownNetworkCore.getInstance(), 0L, 1L);
+            TASK = new BowPullIndicator().runTaskTimer(UnknownNetworkCorePlugin.getInstance(), 0L, 1L);
             return TASK;
         }
 

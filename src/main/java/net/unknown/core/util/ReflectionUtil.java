@@ -59,6 +59,19 @@ public class ReflectionUtil {
         }
     }*/
 
+    public static void setFinalObject(Field targetField, Object instance, Object newValue) {
+        try {
+            Field unsafeField = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+            unsafeField.setAccessible(true);
+            sun.misc.Unsafe unsafe = (sun.misc.Unsafe) unsafeField.get(null);
+
+            long fieldOffset = unsafe.objectFieldOffset(targetField);
+            unsafe.putObject(instance, fieldOffset, newValue);
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public static void setStaticFinalObject(Field targetField, Object newValue) {
         try {
             if (!Modifier.isStatic(targetField.getModifiers())) {
@@ -75,7 +88,25 @@ public class ReflectionUtil {
             Object fieldBase = unsafe.staticFieldBase(targetField);
             long fieldOffset = unsafe.staticFieldOffset(targetField);
 
-            unsafe.putObject(fieldBase, fieldOffset, newValue);
+            if (newValue instanceof Integer) {
+                unsafe.putInt(fieldBase, fieldOffset, (Integer) newValue);
+            } else if (newValue instanceof Long) {
+                unsafe.putLong(fieldBase, fieldOffset, (Long) newValue);
+            } else if (newValue instanceof Boolean) {
+                unsafe.putBoolean(fieldBase, fieldOffset, (Boolean) newValue);
+            } else if (newValue instanceof Byte) {
+                unsafe.putByte(fieldBase, fieldOffset, (Byte) newValue);
+            } else if (newValue instanceof Short) {
+                unsafe.putShort(fieldBase, fieldOffset, (Short) newValue);
+            } else if (newValue instanceof Character) {
+                unsafe.putChar(fieldBase, fieldOffset, (Character) newValue);
+            } else if (newValue instanceof Float) {
+                unsafe.putFloat(fieldBase, fieldOffset, (Float) newValue);
+            } else if (newValue instanceof Double) {
+                unsafe.putDouble(fieldBase, fieldOffset, (Double) newValue);
+            } else {
+                unsafe.putObject(fieldBase, fieldOffset, newValue);
+            }
         } catch (NoSuchFieldException | IllegalAccessException e) {
             throw new RuntimeException(e);
         }

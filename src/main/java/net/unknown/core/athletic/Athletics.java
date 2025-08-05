@@ -31,6 +31,7 @@
 
 package net.unknown.core.athletic;
 
+import com.ryuuta0217.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import net.minecraft.Util;
 import net.minecraft.server.level.ServerPlayer;
@@ -40,7 +41,6 @@ import net.unknown.UnknownNetworkCore;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.shared.SharedConstants;
 import org.bukkit.Bukkit;
@@ -49,7 +49,7 @@ import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftInventoryPlayer;
+import org.bukkit.craftbukkit.inventory.CraftInventoryPlayer;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -139,7 +139,7 @@ public class Athletics {
         if (files != null) {
             for (File file : files) {
                 String fileName = file.getName().replace(".yml", "");
-                if (MessageUtil.isUUID(fileName)) {
+                if (StringUtil.isValidUUID(fileName)) {
                     UUID uniqueId = UUID.fromString(fileName);
                     PROGRESSES.put(uniqueId, PlayerProgress.load(uniqueId));
                 }

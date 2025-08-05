@@ -6,38 +6,44 @@
 
 plugins {
     id 'java'
+    id 'application'
     id 'maven-publish'
     id 'io.papermc.paperweight.userdev' version '+' // Enable Development of using Mojang Mapping.
-    id 'xyz.jpenilla.run-paper' version '+' // Run Mojang Mapped or Spigot Mapped Server
-    id 'com.github.johnrengelman.shadow' version '7.1.0' // fatJar
-    id 'org.cadixdev.licenser' version '0.6.1' // Add License Header to source code headers.
-    id "de.undercouch.download" version "4.1.2" // File Downloader
+    id 'xyz.jpenilla.run-paper' version '2.3.0' // Run Mojang Mapped or Spigot Mapped Server
+    id 'com.github.johnrengelman.shadow' version '+' // fatJar
+    id 'org.cadixdev.licenser' version '+' // Add License Header to source code headers.
+    id "de.undercouch.download" version "+" // File Downloader
     id 'com.palantir.git-version' version '+' // Git Information Getter
+    id "org.jetbrains.gradle.plugin.idea-ext" version "1.0.1" // IntelliJ IDEA Plugin
 }
 
 //apply plugin: xyz.jpenilla.runpaper.RunPaper
 
 group 'net.unknown'
 version versionDetails().gitHash[0..7]
+def styledVersion = "git-" + project.name + "-" + (versionDetails().branchName != null ? versionDetails().branchName : System.getenv("BRANCH_NAME")) + "-" + versionDetails().gitHash[0..7];
 
 compileJava.dependsOn = ["licenseFormat"]
 compileJava.options.encoding = "UTF-8"
 javadoc.options.encoding = "UTF-8"
 processResources.filteringCharset = "UTF-8"
 
-java.sourceCompatibility = JavaVersion.VERSION_17
-java.targetCompatibility = JavaVersion.VERSION_17
-compileJava.options.release.set(17)
-
-tasks.build.dependsOn(reobfJar)
+java.sourceCompatibility = JavaVersion.VERSION_21
+java.targetCompatibility = JavaVersion.VERSION_21
+compileJava.options.release.set(21)
 
 configurations {
     launchwrapper
 }
 
 license {
-    header = project.file("HEADER.txt")
+    header = project.file("src/main/java/net/unknown/HEADER.txt")
     include '**/*.java'
+
+    matching(includes: ['**/com/ryuuta0217/**/*.java']) {
+        header = project.file("src/main/java/com/ryuuta0217/HEADER.txt")
+    }
+
     properties {
         organization = 'Unknown Network'
         year = 2023
@@ -47,53 +53,101 @@ license {
 
 repositories {
     mavenCentral()
+    maven { url = "https://repo.papermc.io/repository/maven-public/" } // Paper, Velocity
     maven { url = "https://repo.spongepowered.org/maven/" }
     maven { url = "https://files.minecraftforge.net/maven/" }
     maven { url = "https://maven.quiltmc.org/repository/release/" }
     maven { url = "https://maven.enginehub.org/repo/" }
     maven { url = "https://jitpack.io" }
-    maven { url = "https://repo.yncrypt.net/repository/unknown-network/" }
+    maven { url = "https://repo.codemc.io/" } // VaultAPI
+    maven { url = "https://repo.ryuuta0217.com/repository/unknown-network/" }
     maven { url = "https://repo.onarandombox.com/content/groups/public/" } // Multiverse-(Core|Inventories|Portals|NetherPortals) repo
     maven { url = "https://maven.playpro.com/" } // CoreProtect
+    maven { url = "https://repo.viaversion.com" } // ViaVersion
 }
 
 dependencies {
-    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.20.1-R0.1-SNAPSHOT")
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.21.7-R0.1-SNAPSHOT")
     compileOnly fileTree(dir: "libs", include: "*.jar")
-    compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '+'
-    compileOnly group: 'com.github.MilkBowl', name: 'VaultAPI', version: '+'
+    compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '+', {
+        exclude group: 'com.google.code.gson', module: 'gson'
+        exclude group: 'com.google.guava', module: 'guava'
+        exclude group: 'it.unimi.dsi', module: 'fastutil'
+    }
+    compileOnly group: 'net.milkbowl.vault', name: 'VaultAPI', version: '1.7'
     compileOnly group: 'net.luckperms', name: 'api', version: '+'
-    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'f85d2a4b'
-    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'f85d2a4b', classifier: 'spigot'
-    implementation group: 'org.mozilla', name: 'rhino', version: '+'
+    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: '844e30cc'
+    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: '844e30cc'
+    implementation group: 'org.mozilla', name: 'rhino', version: '1.7.15'
     compileOnly group: 'com.github.NuVotifier', name: 'NuVotifier', version: '+'
     implementation group: 'net.dv8tion', name: 'JDA', version: '+'
     implementation group: 'org.json', name: 'json', version: '+'
-    compileOnly group: 'com.onarandombox.multiversecore', name: 'Multiverse-Core', version: '+'
+    compileOnly group: 'org.mvplugins.multiverse.core', name: 'multiverse-core', version: '+'
+//    compileOnly group: 'com.onarandombox.multiversecore', name: 'Multiverse-Core', version: '+'
+    compileOnly group: 'org.mvplugins.multiverse.inventories', name: 'multiverse-inventories', version: '+'
     compileOnly group: 'net.coreprotect', name: 'coreprotect', version: '+'
+    implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.25.0'
+    implementation group: 'com.github.luben', name: 'zstd-jni', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
+    compileOnly group: 'com.velocitypowered', name: 'velocity-api', version: '3.+'
+    annotationProcessor group: 'com.velocitypowered', name: 'velocity-api', version: '+'
+    implementation group: 'io.ipinfo', name: 'ipinfo-api', version: '+'
+    compileOnly group: "com.viaversion", name: "viaversion-api", version: "+"
 }
 
+paperweight {
+    reobfArtifactConfiguration = ReobfArtifactConfiguration.getMOJANG_PRODUCTION()
+}
+
+def generateTemplates = tasks.register("generateTemplates", Copy) { task ->
+    def props = [
+        'version': styledVersion
+    ]
+
+    task.inputs.properties props
+
+    task.from file('src/main/templates')
+    task.into layout.buildDirectory.dir('generated/sources/templates')
+    task.expand props
+}
+
+sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
+
+rootProject.idea.project.settings.taskTriggers.afterSync generateTemplates
+
+import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
 import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
     filesMatching("*.yml") {
         duplicatesStrategy(DuplicatesStrategy.INCLUDE)
-        filter ReplaceTokens, tokens: [version: "git-" + project.name + "-" + (versionDetails().branchName != null ? versionDetails().branchName : System.getenv("BRANCH_NAME")) + "-" + versionDetails().gitHash[0..7]]
+        filter ReplaceTokens, tokens: [version: styledVersion]
     }
+
+    filesMatching("*.json") {
+        duplicatesStrategy(DuplicatesStrategy.INCLUDE)
+        filter ReplaceTokens, tokens: [version: styledVersion]
+    }
+}
+
+application {
+    mainClass = 'net.unknown.UnknownNetworkCore'
 }
 
 jar {
     archiveFileName = "original-" + archiveBaseName.get() + "." + archiveExtension.get()
+    manifest {
+        attributes 'Version': styledVersion
+    }
 }
 
 shadowJar {
-    archiveFileName = archiveBaseName.get() + "-mojang." + archiveExtension.get()
+    archiveFileName = archiveBaseName.get() + "." + archiveExtension.get()
 }
 
 reobfJar {
-    outputJar = layout.buildDirectory.file("libs/${project.name}.jar")
+    outputJar = layout.buildDirectory.file("libs/${project.name}-spigot.jar")
 }
 
 runMojangMappedServer {
@@ -101,6 +155,9 @@ runMojangMappedServer {
     systemProperty "net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false"
     systemProperty "Paper.ignoreWorldDataVersion", "true"
     systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
+    systemProperty "file.encoding", System.getProperty("file.encoding", "UTF-8")
+    systemProperty "sun.stdout.encoding", System.getProperty("sun.stdout.encoding", "UTF-8")
+    systemProperty "sun.stderr.encoding", System.getProperty("sun.stderr.encoding", "UTF-8")
     args("-P pluginsMapped")
 }
 
@@ -109,62 +166,29 @@ runServer {
     systemProperty "net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false" // default is false, but run-paper is set this option force true.
     systemProperty "Paper.ignoreWorldDataVersion", "true"
     systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
+    systemProperty "file.encoding", System.getProperty("file.encoding", "UTF-8")
+    systemProperty "sun.stdout.encoding", System.getProperty("sun.stdout.encoding", "UTF-8")
+    systemProperty "sun.stderr.encoding", System.getProperty("sun.stderr.encoding", "UTF-8")
 }
 
 task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
     classpath(configurations.launchwrapper)
     args("--nogui", "--add-plugin=../build/libs/UnknownNetworkCore.jar")
     workingDir(project.file("testServer"))
-    systemProperty "UnknownNetworkMagic", "1.20"
+    systemProperty "UnknownNetworkMagic", "bundle"
     systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
-}
-
-task downloadWaterfall(type: Task) {
-    var wf = new File("libs/standalone/waterfall.jar")
-
-    if (!wf.exists()) {
-        download {
-            src "https://api.papermc.io/v2/projects/waterfall/versions/1.19/builds/526/downloads/waterfall-1.19-526.jar"
-            dest 'libs/standalone/waterfall.jar'
-        }
-
-        println "Downloaded waterfall.jar"
-    }
-
-    if (wf.exists()) {
-        if(!file("libs/waterfall").exists()) {
-            println "Extracting waterfall"
-
-            copy {
-                from zipTree(file("libs/standalone/waterfall.jar"))
-                into file("libs/waterfall/")
-            }
-
-            println "Extracted waterfall"
-        }
-
-        if(file("libs/waterfall/com/mojang/brigadier").exists()) {
-            println "Removing brigadier from extracted waterfall"
-
-            delete {
-                delete file("libs/waterfall/com/mojang/brigadier")
-            }
-
-            println "Removed brigadier from extracted waterfall"
-        }
-    }
-}
-
-task reCompressWaterfall(type: Zip, dependsOn: downloadWaterfall) {
-    from "libs/waterfall/"
-    destinationDirectory = file("libs")
-    archiveFileName = "waterfall.jar"
+    systemProperty "file.encoding", System.getProperty("file.encoding", "UTF-8")
+    systemProperty "sun.stdout.encoding", System.getProperty("sun.stdout.encoding", "UTF-8")
+    systemProperty "sun.stderr.encoding", System.getProperty("sun.stderr.encoding", "UTF-8")
 }
 
 task copyArtifactToProxy(type: Copy) {
     from project.file("build/libs/UnknownNetworkCore.jar")
     into project.file("testProxy/plugins")
 }
+
+copyArtifactToProxy.dependsOn(shadowJar, reobfJar)
+publish.dependsOn(shadowJar)
 
 artifacts {
     jar
@@ -180,10 +204,13 @@ publishing {
             groupId = 'net.unknown'
             artifactId = project.name
             version = version
-            artifact "build/libs/UnknownNetworkCore.jar"
 
-            artifact("build/libs/UnknownNetworkCore-mojang.jar") {
-                classifier "mojang"
+            artifact(reobfJar.outputJar) {
+                classifier = 'spigot'
+            }
+
+            artifact(shadowJar) {
+                classifier = null
             }
 
             pom {
@@ -217,5 +244,10 @@ publishing {
                 password = System.getenv("NEXUS_PASSWORD")
             }
         }
+    }
+
+    publishReleasePublicationToMavenRepository {
+        dependsOn shadowJar
+        dependsOn reobfJar
     }
 }

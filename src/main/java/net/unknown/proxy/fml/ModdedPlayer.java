@@ -31,24 +31,44 @@
 
 package net.unknown.proxy.fml;
 
+import com.velocitypowered.api.proxy.InboundConnection;
+import com.velocitypowered.api.proxy.Player;
 import io.netty.buffer.ByteBuf;
+import net.unknown.proxy.UnknownNetworkProxyCore;
+import net.unknown.shared.fml.ModClientInformation;
 
-import java.util.UUID;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Random;
+import java.util.logging.Logger;
 
-public interface ModdedPlayer {
+public abstract class ModdedPlayer {
+    protected static final Logger LOGGER = UnknownNetworkProxyCore.getInstance().getLogger();
+    protected static final Random RANDOM = new Random();
+
+    public abstract void setPlayer(Player player);
+
+    @Nullable
+    public abstract Player getPlayer();
+
+    public abstract void setConnection(InboundConnection connection);
+
+    @Nonnull
+    public abstract InboundConnection getConnection();
+
     /**
      * Forgeのバージョンを返します
      *
      * @return FML version
      */
-    int getFMLVersion();
+    public abstract int getFMLVersion();
 
     /**
-     * Client -> Server の C2SLoginPayloadPacket と同じデータ構造で
-     * 引数に渡されたByteBufに展開します。
+     * データを、引数に渡されたByteBufに展開します。
      *
      * @param buf      データ展開先のバッファ
-     * @param uniqueId データに内包するプレイヤーのUUID
      */
-    void getData(ByteBuf buf, UUID uniqueId);
+    public abstract void getData(ByteBuf buf);
+
+    public abstract ModClientInformation toModClientInformation();
 }

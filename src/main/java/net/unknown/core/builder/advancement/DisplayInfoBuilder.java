@@ -31,14 +31,16 @@
 
 package net.unknown.core.builder.advancement;
 
+import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.advancements.FrameType;
+import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.Optional;
 
 public class DisplayInfoBuilder {
     private Component title;
@@ -46,7 +48,7 @@ public class DisplayInfoBuilder {
     private ItemStack icon;
     @Nullable
     private ResourceLocation background;
-    private FrameType frame = FrameType.TASK;
+    private AdvancementType type = AdvancementType.TASK;
     private boolean showToast = true;
     private boolean announceChat = true;
     private boolean hidden = false;
@@ -75,8 +77,8 @@ public class DisplayInfoBuilder {
         return this;
     }
 
-    public DisplayInfoBuilder frame(FrameType frame) {
-        this.frame = frame;
+    public DisplayInfoBuilder type(AdvancementType type) {
+        this.type = type;
         return this;
     }
 
@@ -115,8 +117,8 @@ public class DisplayInfoBuilder {
         Objects.requireNonNull(this.title);
         Objects.requireNonNull(this.description);
         Objects.requireNonNull(this.icon);
-        Objects.requireNonNull(this.frame);
-        DisplayInfo displayInfo = new DisplayInfo(icon, title, description, background, frame, showToast, announceChat, hidden);
+        Objects.requireNonNull(this.type);
+        DisplayInfo displayInfo = new DisplayInfo(icon, title, description, Optional.of(new ClientAsset(background == null ? ResourceLocation.tryParse("minecraft:air") : background)), type, showToast, announceChat, hidden);
         displayInfo.setLocation(this.x, this.y);
         return displayInfo;
     }

@@ -39,7 +39,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.managers.TrashManager;
@@ -88,7 +88,7 @@ public class TrashCommand {
                             }
                         }
                     }
-                }, UnknownNetworkCore.getInstance());
+                }, UnknownNetworkCorePlugin.getInstance());
             }
             return 0;
         }).then(Commands.literal("clear")

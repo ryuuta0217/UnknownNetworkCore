@@ -55,13 +55,14 @@ public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> impl
 
     private final ConfigureHopperViewBase parentView;
     private int displayUpdateCooldown = UPDATE_COOLDOWN_DEFAULT;
+    private final boolean incoming;
 
-    public FiltersView(ConfigureHopperViewBase parentView) {
-        super(parentView.getGui(), parentView.getGui().getMixinHopper().getFilters(), (filter) -> {
+    public FiltersView(ConfigureHopperViewBase parentView, boolean incoming) {
+        super(parentView.getGui(), incoming ? parentView.getGui().getMixinHopper().getIncomingFilters() : parentView.getGui().getMixinHopper().getOutgoingFilters(), (filter) -> {
             ItemStack viewItem = ItemStack.EMPTY;
             if (filter instanceof ItemFilter itemFilter) {
                 viewItem = new ItemStack(itemFilter.getItem());
-                if (itemFilter.getNbt() != null) viewItem.setTag(itemFilter.getNbt());
+                if (itemFilter.getDataPatch() != null) viewItem.applyComponents(itemFilter.getDataPatch());
             } else if (filter instanceof TagFilter tagFilter) {
                 Iterable<Holder<Item>> taggedItems = BuiltInRegistries.ITEM.getTagOrEmpty(tagFilter.getTag());
 
@@ -72,7 +73,7 @@ public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> impl
 
                 Holder<Item> taggedFirstItem = taggedItemsList.get(randomIndex);
                 viewItem = new ItemStack(taggedFirstItem);
-                if (tagFilter.getNbt() != null) viewItem.setTag(tagFilter.getNbt());
+                if (tagFilter.getDataPatch() != null) viewItem.applyComponents(tagFilter.getDataPatch());
             }
 
             org.bukkit.inventory.ItemStack bukkitViewItem = MinecraftAdapter.ItemStack.itemStack(viewItem);
@@ -88,14 +89,19 @@ public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> impl
             return MinecraftAdapter.ItemStack.itemStack(viewItem);
         }, true, true);
         this.parentView = parentView;
+        this.incoming = incoming;
     }
 
     @Override
     public void onElementButtonClicked(InventoryClickEvent event, Filter filter) {
         switch (event.getClick()) {
             case SHIFT_RIGHT -> {
-                parentView.getGui().getMixinHopper().getFilters().remove(filter);
-                this.setData(parentView.getGui().getMixinHopper().getFilters(), true);
+                if (this.incoming) {
+                    parentView.getGui().getMixinHopper().getIncomingFilters().remove(filter);
+                } else {
+                    parentView.getGui().getMixinHopper().getOutgoingFilters().remove(filter);
+                }
+                this.setData(this.incoming ? this.parentView.getGui().getMixinHopper().getIncomingFilters() : this.parentView.getGui().getMixinHopper().getOutgoingFilters(), true);
             }
         }
     }
@@ -109,7 +115,7 @@ public class FiltersView extends PaginationView<Filter, ConfigureHopperGui> impl
 
     @Override
     public void onCreateNewButtonClicked(InventoryClickEvent event) {
-        this.getGui().setView(new CreateItemFilterView(this));
+        this.getGui().setView(new CreateItemFilterView(this, this.incoming));
     }
 
     @Override

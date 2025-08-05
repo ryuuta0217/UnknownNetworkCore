@@ -31,21 +31,12 @@
 
 package net.unknown.core.skin;
 
-import com.destroystokyo.paper.profile.PlayerProfile;
-import com.ryuuta0217.util.HTTPUtil;
-import net.unknown.UnknownNetworkCore;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerPreLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.ParseException;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.logging.Logger;
 

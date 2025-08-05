@@ -38,10 +38,11 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.Block;
@@ -60,7 +61,7 @@ import java.util.List;
 public class AutoSmelting implements Listener {
     public static boolean DEBUG = false;
 
-    @EventHandler(priority = EventPriority.LOW)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true) // WorldGuard is handling event at HIGH, if block in protected area is broken, WorldGuard cancels the block break. If it is not canceled, this event handler is called and the processing is performed.
     public void onBlockBreak(BlockBreakEvent event) {
         ServerPlayer player = MinecraftAdapter.player(event.getPlayer());
         if (player == null) return;
@@ -69,7 +70,6 @@ public class AutoSmelting implements Listener {
 
         ItemStack selectedItem = player.getMainHandItem();
         org.bukkit.inventory.ItemStack selectedItemB = event.getPlayer().getInventory().getItemInMainHand();
-        if (!(selectedItem.getItem() instanceof DiggerItem)) return;
         if (selectedItemB.lore() == null) return;
         if (!CustomEnchantUtil.hasEnchantment("自動精錬", selectedItemB)) return;
 
@@ -78,22 +78,11 @@ public class AutoSmelting implements Listener {
         BlockEntity blockEntity = level.getBlockEntity(blockPos);
         if (!player.hasCorrectToolForDrops(blockState)) return;
 
-        FurnaceBlockEntity dummyFurnace = new FurnaceBlockEntity(BlockPos.ZERO, Blocks.FURNACE.defaultBlockState()) {
-            @Override
-            public boolean stillValid(Player player) {
-                return true;
-            }
-        };
-        dummyFurnace.setLevel(level);
-        if (DEBUG) player.openMenu(dummyFurnace); // for debug
-        dummyFurnace.setItem(1, new ItemStack(Items.LAVA_BUCKET, 1));
-
         List<ItemStack> newDrops = Block.getDrops(blockState, level, blockPos, blockEntity).stream()
                 .map(minecraftDropStack -> {
-                    dummyFurnace.setItem(0, minecraftDropStack);
-                    List<SmeltingRecipe> recipes = MinecraftServer.getServer().getRecipeManager().getRecipesFor(RecipeType.SMELTING, dummyFurnace, level);
+                    List<RecipeHolder<SmeltingRecipe>> recipes = MinecraftServer.getServer().getRecipeManager().recipes.getRecipesFor(RecipeType.SMELTING, new SingleRecipeInput(minecraftDropStack), level).toList();
                     if (recipes.size() > 0) {
-                        ItemStack smeltingResult = recipes.get(0).getResultItem(level.registryAccess());
+                        ItemStack smeltingResult = recipes.get(0).value().assemble(new SingleRecipeInput(minecraftDropStack), level.registryAccess());
                         smeltingResult.setCount(minecraftDropStack.getCount());
                         return smeltingResult;
                     }

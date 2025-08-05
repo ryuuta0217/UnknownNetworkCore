@@ -38,7 +38,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import net.unknown.core.enums.Permissions;
@@ -52,7 +51,7 @@ import java.util.Collections;
 public class GamemodeCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         // FORCE UNREGISTER minecraft:gamemode COMMAND FROM COMMAND DISPATCHER
-        BrigadierUtil.forceUnregisterCommand("gamemode");
+        BrigadierUtil.forceUnregisterCommand(dispatcher, "gamemode");
         // FORCE UNREGISTER END
 
         for (String command : new String[] {"gamemode", "gm"}) {

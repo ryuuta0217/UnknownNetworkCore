@@ -31,6 +31,7 @@
 
 package net.unknown.survival.chat.channels;
 
+import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.pointer.Pointer;
@@ -124,14 +125,14 @@ public class CustomChannel extends ChatChannel {
         final Component originalMessageCopy = event.message();
         event.message(Component.empty());
 
+        ChatRenderer renderer = event.renderer();
+
         event.renderer((source, sourceDisplayName, message, viewer) -> {
             if ((viewer instanceof Player player && !this.players.contains(player.getUniqueId())) || (!(viewer instanceof Player) && !(viewer instanceof ConsoleCommandSender))) return Component.empty();
             return Component.empty()
                     .append(getChannelPrefix(false))
-                    .append(Component.text(" "))
-                    .append(sourceDisplayName)
-                    .append(Component.text(": "))
-                    .append(originalMessageCopy);
+                    .appendSpace()
+                    .append(renderer.render(source, sourceDisplayName, customEvent.getMessage(), viewer));
         });
 
         //customEvent.getReceivers().forEach(receiver -> receiver.sendMessage((customEvent.getSender() == null ? Identity.nil() : customEvent.getSender().identity()), customEvent.getRenderedMessage()));

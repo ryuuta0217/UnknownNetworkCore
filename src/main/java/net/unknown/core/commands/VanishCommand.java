@@ -31,5 +31,36 @@
 
 package net.unknown.core.commands;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import net.kyori.adventure.text.Component;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.level.ServerPlayer;
+import net.unknown.core.enums.Permissions;
+import net.unknown.core.managers.VanishManager;
+import net.unknown.core.util.NewMessageUtil;
+
 public class VanishCommand {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+        LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("vanish");
+        builder.requires(Permissions.COMMAND_VANISH::checkAndIsPlayer)
+                        .executes(ctx -> {
+                            ServerPlayer player = ctx.getSource().getPlayer();
+                            if (player != null) {
+                                if (VanishManager.isVanished(player)) {
+                                    VanishManager.unvanish(player, false);
+                                    NewMessageUtil.sendMessage(ctx.getSource(), Component.text("Vanishを解除しました"));
+                                    return 0;
+                                } else {
+                                    VanishManager.vanish(player, false);
+                                    NewMessageUtil.sendMessage(ctx.getSource(), Component.text("Vanishしました"));
+                                    return 1;
+                                }
+                            } else {
+                                return -1;
+                            }
+                        });
+
+        dispatcher.register(builder);
+    }
 }

@@ -31,11 +31,12 @@
 
 package net.unknown.core.util;
 
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -83,12 +84,12 @@ public class BrigadierUtil {
         return def;
     }
 
-    public static void forceUnregisterCommand(String commandName) {
+    public static void forceUnregisterCommand(CommandDispatcher<CommandSourceStack> dispatcher, String commandName) {
         try {
             Field childrenField = CommandNode.class.getDeclaredField("children");
             childrenField.trySetAccessible();
 
-            Map<String, CommandNode<CommandSourceStack>> children = (Map<String, CommandNode<CommandSourceStack>>) childrenField.get(UnknownNetworkCore.getBrigadier().getRoot());
+            Map<String, CommandNode<CommandSourceStack>> children = (Map<String, CommandNode<CommandSourceStack>>) childrenField.get(dispatcher.getRoot());
             Set<String> toRemoveCommands = new HashSet<>();
             children.keySet().stream()
                     .filter(command -> command.contains(":"))
@@ -97,7 +98,7 @@ public class BrigadierUtil {
             toRemoveCommands.forEach(children::remove);
 
             children.remove(commandName);
-            UnknownNetworkCore.getBrigadier().getRoot().removeCommand(commandName);
+            dispatcher.getRoot().removeCommand(commandName);
         } catch (NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
         }

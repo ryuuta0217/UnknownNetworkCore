@@ -34,6 +34,7 @@ package net.unknown.survival.bossbar;
 import de.bluecolored.bluemap.bukkit.BukkitPlugin;
 import de.bluecolored.bluemap.common.rendermanager.RenderManager;
 import de.bluecolored.bluemap.common.rendermanager.RenderTask;
+import de.bluecolored.bluemap.common.rendermanager.WorldRegionRenderTask;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -56,7 +57,7 @@ import java.util.List;
 public class BlueMapBar implements Listener {
     private static final BlueMapBar INSTANCE = new BlueMapBar();
     public static final CustomBossEvent BAR = new CustomBossEvent(
-            ResourceLocation.of("unknown-network:bluemap_progress", ':'), buildDisplayName(Collections.emptyList(), null));
+            ResourceLocation.tryBySeparator("unknown-network:bluemap_progress", ':'), buildDisplayName(Collections.emptyList(), null));
     public static BukkitTask UPDATE_TASK;
 
     public static void initialize() {
@@ -85,7 +86,7 @@ public class BlueMapBar implements Listener {
             return baseComponent.append("Rendering is not running.");
         } else {
             int otherRenderingTaskCount = renderingTasks.size() - 1;
-            return baseComponent.append(Component.literal(currentTask.getDetail().orElse(currentTask.getDescription())))
+            return baseComponent.append(currentTask instanceof WorldRegionRenderTask renderTask ? Component.literal(renderTask.getMap().getName()) : Component.empty()).append(Component.literal(currentTask.getDetail().orElse(currentTask.getDescription())))
                     .append((otherRenderingTaskCount > 0 ? Component.literal(" | Remaining " + otherRenderingTaskCount + " task" + (otherRenderingTaskCount > 1 ? "s": "")) : Component.empty()));
         }
     }

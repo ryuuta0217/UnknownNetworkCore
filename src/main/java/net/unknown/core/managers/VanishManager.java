@@ -31,23 +31,32 @@
 
 package net.unknown.core.managers;
 
+import net.kyori.adventure.text.Component;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoUpdatePacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
+import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.metadata.MetadataValueAdapter;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class VanishManager {
+public class VanishManager implements Listener {
+    private static final VanishManager INSTANCE = new VanishManager();
     private static final Set<UUID> VANISHED_PLAYERS = new HashSet<>();
 
     public static boolean isVanished(ServerPlayer player) {
@@ -62,28 +71,120 @@ public class VanishManager {
         return VANISHED_PLAYERS.contains(uniqueId);
     }
 
+    public static boolean vanish(UUID uniqueId, boolean silent) {
+        if (Bukkit.getOfflinePlayer(uniqueId).isOnline()) {
+            return vanish(Bukkit.getPlayer(uniqueId), silent);
+        } else {
+            VANISHED_PLAYERS.add(uniqueId);
+            return true;
+        }
+    }
+
+    public static boolean vanish(Player player, boolean silent) {
+        return vanish(MinecraftAdapter.player(player), silent);
+    }
+
     public static boolean vanish(ServerPlayer player, boolean silent) {
-        return false;
+        if (isVanished(player)) return false;
+        VANISHED_PLAYERS.add(player.getUUID());
+        removeFromTabList(player);
+        setHidden(player);
+        player.getBukkitEntity().setMetadata("vanished", new FixedMetadataValue(UnknownNetworkCorePlugin.getInstance(), true));
+        if (!silent) {
+            Bukkit.broadcast(Component.translatable("multiplayer.player.left", player.adventure$displayName).color(DefinedTextColor.YELLOW));
+        }
+        return true;
+    }
+
+    public static boolean unvanish(UUID uniqueId, boolean silent) {
+        if (Bukkit.getOfflinePlayer(uniqueId).isOnline()) {
+            return unvanish(Bukkit.getPlayer(uniqueId), silent);
+        } else {
+            VANISHED_PLAYERS.remove(uniqueId);
+            return true;
+        }
+    }
+
+    public static boolean unvanish(Player player, boolean silent) {
+        return unvanish(MinecraftAdapter.player(player), silent);
+    }
+
+    public static boolean unvanish(ServerPlayer player, boolean silent) {
+        if (!isVanished(player)) return false;
+        VANISHED_PLAYERS.remove(player.getUUID());
+        addToTabList(player);
+        setShowing(player);
+        player.getBukkitEntity().removeMetadata("vanished", UnknownNetworkCorePlugin.getInstance());
+        if (!silent) {
+            Bukkit.broadcast(Component.translatable("multiplayer.player.joined", player.adventure$displayName).color(DefinedTextColor.YELLOW));
+        }
+        return true;
+    }
+
+    private static void removeFromTabList(Player removeTarget) {
+        removeFromTabList(MinecraftAdapter.player(removeTarget));
     }
 
     private static void removeFromTabList(ServerPlayer removeTarget) {
         MinecraftServer.getServer().getPlayerList().getPlayers().forEach(sendTarget -> removeFromTabList(removeTarget, sendTarget));
     }
 
+    private static void removeFromTabList(ServerPlayer removeTarget, Player sendTarget) {
+        removeFromTabList(removeTarget, MinecraftAdapter.player(sendTarget));
+    }
+
+    private static void removeFromTabList(Player removeTarget, ServerPlayer sendTarget) {
+        removeFromTabList(MinecraftAdapter.player(removeTarget), sendTarget);
+    }
+
+    private static void removeFromTabList(Player removeTarget, Player sendTarget) {
+        removeFromTabList(MinecraftAdapter.player(removeTarget), MinecraftAdapter.player(sendTarget));
+    }
+
     private static void removeFromTabList(ServerPlayer removeTarget, ServerPlayer sendTarget) {
-        if (sendTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode()))
+        if (sendTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
+            removeTarget.listName = removeTarget.getName().copy().withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC);
+            sendTarget.connection.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, removeTarget));
+            removeTarget.listName = null;
             return;
+        }
         if (sendTarget.getUUID().equals(removeTarget.getUUID())) return;
         sendTarget.connection.send(new ClientboundPlayerInfoRemovePacket(Stream.of(removeTarget).map(ServerPlayer::getUUID).collect(Collectors.toList())));
+    }
+
+    private static void addToTabList(Player addTarget) {
+        addToTabList(MinecraftAdapter.player(addTarget));
     }
 
     private static void addToTabList(ServerPlayer addTarget) {
         MinecraftServer.getServer().getPlayerList().getPlayers().forEach(sendTarget -> addToTabList(addTarget, sendTarget));
     }
 
+    private static void addToTabList(ServerPlayer addTarget, Player sendTarget) {
+        addToTabList(addTarget, MinecraftAdapter.player(sendTarget));
+    }
+
+    private static void addToTabList(Player addTarget, ServerPlayer sendTarget) {
+        addToTabList(MinecraftAdapter.player(addTarget), sendTarget);
+    }
+
+    private static void addToTabList(Player addTarget, Player sendTarget) {
+        addToTabList(MinecraftAdapter.player(addTarget), MinecraftAdapter.player(sendTarget));
+    }
+
     private static void addToTabList(ServerPlayer addTarget, ServerPlayer sendTarget) {
+        if (sendTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
+            addTarget.listName = addTarget.getName();
+            sendTarget.connection.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, addTarget));
+            addTarget.listName = null;
+            return;
+        }
         if (sendTarget.getUUID().equals(addTarget.getUUID())) return;
         sendTarget.connection.send(new ClientboundPlayerInfoUpdatePacket(ClientboundPlayerInfoUpdatePacket.Action.ADD_PLAYER, addTarget));
+    }
+
+    private static void setHidden(Player hideTarget) {
+        setHidden(MinecraftAdapter.player(hideTarget));
     }
 
     private static void setHidden(ServerPlayer hideTarget) {
@@ -91,8 +192,24 @@ public class VanishManager {
     }
 
     private static void setHidden(ServerPlayer hideTarget, Player target) {
-        if (target.hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) return;
-        target.hidePlayer(UnknownNetworkCore.getInstance(), hideTarget.getBukkitEntity());
+        setHidden(hideTarget, MinecraftAdapter.player(target));
+    }
+
+    private static void setHidden(Player hideTarget, ServerPlayer target) {
+        setHidden(MinecraftAdapter.player(hideTarget), target);
+    }
+
+    private static void setHidden(Player hideTarget, Player target) {
+        setHidden(MinecraftAdapter.player(hideTarget), MinecraftAdapter.player(target));
+    }
+
+    private static void setHidden(ServerPlayer hideTarget, ServerPlayer target) {
+        if (target.getBukkitEntity().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) return;
+        target.getBukkitEntity().hidePlayer(UnknownNetworkCorePlugin.getInstance(), hideTarget.getBukkitEntity());
+    }
+
+    private static void setShowing(Player showTarget) {
+        setShowing(MinecraftAdapter.player(showTarget));
     }
 
     private static void setShowing(ServerPlayer showTarget) {
@@ -100,6 +217,48 @@ public class VanishManager {
     }
 
     private static void setShowing(ServerPlayer showTarget, Player target) {
-        target.showPlayer(UnknownNetworkCore.getInstance(), showTarget.getBukkitEntity());
+        setShowing(showTarget, MinecraftAdapter.player(target));
+    }
+
+    private static void setShowing(Player showTarget, ServerPlayer target) {
+        setShowing(MinecraftAdapter.player(showTarget), target);
+    }
+
+    private static void setShowing(Player showTarget, Player target) {
+        setShowing(MinecraftAdapter.player(showTarget), MinecraftAdapter.player(target));
+    }
+
+    private static void setShowing(ServerPlayer showTarget, ServerPlayer target) {
+        target.getBukkitEntity().showPlayer(UnknownNetworkCorePlugin.getInstance(), showTarget.getBukkitEntity());
+    }
+
+    private VanishManager() {
+        ListenerManager.registerListener(this);
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        if (isVanished(event.getPlayer())) { // If vanished player logged in, hide from all players.
+            event.joinMessage(null);
+            RunnableManager.runDelayed(() -> {
+                removeFromTabList(Bukkit.getPlayer(event.getPlayer().getUniqueId()));
+                setHidden(event.getPlayer());
+            }, 1);
+        } else if (!event.getPlayer().hasPermission(Permissions.FEATURE_SEE_VANISHED_PLAYERS.getPermissionNode())) {
+            VANISHED_PLAYERS.forEach(uuid -> {
+                Player vanished = Bukkit.getPlayer(uuid);
+                if (vanished != null) {
+                    removeFromTabList(vanished, event.getPlayer());
+                    setHidden(vanished, event.getPlayer());
+                }
+            });
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        if (isVanished(event.getPlayer())) {
+            event.quitMessage(null);
+        }
     }
 }

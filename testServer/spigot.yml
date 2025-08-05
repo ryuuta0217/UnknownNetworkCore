@@ -1,14 +1,14 @@
-# This is the main configuration file for Spigot.
+# This is the Spigot configuration file for Paper.
 # As you can see, there's tons to configure. Some options may impact gameplay, so use
 # with caution, and make sure you know what each option does before configuring.
-# For a reference for any variable inside this file, check out the Spigot wiki at
-# http://www.spigotmc.org/wiki/spigot-configuration/
 #
-# If you need help with the configuration or have any questions related to Spigot,
-# join us at the Discord or drop by our forums and leave a post.
+# If you need help with the configuration or have any questions related to Paper,
+# join us in our Discord or check the docs page.
 #
-# Discord: https://www.spigotmc.org/go/discord
-# Forums: http://www.spigotmc.org/
+# File Reference: https://docs.papermc.io/paper/reference/spigot-configuration/
+# Docs: https://docs.papermc.io/
+# Discord: https://discord.gg/papermc
+# Website: https://papermc.io/
 
 config-version: 12
 settings:
@@ -27,6 +27,8 @@ settings:
   log-villager-deaths: true
   log-named-deaths: true
   attribute:
+    maxAbsorption:
+      max: 2048.0
     maxHealth:
       max: 2048.0
     movementSpeed:
@@ -58,11 +60,14 @@ commands:
   spam-exclusions:
   - /skill
   silent-commandblock-console: false
+  enable-spam-exclusions: false
 stats:
   disable-saving: false
   forced-stats: {}
 world-settings:
   default:
+    unload-frozen-chunks: false
+    seed-trialchambers: 94251327
     seed-trailruins: 83469867
     seed-ancientcity: 20083232
     seed-buriedtreasure: 10387320
@@ -181,4 +186,6 @@ world-settings:
       sprint-multiplier: 0.1
       other-multiplier: 0.0
   faweregentempworld:
+    verbose: false
+  worldeditregentempworld:
     verbose: false

@@ -40,11 +40,11 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.LiteralContents;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
@@ -56,12 +56,11 @@ import org.bukkit.*;
 import org.bukkit.block.Chest;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.inventory.CraftItemStack;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -88,7 +87,7 @@ public class PlayerDeathListener implements Listener {
 
     private static final Map<Location, Hologram> HOLOGRAMS = new HashMap<>();
 
-    private static final File CONFIG_FILE = new File(UnknownNetworkCore.getInstance().getDataFolder(), "death-items.yml");
+    private static final File CONFIG_FILE = new File(UnknownNetworkCorePlugin.getInstance().getDataFolder(), "death-items.yml");
     private static YamlConfiguration CONFIG;
 
     private static BukkitTask getTask(UUID uniqueId, Location location, long delay) {
@@ -98,7 +97,7 @@ public class PlayerDeathListener implements Listener {
             REMOVAL_TASKS.get(uniqueId).remove(location);
             location.getBlock().setType(Material.AIR);
             if (Bukkit.getOfflinePlayer(uniqueId).isOnline()) {
-                NewMessageUtil.sendMessage(Bukkit.getPlayer(uniqueId), MutableComponent.create(new LiteralContents(""))
+                NewMessageUtil.sendMessage(Bukkit.getPlayer(uniqueId), Component.empty()
                         .append(getGraveyardComponent(location))
                         .append(" は自然に還りました。アイテムは回収できません。"));
             }
@@ -122,14 +121,13 @@ public class PlayerDeathListener implements Listener {
     }
 
     private static Component getGraveyardComponent(Location loc) {
-        return MutableComponent.create(new LiteralContents("[墓]"))
+        return Component.literal("[墓]")
                 .withStyle(Style.EMPTY
                         .withColor(ChatFormatting.AQUA)
                         .withUnderlined(true)
-                        .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                                MutableComponent.create(new LiteralContents(""))
-                                        .append(MutableComponent.create(new LiteralContents("====== 墓の情報 =====\n")).withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD))
-                                        .append(MutableComponent.create(new LiteralContents("ワールド: " + MessageUtil.getWorldName(loc.getWorld()) + "\n")).withStyle(ChatFormatting.YELLOW)
+                        .withHoverEvent(new HoverEvent.ShowText(Component.empty()
+                                        .append(Component.literal("====== 墓の情報 =====\n").withStyle(ChatFormatting.LIGHT_PURPLE, ChatFormatting.BOLD))
+                                        .append(Component.literal("ワールド: " + MessageUtil.getWorldName(loc.getWorld()) + "\n").withStyle(ChatFormatting.YELLOW)
                                                 .append("座標: " + loc.getX() + ", " + loc.getY() + ", " + loc.getZ())))));
     }
 
@@ -256,7 +254,7 @@ public class PlayerDeathListener implements Listener {
         chest.update();
 
         List<String> itemJsonSet = items.stream().map(is -> {
-            return is.save(new CompoundTag()).getAsString(); // for load, use ItemStack.of(TagParser.parse(...))
+            return MinecraftAdapter.ItemStack.json(is); // for load, use ItemStack.of(TagParser.parse(...))
         }).toList();
 
         event.getDrops().clear();
@@ -298,13 +296,7 @@ public class PlayerDeathListener implements Listener {
                 deathBoxes.get(blockPos)
                         .stream()
                         .map(json -> {
-                            try {
-                                return ItemStack.of(TagParser.parseTag(json));
-                            } catch (CommandSyntaxException e) {
-                                e.printStackTrace();
-                                LOGGER.severe("Failed to parse Item from JSON");
-                            }
-                            return ItemStack.EMPTY;
+                            return MinecraftAdapter.ItemStack.json(json);
                         })
                         .map(is -> {
                             if (is.getItem() != null) {
@@ -370,7 +362,7 @@ public class PlayerDeathListener implements Listener {
                             .stream()
                             .map(json -> {
                                 try {
-                                    return ItemStack.of(TagParser.parseTag(json));
+                                    return ItemStack.of(TagParser.parseCompoundFully(json));
                                 } catch (CommandSyntaxException e) {
                                     e.printStackTrace();
                                     LOGGER.severe("Failed to parse Item from JSON");

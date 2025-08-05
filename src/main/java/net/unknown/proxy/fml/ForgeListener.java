@@ -31,76 +31,120 @@
 
 package net.unknown.proxy.fml;
 
-import com.ryuuta0217.packets.S2CModList;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.*;
+import com.velocitypowered.api.event.player.PlayerChannelRegisterEvent;
+import com.velocitypowered.api.event.player.ServerConnectedEvent;
+import com.velocitypowered.api.network.ProtocolVersion;
+import com.velocitypowered.api.proxy.InboundConnection;
+import com.velocitypowered.api.proxy.LoginPhaseConnection;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufHolder;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.event.PlayerDisconnectEvent;
-import net.md_5.bungee.api.event.PreLoginEvent;
-import net.md_5.bungee.api.event.ServerConnectedEvent;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.event.EventHandler;
-import net.md_5.bungee.protocol.ProtocolConstants;
-import net.md_5.bungee.protocol.packet.LoginPayloadRequest;
-import net.unknown.proxy.ModdedInitialHandler;
+import net.unknown.proxy.NetworkDirection;
+import net.unknown.proxy.UnknownNetworkProxyCore;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.logging.Logger;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
-public class ForgeListener implements Listener {
-    private static final Logger LOGGER = ProxyServer.getInstance().getLogger();
-    private static final Random RANDOM = new Random();
+public class ForgeListener {
+    public static final Map<String, ModdedPlayer> MODDED_PLAYERS = new HashMap<>();
+    public static final Map<String, ModdedHandshakeProcessor> ESTABLISHING_MODDED_PLAYERS = new HashMap<>();
 
-    @EventHandler
-    public void onPreLogin(PreLoginEvent event) {
-        if (!(event.getConnection() instanceof ModdedInitialHandler handler)) return;
-        String logPrefix = "[" + handler.getName() + "|" + handler.getSocketAddress() + "]";
-
-        if (handler.getHandshake().getProtocolVersion() >= ProtocolConstants.MINECRAFT_1_13 && handler.getExtraDataInHandshake().contains("FML2")) {
-            LOGGER.info(logPrefix + "  -> Connected as using FML2 protocol");
-            LOGGER.info(logPrefix + "  -  Initializing FML2 Handshake (S2CModList)");
-            LoginPayloadRequest loginPayloadRequest = new LoginPayloadRequest();
-            S2CModList packet = new S2CModList(new HashSet<>() {{
-                add("minecraft");
-                add("forge");
-            }}, new HashMap<>() {{
-                put("forge:tier_sorting", "1.0");
-            }}, new HashSet<>());
-            loginPayloadRequest.setData(ByteBufUtil.getBytes(packet.encode(Unpooled.buffer())));
-            loginPayloadRequest.setChannel("fml:handshake");
-            int id = RANDOM.nextInt(Short.MAX_VALUE);
-            if (ModdedInitialHandler.PENDING_FORGE_PLAYER_CONNECTIONS.containsKey(id)) {
-                LOGGER.info(logPrefix + "  -  FML2 handshake Message ID " + id + " is duplicated, re-generating.");
-                while (ModdedInitialHandler.PENDING_FORGE_PLAYER_CONNECTIONS.containsKey(id)) {
-                    id = RANDOM.nextInt(Integer.MAX_VALUE);
-                    LOGGER.info(logPrefix + "  -  FML2 handshake new Message ID is " + id);
+    public ForgeListener() {
+        UnknownNetworkProxyCore.registerPacketListener("PluginMessagePacket", NetworkDirection.CLIENT_TO_SERVER, "Forge", (player, rawPacket) -> {
+            try {
+                String channel = (String) rawPacket.getClass().getDeclaredMethod("getChannel").invoke(rawPacket);
+                ByteBuf content = ((ByteBufHolder) rawPacket).content();
+                if (ESTABLISHING_MODDED_PLAYERS.containsKey(player)) {
+                    if (ESTABLISHING_MODDED_PLAYERS.get(player) instanceof ForgePlayer p) {
+                        p.handlePluginMessage(UnknownNetworkProxyCore.getInstance().getProxy().getPlayer(player).orElse(null), channel, content);
+                    }
                 }
-                LOGGER.info(logPrefix + "  -  FML2 handshake Message ID duplicate is fixed.");
-            } else {
-                LOGGER.info(logPrefix + "  -  FML2 handshake Message ID is " + id);
+
+                return channel.equals("minecraft:brand");
+            } catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
             }
-            ModdedInitialHandler.PENDING_FORGE_PLAYER_CONNECTIONS.put(id, event.getConnection());
-            loginPayloadRequest.setId(id);
-            event.getConnection().unsafe().sendPacket(loginPayloadRequest);
-            LOGGER.info(logPrefix + " <-  LoginPayloadRequest (FML2 Handshake S2CModList) Sent");
+
+            return false;
+        });
+    }
+
+    @Subscribe
+    public void onPluginMessageReceived(PluginMessageEvent event) {
+        if (event.getSource() instanceof Player player) {
+            if (ESTABLISHING_MODDED_PLAYERS.containsKey(player.getUsername())) {
+                ESTABLISHING_MODDED_PLAYERS.get(player.getUsername()).onPluginMessageReceived(event);
+            }
         }
     }
 
-    @EventHandler
-    public void onDisconnect(PlayerDisconnectEvent event) {
-        ModdedInitialHandler.FORGE_PLAYERS.remove(event.getPlayer().getName());
+    @Subscribe
+    public void onPreLogin(PreLoginEvent event) {
+        if (event.getConnection().getProtocolVersion().getProtocol() >= ProtocolVersion.MINECRAFT_1_13.getProtocol()) {
+            ModdedHandshakeProcessor player = null;
+
+            String extraDataInHandshake = getExtraDataInHandshake(event.getConnection());
+            if (extraDataInHandshake.contains("FML2")) {
+                player = new FML2Player();
+            } else if (extraDataInHandshake.contains("FORGE")) {
+                player = new ForgePlayer();
+            }
+
+            if (player != null) {
+                ESTABLISHING_MODDED_PLAYERS.put(event.getUsername(), player);
+                player.onPreLogin(event);
+            }
+        }
     }
 
-    @EventHandler
+    @Subscribe
+    public void onDisconnect(DisconnectEvent event) {
+        ESTABLISHING_MODDED_PLAYERS.remove(event.getPlayer().getUsername());
+        MODDED_PLAYERS.remove(event.getPlayer().getUsername());
+    }
+
+    @Subscribe
     public void onConnectedToServer(ServerConnectedEvent event) {
-        if (ModdedInitialHandler.FORGE_PLAYERS.containsKey(event.getPlayer().getName())) {
-            ModdedPlayer fp = ModdedInitialHandler.FORGE_PLAYERS.get(event.getPlayer().getName());
-            ByteBuf buf = Unpooled.buffer();
-            fp.getData(buf, event.getPlayer().getUniqueId());
-            event.getServer().sendData("unknown:forge", buf.array());
+        if (MODDED_PLAYERS.containsKey(event.getPlayer().getUsername())) {
+            ModdedPlayer fp = MODDED_PLAYERS.get(event.getPlayer().getUsername());
+            fp.setPlayer(event.getPlayer() instanceof Player connection ? connection : null);
+            if (fp.getPlayer() != null) {
+                ByteBuf buf = Unpooled.buffer();
+                fp.toModClientInformation().encode(buf);
+                event.getPlayer().sendPluginMessage(MinecraftChannelIdentifier.create("unknown", "forge"), ByteBufUtil.getBytes(buf));
+            }
         }
+    }
+
+    private static String getExtraDataInHandshake(InboundConnection connection) {
+        if (connection instanceof LoginPhaseConnection) {
+            try {
+                Field delegateField = connection.getClass().getDeclaredField("delegate");
+                if (delegateField.trySetAccessible()) {
+                    Object initialInboundConnection = delegateField.get(connection);
+                    Field handshakeField = initialInboundConnection.getClass().getDeclaredField("handshake");
+                    if (handshakeField.trySetAccessible()) {
+                        Object handshakePacket = handshakeField.get(initialInboundConnection);
+                        Field serverAddressField = handshakePacket.getClass().getDeclaredField("serverAddress");
+                        if (serverAddressField.trySetAccessible()) {
+                            String serverAddress = (String) serverAddressField.get(handshakePacket);
+                            String[] splitAddress = serverAddress.split("\0", 2);
+                            return splitAddress.length == 2 ? splitAddress[1] : "";
+                        }
+                    }
+                }
+            } catch(NoSuchFieldException | IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        } else {
+            throw new IllegalArgumentException("Supports only PreLogin phase connection.");
+        }
+        return "";
     }
 }

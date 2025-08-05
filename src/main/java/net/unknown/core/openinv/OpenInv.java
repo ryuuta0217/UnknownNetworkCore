@@ -36,13 +36,14 @@ import net.minecraft.Util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -50,19 +51,19 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 public class OpenInv {
-    public static Player load(OfflinePlayer offline) { // TODO Move method to Utility class, Util.getOfflinePlayer(OfflinePlayer player) -> Player
+    /*public static Player load(OfflinePlayer offline) { // TODO Move method to Utility class, Util.getOfflinePlayer(OfflinePlayer player) -> Player
         if (!offline.hasPlayedBefore()) return null; // 以前にプレイしたことないプレイヤーの場合はnullを返す, 読み込めるデータがないので
         if (offline.isOnline()) return Bukkit.getPlayer(offline.getUniqueId());
 
         GameProfile dummyProfile = new GameProfile(offline.getUniqueId(), (offline.getName() != null ? offline.getName() : offline.getUniqueId().toString()));
-        ServerPlayer dummyPlayer = new ServerPlayer(MinecraftServer.getServer(), MinecraftServer.getServer().getLevel(Level.OVERWORLD), dummyProfile);
+        ServerPlayer dummyPlayer = new ServerPlayer(MinecraftServer.getServer(), MinecraftServer.getServer().getLevel(Level.OVERWORLD), dummyProfile, ClientInformation.createDefault());
         dummyPlayer.getAdvancements().stopListening(); // 進捗のトリガーリスナーを停止する, メモリリークを防ぐ
 
         CraftPlayer dummyBukkitEntity = new CraftPlayer(dummyPlayer.server.server, dummyPlayer) {
             @Override
             public void loadData() {
                 System.out.println("loadData - " + this.getUniqueId());
-                CompoundTag loadedData = this.server.getHandle().playerIo.load(this.getHandle());
+                CompoundTag loadedData = this.server.getHandle().playerIo.load(this.getHandle()).orElse(null);
 
                 if (loadedData != null) {
                     this.getHandle().readAdditionalSaveData(loadedData);
@@ -81,11 +82,11 @@ public class OpenInv {
                     this.setExtraData(playerData);
 
                     File tempFile = File.createTempFile(handle.getStringUUID() + "-", ".dat", playerIo.getPlayerDir());
-                    NbtIo.writeCompressed(playerData, tempFile);
+                    NbtIo.writeCompressed(playerData, tempFile.toPath());
 
                     File newFile = new File(playerIo.getPlayerDir(), handle.getStringUUID() + ".dat");
                     File oldFile = new File(playerIo.getPlayerDir(), handle.getStringUUID() + ".dat_old");
-                    Util.safeReplaceFile(newFile, tempFile, oldFile);
+                    Util.safeReplaceFile(newFile.toPath(), tempFile.toPath(), oldFile.toPath());
                 } catch(IOException e) {
                     e.printStackTrace();
                 }
@@ -97,7 +98,7 @@ public class OpenInv {
             if (bukkitEntityField.trySetAccessible()) {
                 bukkitEntityField.set(dummyPlayer, dummyBukkitEntity);
 
-                CompoundTag playerData = MinecraftServer.getServer().getPlayerList().playerIo.load(dummyPlayer);
+                CompoundTag playerData = MinecraftServer.getServer().getPlayerList().playerIo.load(dummyPlayer).orElse(null);
                 if (playerData != null) {
                     dummyPlayer.readAdditionalSaveData(playerData);
                     return dummyPlayer.getBukkitEntity();
@@ -107,5 +108,5 @@ public class OpenInv {
             e.printStackTrace();
         }
         return null;
-    }
+    }*/
 }

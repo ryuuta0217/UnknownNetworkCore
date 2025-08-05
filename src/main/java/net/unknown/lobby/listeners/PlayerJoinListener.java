@@ -35,6 +35,7 @@ import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
 import net.minecraft.world.InteractionHand;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.lobby.UnknownNetworkLobby;
+import net.unknown.lobby.feature.ServerSelector;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -55,8 +56,8 @@ public class PlayerJoinListener implements Listener {
         //アイデア書いたらコードができてくのすげえ!!w
         // キレそう
         //w
-        if (!event.getPlayer().getInventory().contains(UnknownNetworkLobby.getServerSelectorCompass())) {
-            event.getPlayer().getInventory().addItem(UnknownNetworkLobby.getServerSelectorCompass());
+        if (!event.getPlayer().getInventory().contains(ServerSelector.getServerSelectorCompass())) {
+            event.getPlayer().getInventory().addItem(ServerSelector.getServerSelectorCompass());
         }
 
         if (!event.getPlayer().getInventory().contains(UnknownNetworkLobby.getBook())) {

@@ -47,16 +47,19 @@ public class ManageHopperView extends ConfigureHopperViewBase {
     @Override
     public void initialize() {
         this.getGui().getInventory().setItem(21, new ItemStackBuilder(Material.HOPPER)
-                .displayName(Component.text("アイテムの吸取設定", DefinedTextColor.YELLOW))
-                .lore(Component.text("ホッパーがアイテムを吸い取るかどうかや、吸取範囲を変更できます。", DefinedTextColor.GREEN),
-                        Component.text("ホッパーのアイテム吸取: ", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().isEnabledFindItem() ? Component.text("有効", DefinedTextColor.GREEN) : Component.text("無効", DefinedTextColor.RED)))
+                .displayName(Component.text("搬入出設定", DefinedTextColor.YELLOW))
+                .lore(Component.text("ホッパーがアイテムを搬入するか、搬出するかを設定できます。", DefinedTextColor.GREEN),
+                        ManageTransportView.getIncomingStatusComponent(this.getGui().getMixinHopper()),
+                        this.getGui().getMixinHopper().isEnabledPushItem() ? Component.text("搬出: 有効", DefinedTextColor.GREEN) : Component.text("搬出: 無効", DefinedTextColor.RED))
                 .build());
 
         this.getGui().getInventory().setItem(23, new ItemStackBuilder(Material.COMPARATOR)
                 .displayName(Component.text("アイテムフィルター設定", DefinedTextColor.GREEN))
                 .lore(Component.text("ホッパーが吸い取るアイテムにフィルターを設定します。", DefinedTextColor.GREEN),
-                        Component.text("アイテムフィルター: ", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().isFilterEnabled() ? Component.text("有効", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().getFilterMode() == FilterType.WHITELIST ? Component.text(" (ホワイトリスト)", DefinedTextColor.AQUA) : Component.text(" (ブラックリスト)", DefinedTextColor.YELLOW)) : Component.text("無効", DefinedTextColor.RED)),
-                        Component.text("アイテムフィルター登録数: " + this.getGui().getMixinHopper().getFilters().size() + "件", DefinedTextColor.GREEN))
+                        Component.text("搬入フィルター: ", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().isIncomingFilterEnabled() ? Component.text("有効", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().getIncomingFilterMode() == FilterType.WHITELIST ? Component.text(" (ホワイトリスト)", DefinedTextColor.AQUA) : Component.text(" (ブラックリスト)", DefinedTextColor.YELLOW)) : Component.text("無効", DefinedTextColor.RED)),
+                        Component.text("搬入フィルター登録数: " + this.getGui().getMixinHopper().getIncomingFilters().size() + "件", DefinedTextColor.GREEN),
+                        Component.text("搬出フィルター: ", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().isOutgoingFilterEnabled() ? Component.text("有効", DefinedTextColor.GREEN).append(this.getGui().getMixinHopper().getOutgoingFilterMode() == FilterType.WHITELIST ? Component.text(" (ホワイトリスト)", DefinedTextColor.AQUA) : Component.text(" (ブラックリスト)", DefinedTextColor.YELLOW)) : Component.text("無効", DefinedTextColor.RED)),
+                        Component.text("搬出フィルター登録数: " + this.getGui().getMixinHopper().getOutgoingFilters().size() + "件", DefinedTextColor.GREEN))
                 .build());
     }
 
@@ -64,7 +67,7 @@ public class ManageHopperView extends ConfigureHopperViewBase {
     public void onClick(InventoryClickEvent event) {
         switch (event.getSlot()) {
             case 21 -> {
-                this.getGui().setView(new ManagePullView(this));
+                this.getGui().setView(new ManageTransportView(this));
             }
 
             case 23 -> {

@@ -31,12 +31,11 @@
 
 package net.unknown.core.prefix;
 
+import com.ryuuta0217.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.unknown.core.events.PrefixChangedEvent;
-import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.core.util.MessageUtil;
 import net.unknown.shared.SharedConstants;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
@@ -62,7 +61,7 @@ public class PlayerPrefixes {
             if (searchResult != null) {
                 for (File file : searchResult) {
                     String fileName = file.getName().replace(".yml", "");
-                    if (MessageUtil.isUUID(fileName)) {
+                    if (StringUtil.isValidUUID(fileName)) {
                         UUID uniqueId = UUID.fromString(fileName);
                         PlayerPrefixes.load(uniqueId);
                     }

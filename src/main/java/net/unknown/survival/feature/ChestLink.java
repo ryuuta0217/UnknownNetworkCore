@@ -293,6 +293,11 @@ public class ChestLink implements Listener {
             if (sourcePos != null) {
                 IMixinChestBlockEntity sourceChestBlockEntity = getChestBlockEntity(sourcePos);
                 if (sourceChestBlockEntity != null && sourceChestBlockEntity.getChestTransportMode() == LinkChestMode.SOURCE) {
+                    if (clientPos.equals(sourcePos)) { // 循環参照を防止する
+                        NewMessageUtil.sendErrorMessage(player, Component.text("現在ソースとして設定されているチェストを、クライアントとして設定することはできません。\nこのチェストを別のソースのクライアントとして設定したい場合、先にソースとなるチェストに「ソース設定」モードにして触れてから、このチェストに触れてください。"));
+                        return;
+                    }
+
                     if (!sourcePos.isChunkLoaded()) sourcePos.getWorld().loadChunk(sourcePos.getChunk());
                     PlayerInteractEvent event = new PlayerInteractEvent(player, Action.RIGHT_CLICK_BLOCK, stack, sourcePos.getBlock(), BlockFace.SELF);
                     SKIP_NEXT_INTERACT_EVENT = true;

@@ -32,21 +32,19 @@
 package net.unknown.survival;
 
 import net.milkbowl.vault.economy.Economy;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.discord.UnknownNetworkDiscordBot;
+import net.unknown.survival.economy.UnknownNetworkEconomy;
+import net.unknown.survival.economy.VaultEconomy;
 import net.unknown.core.managers.ListenerManager;
-import net.unknown.survival.antivillagerlag.AntiVillagerLag;
 import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
-import net.unknown.survival.commands.Commands;
-import net.unknown.survival.commands.SuppressRaidCommand;
-import net.unknown.survival.data.VoteTicketExchangeItems;
+import net.unknown.survival.vote.data.VoteTicketExchangeItems;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.discord.MinecraftToDiscordMessageListener;
 import net.unknown.survival.enchants.*;
-import net.unknown.survival.enchants.nms.DamageEnchant;
 import net.unknown.survival.events.ModifiableBlockBreakEvent;
 import net.unknown.survival.feature.*;
 import net.unknown.survival.feature.gnarms.GNArms;
@@ -57,10 +55,12 @@ import net.unknown.survival.fun.MonsterBall;
 import net.unknown.survival.fun.PathfinderGrapple;
 import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import net.unknown.survival.item.Items;
+import net.unknown.survival.item.PotionEffectItem;
 import net.unknown.survival.listeners.*;
 import net.unknown.survival.update.UNCUpdateCheckTask;
 import net.unknown.survival.queue.ItemGiveQueue;
 import net.unknown.survival.vote.VoteManager;
+import net.unknown.survival.world.regen.AutomatedRegenWorldManager;
 import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.RegisteredServiceProvider;
@@ -80,8 +80,7 @@ public class UnknownNetworkSurvival {
     private static boolean VOTIFIER_ENABLED = false;
 
     public static void onLoad() {
-        Commands.init();
-        DamageEnchant.register();
+        //DamageEnchant.register();
         try {
             Class.forName("net.unknown.launchwrapper.Main");
             BOOTSTRAPPED = true;
@@ -93,6 +92,7 @@ public class UnknownNetworkSurvival {
 
     public static void onEnable() {
         Items.init(); // Custom item initialization
+        PotionEffectItem.startTask();
 
         HOLOGRAPHIC_DISPLAYS_ENABLED = Bukkit.getPluginManager().getPlugin("HolographicDisplays") != null && Bukkit.getPluginManager().isPluginEnabled("HolographicDisplays");
         WORLD_GUARD_ENABLED = Bukkit.getPluginManager().getPlugin("WorldGuard") != null && Bukkit.getPluginManager().isPluginEnabled("WorldGuard");
@@ -106,6 +106,9 @@ public class UnknownNetworkSurvival {
         CustomChannels.load();
         //AntiVillagerLag.startLoopTask();
         PlayerDeathListener.load();
+        UnknownNetworkEconomy.init();
+        //AutomaticWorldRegeneration.getInstance();
+        AutomatedRegenWorldManager.getInstance();
 
         CustomEnchantments.initialize();
         GNArms.initialize();
@@ -113,7 +116,7 @@ public class UnknownNetworkSurvival {
         UNCUpdateCheckTask.start();
         DebugStickEntityEditor.Listener.register();
 
-        Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCore.getInstance());
+        Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCorePlugin.getInstance());
 
         if (ItemGiveQueue.getInstance() == null) LOGGER.warning("Failed to initialize ItemGiveQueue, but proceed to enable.");
         MainGuiOpenListener guiOpenListener = new MainGuiOpenListener();
@@ -130,20 +133,29 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new PlayerJoinListener());
         ListenerManager.registerListener(new MinecraftToDiscordMessageListener());
         ListenerManager.registerListener(new LocalLoginListener());
-        SuppressRaidCommand.registerListener();
+        ListenerManager.registerListener(new OpenShulkerBoxInHand());
+        ListenerManager.registerListener(new EconomyListener());
+        ListenerManager.registerListener(new MinecartPlacer());
+        ListenerManager.registerListener(new AdvancementRewards());
+        SuppressRaids.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");
             ListenerManager.registerListener(new BlockDisassembler());
+            ListenerManager.registerListener(new Crusher());
             ListenerManager.registerListener(new ConfigureHopperGui.Listener());
             ListenerManager.registerListener(new ChestLink());
         }
 
-        Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCore.getInstance(), "BungeeCord");
-        Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unknown:forge", new FMLConnectionListener());
-        Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCore.getInstance(), "unc_survival:open_gui", guiOpenListener);
+        Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "BungeeCord");
+        Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "unknown:forge", new FMLConnectionListener());
+        Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "unc_survival:open_gui", guiOpenListener);
 
         DemolitionGun.BowPullIndicator.boot();
+
+        if (isVaultEnabled() && !isJeconEnabled()) {
+            VaultEconomy.hookVault();
+        }
 
         if (isVaultEnabled() && isJeconEnabled()) {
             Optional<RegisteredServiceProvider<Economy>> optionalEconomyServiceProvider = Optional.ofNullable(Bukkit.getServicesManager().getRegistration(Economy.class));
@@ -151,7 +163,7 @@ public class UnknownNetworkSurvival {
                 Economy economyService = optionalEconomyServiceProvider.get().getProvider();
                 Bukkit.getServicesManager().unregister(Economy.class, economyService);
                 WrappedEconomy wrapped = new WrappedEconomy(economyService);
-                Bukkit.getServicesManager().register(Economy.class, wrapped, UnknownNetworkCore.getInstance(), ServicePriority.Highest);
+                Bukkit.getServicesManager().register(Economy.class, wrapped, UnknownNetworkCorePlugin.getInstance(), ServicePriority.Highest);
             }
         }
 

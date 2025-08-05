@@ -35,10 +35,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
+import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.advancements.*;
+import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -57,30 +62,29 @@ import java.util.stream.IntStream;
 
 public class AdvancementManager {
     private static final Logger LOGGER = Logger.getLogger("UNC/Advancements");
-    private static final AdvancementProgress.Serializer PROGRESS_SERIALIZER = new AdvancementProgress.Serializer();
 
-    private static final Map<ResourceLocation, Advancement> ADVANCEMENTS = new HashMap<>();
+    private static final Map<ResourceLocation, AdvancementHolder> ADVANCEMENTS = new HashMap<>();
     private static final Map<ResourceLocation, Map<UUID, AdvancementProgress>> PROGRESSES = new HashMap<>();
 
-    public static void register(Advancement advancement) {
-        if (ADVANCEMENTS.containsKey(advancement.getId())) LOGGER.warning("Advancement " + advancement.getId() + " is already registered. Overwriting.");
-        ADVANCEMENTS.put(advancement.getId(), advancement);
-        PROGRESSES.put(advancement.getId(), new HashMap<>());
+    public static void register(AdvancementHolder advancementHolder) {
+        if (ADVANCEMENTS.containsKey(advancementHolder.id())) LOGGER.warning("Advancement " + advancementHolder.id() + " is already registered. Overwriting.");
+        ADVANCEMENTS.put(advancementHolder.id(), advancementHolder);
+        PROGRESSES.put(advancementHolder.id(), new HashMap<>());
     }
 
     public static void resetProgress(UUID uniqueId, ResourceLocation id) {
         if (!ADVANCEMENTS.containsKey(id)) throw new IllegalArgumentException("Unknown advancement " + id);
-        Advancement advancement = ADVANCEMENTS.get(id);
+        Advancement advancement = ADVANCEMENTS.get(id).value();
         AdvancementProgress progress = new AdvancementProgress();
-        progress.update(advancement.getCriteria(), advancement.getRequirements());
+        progress.update(advancement.requirements());
         PROGRESSES.get(id).put(uniqueId, progress);
     }
 
     public static void resetProgress(UUID uniqueId, Advancement advancement) {
-        resetProgress(uniqueId, advancement.getId());
+        resetProgress(uniqueId, ADVANCEMENTS.entrySet().stream().filter(e -> e.getValue().value().equals(advancement)).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown advancement provided")).getKey());
     }
 
-    public static Advancement getAdvancement(ResourceLocation id) {
+    public static AdvancementHolder getAdvancement(ResourceLocation id) {
         return ADVANCEMENTS.getOrDefault(id, null);
     }
 
@@ -91,15 +95,19 @@ public class AdvancementManager {
         return progresses.get(player.getUUID());
     }
 
+    public static AdvancementProgress getProgress(ServerPlayer player, AdvancementHolder advancementHolder) {
+        return getProgress(player, advancementHolder.id());
+    }
+
     public static AdvancementProgress getProgress(ServerPlayer player, Advancement advancement) {
-        return getProgress(player, advancement.getId());
+        return getProgress(player, ADVANCEMENTS.entrySet().stream().filter(e -> e.getValue().value().equals(advancement)).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown advancement provided")).getKey());
     }
 
     public static boolean grantProgress(ServerPlayer player, ResourceLocation id, String name) {
         AdvancementProgress progress = getProgress(player, id);
         boolean granted = progress.grantProgress(name);
         if (granted) {
-            ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Collections.singletonMap(id, progress));
+            ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Collections.singletonMap(id, progress), true);
             player.connection.send(packet);
             Bukkit.getPluginManager().callEvent(new CustomAdvancementCriteriaGrantedEvent(!Bukkit.isPrimaryThread(), player, getAdvancement(id), progress, name));
             if (progress.isDone()) {
@@ -110,15 +118,20 @@ public class AdvancementManager {
         return false;
     }
 
+    public static boolean grantProgress(ServerPlayer player, AdvancementHolder advancementHolder, String name) {
+        return grantProgress(player, advancementHolder.id(), name);
+    }
+
+    @Deprecated
     public static boolean grantProgress(ServerPlayer player, Advancement advancement, String name) {
-        return grantProgress(player, advancement.getId(), name);
+        return grantProgress(player, ADVANCEMENTS.entrySet().stream().filter(e -> e.getValue().value().equals(advancement)).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown advancement provided")).getKey(), name);
     }
 
     public static boolean revokeProgress(ServerPlayer player, ResourceLocation id, String name) {
         AdvancementProgress progress = getProgress(player, id);
         boolean revoked = progress.revokeProgress(name);
         if (revoked) {
-            ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Collections.singletonMap(id, progress));
+            ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Collections.singletonMap(id, progress), true);
             player.connection.send(packet);
             Bukkit.getPluginManager().callEvent(new CustomAdvancementCriteriaRevokedEvent(!Bukkit.isPrimaryThread(), player, getAdvancement(id), progress, name));
             return true;
@@ -127,15 +140,14 @@ public class AdvancementManager {
         return false;
     }
 
-    public static boolean revokeProgress(ServerPlayer player, Advancement advancement, String name) {
-        return revokeProgress(player, advancement.getId(), name);
-    }
-
     public static void save(ServerPlayer player) {
         File folder = new File(SharedConstants.DATA_FOLDER, "advancements");
         if (folder.exists() || (!folder.exists() && folder.mkdirs())) {
-            ADVANCEMENTS.forEach((id, advancement) -> {
+            throw new IllegalStateException("Unimplemented");
+            /*ADVANCEMENTS.forEach((id, advancement) -> {
                 AdvancementProgress progress = getProgress(player, id);
+
+                AdvancementProgress.CODEC.encodeStart(DynamicOps, progress).get()
                 JsonElement progressJson = PROGRESS_SERIALIZER.serialize(progress, AdvancementProgress.class, new JsonSerializationContext() {
                     @Override
                     public JsonElement serialize(Object o) {
@@ -147,9 +159,13 @@ public class AdvancementManager {
                         return new JsonPrimitive(o.toString());
                     }
                 });
-            });
+            });*/
         }
     }
+
+    /*public static JsonElement getProgressAsJson(AdvancementProgress progress) {
+        MinecraftServer.getServer().getPlayerList().getPlayerAdvancements(MinecraftServer.getServer().getPlayerList().players.stream().findAny().orEl)
+    }*/
 
     public static void registerDebug() {
         Advancement.Builder builder = Advancement.Builder
@@ -158,32 +174,32 @@ public class AdvancementManager {
                         .icon(new ItemStack(Items.TORCH))
                         .title(Component.literal("UN Pass"))
                         .description(Component.literal("Unknown Network Pass"))
-                        .background(ResourceLocation.of("minecraft:textures/block/dirt.png", ':'))
+                        .background(ResourceLocation.tryBySeparator("minecraft:textures/block/dirt.png", ':'))
                         .announceChat(false)
                         .showToast(false)
                         .build());
 
         IntStream.rangeClosed(1, 10).forEach(i -> {
-            builder.addCriterion(String.valueOf(i), CriteriaTriggers.IMPOSSIBLE.createInstance(null, null));
+            builder.addCriterion(String.valueOf(i), CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance()));
         });
 
-        Advancement adv = builder.build(ResourceLocation.of("unpass:root", ':'));
+        AdvancementHolder adv = builder.build(ResourceLocation.tryBySeparator("unpass:root", ':'));
         register(adv);
     }
 
     public static void send(ServerPlayer player) {
-        List<Advancement> toEarn = new ArrayList<>();
+        List<AdvancementHolder> toEarn = new ArrayList<>();
         Set<ResourceLocation> toRemove = new HashSet<>();
         Map<ResourceLocation, AdvancementProgress> toSetProgress = new HashMap<>();
 
         ADVANCEMENTS.forEach((id, advancement) -> {
             if(!PROGRESSES.containsKey(id)) return;
             toEarn.add(advancement);
-            toRemove.add(advancement.getId());
+            toRemove.add(advancement.id());
             toSetProgress.put(id, getProgress(player, id));
         });
 
-        ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, toEarn, toRemove, toSetProgress);
+        ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, toEarn, toRemove, toSetProgress, true);
         player.connection.send(packet);
     }
 }

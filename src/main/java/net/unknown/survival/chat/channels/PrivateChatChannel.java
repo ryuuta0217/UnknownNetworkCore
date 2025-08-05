@@ -36,7 +36,7 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.OutgoingChatMessage;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.server.level.ServerPlayer;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.chat.CustomChatTypes;
 import net.unknown.core.events.PrivateMessageEvent;
 import net.unknown.core.util.MinecraftAdapter;
@@ -44,7 +44,7 @@ import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 
 import java.util.Collections;
@@ -84,7 +84,7 @@ public class PrivateChatChannel extends ChatChannel {
         ServerPlayer receiver = ((CraftPlayer) player).getHandle();
         PrivateMessageEvent pEvent = new PrivateMessageEvent(sender.getBukkitEntity(), Collections.singleton(receiver.getBukkitEntity()), event.signedMessage());
         try {
-            Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), pEvent::callEvent).get(1, TimeUnit.SECONDS);
+            Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), pEvent::callEvent).get(1, TimeUnit.SECONDS);
             if (pEvent.isCancelled()) {
                 event.setCancelled(true);
                 return;
@@ -101,7 +101,7 @@ public class PrivateChatChannel extends ChatChannel {
         event.viewers().removeIf(viewer -> !viewer.equals(receiver.getBukkitEntity()));
 
         PlayerChatMessage originalMessage = MinecraftAdapter.Adventure.playerChatMessage(event.signedMessage());
-        boolean isNotModifiedMessage = Objects.equals(originalMessage.requireResult().message().component(), event.message());
+        boolean isNotModifiedMessage = Objects.equals(originalMessage.adventureView().unsignedContent(), event.message());
         OutgoingChatMessage message = OutgoingChatMessage.create(isNotModifiedMessage ? originalMessage : originalMessage.withUnsignedContent(NewMessageUtil.convertAdventure2Minecraft(event.message())));
 
         event.viewers().forEach(viewer -> {

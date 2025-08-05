@@ -31,24 +31,30 @@
 
 package net.unknown.proxy.fml;
 
-import com.ryuuta0217.packets.C2SModListReply;
+import com.ryuuta0217.packets.forge.v2.C2SModListReply;
+import com.ryuuta0217.packets.forge.v2.FML2HandshakePacket;
+import com.ryuuta0217.packets.forge.v2.S2CModList;
+import com.ryuuta0217.util.MinecraftPacketReader;
+import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.connection.PreLoginEvent;
+import com.velocitypowered.api.proxy.InboundConnection;
+import com.velocitypowered.api.proxy.LoginPhaseConnection;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import io.netty.buffer.ByteBuf;
-import net.md_5.bungee.protocol.DefinedPacket;
+import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.Unpooled;
+import net.unknown.shared.fml.ModClientInformation;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
-public class FML2Player implements ModdedPlayer {
-    private final Set<String> mods;
-    private final Map<String, String> channels;
-    private final Map<String, String> registries;
-
-    public FML2Player(Set<String> mods, Map<String, String> channels, Map<String, String> registries) {
-        this.mods = mods;
-        this.channels = channels;
-        this.registries = registries;
-    }
+public class FML2Player extends ModdedPlayer implements ModdedHandshakeProcessor {
+    private InboundConnection connection;
+    private Player player;
+    private Set<String> mods;
+    private Map<String, String> channels;
+    private Map<String, String> registries;
 
     public Set<String> getMods() {
         return this.mods;
@@ -63,13 +69,86 @@ public class FML2Player implements ModdedPlayer {
     }
 
     @Override
-    public void getData(ByteBuf buf, UUID uniqueId) {
-        DefinedPacket.writeUUID(uniqueId, buf);
+    public void onPluginMessageReceived(PluginMessageEvent event) {
+        // unused
+    }
+
+    @Override
+    public void onPreLogin(PreLoginEvent event) {
+        this.setConnection(event.getConnection());
+
+        String logPrefix = "[" + event.getUsername() + "|" + event.getConnection().getRemoteAddress() + "]";
+
+        LOGGER.info(logPrefix + "  -> Connected as using FML2 protocol");
+        LOGGER.info(logPrefix + "  -  Initializing FML2 Handshake (S2CModList)");
+
+        S2CModList packet = new S2CModList(new HashSet<>() {{
+            add("minecraft");
+            add("forge");
+        }}, new HashMap<>() {{
+            put("forge:tier_sorting", "1.0");
+        }}, new HashSet<>());
+        ByteBuf outgoingBuf = Unpooled.buffer();
+        packet.encode(outgoingBuf);
+
+        if (event.getConnection() instanceof LoginPhaseConnection loginConnection) {
+            loginConnection.sendLoginPluginMessage(MinecraftChannelIdentifier.create("fml", "handshake"), ByteBufUtil.getBytes(outgoingBuf), (response) -> {
+                ByteBuf incomingBuf = Unpooled.wrappedBuffer(response != null ? response : new byte[0]);
+
+                try {
+                    C2SModListReply handshake = C2SModListReply.decode(incomingBuf);
+                    this.mods = handshake.getMods();
+                    this.channels = handshake.getChannels();
+                    this.registries = handshake.getRegistries();
+
+                    ForgeListener.ESTABLISHING_MODDED_PLAYERS.remove(event.getUsername());
+                    ForgeListener.MODDED_PLAYERS.put(event.getUsername(), this);
+                    LOGGER.info(logPrefix + " <-> Successfully FML2 handshake completed");
+                    LOGGER.info(logPrefix + " <-> Connected as using mods: " + handshake.getMods());
+                } catch (IllegalArgumentException e) {
+                    e.printStackTrace();
+                }
+            });
+            LOGGER.info(logPrefix + " <-  LoginPayloadRequest (FML2 Handshake S2CModList) Sent");
+        }
+    }
+
+    @Override
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    @Override
+    public Player getPlayer() {
+        return this.player;
+    }
+
+    @Override
+    public void setConnection(InboundConnection connection) {
+        this.connection = connection;
+        if (connection instanceof Player player) this.setPlayer(player);
+    }
+
+    @NotNull
+    @Override
+    public InboundConnection getConnection() {
+        return this.connection;
+    }
+
+    @Override
+    public void getData(ByteBuf buf) {
+        if (this.player == null) throw new IllegalStateException("Player is not set");
+        MinecraftPacketReader.writeUUID(this.player.getUniqueId(), buf);
         new C2SModListReply(this.mods, this.channels, this.registries).encode(buf);
     }
 
     @Override
     public int getFMLVersion() {
         return 2;
+    }
+
+    @Override
+    public ModClientInformation toModClientInformation() {
+        return new ModClientInformation(this.player.getUniqueId(), new FML2HandshakePacket(this.mods, this.channels, this.registries));
     }
 }

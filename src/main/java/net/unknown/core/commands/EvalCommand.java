@@ -41,7 +41,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.managers.EvalManager;
@@ -94,11 +93,11 @@ public class EvalCommand {
                         Collections.reverse(sts); // trace reverse
                         List<Component> componentTraces = new ArrayList<>();
                         for (StackTraceElement element : sts) {
-                            componentTraces.add(MutableComponent.create(new LiteralContents(element.toString())));
+                            componentTraces.add(Component.literal(element.toString()));
                         }
                         Collections.reverse(componentTraces);
 
-                        MutableComponent c = MutableComponent.create(new LiteralContents(""));
+                        MutableComponent c = Component.empty();
                         componentTraces.forEach(trace -> {
                             c.append(trace).append("\n");
                         });
@@ -107,8 +106,8 @@ public class EvalCommand {
                         //e.printStackTrace(new PrintWriter(s));
 
                         Style modifier = Style.EMPTY.withColor(ChatFormatting.RED)
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, c));
-                        ctx.getSource().sendFailure(MutableComponent.create(new LiteralContents("コードの評価中にエラーが発生しました: " + e.getLocalizedMessage())).withStyle(modifier));
+                                .withHoverEvent(new HoverEvent.ShowText(c));
+                        ctx.getSource().sendFailure(Component.literal("コードの評価中にエラーが発生しました: " + e.getLocalizedMessage()).withStyle(modifier));
                         return e.hashCode();
                     }
                 }));

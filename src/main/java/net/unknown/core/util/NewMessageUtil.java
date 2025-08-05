@@ -31,17 +31,28 @@
 
 package net.unknown.core.util;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.serialization.JsonOps;
+import io.papermc.paper.adventure.PaperAdventure;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.ComponentArgument;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.SnbtGrammar;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.parsing.packrat.commands.Grammar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.unknown.core.define.DefinedTextColor;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHumanEntity;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.spigotmc.SpigotConfig;
 
 public class NewMessageUtil {
@@ -57,7 +68,9 @@ public class NewMessageUtil {
     }
 
     public static void sendMessage(Player player, Component component, boolean broadcastToOps) {
-        sendMessage(player.createCommandSourceStack(), component, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendMessage(sPlayer.createCommandSourceStack(), component, broadcastToOps);
+        }
     }
 
     public static void sendMessage(Player player, Component component) {
@@ -91,7 +104,9 @@ public class NewMessageUtil {
     }
 
     public static void sendMessage(Player player, net.kyori.adventure.text.Component component, boolean broadcastToOps) {
-        sendMessage(player.createCommandSourceStack(), component, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendMessage(sPlayer.createCommandSourceStack(), component, broadcastToOps);
+        }
     }
 
     public static void sendMessage(Player player, net.kyori.adventure.text.Component component) {
@@ -125,7 +140,9 @@ public class NewMessageUtil {
     }
 
     public static void sendMessage(Player player, String message, boolean broadcastToOps) {
-        sendMessage(player.createCommandSourceStack(), message, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendMessage(sPlayer.createCommandSourceStack(), message, broadcastToOps);
+        }
     }
 
     public static void sendMessage(Player player, String message) {
@@ -162,7 +179,9 @@ public class NewMessageUtil {
     }
 
     public static void sendErrorMessage(Player player, Component component, boolean broadcastToOps) {
-        sendErrorMessage(player.createCommandSourceStack(), component, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendErrorMessage(sPlayer.createCommandSourceStack(), component, broadcastToOps);
+        }
     }
 
     public static void sendErrorMessage(Player player, Component component) {
@@ -230,7 +249,9 @@ public class NewMessageUtil {
     }
 
     public static void sendErrorMessage(Player player, String message, boolean broadcastToOps) {
-        sendErrorMessage(player.createCommandSourceStack(), message, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendErrorMessage(sPlayer.createCommandSourceStack(), message, broadcastToOps);
+        }
     }
 
     public static void sendErrorMessage(Player player, String message) {
@@ -258,7 +279,7 @@ public class NewMessageUtil {
     /* VERBOSE MESSAGES */
     /* START - Minecraft Components */
     public static void sendVerboseMessage(CommandSourceStack source, Component component, boolean broadcastToOps) {
-        if (source.hasPermission(2, "unknown.core.verbose")) sendMessage(source, component, broadcastToOps);
+        if (source.hasPermission(2, "unknown.core.verbose")) sendMessage(source, component.copy().withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), broadcastToOps);
     }
 
     public static void sendVerboseMessage(CommandSourceStack source, Component component) {
@@ -266,7 +287,9 @@ public class NewMessageUtil {
     }
 
     public static void sendVerboseMessage(Player player, Component component, boolean broadcastToOps) {
-        sendVerboseMessage(player.createCommandSourceStack(), component, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendVerboseMessage(sPlayer.createCommandSourceStack(), component, broadcastToOps);
+        }
     }
 
     public static void sendVerboseMessage(Player player, Component component) {
@@ -300,7 +323,9 @@ public class NewMessageUtil {
     }
 
     public static void sendVerboseMessage(Player player, net.kyori.adventure.text.Component component, boolean broadcastToOps) {
-        sendVerboseMessage(player.createCommandSourceStack(), component, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendVerboseMessage(sPlayer.createCommandSourceStack(), component, broadcastToOps);
+        }
     }
 
     public static void sendVerboseMessage(Player player, net.kyori.adventure.text.Component component) {
@@ -335,7 +360,9 @@ public class NewMessageUtil {
     }
 
     public static void sendVerboseMessage(Player player, String message, boolean broadcastToOps) {
-        sendVerboseMessage(player.createCommandSourceStack(), message, broadcastToOps);
+        if (player instanceof ServerPlayer sPlayer) {
+            sendVerboseMessage(sPlayer.createCommandSourceStack(), message, broadcastToOps);
+        }
     }
 
     public static void sendVerboseMessage(Player player, String message) {
@@ -372,13 +399,13 @@ public class NewMessageUtil {
                 .withStyle(error ? ChatFormatting.RED : ChatFormatting.GRAY, ChatFormatting.ITALIC);
 
         source.getServer().getPlayerList().getPlayers().forEach(player -> {
-            if (player != source.source && player.getBukkitEntity().hasPermission("minecraft.admin.command_feedback")) {
+            if (player.commandSource() != source.source && player.getBukkitEntity().hasPermission("minecraft.admin.command_feedback")) {
                 // TODO iterateの前にチェックを挟むか？
                 //  前にチェックを挟むと、
                 //  ワールドA(sendCommandFeedback: false) で実行されたコマンドがワールドB(sendCommandFeedback: true)のワールドで表示される
                 //  → プレイヤーの行動追跡に若干の難が生まれる？
                 //  ただし、実行者のワールドAがtrueでも受信者のいるワールドBがfalseだとフィードバックを受信できない
-                if (player.serverLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
+                if (player.level().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
                     player.sendSystemMessage(msg);
                 }
             }
@@ -415,11 +442,11 @@ public class NewMessageUtil {
     }
 
     public static Component convertAdventure2Minecraft(net.kyori.adventure.text.Component component) {
-        return Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(component));
+        return PaperAdventure.asVanilla(component);
     }
 
     public static net.kyori.adventure.text.Component convertMinecraft2Adventure(Component component) {
-        return GsonComponentSerializer.gson().deserializeFromTree(Component.Serializer.toJsonTree(component));
+        return PaperAdventure.asAdventure(component);
     }
 
     public static boolean equalsComponent(net.kyori.adventure.text.Component a, net.kyori.adventure.text.Component b) {

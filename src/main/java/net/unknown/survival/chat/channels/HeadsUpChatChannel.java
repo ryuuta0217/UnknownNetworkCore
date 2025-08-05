@@ -37,7 +37,7 @@ import me.filoghost.holographicdisplays.api.Position;
 import me.filoghost.holographicdisplays.api.hologram.Hologram;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
@@ -97,7 +97,7 @@ public class HeadsUpChatChannel extends ChatChannel implements Listener {
 
         if (this.hologram == null) {
             try {
-                this.hologram = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> {
+                this.hologram = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
                     return holoApi.createHologram(Position.of(event.getPlayer()).add(0, getYPos(2.5, messages.size(), 0.25), 0));
                 }).get();
             } catch (InterruptedException | ExecutionException e) {
@@ -106,12 +106,12 @@ public class HeadsUpChatChannel extends ChatChannel implements Listener {
                 event.setCancelled(false);
                 return;
             }
-            messages.forEach(line -> Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> this.hologram.getLines().appendText(line)));
+            messages.forEach(line -> Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> this.hologram.getLines().appendText(line)));
 
             putUpdater(event);
         } else {
             messages.forEach(m -> {
-                Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> this.hologram.getLines().appendText(m));
+                Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> this.hologram.getLines().appendText(m));
                 setHologramPosition(event.getPlayer());
             });
 
@@ -141,7 +141,7 @@ public class HeadsUpChatChannel extends ChatChannel implements Listener {
 
     private void setHologramPosition(Player player) {
         if (this.hologram == null) return;
-        Bukkit.getScheduler().callSyncMethod(UnknownNetworkCore.getInstance(), () -> {
+        Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
             this.hologram.setPosition(Position.of(player).add(0, getYPos(2.5, this.hologram.getLines().size(), 0.25), 0));
             return null;
         });

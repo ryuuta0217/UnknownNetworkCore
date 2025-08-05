@@ -31,18 +31,25 @@
 
 package net.unknown.survival.data.model;
 
+import com.ryuuta0217.util.ComponentCollector;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.unknown.core.configurations.ConfigurationSerializer;
+import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.survival.data.PlayerData;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
 
 import javax.annotation.Nullable;
-import java.util.LinkedHashMap;
+import java.util.*;
+import java.util.function.BiPredicate;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class HomeGroup {
+    private final Logger logger;
     private final PlayerData.HomeData homeData;
     private final String name;
     private Material icon;
@@ -51,6 +58,7 @@ public class HomeGroup {
     public HomeGroup(PlayerData.HomeData homeData, String name, Material icon, LinkedHashMap<String, Home> homes) {
         this.homeData = homeData;
         this.name = name;
+        this.logger = Logger.getLogger(homeData.getLogger().getName() + "/Group/" + this.name);
         this.icon = icon;
         this.homes = homes;
     }
@@ -103,6 +111,18 @@ public class HomeGroup {
         this.saveAsync();
     }
 
+    public boolean removeIf(BiPredicate<String, Home> filter) {
+        boolean removed = this.homes.entrySet().removeIf(e -> filter.test(e.getKey(), e.getValue()));
+        if (removed) this.saveAsync();
+        return removed;
+    }
+
+    public boolean removeAll(Collection<String> c) {
+        boolean removed = this.homes.keySet().removeAll(c);
+        if (removed) this.saveAsync();
+        return removed;
+    }
+
     public Material getIcon() {
         return this.icon != null ? this.icon : Material.WHITE_WOOL;
     }
@@ -110,6 +130,10 @@ public class HomeGroup {
     public void setIcon(Material icon) {
         this.icon = icon;
         this.saveAsync();
+    }
+
+    public Logger getLogger() {
+        return this.logger;
     }
 
     public static HomeGroup load(PlayerData.HomeData homeData, String groupName, ConfigurationSection groupSection, @Nullable ConfigurationSection itemsSection) {
@@ -132,11 +156,20 @@ public class HomeGroup {
     }
 
     public void save(ConfigurationSection groupSection, ConfigurationSection itemsSection) {
+        Map<String, Throwable> saveFailures = new HashMap<>();
         this.getHomes().forEach((homeName, home) -> {
-            ConfigurationSerializer.setLocationData(groupSection, homeName, home.location());
+            try {
+                ConfigurationSerializer.setLocationData(groupSection, homeName, home);
+            } catch (Throwable t) {
+                saveFailures.put(homeName, t);
+            }
         });
 
         if (this.getIcon() != null) itemsSection.set(this.getName(), this.getIcon().name());
+        if (!saveFailures.isEmpty()) {
+            saveFailures.forEach((homeName, t) -> this.getLogger().log(Level.WARNING, "Failed to save home " + homeName, t));
+            throw new IllegalStateException("Failed to save home(s): " + saveFailures.keySet());
+        }
     }
 
     private void saveAsync() {

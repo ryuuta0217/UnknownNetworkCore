@@ -42,9 +42,9 @@ import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.managers.TrashManager;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHumanEntity;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
-import org.bukkit.craftbukkit.v1_20_R1.util.CraftMagicNumbers;
+import org.bukkit.craftbukkit.entity.CraftHumanEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -72,6 +72,7 @@ public class TrashGui extends GuiBase {
         }, true);
         this.player = player;
         this.opener = opener;
+        this.passOnlyThisInventory = false;
     }
 
     @Override
@@ -86,7 +87,7 @@ public class TrashGui extends GuiBase {
 
     @Override
     public void onClick(InventoryClickEvent event) {
-        if (event.getSlot() == 53) {
+        if (event.getInventory().equals(this.inventory) && event.getSlot() == 53) {
             // Clear the items button
             IntStream.rangeClosed(0, 52).forEach(this.getInventory()::clear);
             this.save();

@@ -39,13 +39,13 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.network.chat.*;
-import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.unknown.core.managers.RunnableManager;
@@ -62,7 +62,7 @@ import net.unknown.survival.chat.channels.ranged.TitleChatChannel;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
@@ -75,7 +75,7 @@ public class ChannelCommand {
 
     private static final Map<UUID, CustomChannel> TO_REMOVE_CONFIRM = new HashMap<>();
 
-    public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+    public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("channel");
 
         builder.then(Commands.literal("setdefault")
@@ -104,7 +104,7 @@ public class ChannelCommand {
                                 .executes(ctx -> setChannel(ctx, ChannelType.CUSTOM))))
                 .then(Commands.literal("create") // /channel create <channelName> <displayName>
                         .then(Commands.argument("チャンネル名", StringArgumentType.word())
-                                .then(Commands.argument("表示名", ComponentArgument.textComponent())
+                                .then(Commands.argument("表示名", ComponentArgument.textComponent(buildContext))
                                         .executes(ChannelCommand::createChannel))))
                 .then(Commands.literal("remove")
                         .executes(ChannelCommand::removeChannel) // remove default channel
@@ -138,7 +138,7 @@ public class ChannelCommand {
                         .then(Commands.argument("チャンネル名", StringArgumentType.word())
                                 .suggests(Suggestions.OWNED_CHANNELS_SUGGEST)
                                 .then(Commands.literal("displayName")
-                                        .then(Commands.argument("表示名", ComponentArgument.textComponent())
+                                        .then(Commands.argument("表示名", ComponentArgument.textComponent(buildContext))
                                                 .executes(ChannelCommand::modifyChannelDisplayName)))));
 
         builder.then(Commands.literal("options")
@@ -264,7 +264,7 @@ public class ChannelCommand {
                 return 1;
             }
 
-            Component displayName$minecraft = ComponentArgument.getComponent(ctx, "表示名");
+            Component displayName$minecraft = ComponentArgument.getRawComponent(ctx, "表示名");
             net.kyori.adventure.text.Component displayName$adv = NewMessageUtil.convertMinecraft2Adventure(displayName$minecraft);
             CustomChannel channel = CustomChannels.createChannel(internalChannelName, player.getUUID(), displayName$adv);
 
@@ -333,7 +333,7 @@ public class ChannelCommand {
                                         .suggests(Suggestions.JOINED_CHANNELS_SUGGEST)
                                         .executes(ChannelCommand::inviteToChannel)))) // invite specified channel
          */
-        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof Player player) {
+        if (ctx.getSource().getEntity() != null && ctx.getSource().getEntity() instanceof ServerPlayer player) {
             ServerPlayer inviteTarget = EntityArgument.getPlayer(ctx, "対象");
             String inviteChannelName = BrigadierUtil.getArgumentOrDefault(ctx, String.class, "チャンネル名", null);
             if (inviteChannelName != null && !CustomChannels.isChannelFound(inviteChannelName)) {
@@ -416,7 +416,7 @@ public class ChannelCommand {
                             .withColor(TextColor.fromLegacyFormat(ChatFormatting.AQUA))
                             .withBold(true)
                             .withUnderlined(true)
-                            .withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/channel accept " + player.getScoreboardName() + " " + inviteChannelName)))));
+                            .withClickEvent(new ClickEvent.RunCommand("/channel accept " + player.getScoreboardName() + " " + inviteChannelName)))));
 
 
             NewMessageUtil.sendMessage(ctx.getSource(), Component.literal("")
@@ -670,7 +670,7 @@ public class ChannelCommand {
 
     private static int modifyChannelDisplayName(CommandContext<CommandSourceStack> ctx) {
         String channelName = StringArgumentType.getString(ctx, "チャンネル名");
-        Component displayName = ComponentArgument.getComponent(ctx, "表示名");
+        Component displayName = ComponentArgument.getRawComponent(ctx, "表示名");
         net.kyori.adventure.text.Component displayName$adventure = NewMessageUtil.convertMinecraft2Adventure(displayName);
 
         CustomChannel channel = CustomChannels.getChannel(channelName);

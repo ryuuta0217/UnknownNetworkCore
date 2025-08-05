@@ -31,7 +31,7 @@
 
 package net.unknown.core.advancements.event;
 
-import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.server.level.ServerPlayer;
 import org.bukkit.event.HandlerList;
@@ -42,7 +42,7 @@ public class CustomAdvancementCriteriaRevokedEvent extends CustomAdvancementEven
 
     private final String criterionName;
 
-    public CustomAdvancementCriteriaRevokedEvent(boolean isAsync, ServerPlayer player, Advancement advancement, AdvancementProgress progress, String criterionName) {
+    public CustomAdvancementCriteriaRevokedEvent(boolean isAsync, ServerPlayer player, AdvancementHolder advancement, AdvancementProgress progress, String criterionName) {
         super(isAsync, player, advancement, progress);
         this.criterionName = criterionName;
     }

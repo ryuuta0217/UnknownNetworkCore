@@ -33,7 +33,7 @@ package net.unknown.survival.chat;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.chat.channels.CustomChannel;
@@ -55,7 +55,7 @@ public class CustomChannels {
 
     private static final Map<String, CustomChannel> CHANNELS = new HashMap<>();
 
-    private static final File CONFIG_FILE = new File(UnknownNetworkCore.getInstance().getDataFolder(), "custom_channels.yml");
+    private static final File CONFIG_FILE = new File(UnknownNetworkCorePlugin.getInstance().getDataFolder(), "custom_channels.yml");
     private static YamlConfiguration CONFIG;
 
     public static void load() {

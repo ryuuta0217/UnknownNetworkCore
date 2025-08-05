@@ -3,10 +3,10 @@ exchange-items:
     type: SCRIPT
     item: '{Count:0b,id:"minecraft:air"}'
     price: -1
-    getItem: function(player, choice) { return new org.bukkit.inventory.ItemStack(Material.STICK,
+    get-item: function(player, choice) { return new org.bukkit.inventory.ItemStack(Material.STICK,
       64); }
-    getDisplayItem: function(player) { return getItem(player, null); }
-    getPrice: function(player) { return 4; }
+    get-display-item: function(player) { return getItem(player, null); }
+    get-price: function(player) { return 4; }
   random:
     type: SIMPLE_RANDOM
     item: '{Count:1b,id:"minecraft:player_head",tag:{SkullOwner:{Id:[I;1617833968,-310949822,-1653808685,840726584],Name:"MHF_Question",Properties:{textures:[{Signature:"BdQTl4LNnuac9N68oouWxjdL1SzMFKwhZd3LITXrCIznBZEw29EeyhLEb6EGwCZq63kTgRDD/TLWAmmy34pLaVQu/WvmwFah/8VL/dmp8r/gJxbQUn+b4WlQ19BOk89bWTuPiIjZBXIDILsW+rza4x/BQC13f82e/gT1hn2BPi1CCXRwamGIJQGWWSEMeK8goPUT6AGHUDhIYrkpsz9bNnNU3lFZTgKvU1g56/9yTCItA7w+lpkUOg0Ej7cEV4iT/8p9kmHBZ7OBNd8KesJqmJ6UXaUvQhOy5hXYBnKaemaJp0i0vU5lWqqwal+PZ4PguouQFrOCA0dAenRAr5u+u51YZ7VhJNgjNrr2PokNC1bAT1mrkvU81i1GIsFBCzmycCG6gw+n5mw0n5b/wzysnTovy4b1Y89WbtQMdb8rnQhhUeNghacjU3IaNdPgLVBm8Ufi/I+fqQVn2Wh5aQ8ryQ3ShMAvZwYR7kPmrcu5ueXpIEPurJz7uBoI41LyJSHUqUnPK21B6Pg7l8YoNB1vP1eaJiUoveXRXxwkHs7M35z+O2xyvAzJsRvtpfc/HTeZMPtXegbXWKgW+EYeSp9teW+5+HQdEYyT/4UfOGMYq6O/lexycTKt93kWAtn5jincLj3gsuUD03JAnU1FKS7D31BmEoaerwjrOy1Pzbf7AkE=",Value:"ewogICJ0aW1lc3RhbXAiIDogMTY4OTg3MDg5MDUwMywKICAicHJvZmlsZUlkIiA6ICI2MDZlMmZmMGVkNzc0ODQyOWQ2Y2UxZDMzMjFjNzgzOCIsCiAgInByb2ZpbGVOYW1lIiA6ICJNSEZfUXVlc3Rpb24iLAogICJzaWduYXR1cmVSZXF1aXJlZCIgOiB0cnVlLAogICJ0ZXh0dXJlcyIgOiB7CiAgICAiU0tJTiIgOiB7CiAgICAgICJ1cmwiIDogImh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZDM0ZTA2M2NhZmI0NjdhNWM4ZGU0M2VjNzg2MTkzOTlmMzY5ZjRhNTI0MzRkYTgwMTdhOTgzY2RkOTI1MTZhMCIKICAgIH0KICB9Cn0="}]}}}}'
@@ -20,6 +20,8 @@ exchange-items:
   cherry-builders-box:
     type: SELECTABLE_CONTAINER
     price: 2
+    display-item: '{Count:1b,id:"minecraft:pink_shulker_box",tag:{display:{Name:''{"text":"桜の建材ボックス",
+      "color":"light_purple", "italic":"false"}''}}}'
     container: '{Count:1b,id:"minecraft:pink_shulker_box",tag:{display:{Name:''{"text":"桜の建材ボックス",
       "color":"light_purple", "italic":"false"}''}}}'
     stacks: 27

@@ -43,8 +43,9 @@ import net.minecraft.network.chat.SignedMessageLink;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
-import org.bukkit.craftbukkit.v1_20_R1.command.VanillaCommandWrapper;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.command.VanillaCommandWrapper;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
@@ -52,6 +53,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -65,7 +67,8 @@ public class PrivateMessageEvent extends Event implements Cancellable {
     private PlayerChatMessage message;
     private boolean isDirty = false;
 
-    public PrivateMessageEvent(Entity sender, Collection<Player> receivers, Component message) {
+    public PrivateMessageEvent(boolean async, Entity sender, Collection<Player> receivers, Component message) {
+        super(async);
         this.source = VanillaCommandWrapper.getListener(sender);
         this.receivers = receivers.stream().map(player -> (CraftPlayer) player).map(CraftPlayer::getHandle).collect(Collectors.toSet());
         this.message = new PlayerChatMessage(
@@ -76,16 +79,30 @@ public class PrivateMessageEvent extends Event implements Cancellable {
                 FilterMask.PASS_THROUGH);
     }
 
-    public PrivateMessageEvent(Entity sender, Collection<Player> receivers, SignedMessage adventureSignedMessage) {
+    public PrivateMessageEvent(Entity sender, Collection<Player> receivers, Component message) {
+        this(!Bukkit.isPrimaryThread(), sender, receivers, message);
+    }
+
+    public PrivateMessageEvent(boolean async, Entity sender, Collection<Player> receivers, SignedMessage adventureSignedMessage) {
+        super(async);
         this.source = VanillaCommandWrapper.getListener(sender);
         this.receivers = receivers.stream().map(player -> (CraftPlayer) player).map(CraftPlayer::getHandle).collect(Collectors.toSet());
         this.message = MinecraftAdapter.Adventure.playerChatMessage(adventureSignedMessage);
     }
 
-    public PrivateMessageEvent(CommandSourceStack source, Collection<ServerPlayer> receivers, PlayerChatMessage message) {
+    public PrivateMessageEvent(Entity sender, Collection<Player> receivers, SignedMessage adventureSignedMessage) {
+        this(!Bukkit.isPrimaryThread(), sender, receivers, adventureSignedMessage);
+    }
+
+    public PrivateMessageEvent(boolean async, CommandSourceStack source, Collection<ServerPlayer> receivers, PlayerChatMessage message) {
+        super(async);
         this.source = source;
         this.receivers = new HashSet<>(receivers);
         this.message = message;
+    }
+
+    public PrivateMessageEvent(CommandSourceStack source, Collection<ServerPlayer> receivers, PlayerChatMessage message) {
+        this(!Bukkit.isPrimaryThread(), source, receivers, message);
     }
 
     @NotNull
@@ -101,21 +118,21 @@ public class PrivateMessageEvent extends Event implements Cancellable {
         return this.receivers.stream().map(ServerPlayer::getBukkitEntity).collect(Collectors.toSet());
     }
 
+    @Nullable
     public Component message() {
-        return NewMessageUtil.convertMinecraft2Adventure(this.message.unsignedContent());
+        return NewMessageUtil.convertMinecraft2Adventure(this.message.decoratedContent());
     }
 
     public void message(Component message) {
-        this.message = new PlayerChatMessage(
-                SignedMessageLink.unsigned(this.source.getEntity() == null ? Util.NIL_UUID : this.source.getEntity().getUUID()),
-                null,
-                SignedMessageBody.unsigned(PlainTextComponentSerializer.plainText().serialize(message)),
-                NewMessageUtil.convertAdventure2Minecraft(message),
-                FilterMask.PASS_THROUGH);
+        this.message = this.message.withUnsignedContent(NewMessageUtil.convertAdventure2Minecraft(message));
         this.isDirty = true;
     }
 
-    public void message(PlayerChatMessage message) {
+    public PlayerChatMessage playerChatMessage() {
+        return this.message;
+    }
+
+    public void playerChatMessage(PlayerChatMessage message) {
         this.message = message;
     }
 

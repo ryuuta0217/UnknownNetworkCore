@@ -31,23 +31,46 @@
 
 package net.unknown.proxy;
 
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.BaseComponent;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.event.ServerKickEvent;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.event.EventHandler;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.player.KickedFromServerEvent;
+import com.velocitypowered.api.proxy.ServerConnection;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.unknown.core.define.DefinedTextColor;
 
-public class ServerDisconnectListener implements Listener {
-    @EventHandler
-    public void onPlayerDisconnectedFromServer(ServerKickEvent event) {
-        if (event.getKickedFrom().equals(UnknownNetworkProxyCore.getSurvivalServer()) && event.getCause() != ServerKickEvent.Cause.LOST_CONNECTION) {
-            event.setCancelled(true);
-            event.setCancelServer(UnknownNetworkProxyCore.getLobbyServer());
-            BaseComponent[] message = new BaseComponent[event.getKickReasonComponent().length + 1];
-            message[0] = new TextComponent("§c生活鯖から切断されました: ");
-            System.arraycopy(event.getKickReasonComponent(), 0, message, 1, event.getKickReasonComponent().length);
-            event.getPlayer().sendMessage(ChatMessageType.SYSTEM, message);
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+public class ServerDisconnectListener {
+    private final Map<UUID, AtomicInteger> disconnectCounter = new HashMap<>();
+
+    @Subscribe
+    public void onPlayerDisconnectedFromServer(KickedFromServerEvent event) {
+        if (!event.getServer().getServerInfo().getName().equals("lobby")) {
+            ServerConnection current = event.getPlayer().getCurrentServer().orElse(null);
+            TextComponent reason = Component.text(event.getServer().getServerInfo().getName() + " から切断されました: ", DefinedTextColor.RED).append(event.getServerKickReason().orElse(Component.text("(理由は不明)")));
+            if (current != null && !current.getServerInfo().getName().equals("lobby")) {
+                event.setResult(KickedFromServerEvent.RedirectPlayer.create(UnknownNetworkProxyCore.getLobbyServer(), reason));
+            } else {
+                event.setResult(KickedFromServerEvent.Notify.create(reason));
+            }
+            if (this.disconnectCounter.computeIfAbsent(event.getPlayer().getUniqueId(), uuid -> new AtomicInteger(0)).incrementAndGet() == 3) {
+                event.getPlayer().sendMessage(Component.text("何度もサーバーから切断されているようです。一度切断していただき、再度サーバーに参加することで改善する場合があります。", DefinedTextColor.YELLOW));
+            }
+
+            UnknownNetworkProxyCore.getInstance().getProxy().getScheduler().buildTask(UnknownNetworkProxyCore.getInstance(), () -> {
+                        if (this.disconnectCounter.containsKey(event.getPlayer().getUniqueId())) {
+                            AtomicInteger counter = this.disconnectCounter.get(event.getPlayer().getUniqueId());
+                            if (counter.decrementAndGet() == 0) {
+                                this.disconnectCounter.remove(event.getPlayer().getUniqueId());
+                            }
+                        }
+                    })
+                    .delay(10, TimeUnit.SECONDS)
+                    .schedule();
         }
     }
 }

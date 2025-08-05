@@ -1,0 +1,44 @@
+# 自動ワールド再生成機能のConfig
+pre-gen:
+  name-format: "${worldName}_PRE"
+  mode: "EMPTY_PLAYERS"
+keep-old-world:
+  name-format: "old_${worldName}"
+backup:
+  # 利用可能な変数: worldName, lastYear, lastMonth, lastDay, year, month, day
+  folder-pattern: "./backups/${worldName}"
+  # 利用可能な変数: worldName, lastYear, lastMonth, lastDay, year, month, day, extension
+  file-pattern: "${year}-${month}-${day}.${extension}"
+
+# ワールド再生成時に実行されるスクリプトの設定
+#
+# 例:
+# scripts:
+#  resource:
+#    before_pre_generate: "scripts/before-pr-resource.js"
+#    after_pre_generate: "scripts/after-pr-resource.js"
+#    before: "scripts/before-resource.js"
+#    after: "scripts/after-resource.js"
+#  resource_nether:
+#    before_pre_generate: "scripts/before-pr-resource.js"
+#    after_pre_generate: "scripts/after-pr-resource.js"
+#    before: "scripts/before-resource.js"
+#    after: "scripts/after-resource.js"
+#  resource_the_end:
+#    before_pre_generate: "scripts/before-pr-resource.js"
+#    after_pre_generate: "scripts/after-pr-resource.js"
+#    before: "scripts/before-resource.js"
+#    after: "scripts/after-resource.js"
+scripts: {}
+
+# ワールド再生成の予定一覧
+#
+# 例:
+# schedules:
+#  2024/04/15:
+#    worlds: ["resource", "resource_nether", "resource_the_end"]
+#    seed: HelloWorldNewWorld
+#    keep-game-rules: true
+#    keep-old-world: true
+#    pre-generate: true
+schedules: {}

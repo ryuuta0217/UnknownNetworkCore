@@ -45,7 +45,6 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.*;
-import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.sounds.SoundEvents;
@@ -75,9 +74,9 @@ public class MsgCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         // FORCE UNREGISTER [minecraft:msg, minecraft:tell, minecraft:w] COMMAND FROM COMMAND DISPATCHER
-        BrigadierUtil.forceUnregisterCommand("msg");
-        BrigadierUtil.forceUnregisterCommand("tell");
-        BrigadierUtil.forceUnregisterCommand("w");
+        BrigadierUtil.forceUnregisterCommand(dispatcher, "msg");
+        BrigadierUtil.forceUnregisterCommand(dispatcher, "tell");
+        BrigadierUtil.forceUnregisterCommand(dispatcher, "w");
         // FORCE UNREGISTER END
 
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("msg");
@@ -200,7 +199,7 @@ public class MsgCommand {
 
             boolean filtered;
 
-            ChatType.Bound outgoingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, receiver).withTargetName(receiver.getDisplayName());
+            ChatType.Bound outgoingBound = ChatType.bind(CustomChatTypes.PRIVATE_MESSAGE_OUTGOING, source.getEntity()).withTargetName(receiver.getDisplayName());
             source.sendChatMessage(outMessage, false, outgoingBound);
             boolean filterMask = source.shouldFilterMessageTo(receiver);
             receiver.sendChatMessage(outMessage, filterMask, incomingBound);
@@ -216,10 +215,10 @@ public class MsgCommand {
     }
 
     public static Component spyMessage(Component senderName, Component receiverName, Component message) {
-        return MutableComponent.create(new LiteralContents(""))
-                .append(MutableComponent.create(new LiteralContents("[PM]")).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA)))
+        return Component.empty()
+                .append(Component.literal("[PM]")).setStyle(Style.EMPTY.withColor(ChatFormatting.AQUA))
                 .append(" ")
-                .append(MutableComponent.create(new LiteralContents("[")).append(senderName).append(" -> ").append(receiverName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW)))
+                .append(Component.literal("[")).append(senderName).append(" -> ").append(receiverName).append("]").setStyle(Style.EMPTY.withColor(ChatFormatting.YELLOW))
                 .append(" ")
                 .append(message);
     }

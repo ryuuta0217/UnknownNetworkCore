@@ -31,7 +31,7 @@
 
 package net.unknown.survival.enchants;
 
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.managers.ListenerManager;
 
 public class CustomEnchantments {
@@ -42,7 +42,7 @@ public class CustomEnchantments {
     public static final AutoReplant AUTO_REPLANT = new AutoReplant();
 
     public static void initialize() {
-        if (UnknownNetworkCore.getInstance().isEnabled()) {
+        if (UnknownNetworkCorePlugin.getInstance().isEnabled()) {
             ListenerManager.registerListener(HATAKE_WATARI);
             ListenerManager.registerListener(RANGED_MINING);
             ListenerManager.registerListener(CHAIN_DESTRUCTION);

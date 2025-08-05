@@ -38,10 +38,10 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
@@ -96,11 +96,9 @@ public class ChainDestruction implements Listener {
         /* Enchant test */
         ItemStack selectedItem = player.getMainHandItem();
         org.bukkit.inventory.ItemStack selectedItemB = event.getPlayer().getInventory().getItemInMainHand();
-        if (!(selectedItem.getItem() instanceof PickaxeItem) && !(selectedItem.getItem() instanceof AxeItem)) return;
         if (!CustomEnchantUtil.hasEnchantment("一括破壊", selectedItemB)) return;
         /* test end */
-
-        int maxBlocks = (selectedItem.getItem() instanceof PickaxeItem ? 8 : 32) * CustomEnchantUtil.getEnchantmentLevel(CustomEnchantUtil.getEnchantmentLine("§7一括破壊", selectedItemB));
+        int maxBlocks = (selectedItem.getItem().getDefaultInstance().is(ItemTags.PICKAXES) ? 8 : 32) * CustomEnchantUtil.getEnchantmentLevel(CustomEnchantUtil.getEnchantmentLine("§7一括破壊", selectedItemB));
 
         ServerLevel level = MinecraftAdapter.level(event.getBlock().getLocation().getWorld());
         BlockState blockState = MinecraftAdapter.blockState(event.getBlock());
@@ -108,7 +106,7 @@ public class ChainDestruction implements Listener {
         if (!isValidTarget(chainDestructTarget)) return;
         if (blockState.is(BlockTags.LOGS) && !(selectedItem.getItem() instanceof AxeItem)) return;
         if (!player.hasCorrectToolForDrops(blockState)) return;
-        if (selectedItem.getItem().getMaxDamage() - selectedItem.getDamageValue() == 1) return;
+        if (selectedItem.getMaxDamage() - selectedItem.getDamageValue() == 1) return;
 
         Set<BlockPos> toBreak = new HashSet<>();
 
@@ -121,7 +119,7 @@ public class ChainDestruction implements Listener {
         toBreak.forEach(pos -> {
             RunnableManager.runDelayed(() -> {
                 if (player.getMainHandItem().equals(selectedItem)) {
-                    if ((selectedItem.getItem().getMaxDamage() - selectedItem.getDamageValue()) > 1) {
+                    if ((selectedItem.getMaxDamage() - selectedItem.getDamageValue()) > 1) {
                         IGNORE_EVENT.get(player.getUUID()).add(pos);
                         try {
                             player.gameMode.destroyBlock(pos);

@@ -13,7 +13,13 @@ testServer/cache/
 testServer/libraries/
 testServer/versions/
 testServer/plugins/*/
+testServer/paper.jar
 !testServer/plugins/UnknownNetworkCore/
 .DS_Store
 shared/discord-config.txt
 shared/tokens.txt
+testPRoxy/proxy.log.0
+testProxy/logs/
+testProxy/plugins/
+testProxy/lang/
+testProxy/forwarding.secret

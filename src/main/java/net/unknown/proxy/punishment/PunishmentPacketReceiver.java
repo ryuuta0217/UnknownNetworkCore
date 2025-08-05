@@ -31,13 +31,5 @@
 
 package net.unknown.proxy.punishment;
 
-import net.md_5.bungee.api.event.PluginMessageEvent;
-import net.md_5.bungee.api.plugin.Listener;
-import net.md_5.bungee.event.EventHandler;
-
-public class PunishmentPacketReceiver implements Listener {
-    @EventHandler
-    public void onPluginMessageReceived(PluginMessageEvent event) {
-        
-    }
+public class PunishmentPacketReceiver {
 }

@@ -33,7 +33,7 @@ package net.unknown.survival.listeners;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerKickEvent;
@@ -45,7 +45,7 @@ public class ServerRestartListener implements Listener {
             ByteArrayDataOutput out = ByteStreams.newDataOutput();
             out.writeUTF("Connect");
             out.writeUTF("lobby");
-            event.getPlayer().sendPluginMessage(UnknownNetworkCore.getInstance(), "BungeeCord", out.toByteArray());
+            event.getPlayer().sendPluginMessage(UnknownNetworkCorePlugin.getInstance(), "BungeeCord", out.toByteArray());
             event.setCancelled(true);
         }
     }

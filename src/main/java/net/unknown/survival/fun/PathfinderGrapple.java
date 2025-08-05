@@ -31,7 +31,7 @@
 
 package net.unknown.survival.fun;
 
-import net.unknown.UnknownNetworkCore;
+import net.unknown.UnknownNetworkCorePlugin;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Particle;
@@ -92,7 +92,7 @@ public class PathfinderGrapple implements Listener {
                     }
                 }
             }
-        }.runTaskTimer(UnknownNetworkCore.getInstance(), 0, 0);
+        }.runTaskTimer(UnknownNetworkCorePlugin.getInstance(), 0, 0);
     }
 
     private void drawLine(Player player, Location point2, double space) {
@@ -112,7 +112,7 @@ public class PathfinderGrapple implements Listener {
 
         for (; covered < distance; p1.add(vector)) {
             Particle.DustOptions dustOptions = new Particle.DustOptions(color, 2);
-            world.spawnParticle(Particle.REDSTONE, p1.getX(), p1.getY(), p1.getZ(), 2, dustOptions);
+            world.spawnParticle(Particle.DUST, p1.getX(), p1.getY(), p1.getZ(), 2, dustOptions);
             covered += space;
         }
     }

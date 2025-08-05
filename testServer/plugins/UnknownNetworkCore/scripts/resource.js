@@ -1,0 +1,2 @@
+const nextExecEpochMillis = task.getExecDateTime().plusMonths(1).atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli();
+manager.addTask(nextExecEpochMillis, task.getWorldNames(), task.getSeed(), task.keepGameRule(), task.preGenerate());

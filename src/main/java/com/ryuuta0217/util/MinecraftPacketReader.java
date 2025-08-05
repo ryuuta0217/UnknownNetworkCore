@@ -1,37 +1,23 @@
 /*
- * Copyright (c) 2023 Unknown Network Developers and contributors.
+ * Copyright (C) 2023 Ryuta Iwakura (ryuuta0217)
  *
- * All rights reserved.
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation version 3 of the License.
  *
- * NOTICE: This license is subject to change without prior notice.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
  *
- * Redistribution and use in source and binary forms, *without modification*,
- *     are permitted provided that the following conditions are met:
- *
- * I. Redistributions of source code must retain the above copyright notice,
- *     this list of conditions and the following disclaimer.
- *
- * II. Redistributions in binary form must reproduce the above copyright notice,
- *     this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- * III. Neither the name of Unknown Network nor the names of its contributors may be used to
- *     endorse or promote products derived from this software without specific prior written permission.
- *
- * IV. This source code and binaries is provided by the copyright holders and contributors "AS-IS" and
- *     any express or implied warranties, including, but not limited to, the implied warranties of
- *     merchantability and fitness for a particular purpose are disclaimed.
- *     In not event shall the copyright owner or contributors be liable for
- *     any direct, indirect, incidental, special, exemplary, or consequential damages
- *     (including but not limited to procurement of substitute goods or services;
- *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
- *     whether in contract, strict liability, or tort (including negligence or otherwise)
- *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
+ * You should have received a copy of the GNU Affero General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 package com.ryuuta0217.util;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.handler.codec.DecoderException;
 
 import java.nio.charset.StandardCharsets;
@@ -41,27 +27,24 @@ import java.util.UUID;
  * @see net.md_5.bungee.protocol.DefinedPacket
  */
 public class MinecraftPacketReader {
-    public static int readVarInt(ByteBuf input) {
-        return readVarInt(input, 5);
+    private static boolean hasContinuationBit(byte b) {
+        return (b & 128) == 128;
     }
 
-    public static int readVarInt(ByteBuf input, int maxBytes) {
-        int out = 0;
+    public static int readVarInt(ByteBuf input) {
+        int value = 0;
         int bytes = 0;
 
-        while (input.readableBytes() != 0) {
-            byte in = input.readByte();
-            out |= (in & 127) << bytes++ * 7;
-            if (bytes > maxBytes) {
-                throw new DecoderException("VarInt too big");
+        byte currentByte;
+        do {
+            currentByte = input.readByte();
+            value |= (currentByte & 127) << bytes++ * 7;
+            if (bytes > 5) {
+                throw new RuntimeException("VarInt too big");
             }
+        } while(hasContinuationBit(currentByte));
 
-            if ((in & 128) != 128) {
-                return out;
-            }
-        }
-
-        throw new DecoderException("No more bytes reading varint");
+        return value;
     }
 
     public static String readString(ByteBuf buf) {
@@ -88,16 +71,41 @@ public class MinecraftPacketReader {
         return new UUID(input.readLong(), input.readLong());
     }
 
-    public static void writeVarInt(int value, ByteBuf out) {
-        do {
-            int part = value & 127;
-            value >>>= 7;
-            if (value != 0) {
-                part |= 128;
-            }
+    public static String readUtf(ByteBuf input) {
+        return readUtf(input, 32767);
+    }
 
-            out.writeByte(part);
-        } while (value != 0);
+    public static String readUtf(ByteBuf input, int maxLen) {
+        int maxBytes = ByteBufUtil.utf8MaxBytes(maxLen);
+        int bytes = readVarInt(input);
+
+        if (bytes > maxBytes) {
+            throw new IllegalArgumentException("Buffer length is longer then max allowed (" + bytes + " > " + maxBytes + ")");
+        } else if (bytes < 0) {
+            throw new IllegalArgumentException("Huh? There is not found.");
+        } else {
+            int readableBytes = input.readableBytes();
+            if (bytes > readableBytes) {
+                throw new IllegalArgumentException("Data says \"I have " + bytes + " bytes string!\" but actual data is \"" + readableBytes + " bytes!\" (readerIndex: " + input.readerIndex() + ")");
+            } else {
+                String str = input.toString(input.readerIndex(), bytes, StandardCharsets.UTF_8);
+                input.readerIndex(input.readerIndex() + bytes);
+                if (str.length() > maxLen) {
+                    throw new IllegalArgumentException("Maximum length of string is " + maxLen + " but got " + str.length() + " characters.");
+                } else {
+                    return str;
+                }
+            }
+        }
+    }
+
+    public static void writeVarInt(int value, ByteBuf out) {
+        while ((value & -128) != 0) {
+            out.writeByte(value & 127 | 128);
+            value >>>= 7;
+        }
+
+        out.writeByte(value);
     }
 
     public static void writeString(String s, ByteBuf out) {
@@ -107,6 +115,37 @@ public class MinecraftPacketReader {
             byte[] b = s.getBytes(StandardCharsets.UTF_8);
             writeVarInt(b.length, out);
             out.writeBytes(b);
+        }
+    }
+
+    public static void writeUUID(UUID value, ByteBuf out) {
+        out.writeLong(value.getMostSignificantBits());
+        out.writeLong(value.getLeastSignificantBits());
+    }
+
+    public static void writeUtf(String str, ByteBuf out) {
+        writeUtf(str, 32767, out);
+    }
+
+    public static void writeUtf(String str, int maxLen, ByteBuf out) {
+        if (str.length() > maxLen) {
+            throw new IllegalArgumentException("Maximum length of string is " + maxLen + " but provided string is " + str.length() + " characters.");
+        } else {
+            int strBytes = ByteBufUtil.utf8MaxBytes(str);
+            ByteBuf buf = out.alloc().buffer(strBytes);
+
+            try {
+                int bytes = ByteBufUtil.writeUtf8(buf, str);
+                int maxBytes = ByteBufUtil.utf8MaxBytes(maxLen);
+                if (bytes > maxBytes) {
+                    throw new IllegalArgumentException("Buffer length is longer then max allowed (" + bytes + " > " + maxBytes + ")");
+                }
+
+                writeVarInt(bytes, out);
+                out.writeBytes(buf);
+            } finally {
+                buf.release();
+            }
         }
     }
 }

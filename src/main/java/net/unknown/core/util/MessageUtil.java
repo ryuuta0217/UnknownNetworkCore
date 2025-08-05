@@ -31,6 +31,7 @@
 
 package net.unknown.core.util;
 
+import io.papermc.paper.adventure.PaperAdventure;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -39,7 +40,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
-import net.minecraft.network.chat.contents.LiteralContents;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.GameRules;
 import net.unknown.core.define.DefinedTextColor;
@@ -48,13 +48,12 @@ import org.bukkit.ChatColor;
 import org.bukkit.GameRule;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.regex.Pattern;
 
 @Deprecated(forRemoval = true)
 public class MessageUtil {
@@ -64,11 +63,11 @@ public class MessageUtil {
             .append(Component.text("U.N.", net.kyori.adventure.text.format.Style.style(DefinedTextColor.GOLD, TextDecoration.BOLD.withState(true))))
             .append(Component.text("]", DefinedTextColor.GRAY))
             .append(Component.text(" "));
-    private static final MutableComponent PREFIX_MINECRAFT_COMPONENT = MutableComponent.create(new LiteralContents(""))
-            .append(MutableComponent.create(new LiteralContents("[")).withStyle(ChatFormatting.GRAY))
-            .append(MutableComponent.create(new LiteralContents("U.N.")).withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
-            .append(MutableComponent.create(new LiteralContents("]")).withStyle(ChatFormatting.GRAY))
-            .append(MutableComponent.create(new LiteralContents(" ")));
+    private static final MutableComponent PREFIX_MINECRAFT_COMPONENT = net.minecraft.network.chat.Component.empty()
+            .append(net.minecraft.network.chat.Component.literal("[").withStyle(ChatFormatting.GRAY))
+            .append(net.minecraft.network.chat.Component.literal("U.N.").withStyle(ChatFormatting.GOLD, ChatFormatting.BOLD))
+            .append(net.minecraft.network.chat.Component.literal("]").withStyle(ChatFormatting.GRAY))
+            .append(net.minecraft.network.chat.Component.literal(" "));
     private static final String PREFIX_ERROR = "§c";
     private static final String PREFIX_ADMIN = "§r";
     private static final String PREFIX_ADMIN_ERROR = "§c";
@@ -83,8 +82,6 @@ public class MessageUtil {
         put("resource_nether", "資源ネザー");
         put("resource_the_end", "資源エンド");
     }};
-
-    private static final Pattern UUID_PATTERN = Pattern.compile("(?i)^[\\dA-F]{8}-[\\dA-F]{4}-4[\\dA-F]{3}-[89AB][\\dA-F]{3}-[\\dA-F]{12}");
 
     public static void sendMessage(Player player, String msg) {
         sendMessage(((CraftPlayer) player).getHandle().createCommandSourceStack(), msg, true);
@@ -236,14 +233,10 @@ public class MessageUtil {
     }*/
 
     public static Component convertNMS2Adventure(net.minecraft.network.chat.Component nms) {
-        return GsonComponentSerializer.gson().deserializeFromTree(net.minecraft.network.chat.Component.Serializer.toJsonTree(nms));
+        return PaperAdventure.asAdventure(nms);
     }
 
     public static net.minecraft.network.chat.Component convertAdventure2NMS(Component adventure) {
-        return net.minecraft.network.chat.Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(adventure));
-    }
-
-    public static boolean isUUID(String s) {
-        return UUID_PATTERN.matcher(s).matches();
+        return PaperAdventure.asVanilla(adventure);
     }
 }

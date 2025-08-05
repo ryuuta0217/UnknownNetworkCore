@@ -31,6 +31,7 @@
 
 package net.unknown.survival.data.model;
 
+import com.ryuuta0217.util.LocationRef;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -39,20 +40,22 @@ import org.bukkit.entity.Player;
 import javax.annotation.Nullable;
 import java.lang.ref.Reference;
 import java.lang.reflect.Field;
+import java.util.Objects;
 
-public record Home(String name, String worldName, double x, double y, double z, float yaw, float pitch) {
-    @Nullable
-    public Location location() {
-        if (Bukkit.getWorld(this.worldName()) == null) return null;
-        return new Location(Bukkit.getWorld(worldName), x, y, z, yaw, pitch);
+public final class Home extends LocationRef {
+    private final String name;
+
+    public Home(String name, String worldName, double x, double y, double z, float yaw, float pitch) {
+        super(worldName, x, y, z, yaw, pitch);
+        this.name = name;
     }
 
     public boolean isAvailable() {
-        return this.location() != null;
+        return this.asLocation() != null;
     }
 
     public World world() {
-        Location location = this.location();
+        Location location = this.asLocation();
         if (location == null) return null;
         if (location.isWorldLoaded()) return location.getWorld();
         try {
@@ -62,8 +65,8 @@ public record Home(String name, String worldName, double x, double y, double z, 
                 if (oldWorldRef.get() != null) {
                     World oldWorld = oldWorldRef.get();
                     World newWorld = Bukkit.getWorld(oldWorld.getName());
-                    worldField.set(this.location(), newWorld);
-                    return this.location().getWorld();
+                    worldField.set(this.asLocation(), newWorld);
+                    return this.asLocation().getWorld();
                 } else {
                     throw new IllegalStateException("Object is already garbage collected.");
                 }
@@ -75,6 +78,42 @@ public record Home(String name, String worldName, double x, double y, double z, 
     }
 
     public void teleportPlayer(Player player) {
-        player.teleportAsync(location());
+        player.teleportAsync(this.asLocation());
     }
+
+    public String name() {
+        return name;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) return true;
+        if (obj == null || obj.getClass() != this.getClass()) return false;
+        var that = (Home) obj;
+        return Objects.equals(this.name, that.name) &&
+                Objects.equals(this.worldName, that.worldName) &&
+                Double.doubleToLongBits(this.x) == Double.doubleToLongBits(that.x) &&
+                Double.doubleToLongBits(this.y) == Double.doubleToLongBits(that.y) &&
+                Double.doubleToLongBits(this.z) == Double.doubleToLongBits(that.z) &&
+                Float.floatToIntBits(this.yaw) == Float.floatToIntBits(that.yaw) &&
+                Float.floatToIntBits(this.pitch) == Float.floatToIntBits(that.pitch);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.name, this.worldName, this.x, this.y, this.z, this.yaw, this.pitch);
+    }
+
+    @Override
+    public String toString() {
+        return "Home[" +
+                "name=" + this.name + ", " +
+                "worldName=" + this.worldName + ", " +
+                "x=" + this.x + ", " +
+                "y=" + this.y + ", " +
+                "z=" + this.z + ", " +
+                "yaw=" + this.yaw + ", " +
+                "pitch=" + this.pitch + ']';
+    }
+
 }

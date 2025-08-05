@@ -31,11 +31,11 @@
 
 package net.unknown.core.prefix;
 
+import com.ryuuta0217.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.core.util.MessageUtil;
 import net.unknown.shared.SharedConstants;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -63,7 +63,7 @@ public class OldPlayerPrefixes implements Listener {
         if(files == null) return;
 
         Stream.of(files)
-                .filter(file -> MessageUtil.isUUID(file.getName().replace(".yml", "")))
+                .filter(file -> StringUtil.isValidUUID(file.getName().replace(".yml", "")))
                 .map(file -> UUID.fromString(file.getName().replace(".yml", "")))
                 .forEach(OldPlayerPrefixes::load);
     }
