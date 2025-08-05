@@ -36,18 +36,14 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.*;
 import net.minecraft.advancements.critereon.ImpossibleTrigger;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.recipes.ShapelessRecipeBuilder;
-import net.minecraft.network.protocol.game.ClientboundRecipeBookAddPacket;
+import net.minecraft.data.recipes.*;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.crafting.CraftingRecipe;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
-import net.minecraft.world.item.crafting.display.RecipeDisplay;
-import net.minecraft.world.item.crafting.display.RecipeDisplayEntry;
-import net.minecraft.world.item.crafting.display.RecipeDisplayId;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.*;
 import net.unknown.core.builder.advancement.DisplayInfoBuilder;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
@@ -90,15 +86,62 @@ public class ToastManager {
                 .build(id);
 
         // Send new advancement to player
-        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Collections.emptySet(), Collections.emptyMap()));
+        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Collections.emptySet(), Collections.emptyMap(), true));
 
         // Grant the advancement to the player (show toast)
         AdvancementProgress progress = new AdvancementProgress();
         progress.update(advancement.value().requirements());
         progress.grantProgress("dummy");
-        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Map.of(id, progress)));
+        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Map.of(id, progress), true));
 
         // Remove advancement from the player
-        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Set.of(id), Collections.emptyMap()));
+        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Set.of(id), Collections.emptyMap(), true));
+    }
+
+    public static void showRecipeUnlockToast(ServerPlayer player, RecipeType<?> type, Ingredient ingredient, RecipeCategory category, Item item, int count) {
+        RecipeManager recipeManager = MinecraftServer.getServer().getRecipeManager();
+        ResourceKey<Recipe<?>> key = ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath("unknown-network", "recipes/dummy_" + String.valueOf(UUID.randomUUID()).split("-")[0]));
+        Map<ResourceKey<Recipe<?>>, Recipe<?>> recipes = new HashMap<>();
+
+        RecipeOutput recipeOutput = new RecipeOutput() {
+            @Override
+            public void accept(ResourceKey<Recipe<?>> key, Recipe<?> recipe, @org.jetbrains.annotations.Nullable AdvancementHolder advancement) {
+                recipes.put(key, recipe);
+            }
+
+            @Override
+            public Advancement.Builder advancement() {
+                return net.minecraft.advancements.Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
+            }
+
+            @Override
+            public void includeRootAdvancement() {
+
+            }
+        };
+
+        if (type == RecipeType.SMELTING) {
+            SimpleCookingRecipeBuilder.smelting(ingredient, category, item, 0f, Integer.MAX_VALUE).unlockedBy("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
+        } else if (type == RecipeType.BLASTING) {
+            SimpleCookingRecipeBuilder.blasting(ingredient, category, item, 0f, Integer.MAX_VALUE).unlockedBy("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
+        } else if (type == RecipeType.SMOKING) {
+            SimpleCookingRecipeBuilder.smoking(ingredient, category, item, 0f, Integer.MAX_VALUE).unlockedBy("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
+        } else if (type == RecipeType.CAMPFIRE_COOKING) {
+            SimpleCookingRecipeBuilder.campfireCooking(ingredient, category, item, 0f, Integer.MAX_VALUE).unlockedBy("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
+        } else if (type == RecipeType.STONECUTTING) {
+            SingleItemRecipeBuilder.stonecutting(ingredient, category, item, count).unlockedBy("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
+        } else if (type == RecipeType.SMITHING) {
+            SmithingTransformRecipeBuilder.smithing(ingredient, ingredient, ingredient, category, item).unlocks("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
+        } else {
+            ShapelessRecipeBuilder.shapeless(MinecraftServer.getServer().registryAccess().lookupOrThrow(Registries.ITEM), category, item, count).requires(ingredient).unlockedBy("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
+        }
+
+        recipes.forEach((k, v) -> {
+            RecipeHolder<Recipe<?>> recipe = new RecipeHolder<>(k, v);
+            recipeManager.addRecipe(recipe);
+            player.awardRecipes(List.of(recipe));
+            player.resetRecipes(List.of(recipe));
+            recipeManager.removeRecipe(recipe.id());
+        });
     }
 }

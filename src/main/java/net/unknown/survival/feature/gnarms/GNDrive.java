@@ -31,25 +31,31 @@
 
 package net.unknown.survival.feature.gnarms;
 
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import io.papermc.paper.adventure.PaperAdventure;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.*;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.level.storage.TagValueInput;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
+import net.unknown.core.util.NewMessageUtil;
 import net.unknown.launchwrapper.util.ComponentUtil;
 import net.unknown.survival.feature.gnarms.module.GNModule;
 import net.unknown.survival.feature.gnarms.module.GNModules;
@@ -142,14 +148,14 @@ public class GNDrive implements GN, Listener {
 
     public static UUID getId(ItemStack drive) {
         if (isTagValid(drive.has(DataComponents.CUSTOM_DATA) ? drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) {
-            return drive.get(DataComponents.CUSTOM_DATA).getUnsafe().getCompound("GNDrive").getUUID("ID");
+            return TagValueInput.createGlobal(ProblemReporter.DISCARDING, drive.get(DataComponents.CUSTOM_DATA).getUnsafe().getCompoundOrEmpty("GNDrive")).read("UUID", UUIDUtil.CODEC).orElse(null);
         }
         return null;
     }
 
     public static UUID getOwner(ItemStack drive) {
         if (isTagValid(drive.has(DataComponents.CUSTOM_DATA) ? drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null)) {
-            return drive.get(DataComponents.CUSTOM_DATA).getUnsafe().getCompound("GNDrive").getUUID("Owner");
+            return TagValueInput.createGlobal(ProblemReporter.DISCARDING, drive.get(DataComponents.CUSTOM_DATA).getUnsafe().getCompoundOrEmpty("GNDrive")).read("Owner", UUIDUtil.CODEC).orElse(null);
         }
         return null;
     }
@@ -157,23 +163,23 @@ public class GNDrive implements GN, Listener {
     public static boolean isTagValid(CompoundTag tag) {
         if (tag == null) return false;
         if (tag.contains("GNDrive")) {
-            CompoundTag GNDrive = tag.getCompound("GNDrive");
-            if (!GNDrive.contains("ID", Tag.TAG_INT_ARRAY)) return false;
-            if (!GNDrive.contains("Owner", Tag.TAG_INT_ARRAY)) return false;
+            CompoundTag GNDrive = tag.getCompoundOrEmpty("GNDrive");
+            if (!GNDrive.contains("ID")) return false;
+            if (!GNDrive.contains("Owner")) return false;
 
             if (GNDrive.contains("Generator")) {
-                CompoundTag Generator = GNDrive.getCompound("Generator");
+                CompoundTag Generator = GNDrive.getCompoundOrEmpty("Generator");
                 if (!Generator.contains("Current") || !Generator.contains("Minimum") || !Generator.contains("Maximum"))
                     return false;
             }
 
             if (GNDrive.contains("Capacity")) {
-                CompoundTag Capacity = GNDrive.getCompound("Capacity");
+                CompoundTag Capacity = GNDrive.getCompoundOrEmpty("Capacity");
                 if (!Capacity.contains("Current") || !Capacity.contains("Maximum")) return false;
             }
 
             if (GNDrive.contains("Modules")) {
-                CompoundTag Modules = GNDrive.getCompound("Modules");
+                CompoundTag Modules = GNDrive.getCompoundOrEmpty("Modules");
                 return Modules.contains("Enabled") && Modules.contains("Disabled");
             }
             return true;
@@ -275,9 +281,10 @@ public class GNDrive implements GN, Listener {
 
     @Override
     public Set<GNModule> getEnabledModules() {
-        return this.getModulesTag().getList("Enabled", Tag.TAG_STRING).stream()
+        return this.getModulesTag().getListOrEmpty("Enabled").stream()
                 .filter(tag -> tag instanceof StringTag)
-                .map(Tag::getAsString)
+                .map(Tag::asString)
+                .map(Optional::get)
                 .filter(id -> id.chars().allMatch(c -> ResourceLocation.isAllowedInResourceLocation((char) c)))
                 .map(ResourceLocation::tryParse)
                 .filter(GNModules::isModule)
@@ -287,9 +294,10 @@ public class GNDrive implements GN, Listener {
 
     @Override
     public Set<GNModule> getDisabledModules() {
-        return this.getModulesTag().getList("Disabled", Tag.TAG_STRING).stream()
+        return this.getModulesTag().getListOrEmpty("Disabled").stream()
                 .filter(tag -> tag instanceof StringTag)
-                .map(Tag::getAsString)
+                .map(Tag::asString)
+                .map(Optional::get)
                 .filter(id -> id.chars().allMatch(c -> ResourceLocation.isAllowedInResourceLocation((char) c)))
                 .map(ResourceLocation::tryParse)
                 .filter(GNModules::isModule)
@@ -299,17 +307,17 @@ public class GNDrive implements GN, Listener {
 
     @Override
     public Set<GNModule> getInstalledModules() {
-        ListTag Enabled = this.getModulesTag().getList("Enabled", Tag.TAG_STRING);
-        ListTag Disabled = this.getModulesTag().getList("Disabled", Tag.TAG_STRING);
+        ListTag Enabled = this.getModulesTag().getListOrEmpty("Enabled");
+        ListTag Disabled = this.getModulesTag().getListOrEmpty("Disabled");
         List<String> allModulesIds = new ArrayList<>();
         Enabled.stream()
                 .filter(tag -> tag instanceof StringTag)
                 .map(tag -> (StringTag) tag)
-                .forEach(tag -> allModulesIds.add(tag.getAsString()));
+                .forEach(tag -> allModulesIds.add(tag.asString().get()));
         Disabled.stream()
                 .filter(tag -> tag instanceof StringTag)
                 .map(tag -> (StringTag) tag)
-                .forEach(tag -> allModulesIds.add(tag.getAsString()));
+                .forEach(tag -> allModulesIds.add(tag.asString().get()));
         return allModulesIds.stream()
                 .filter(id -> id.chars().allMatch(c -> ResourceLocation.isAllowedInResourceLocation((char) c)))
                 .map(ResourceLocation::tryParse)
@@ -353,10 +361,20 @@ public class GNDrive implements GN, Listener {
         List<Component> styledLoreLines = Lore.stream()
                 .filter(tag -> tag instanceof StringTag)
                 .map(tag -> (StringTag) tag)
-                .map(StringTag::getAsString)
-                .map(json -> Component.Serializer.fromJson(json, MinecraftServer.getDefaultRegistryAccess()))
-                .map(component -> (Component) component)
+                .map(StringTag::asString)
+                .map(Optional::get)
+                .map(json -> {
+                    try {
+                        return TagParser.parseCompoundFully(json);
+                    } catch (CommandSyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                })
+                .map(tag -> ComponentSerialization.CODEC.decode(NbtOps.INSTANCE, tag))
+                .map(result -> result.getOrThrow())
+                .map(pair -> pair.getFirst())
                 .toList();
+
         ItemLore lore = new ItemLore(styledLoreLines, styledLoreLines);
         this.drive.set(DataComponents.LORE, lore);
     }
@@ -372,7 +390,7 @@ public class GNDrive implements GN, Listener {
     }
 
     public long getGeneratorParticlesOutput() {
-        return this.getGeneratorTag().getLong("Current");
+        return this.getGeneratorTag().getLongOr("Current", -1L);
         //return RANDOM.nextLong(this.getGeneratorParticlesMaximumOutput() - this.getGeneratorParticlesMinimumOutput()) + this.getGeneratorParticlesMinimumOutput();
     }
 
@@ -381,15 +399,15 @@ public class GNDrive implements GN, Listener {
     }
 
     public long getGeneratorParticlesMinimumOutput() {
-        return this.getGeneratorTag().getLong("Minimum");
+        return this.getGeneratorTag().getLongOr("Minimum", -1L);
     }
 
     public long getGeneratorParticlesMaximumOutput() {
-        return this.getGeneratorTag().getLong("Maximum");
+        return this.getGeneratorTag().getLongOr("Maximum", -1L);
     }
 
     public long getStoredParticles() {
-        return this.getCapacityTag().getLong("Current");
+        return this.getCapacityTag().getLongOr("Current", -1L);
     }
 
     public void setStoredParticles(long particles) {
@@ -397,7 +415,7 @@ public class GNDrive implements GN, Listener {
     }
 
     public long getMaximumStorableParticles() {
-        return this.getCapacityTag().getLong("Maximum");
+        return this.getCapacityTag().getLongOr("Maximum", -1L);
     }
 
     public void setMaximumStorableParticles(long maximumParticles) {
@@ -406,19 +424,19 @@ public class GNDrive implements GN, Listener {
 
     @Nonnull
     private CompoundTag getTag() {
-        return Objects.requireNonNull(this.drive.has(DataComponents.CUSTOM_DATA) ? this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null).getCompound("GNDrive");
+        return Objects.requireNonNull(this.drive.has(DataComponents.CUSTOM_DATA) ? this.drive.get(DataComponents.CUSTOM_DATA).getUnsafe() : null).getCompoundOrEmpty("GNDrive");
     }
 
     private CompoundTag getGeneratorTag() {
-        return this.getTag().getCompound("Generator");
+        return this.getTag().getCompoundOrEmpty("Generator");
     }
 
     private CompoundTag getCapacityTag() {
-        return this.getTag().getCompound("Capacity");
+        return this.getTag().getCompoundOrEmpty("Capacity");
     }
 
     private CompoundTag getModulesTag() {
-        return this.getTag().getCompound("Modules");
+        return this.getTag().getCompoundOrEmpty("Modules");
     }
 
     public static class Builder {
@@ -428,13 +446,14 @@ public class GNDrive implements GN, Listener {
         public Builder(Item driveItemType) {
             this.drive = new ItemStack(driveItemType);
 
-            this.GNDrive.putUUID("ID", UUID.randomUUID());
-            this.GNDrive.putUUID("Owner", Util.NIL_UUID);
+            TagValueOutput output = TagValueOutput.createWrappingGlobal(ProblemReporter.DISCARDING, this.GNDrive);
+            output.store("ID", UUIDUtil.CODEC, UUID.randomUUID());
+            output.store("Owner", UUIDUtil.CODEC, Util.NIL_UUID);
             this.GNDrive.put("Capacity", new CompoundTag());
             this.GNDrive.put("Generator", new CompoundTag());
             this.GNDrive.put("Modules", new CompoundTag());
-            this.GNDrive.getCompound("Modules").put("Enabled", new ListTag());
-            this.GNDrive.getCompound("Modules").put("Disabled", new ListTag());
+            this.GNDrive.getCompoundOrEmpty("Modules").put("Enabled", new ListTag());
+            this.GNDrive.getCompoundOrEmpty("Modules").put("Disabled", new ListTag());
         }
 
         public static Builder simple() {
@@ -456,45 +475,47 @@ public class GNDrive implements GN, Listener {
         }
 
         public Builder setID(UUID id) {
-            this.GNDrive.putUUID("ID", id);
+            TagValueOutput output = TagValueOutput.createWrappingGlobal(ProblemReporter.DISCARDING, this.GNDrive);
+            output.store("ID", UUIDUtil.CODEC, id);
             return this;
         }
 
         public Builder setOwner(UUID uuid) {
-            this.GNDrive.putUUID("Owner", uuid);
+            TagValueOutput output = TagValueOutput.createWrappingGlobal(ProblemReporter.DISCARDING, this.GNDrive);
+            output.store("Owner", UUIDUtil.CODEC, uuid);
             return this;
         }
 
         public Builder setCurrentCapacity(long currentCapacity) {
-            this.GNDrive.getCompound("Capacity").putLong("Current", currentCapacity);
+            this.GNDrive.getCompoundOrEmpty("Capacity").putLong("Current", currentCapacity);
             return this;
         }
 
         public Builder setMaximumCapacity(long maximumCapacity) {
-            this.GNDrive.getCompound("Capacity").putLong("Maximum", maximumCapacity);
+            this.GNDrive.getCompoundOrEmpty("Capacity").putLong("Maximum", maximumCapacity);
             return this;
         }
 
         public Builder setGeneratorParticlesOutput(long particlesOutput) {
-            this.GNDrive.getCompound("Generator").putLong("Current", particlesOutput);
+            this.GNDrive.getCompoundOrEmpty("Generator").putLong("Current", particlesOutput);
             return this;
         }
 
         public Builder setGeneratorParticlesMinimumOutput(long particlesMinimumOutput) {
-            this.GNDrive.getCompound("Generator").putLong("Minimum", particlesMinimumOutput);
+            this.GNDrive.getCompoundOrEmpty("Generator").putLong("Minimum", particlesMinimumOutput);
             return this;
         }
 
         public Builder setGeneratorParticlesMaximumOutput(long particlesMaximumOutput) {
-            this.GNDrive.getCompound("Generator").putLong("Maximum", particlesMaximumOutput);
+            this.GNDrive.getCompoundOrEmpty("Generator").putLong("Maximum", particlesMaximumOutput);
             return this;
         }
 
         public Builder addModule(GNModule module, boolean enabled) {
             if (enabled) {
-                this.GNDrive.getCompound("Modules").getList("Enabled", Tag.TAG_STRING).add(StringTag.valueOf(module.getId().toString()));
+                this.GNDrive.getCompoundOrEmpty("Modules").getListOrEmpty("Enabled").add(StringTag.valueOf(module.getId().toString()));
             } else {
-                this.GNDrive.getCompound("Modules").getList("Disabled", Tag.TAG_STRING).add(StringTag.valueOf(module.getId().toString()));
+                this.GNDrive.getCompoundOrEmpty("Modules").getListOrEmpty("Disabled").add(StringTag.valueOf(module.getId().toString()));
             }
             return this;
         }

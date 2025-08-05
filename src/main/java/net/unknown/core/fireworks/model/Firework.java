@@ -250,14 +250,14 @@ public class Firework {
         boolean entityTag = tag.contains("FireworksItem");
 
         // if item tag input, calculate lifetime from Flight tag, 10*1+flight = lifetime
-        int lifeTime = entityTag ? tag.getInt("LifeTime") : 10 * (1 + tag.getCompound("Fireworks").getInt("Flight"));
-        boolean shotAtAngle = entityTag ? (tag.contains("ShotAtAngle") ? tag.getBoolean("ShotAtAngle") : false) : false;
+        int lifeTime = entityTag ? tag.getInt("LifeTime").get() : 10 * (1 + tag.getCompoundOrEmpty("Fireworks").getInt("Flight").get());
+        boolean shotAtAngle = entityTag ? (tag.contains("ShotAtAngle") ? tag.getBoolean("ShotAtAngle").get() : false) : false;
 
-        CompoundTag fireworks = entityTag ? tag.getCompound("FireworksItem").getCompound("tag").getCompound("Fireworks") : tag.getCompound("Fireworks");
-        ListTag explosions = fireworks.getList("Explosions", Tag.TAG_COMPOUND);
+        CompoundTag fireworks = entityTag ? tag.getCompoundOrEmpty("FireworksItem").getCompoundOrEmpty("tag").getCompoundOrEmpty("Fireworks") : tag.getCompoundOrEmpty("Fireworks");
+        ListTag explosions = fireworks.getListOrEmpty("Explosions");
         Map<String, Explosion> explosionsMap = new HashMap<>();
         for (int i = 0; i < explosions.size(); i++) {
-            CompoundTag explosion = explosions.getCompound(i);
+            CompoundTag explosion = explosions.getCompoundOrEmpty(i);
             String id = String.valueOf(i);
             explosionsMap.put(id, Explosion.buildObject(explosion, parent.getId()));
         }
@@ -316,16 +316,16 @@ public class Firework {
             explosion.putInt("Type", this.type.ordinal());
             explosion.putBoolean("Flicker", this.flicker);
             explosion.putBoolean("Trail", this.trail);
-            explosion.putIntArray("Colors", this.getColors().stream().map(Color::asRGB).toList());
-            explosion.putIntArray("FadeColors", this.getFadeColors().stream().map(Color::asRGB).toList());
+            explosion.putIntArray("Colors", this.getColors().stream().map(Color::asRGB).mapToInt(i -> i).toArray());
+            explosion.putIntArray("FadeColors", this.getFadeColors().stream().map(Color::asRGB).mapToInt(i -> i).toArray());
             return explosion;
         }
 
         public static Explosion buildObject(CompoundTag tag, String programId) {
-            FireworkExplosion.Shape shape = FireworkExplosion.Shape.values()[tag.getInt("Type")];
-            boolean flicker = tag.getBoolean("Flicker");
-            boolean trail = tag.getBoolean("Trail");
-            int[] colors = tag.getIntArray("Colors");
+            FireworkExplosion.Shape shape = FireworkExplosion.Shape.values()[tag.getInt("Type").get()];
+            boolean flicker = tag.getBoolean("Flicker").get();
+            boolean trail = tag.getBoolean("Trail").get();
+            int[] colors = tag.getIntArray("Colors").get();
             List<ColorReference> colorRefs = Arrays.stream(colors).mapToObj(rgb -> {
                 Map<String, Color> defColors = null;
 
@@ -350,7 +350,7 @@ public class Firework {
                 return null;
             }).toList();
 
-            int[] fadeColors = tag.getIntArray("FadeColors");
+            int[] fadeColors = tag.getIntArray("FadeColors").get();
             List<ColorReference> fadeColorRefs = Arrays.stream(fadeColors).mapToObj(rgb -> {
                 Map<String, Color> defColors = null;
 

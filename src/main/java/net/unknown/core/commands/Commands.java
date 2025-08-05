@@ -59,5 +59,6 @@ public class Commands {
         ProgrammedFireworksCommand.register(dispatcher);
         VanishCommand.register(dispatcher);
         WhoisCommand.register(dispatcher);
+        ToastCommand.register(dispatcher, buildContext);
     }
 }

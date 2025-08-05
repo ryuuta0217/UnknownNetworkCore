@@ -34,6 +34,7 @@ package net.unknown.core.util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.util.ProblemReporter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -50,18 +51,18 @@ public class PlayerDataUtil {
         if (tag == null) throw new IllegalArgumentException("プレイヤーが見つかりません");
 
         if (tag.contains("WorldUUIDMost") && tag.contains("WorldUUIDLeast") && tag.contains("Pos") && tag.contains("Rotation")) {
-            UUID worldUniqueId = new UUID(tag.getLong("WorldUUIDMost"), tag.getLong("WorldUUIDLeast"));
+            UUID worldUniqueId = new UUID(tag.getLongOr("WorldUUIDMost", 0L), tag.getLongOr("WorldUUIDLeast", 0L));
             World world = Bukkit.getWorld(worldUniqueId);
             if (world == null) throw new IllegalStateException("ワールドが見つかりません");
 
-            ListTag position = tag.getList("Pos", CompoundTag.TAG_DOUBLE);
-            double x = position.getDouble(0);
-            double y = position.getDouble(1);
-            double z = position.getDouble(2);
+            ListTag position = tag.getListOrEmpty("Pos");
+            double x = position.getDoubleOr(0, 0);
+            double y = position.getDoubleOr(1, 120);
+            double z = position.getDoubleOr(2, 0);
 
-            ListTag rotation = tag.getList("Rotation", CompoundTag.TAG_FLOAT);
-            float yaw = rotation.getFloat(0);
-            float pitch = rotation.getFloat(1);
+            ListTag rotation = tag.getListOrEmpty("Rotation");
+            float yaw = rotation.getFloatOr(0, 0);
+            float pitch = rotation.getFloatOr(1, 0);
 
             return new Location(world, x, y, z, yaw, pitch);
         }
@@ -73,7 +74,7 @@ public class PlayerDataUtil {
         if (tag == null) throw new IllegalArgumentException("プレイヤーが見つかりません");
 
         if (tag.contains("Inventory")) {
-            ListTag items = tag.getList("Inventory", CompoundTag.TAG_COMPOUND);
+            ListTag items = tag.getListOrEmpty("Inventory");
 
         }
         throw new IllegalStateException("プレイヤーデータに異常があります");
@@ -81,6 +82,6 @@ public class PlayerDataUtil {
 
     @Nullable
     public static CompoundTag getData(OfflinePlayer offlinePlayer) {
-        return offlinePlayer.hasPlayedBefore() ? DedicatedServer.getServer().playerDataStorage.load(offlinePlayer.getName(), offlinePlayer.getUniqueId().toString()).orElse(null) : null;
+        return offlinePlayer.hasPlayedBefore() ? DedicatedServer.getServer().playerDataStorage.load(offlinePlayer.getName(), offlinePlayer.getUniqueId().toString(), ProblemReporter.DISCARDING).orElse(null) : null;
     }
 }

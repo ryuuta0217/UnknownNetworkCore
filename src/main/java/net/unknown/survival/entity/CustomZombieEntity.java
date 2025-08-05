@@ -122,14 +122,6 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundTag nbt) {
-        super.readAdditionalSaveData(nbt);
-        if (!this.level().isClientSide) {
-            this.reassessWeaponGoal();
-        }
-    }
-
-    @Override
     public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
         super.setItemSlot(slot, stack);
         if (!this.level().isClientSide) {

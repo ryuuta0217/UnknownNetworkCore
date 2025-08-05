@@ -32,10 +32,6 @@
 package net.unknown.core.openinv;
 
 import com.google.common.collect.ImmutableList;
-import com.onarandombox.multiverseinventories.MultiverseInventories;
-import com.onarandombox.multiverseinventories.profile.PlayerProfile;
-import com.onarandombox.multiverseinventories.profile.ProfileTypes;
-import com.onarandombox.multiverseinventories.share.Sharables;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
@@ -60,7 +56,7 @@ import org.bukkit.scheduler.BukkitTask;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class OtherPlayerInventory extends Inventory implements Listener {
+/*public class OtherPlayerInventory extends Inventory implements Listener {
     public static final Set<OtherPlayerInventory> INSTANCES = new HashSet<>();
 
     static {
@@ -235,4 +231,4 @@ public class OtherPlayerInventory extends Inventory implements Listener {
     private enum ConnectionType {
         DIRECT, MULTIVERSE_INVENTORIES
     }
-}
+}*/

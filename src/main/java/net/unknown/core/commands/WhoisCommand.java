@@ -57,6 +57,7 @@ import net.unknown.core.enums.Permissions;
 import net.unknown.core.feature.WhoisListener;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.BrigadierUtil;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.core.util.TextBasePagination;
 import net.unknown.shared.whois.Whois;
@@ -130,7 +131,7 @@ public class WhoisCommand {
             }
             return l;
         }, 10, showPage, true, Component.text("IP Database"), pageNum -> "/whois ipdb " + pageNum);
-        ctx.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(combineComponents(page.getTextLines())), MinecraftServer.getDefaultRegistryAccess()), false);
+        ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(combineComponents(page.getTextLines())), false);
         return 0;
     }
 
@@ -173,7 +174,7 @@ public class WhoisCommand {
             }
             return l;
         }, 10, showPage, true, Component.text("IP Database"), pageNum -> "/whois ipdb by player \"" + player + "\" " + pageNum);
-        ctx.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(combineComponents(page.getTextLines())), MinecraftServer.getDefaultRegistryAccess()), false);
+        ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(combineComponents(page.getTextLines())), false);
         return 0;
     }
 
@@ -216,7 +217,7 @@ public class WhoisCommand {
             }
             return l;
         }, 10, showPage, true, Component.text("IP Database"), pageNum -> "/whois ipdb by ip \"" + ip + "\" " + pageNum);
-        ctx.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(combineComponents(page.getTextLines())), MinecraftServer.getDefaultRegistryAccess()), false);
+        ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(combineComponents(page.getTextLines())), false);
         return 0;
     }
 
@@ -245,7 +246,7 @@ public class WhoisCommand {
         }
 
         ServerPlayer finalTarget = target;
-        if (Whois.getIpInfoCache() != null) ctx.getSource().sendSuccess(() -> net.minecraft.network.chat.Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(WhoisListener.buildWhoisInformationMessage(finalTarget.getBukkitEntity(), finalTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode()))), MinecraftServer.getDefaultRegistryAccess()), false);
+        if (Whois.getIpInfoCache() != null) ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(WhoisListener.buildWhoisInformationMessage(finalTarget.getBukkitEntity(), finalTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode()))), false);
         else ctx.getSource().sendFailure(net.minecraft.network.chat.Component.literal("Whois is disabled"));
         return 0;
     }

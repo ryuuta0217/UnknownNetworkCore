@@ -102,7 +102,7 @@ public class CreateItemFilterView extends ConfigureHopperViewBase {
                     .displayName(Component.text("NBTタグを指定する", DefinedTextColor.GREEN))
                     .lore(Component.empty(),
                             (this.componentPatch != null ? Component.text("設定済", DefinedTextColor.GREEN) : Component.text("未設定", DefinedTextColor.RED)),
-                            (NewMessageUtil.convertMinecraft2Adventure(new TextComponentTagVisitor("").visit(this.componentPatch != null ? DataComponentPatch.CODEC.encodeStart(MinecraftServer.getDefaultRegistryAccess().createSerializationContext(NbtOps.INSTANCE), this.componentPatch).getOrThrow() : new CompoundTag()))),
+                            (NewMessageUtil.convertMinecraft2Adventure(new TextComponentTagVisitor("").visit(this.componentPatch != null ? DataComponentPatch.CODEC.encodeStart(MinecraftServer.getServer().registryAccess().createSerializationContext(NbtOps.INSTANCE), this.componentPatch).getOrThrow() : new CompoundTag()))),
                             Component.text("クリックで編集", DefinedTextColor.AQUA))
                     .build());
         } else {
@@ -148,12 +148,12 @@ public class CreateItemFilterView extends ConfigureHopperViewBase {
                 NewMessageUtil.sendMessage(event.getWhoClicked(), Component.text("チャット欄にNBTタグを入力して送信してください", DefinedTextColor.GREEN), false);
                 if (this.componentPatch != null) {
                     NewMessageUtil.sendMessage(event.getWhoClicked(), Component.text("[ここをクリックして現在設定されているタグを補完]", DefinedTextColor.GREEN)
-                            .clickEvent(ClickEvent.suggestCommand(DataComponentPatch.CODEC.encodeStart(MinecraftServer.getDefaultRegistryAccess().createSerializationContext(NbtOps.INSTANCE), this.componentPatch).getOrThrow().toString())), false);
+                            .clickEvent(ClickEvent.suggestCommand(DataComponentPatch.CODEC.encodeStart(MinecraftServer.getServer().registryAccess().createSerializationContext(NbtOps.INSTANCE), this.componentPatch).getOrThrow().toString())), false);
                 }
 
                 ListenerManager.waitForEvent(AsyncChatEvent.class, false, EventPriority.LOWEST, (e) -> {
                     try {
-                        TagParser.parseTag(PlainTextComponentSerializer.plainText().serialize(e.message()));
+                        TagParser.parseCompoundFully(PlainTextComponentSerializer.plainText().serialize(e.message()));
                         return e.getPlayer().equals(event.getWhoClicked());
                     } catch (CommandSyntaxException ex) {
                         NewMessageUtil.sendErrorMessage(e.getPlayer(), "タグを解析中にエラーが発生しました: " + ex.getLocalizedMessage());
@@ -163,7 +163,7 @@ public class CreateItemFilterView extends ConfigureHopperViewBase {
                     // Here is only parse input NBT tag to CompoundTag. Tag parse is already checked in before.
                     String tagStr = PlainTextComponentSerializer.plainText().serialize(e.message());
                     try {
-                        this.componentPatch = DataComponentPatch.CODEC.parse(MinecraftServer.getDefaultRegistryAccess().createSerializationContext(NbtOps.INSTANCE), TagParser.parseTag(tagStr)).getOrThrow();
+                        this.componentPatch = DataComponentPatch.CODEC.parse(MinecraftServer.getServer().registryAccess().createSerializationContext(NbtOps.INSTANCE), TagParser.parseCompoundFully(tagStr)).getOrThrow();
                     } catch (CommandSyntaxException ignored) {
                         // Unreachable in here, already checked before.
                     }

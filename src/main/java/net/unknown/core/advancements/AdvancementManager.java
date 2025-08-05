@@ -107,7 +107,7 @@ public class AdvancementManager {
         AdvancementProgress progress = getProgress(player, id);
         boolean granted = progress.grantProgress(name);
         if (granted) {
-            ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Collections.singletonMap(id, progress));
+            ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Collections.singletonMap(id, progress), true);
             player.connection.send(packet);
             Bukkit.getPluginManager().callEvent(new CustomAdvancementCriteriaGrantedEvent(!Bukkit.isPrimaryThread(), player, getAdvancement(id), progress, name));
             if (progress.isDone()) {
@@ -131,7 +131,7 @@ public class AdvancementManager {
         AdvancementProgress progress = getProgress(player, id);
         boolean revoked = progress.revokeProgress(name);
         if (revoked) {
-            ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Collections.singletonMap(id, progress));
+            ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Collections.emptySet(), Collections.singletonMap(id, progress), true);
             player.connection.send(packet);
             Bukkit.getPluginManager().callEvent(new CustomAdvancementCriteriaRevokedEvent(!Bukkit.isPrimaryThread(), player, getAdvancement(id), progress, name));
             return true;
@@ -199,7 +199,7 @@ public class AdvancementManager {
             toSetProgress.put(id, getProgress(player, id));
         });
 
-        ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, toEarn, toRemove, toSetProgress);
+        ClientboundUpdateAdvancementsPacket packet = new ClientboundUpdateAdvancementsPacket(false, toEarn, toRemove, toSetProgress, true);
         player.connection.send(packet);
     }
 }

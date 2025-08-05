@@ -2,6 +2,8 @@
 pre-gen:
   name-format: "${worldName}_PRE"
   mode: "EMPTY_PLAYERS"
+keep-old-world:
+  name-format: "old_${worldName}"
 backup:
   # 利用可能な変数: worldName, lastYear, lastMonth, lastDay, year, month, day
   folder-pattern: "./backups/${worldName}"
@@ -37,5 +39,6 @@ scripts: {}
 #    worlds: ["resource", "resource_nether", "resource_the_end"]
 #    seed: HelloWorldNewWorld
 #    keep-game-rules: true
+#    keep-old-world: true
 #    pre-generate: true
 schedules: {}

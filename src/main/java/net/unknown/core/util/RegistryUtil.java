@@ -197,7 +197,7 @@ public class RegistryUtil {
                         continue;
                     }
 
-                    ResourceLocation key = CraftMagicNumbers.key(material);
+                    /*ResourceLocation key = CraftMagicNumbers.key(material);
                     BuiltInRegistries.ITEM.getOptional(key).ifPresent((item) -> {
                         MATERIAL_ITEM.put(material, item);
                     });
@@ -206,7 +206,7 @@ public class RegistryUtil {
                     });
                     BuiltInRegistries.FLUID.getOptional(key).ifPresent((fluid) -> {
                         MATERIAL_FLUID.put(material, fluid);
-                    });
+                    });*/
                 }
                 return true;
             } catch (NoSuchFieldException ignored) {

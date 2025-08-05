@@ -83,7 +83,7 @@ public class ConfigureHopperGui extends ViewedGuiBase<ConfigureHopperView> {
             if (event.getItem() != null) return;
             if (!event.getPlayer().isSneaking()) return;
             event.setCancelled(true);
-            HopperBlockEntity hopper = ((CraftHopper) event.getClickedBlock().getState()).getTileEntity();
+            HopperBlockEntity hopper = ((CraftHopper) event.getClickedBlock().getState()).getBlockEntity();
             new ConfigureHopperGui(event.getPlayer(), hopper, (IMixinHopperBlockEntity) hopper).open(event.getPlayer());
         }
     }

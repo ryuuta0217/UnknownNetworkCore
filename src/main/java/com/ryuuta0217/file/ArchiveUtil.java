@@ -30,18 +30,26 @@ import java.util.List;
 
 public class ArchiveUtil {
     public static void createArchiveWithZstd(List<File> files, File archive, @Nullable File baseDir) throws IOException {
+        createArchiveWithZstd(files, archive, baseDir, false);
+    }
+
+    public static void createArchiveWithZstd(List<File> files, File archive, @Nullable File baseDir, boolean overwrite) throws IOException {
         int index = 1;
         final File originalArchive = archive;
-        while(archive.exists()) {
-            String archiveName = originalArchive.getName();
-            int dotIndex = archiveName.indexOf('.');
-            if (dotIndex == -1) {
-                archiveName += "-" + index;
-            } else {
-                archiveName = archiveName.substring(0, dotIndex) + "-" + index + archiveName.substring(dotIndex);
+        if (archive.exists() && !overwrite) {
+            while(archive.exists()) {
+                String archiveName = originalArchive.getName();
+                int dotIndex = archiveName.indexOf('.');
+                if (dotIndex == -1) {
+                    archiveName += "-" + index;
+                } else {
+                    archiveName = archiveName.substring(0, dotIndex) + "-" + index + archiveName.substring(dotIndex);
+                }
+                archive = new File(archive.getParentFile(), archiveName);
+                index++;
             }
-            archive = new File(archive.getParentFile(), archiveName);
-            index++;
+        } else if (archive.exists() && overwrite) {
+            archive.delete();
         }
 
         if ((archive.getParentFile() == null || archive.getParentFile().exists() || archive.getParentFile().mkdirs()) && archive.createNewFile()) {

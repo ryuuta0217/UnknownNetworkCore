@@ -31,15 +31,23 @@
 
 package net.unknown.core.util;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.serialization.JsonOps;
 import io.papermc.paper.adventure.PaperAdventure;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.ComponentArgument;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.SnbtGrammar;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.parsing.packrat.commands.Grammar;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.GameRules;
 import net.unknown.core.define.DefinedTextColor;
@@ -397,7 +405,7 @@ public class NewMessageUtil {
                 //  ワールドA(sendCommandFeedback: false) で実行されたコマンドがワールドB(sendCommandFeedback: true)のワールドで表示される
                 //  → プレイヤーの行動追跡に若干の難が生まれる？
                 //  ただし、実行者のワールドAがtrueでも受信者のいるワールドBがfalseだとフィードバックを受信できない
-                if (player.serverLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
+                if (player.level().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
                     player.sendSystemMessage(msg);
                 }
             }
@@ -434,7 +442,7 @@ public class NewMessageUtil {
     }
 
     public static Component convertAdventure2Minecraft(net.kyori.adventure.text.Component component) {
-        return Component.Serializer.fromJson(GsonComponentSerializer.gson().serializeToTree(component), MinecraftServer.getDefaultRegistryAccess());
+        return PaperAdventure.asVanilla(component);
     }
 
     public static net.kyori.adventure.text.Component convertMinecraft2Adventure(Component component) {

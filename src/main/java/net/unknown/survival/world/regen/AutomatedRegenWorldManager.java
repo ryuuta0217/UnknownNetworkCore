@@ -31,7 +31,6 @@
 
 package net.unknown.survival.world.regen;
 
-import com.ryuuta0217.file.ArchiveUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.unknown.UnknownNetworkCorePlugin;
@@ -42,14 +41,11 @@ import net.unknown.core.managers.EvalManager;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerTeleportEvent;
 import org.mozilla.javascript.NativeJavaClass;
 import org.mozilla.javascript.ScriptableObject;
 import org.mvplugins.multiverse.core.utils.result.Attempt;
@@ -64,10 +60,10 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class AutomatedRegenWorldManager extends ConfigurationBase implements Listener {
@@ -75,6 +71,8 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
     private static final AutomatedRegenWorldManager INSTANCE = new AutomatedRegenWorldManager();
 
     private String preGenerateWorldNamePattern;
+
+    private String keepWorldWorldNamePattern;
 
     private String backupFolderPattern;
     private String backupFilePattern;
@@ -100,6 +98,7 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
         this.preGenerateWorldNamePattern = this.getConfig().getString("pre-gen.name-format", "${worldName}_PRE");
         this.backupFolderPattern = this.getConfig().getString("backup.folder-pattern", "./backups/${worldName}");
         this.backupFilePattern = this.getConfig().getString("backup.file-pattern", "${year}-${month}-${day}.${extension}");
+        this.keepWorldWorldNamePattern = this.getConfig().getString("keep-old-world.name-format", "old_${worldName}");
 
         this.scripts = new HashMap<>();
         ConfigurationSection scriptsSection = this.getConfig().getConfigurationSection("scripts");
@@ -227,6 +226,13 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
                 keepGameRules = true;
             }
 
+            boolean keepOldWorld;
+            if (dateSection.isBoolean("keep-old-world")) {
+                keepOldWorld = dateSection.getBoolean("keep-old-world");
+            } else {
+                keepOldWorld = false;
+            }
+
             boolean preGenerate;
             if (dateSection.isBoolean("pre-generate")) {
                 preGenerate = dateSection.getBoolean("pre-generate");
@@ -234,7 +240,7 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
                 preGenerate = false;
             }
 
-            Task task = new Task(execTimeEpoch, worlds.toArray(new String[0]), seed, keepGameRules, preGenerate, this);
+            Task task = new Task(execTimeEpoch, worlds.toArray(new String[0]), seed, keepGameRules, preGenerate, keepOldWorld, this);
             this.tasks.put(execTimeEpoch, task);
         });
     }
@@ -254,6 +260,7 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
             scheduleSection.set("worlds", Arrays.asList(task.getWorldNames()));
             scheduleSection.set("seed", task.getSeed());
             scheduleSection.set("keep-game-rules", task.keepGameRule());
+            scheduleSection.set("keep-old-world", task.keepOldWorld());
             scheduleSection.set("pre-generate", task.preGenerate());
         });
 
@@ -261,8 +268,8 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
         super.save();
     }
 
-    public void addTask(long execEpochMillis, String[] worldNames, @Nullable String seed, boolean keepGameRule, boolean preGenerate) {
-        Task task = new Task(execEpochMillis, worldNames, seed, keepGameRule, preGenerate, this);
+    public void addTask(long execEpochMillis, String[] worldNames, @Nullable String seed, boolean keepGameRule, boolean preGenerate, boolean keepOldWorld) {
+        Task task = new Task(execEpochMillis, worldNames, seed, keepGameRule, preGenerate, keepOldWorld, this);
         this.tasks.put(execEpochMillis, task);
         RunnableManager.runAsync(this::save);
     }
@@ -283,6 +290,15 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
 
     private String getPregenerateWorldName(String worldName) {
         return String.format(this.getPreGenerateWorldNamePattern()
+                .replace("${worldName}", worldName), worldName);
+    }
+
+    public String getKeepOldWorldNamePattern() {
+        return this.keepWorldWorldNamePattern;
+    }
+
+    public String getKeepOldWorldName(String worldName) {
+        return String.format(this.getKeepOldWorldNamePattern()
                 .replace("${worldName}", worldName), worldName);
     }
 
@@ -357,7 +373,7 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
-        RunnableManager.runDelayed(() -> {
+        RunnableManager.runAsyncDelayed(() -> {
             if (Bukkit.getOnlinePlayers().isEmpty()) {
                 this.tasks.values().forEach(task -> {
                     if (task.isNeedsToPreGenerate()) {
@@ -379,25 +395,26 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
         private final boolean keepGameRule;
 
         private final boolean preGenerate;
+        private final boolean keepOldWorld;
 
         private final AutomatedRegenWorldManager manager;
 
-        public Task(long execEpochMillis, String[] worldNames, String seed, boolean keepGameRule, boolean preGenerate, AutomatedRegenWorldManager manager) {
+        public Task(long execEpochMillis, String[] worldNames, String seed, boolean keepGameRule, boolean preGenerate, boolean keepOldWorld, AutomatedRegenWorldManager manager) {
             this.execEpochMillis = execEpochMillis;
             this.worldNames = worldNames;
             this.seed = seed;
             this.keepGameRule = keepGameRule;
             this.preGenerate = preGenerate;
+            this.keepOldWorld = keepOldWorld;
             this.manager = manager;
 
             this.regenerationTask = new TimerTask() {
                 @Override
                 public void run() {
                     Bukkit.broadcast(Component.text("30秒後に、ワールドの再生成が実行されます。対象のワールドは次の通りです: " + Arrays.stream(Task.this.getWorldNames()).map(MessageUtil::getWorldName).collect(Collectors.joining(", ")), DefinedTextColor.YELLOW, TextDecoration.BOLD));
-                    RunnableManager.runDelayed(() -> Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
+                    RunnableManager.runAsyncDelayed(() -> {
                         Task.this.run();
-                        return null;
-                    }), 20 * 30L);
+                    }, 20 * 30L);
                 }
             };
 
@@ -413,15 +430,24 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
                 try {
                     if (this.isPreGenerated(worldName)) {
                         this.logger.info("World \"{}\" is pre-generated, using it.", worldName);
-                        this.backupWorld(worldName, this.manager.getBackupFolder(worldName, LocalDateTime.now(), this.manager.getLastExecDateTime()), this.manager.getBackupFile(worldName, LocalDateTime.now(), this.manager.getLastExecDateTime(), "tar.zst"));
-                        this.deleteWorld(worldName);
-                        if (this.renameWorld(this.manager.getPregenerateWorldName(worldName), worldName, false) && !this.isWorldLoaded(worldName)) {
-                            this.loadWorld(worldName);
+                        MultiverseCore.compressWorld(worldName, this.manager.getBackupFolder(worldName, LocalDateTime.now(), this.manager.getLastExecDateTime()), this.manager.getBackupFile(worldName, LocalDateTime.now(), this.manager.getLastExecDateTime(), "tar.zst"), false);
+                        if (this.keepOldWorld) MultiverseCore.renameWorld(worldName, this.manager.getKeepOldWorldName(worldName), true, true);
+                        else MultiverseCore.deleteWorld(worldName, Collections.emptyList(), true);
+                        if (MultiverseCore.renameWorld(this.manager.getPregenerateWorldName(worldName), worldName, true, false) && !MultiverseCore.isWorldLoaded(worldName)) {
+                            MultiverseCore.loadWorld(worldName);
                         }
                     } else {
                         this.logger.info("Regenerating world \"{}\"", worldName);
-                        this.backupWorld(worldName, this.manager.getBackupFolder(worldName, LocalDateTime.now(), this.manager.getLastExecDateTime()), this.manager.getBackupFile(worldName, LocalDateTime.now(), this.manager.getLastExecDateTime(), "tar.zst"));
-                        this.regenerateWorld(worldName, this.seed, this.keepGameRule);
+                        MultiverseCore.compressWorld(worldName, this.manager.getBackupFolder(worldName, LocalDateTime.now(), this.manager.getLastExecDateTime()), this.manager.getBackupFile(worldName, LocalDateTime.now(), this.manager.getLastExecDateTime(), "tar.zst"), false);
+                        this.getManager().getScripts(worldName).getOrDefault(ScriptTiming.BEFORE, Collections.emptyList()).forEach(scriptFile -> {
+                            this.executeScript(scriptFile, MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrNull(), Collections.emptyMap());
+                        });
+                        if (this.keepOldWorld) MultiverseCore.cloneWorld(worldName, this.manager.getKeepOldWorldName(worldName), true, true, true, true, true, true);
+                        MultiverseCore.regenerateWorld(worldName, this.seed, this.keepGameRule);
+                        this.getManager().getScripts(worldName).getOrDefault(ScriptTiming.AFTER, Collections.emptyList()).forEach(scriptFile -> {
+                            this.executeScript(scriptFile, MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrNull(), Collections.emptyMap());
+                        });
+                        this.logger.info("World \"{}\" is regenerated.", worldName);
                     }
                 } catch(Throwable t) {
                     t.printStackTrace();
@@ -454,6 +480,10 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
 
         public boolean preGenerate() {
             return this.preGenerate;
+        }
+
+        public boolean keepOldWorld() {
+            return this.keepOldWorld;
         }
 
         public AutomatedRegenWorldManager getManager() {
@@ -492,13 +522,18 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
             for (String worldName : this.worldNames) {
                 if (!this.isPreGenerated(worldName)) {
                     this.logger.info("Pre-generating world \"{}\"", worldName);
-                    boolean success = this.pregenerateWorld(worldName, this.seed, this.keepGameRule, false);
-                    if (success) {
-                        this.logger.info("World \"{}\" successfully pre-generated", worldName);
-                    } else {
-                        this.logger.error("Failed to pre-generate world \"{}\"", worldName);
-                        allSuccess = false;
+                    Throwable thrown = null;
+                    try {
+                        boolean success = pregenerateWorld(this, worldName, this.seed, this.keepGameRule, false);
+                        if (success) {
+                            this.logger.info("World \"{}\" successfully pre-generated", worldName);
+                            continue;
+                        }
+                    } catch(Throwable t) {
+                        thrown = t;
                     }
+                    this.logger.error("Failed to pre-generate world \"" + worldName + "\"", thrown);
+                    allSuccess = false;
                 } else {
                     this.logger.info("World \"{}\" is already pre-generated, skipping!", worldName);
                 }
@@ -507,169 +542,52 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
             return allSuccess;
         }
 
-        public boolean pregenerateWorld(String worldName, @Nullable String seed, boolean keepGameRules, boolean loadWorld) throws IllegalArgumentException {
+        public static boolean pregenerateWorld(Task task, String worldName, @Nullable String seed, boolean keepGameRules, boolean loadWorld) throws IllegalArgumentException {
             LoadedMultiverseWorld baseLoadedMultiverseWorld = MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrElseThrow(() -> new IllegalArgumentException("World " + worldName + " is not loaded."));
 
             // Exec script before pre-generation
-            this.getManager().getScripts(worldName).getOrDefault(ScriptTiming.BEFORE_PRE_GENERATE, Collections.emptyList()).forEach(scriptFile -> {
-                this.executeScript(scriptFile, baseLoadedMultiverseWorld, Collections.emptyMap());
+            task.getManager().getScripts(worldName).getOrDefault(ScriptTiming.BEFORE_PRE_GENERATE, Collections.emptyList()).forEach(scriptFile -> {
+                task.executeScript(scriptFile, baseLoadedMultiverseWorld, Collections.emptyMap());
             });
 
-            CloneWorldOptions cloneOptions = CloneWorldOptions.fromTo(baseLoadedMultiverseWorld, this.manager.getPregenerateWorldName(worldName));
-            cloneOptions.keepGameRule(keepGameRules);
+            boolean isCloneSuccess;
+            try {
+                isCloneSuccess = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> MultiverseCore.cloneWorld(baseLoadedMultiverseWorld, task.getManager().getPregenerateWorldName(worldName), keepGameRules, true, true, true, true, true)).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new IllegalStateException("Failed to clone world " + worldName, e);
+            }
 
-            Attempt<LoadedMultiverseWorld, CloneFailureReason> cloneResult = MultiverseCore.getWorldManager().cloneWorld(cloneOptions);
-            if (cloneResult.isSuccess()) {
-                LoadedMultiverseWorld loadedCloneWorld = cloneResult.get();
+            if (isCloneSuccess) {
+                LoadedMultiverseWorld loadedCloneWorld = MultiverseCore.getWorldManager().getLoadedWorld(task.getManager().getPregenerateWorldName(worldName)).getOrElseThrow(() -> new IllegalStateException("Failed to get loaded world after cloning: " + task.getManager().getPregenerateWorldName(worldName)));
                 loadedCloneWorld.setAlias(null);
 
-                RegenWorldOptions regenOptions = RegenWorldOptions.world(loadedCloneWorld);
-                if (seed != null && !seed.isBlank()) {
-                    regenOptions.seed(seed);
-                    regenOptions.randomSeed(false);
-                } else {
-                    regenOptions.randomSeed(true);
-                }
-                regenOptions.keepGameRule(keepGameRules);
+                try {
+                    boolean isRegenSuccess = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> MultiverseCore.regenerateWorld(loadedCloneWorld, seed, true)).get();
 
-                Attempt<LoadedMultiverseWorld, RegenFailureReason> regenResult = MultiverseCore.getWorldManager().regenWorld(regenOptions);
-                if (regenResult.isSuccess()) {
-                    // Exec script after pre-generation
-                    this.getManager().getScripts(worldName).getOrDefault(ScriptTiming.AFTER_PRE_GENERATE, Collections.emptyList()).forEach(scriptFile -> {
-                        this.executeScript(scriptFile, loadedCloneWorld, Collections.emptyMap());
-                    });
+                    if (isRegenSuccess) {
+                        // Exec script after pre-generation
+                        task.getManager().getScripts(worldName).getOrDefault(ScriptTiming.AFTER_PRE_GENERATE, Collections.emptyList()).forEach(scriptFile -> {
+                            task.executeScript(scriptFile, loadedCloneWorld, Collections.emptyMap());
+                        });
 
-                    LoadedMultiverseWorld regeneratedWorld = regenResult.get();
-                    if (!loadWorld) {
-                        UnloadWorldOptions unloadOptions = UnloadWorldOptions.world(regeneratedWorld);
+                        LoadedMultiverseWorld regeneratedWorld = MultiverseCore.getWorldManager().getLoadedWorld(task.getManager().getPregenerateWorldName(worldName)).getOrElseThrow(() -> new IllegalStateException("Something went wrong. Failed to get regenerated world: " + task.getManager().getPregenerateWorldName(worldName)));
+                        if (!loadWorld) {
+                            MultiverseCore.unloadWorld(regeneratedWorld, true, true);
+                            return MultiverseCore.getWorldManager().getLoadedWorld(regeneratedWorld).isEmpty();
+                        }
 
-                        Attempt<MultiverseWorld, UnloadFailureReason> unloadResult = MultiverseCore.getWorldManager().unloadWorld(unloadOptions);
-                        return unloadResult.isSuccess();
+                        return true;
                     }
-
-                    return true;
+                } catch (ExecutionException | InterruptedException e) {
+                    throw new IllegalStateException("Failed to regenerate world " + loadedCloneWorld.getName(), e);
                 }
             }
 
             return false;
-        }
-
-        public boolean isWorldLoaded(String worldName) {
-            return MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrNull() != null;
-        }
-
-        public boolean unloadWorld(String worldName) {
-            LoadedMultiverseWorld mvWorld = MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrElseThrow(() -> new IllegalArgumentException("World " + worldName + " is not loaded."));
-
-            UnloadWorldOptions options = UnloadWorldOptions.world(mvWorld);
-
-            this.removePlayersFromWorld(worldName);
-
-            Attempt<MultiverseWorld, UnloadFailureReason> unloadResult = MultiverseCore.getWorldManager().unloadWorld(options);
-            return unloadResult.isSuccess();
-        }
-
-        public boolean loadWorld(String worldName) {
-            Attempt<LoadedMultiverseWorld, LoadFailureReason> loadResult = MultiverseCore.getWorldManager().loadWorld(worldName);
-            return loadResult.isSuccess();
-        }
-
-        public boolean backupWorld(String worldName, String backupFolderStr, String backupFileStr) throws IllegalArgumentException {
-            MultiverseCore.getWorldManager().getWorld(worldName).getOrElseThrow(() -> new IllegalArgumentException("World " + worldName + " does not exist."));
-            boolean loadAfter = false;
-
-            if (this.isWorldLoaded(worldName)) {
-                loadAfter = true;
-            } else {
-                this.loadWorld(worldName);
-            }
-            File worldFolder = MultiverseCore.getWorldManager().getLoadedWorld(worldName).get().getBukkitWorld().get().getWorldFolder();
-            this.unloadWorld(worldName);
-
-            File backupFolder = new File(backupFolderStr);
-            File backupFile = new File(backupFolder, backupFileStr);
-
-            try {
-                Path worldPath = worldFolder.toPath();
-                ArchiveUtil.createArchiveWithZstd(Files.walk(worldPath).map(Path::toAbsolutePath).map(Path::toFile).toList(), backupFile, worldFolder);
-            } catch(IOException e) {
-                this.logger.warn("An exception occurred while opening the backup file.", e);
-            }
-
-            if (loadAfter) {
-                this.loadWorld(worldName);
-            }
-            return true;
-        }
-
-        public boolean deleteWorld(String worldName) {
-            MultiverseWorld mvWorld = MultiverseCore.getWorldManager().getWorld(worldName).getOrElseThrow(() -> new IllegalArgumentException("World " + worldName + " does not exist."));
-
-            DeleteWorldOptions options = DeleteWorldOptions.world(mvWorld);
-
-            this.removePlayersFromWorld(worldName);
-            Attempt<String, DeleteFailureReason> deleteResult = MultiverseCore.getWorldManager().deleteWorld(options);
-            return deleteResult.isSuccess();
-        }
-
-        public boolean renameWorld(String from, String to, boolean overwrite) {
-            MultiverseWorld fromWorld = MultiverseCore.getWorldManager().getWorld(from).getOrElseThrow(() -> new IllegalArgumentException("World " + from + " does not exist."));
-            boolean loadAfter = fromWorld.isLoaded();
-            if (!fromWorld.isLoaded() && !this.loadWorld(from)) {
-                throw new IllegalArgumentException("World " + from + " is not loaded.");
-            }
-            fromWorld = MultiverseCore.getWorldManager().getLoadedWorld(from).getOrElseThrow(() -> new IllegalArgumentException("World " + from + " is not loaded."));
-
-            MultiverseWorld toWorld = MultiverseCore.getWorldManager().getWorld(to).getOrNull();
-            if (toWorld != null) {
-                if (overwrite) {
-                    MultiverseCore.getWorldManager().deleteWorld(DeleteWorldOptions.world(toWorld));
-                } else {
-                    throw new IllegalArgumentException("World \"" + to + "\" already exists.");
-                }
-            }
-
-            CloneWorldOptions options = CloneWorldOptions.fromTo((LoadedMultiverseWorld) fromWorld, to);
-            Attempt<LoadedMultiverseWorld, CloneFailureReason> cloneResult = MultiverseCore.getWorldManager().cloneWorld(options);
-            if (cloneResult.isSuccess()) {
-                toWorld = cloneResult.get();
-                if (!MultiverseCore.getWorldManager().deleteWorld(DeleteWorldOptions.world(fromWorld)).isSuccess()) return false;
-                return loadAfter && !toWorld.isLoaded() ? MultiverseCore.getWorldManager().loadWorld(to).isSuccess() : true;
-            }
-
-            return false;
-        }
-
-        public boolean regenerateWorld(String worldName, @Nullable String seed, boolean keepGameRule) throws IllegalArgumentException {
-            LoadedMultiverseWorld mvWorld = MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrElseThrow(() -> new IllegalArgumentException("World " + worldName + " is not loaded."));
-
-            // Exec script before regeneration
-            this.getManager().getScripts(worldName).getOrDefault(ScriptTiming.BEFORE, Collections.emptyList()).forEach(scriptFile -> {
-                this.executeScript(scriptFile, mvWorld, Collections.emptyMap());
-            });
-
-            RegenWorldOptions options = RegenWorldOptions.world(mvWorld);
-            if (seed != null && !seed.isBlank()) {
-                options.seed(seed);
-                options.randomSeed(false);
-            } else {
-                options.randomSeed(true);
-            }
-            options.keepGameRule(keepGameRule);
-
-            this.removePlayersFromWorld(worldName);
-            boolean success = MultiverseCore.getWorldManager().regenWorld(options).isSuccess();
-
-            // Exec script after regeneration
-            this.getManager().getScripts(worldName).getOrDefault(ScriptTiming.AFTER, Collections.emptyList()).forEach(scriptFile -> {
-                this.executeScript(scriptFile, mvWorld, Collections.emptyMap());
-            });
-
-            return success;
         }
 
         public void executeScript(File scriptFile, MultiverseWorld world, Map<String, Object> vars) {
-            ScriptableObject scope = EvalManager.getRhinoContext().initStandardObjects();
+            ScriptableObject scope = EvalManager.getRhinoContextFactory().enterContext().initStandardObjects();
             ScriptableObject.putConstProperty(scope, "Bukkit", new NativeJavaClass(scope, Bukkit.class));
 
             ScriptableObject.putConstProperty(scope, "Storage", EvalManager.getGlobalStorage());
@@ -683,16 +601,6 @@ public class AutomatedRegenWorldManager extends ConfigurationBase implements Lis
             } catch (IOException e) {
                 this.logger.error("Failed to read script file: " + scriptFile.getAbsolutePath(), e);
             }
-        }
-        public boolean removePlayersFromWorld(String worldName) {
-            LoadedMultiverseWorld mvWorld = MultiverseCore.getWorldManager().getLoadedWorld(worldName).getOrElseThrow(() -> new IllegalArgumentException("World " + worldName + " is not loaded."));
-
-            return mvWorld.getPlayers().getOrElseThrow(() -> new IllegalArgumentException("World " + worldName + " is not loaded."))
-                    .stream()
-                    .allMatch(player -> {
-                        Location spawnLocation = MultiverseCore.getSpawnLocation(Bukkit.getWorld("world"));
-                        return spawnLocation != null && player.teleport(spawnLocation, PlayerTeleportEvent.TeleportCause.PLUGIN);
-                    });
         }
 
         @Override

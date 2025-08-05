@@ -67,7 +67,7 @@ repositories {
 }
 
 dependencies {
-    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.21.4-R0.1-SNAPSHOT")
+    paperweightDevelopmentBundle("io.papermc.paper:dev-bundle:1.21.7-R0.1-SNAPSHOT")
     compileOnly fileTree(dir: "libs", include: "*.jar")
     compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '+', {
         exclude group: 'com.google.code.gson', module: 'gson'
@@ -84,7 +84,7 @@ dependencies {
     implementation group: 'org.json', name: 'json', version: '+'
     compileOnly group: 'org.mvplugins.multiverse.core', name: 'multiverse-core', version: '+'
 //    compileOnly group: 'com.onarandombox.multiversecore', name: 'Multiverse-Core', version: '+'
-    compileOnly group: 'com.onarandombox.multiverseinventories', name: 'Multiverse-Inventories', version: '+'
+    compileOnly group: 'org.mvplugins.multiverse.inventories', name: 'multiverse-inventories', version: '+'
     compileOnly group: 'net.coreprotect', name: 'coreprotect', version: '+'
     implementation group: 'org.apache.commons', name: 'commons-compress', version: '1.25.0'
     implementation group: 'com.github.luben', name: 'zstd-jni', version: '+'
@@ -155,6 +155,9 @@ runMojangMappedServer {
     systemProperty "net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false"
     systemProperty "Paper.ignoreWorldDataVersion", "true"
     systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
+    systemProperty "file.encoding", System.getProperty("file.encoding", "UTF-8")
+    systemProperty "sun.stdout.encoding", System.getProperty("sun.stdout.encoding", "UTF-8")
+    systemProperty "sun.stderr.encoding", System.getProperty("sun.stderr.encoding", "UTF-8")
     args("-P pluginsMapped")
 }
 
@@ -163,6 +166,9 @@ runServer {
     systemProperty "net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false" // default is false, but run-paper is set this option force true.
     systemProperty "Paper.ignoreWorldDataVersion", "true"
     systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
+    systemProperty "file.encoding", System.getProperty("file.encoding", "UTF-8")
+    systemProperty "sun.stdout.encoding", System.getProperty("sun.stdout.encoding", "UTF-8")
+    systemProperty "sun.stderr.encoding", System.getProperty("sun.stderr.encoding", "UTF-8")
 }
 
 task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
@@ -171,6 +177,9 @@ task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
     workingDir(project.file("testServer"))
     systemProperty "UnknownNetworkMagic", "bundle"
     systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
+    systemProperty "file.encoding", System.getProperty("file.encoding", "UTF-8")
+    systemProperty "sun.stdout.encoding", System.getProperty("sun.stdout.encoding", "UTF-8")
+    systemProperty "sun.stderr.encoding", System.getProperty("sun.stderr.encoding", "UTF-8")
 }
 
 task copyArtifactToProxy(type: Copy) {

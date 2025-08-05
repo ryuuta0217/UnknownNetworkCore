@@ -93,10 +93,10 @@ public class PrivateMessageSpy implements SpyModule, Listener {
             if (audience instanceof Player audiencePlayer) {
                 ServerPlayer audienceMinecraftPlayer = MinecraftAdapter.player(audiencePlayer);
                 if (audienceMinecraftPlayer != null) {
-                    audienceMinecraftPlayer.sendChatMessage(OutgoingChatMessage.create(originalMessage), false, CustomChatTypes.VALUE_PRIVATE_MESSAGE.bind(CustomChatTypes.PRIVATE_MESSAGE, MinecraftServer.getDefaultRegistryAccess(), NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName)).withTargetName(NewMessageUtil.convertAdventure2Minecraft(targetDisplayName)));
+                    audienceMinecraftPlayer.sendChatMessage(OutgoingChatMessage.create(originalMessage), false, CustomChatTypes.VALUE_PRIVATE_MESSAGE.bind(CustomChatTypes.PRIVATE_MESSAGE, MinecraftServer.getServer().registryAccess(), NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName)).withTargetName(NewMessageUtil.convertAdventure2Minecraft(targetDisplayName)));
                 }
             } else {
-                audience.sendMessage(NewMessageUtil.convertMinecraft2Adventure(CustomChatTypes.VALUE_PRIVATE_MESSAGE.chat().decorate(NewMessageUtil.convertAdventure2Minecraft(LegacyComponentSerializer.legacySection().deserialize(PlainTextComponentSerializer.plainText().serialize(message))), CustomChatTypes.VALUE_PRIVATE_MESSAGE.bind(CustomChatTypes.PRIVATE_MESSAGE, MinecraftServer.getDefaultRegistryAccess(), NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName)).withTargetName(NewMessageUtil.convertAdventure2Minecraft(targetDisplayName)))));
+                audience.sendMessage(NewMessageUtil.convertMinecraft2Adventure(CustomChatTypes.VALUE_PRIVATE_MESSAGE.chat().decorate(NewMessageUtil.convertAdventure2Minecraft(LegacyComponentSerializer.legacySection().deserialize(PlainTextComponentSerializer.plainText().serialize(message))), CustomChatTypes.VALUE_PRIVATE_MESSAGE.bind(CustomChatTypes.PRIVATE_MESSAGE, MinecraftServer.getServer().registryAccess(), NewMessageUtil.convertAdventure2Minecraft(sourceDisplayName)).withTargetName(NewMessageUtil.convertAdventure2Minecraft(targetDisplayName)))));
             }
         });
     }

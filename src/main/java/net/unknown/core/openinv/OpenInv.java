@@ -51,7 +51,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 
 public class OpenInv {
-    public static Player load(OfflinePlayer offline) { // TODO Move method to Utility class, Util.getOfflinePlayer(OfflinePlayer player) -> Player
+    /*public static Player load(OfflinePlayer offline) { // TODO Move method to Utility class, Util.getOfflinePlayer(OfflinePlayer player) -> Player
         if (!offline.hasPlayedBefore()) return null; // 以前にプレイしたことないプレイヤーの場合はnullを返す, 読み込めるデータがないので
         if (offline.isOnline()) return Bukkit.getPlayer(offline.getUniqueId());
 
@@ -108,5 +108,5 @@ public class OpenInv {
             e.printStackTrace();
         }
         return null;
-    }
+    }*/
 }

@@ -91,11 +91,11 @@ public class Stopwatch extends BukkitRunnable implements Listener {
     }
 
     public static void startStopwatch(Player player, Location source) {
-        StopwatchStartEvent event = new StopwatchStartEvent(player, source);
+        /*StopwatchStartEvent event = new StopwatchStartEvent(player, source);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
             return;
-        }
+        }*/
         player.getPersistentDataContainer().set(TIME_KEY, PersistentDataType.INTEGER, 0);
         player.getPersistentDataContainer().set(RUNNING_KEY, PersistentDataType.BOOLEAN, true);
     }
@@ -103,12 +103,12 @@ public class Stopwatch extends BukkitRunnable implements Listener {
     public static int stopStopwatch(Player player, Location source) {
         int time = player.getPersistentDataContainer().getOrDefault(TIME_KEY, PersistentDataType.INTEGER, 0);
         if (isRunningStopwatch(player)) {
-            StopwatchStopEvent event = new StopwatchStopEvent(player, source, time);
+           /* StopwatchStopEvent event = new StopwatchStopEvent(player, source, time);
             Bukkit.getPluginManager().callEvent(event);
             time = event.getTime();
             if (event.isCancelled()) {
                 return -1;
-            }
+            }*/
         }
         player.getPersistentDataContainer().set(RUNNING_KEY, PersistentDataType.BOOLEAN, false);
         return time;
