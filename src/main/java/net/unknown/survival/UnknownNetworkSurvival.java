@@ -137,6 +137,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new EconomyListener());
         ListenerManager.registerListener(new MinecartPlacer());
         ListenerManager.registerListener(new AdvancementRewards());
+        ListenerManager.registerListener(new FastLeafDecay());
         SuppressRaids.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
         if (isBootstrapped()) {
