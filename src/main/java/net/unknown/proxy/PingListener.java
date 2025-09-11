@@ -57,7 +57,7 @@ public class PingListener {
 
         if (!config.hasChild("supported-protocol-numbers")) {
             try {
-                config.node("supported-protocol-numbers").setList(Integer.class, List.of(763, 764, 765, 766, 767)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6, 1.21
+                config.node("supported-protocol-numbers").setList(Integer.class, List.of(763, 764, 765, 766, 767, 768, 769, 770, 771, 772)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6, 1.21-1.21.1, 1.21.2-1.21.3, 1.21.4, 1.21.5, 1.21.6, 1.21.7-1.21.8
             } catch (SerializationException ignored) {}
         }
 
@@ -67,7 +67,7 @@ public class PingListener {
         try {
             protocolNumbers = config.node("supported-protocol-numbers").getList(Integer.class);
         } catch (SerializationException ignored) {}
-        BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(767); // if failed to get min, use default (defined default)
+        BASE_SUPPORTED_PROTOCOL_NUMBER = protocolNumbers.stream().min(Integer::compareTo).orElse(772); // if failed to get min, use default (defined default)
         protocolNumbers.remove((Integer) BASE_SUPPORTED_PROTOCOL_NUMBER);
         SUPPORTED_PROTOCOL_NUMBERS = new HashSet<>(protocolNumbers);
     }

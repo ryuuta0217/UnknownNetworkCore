@@ -197,7 +197,7 @@ public class MinecraftAdapter {
     public static class ItemStack {
         @Nullable
         public static net.minecraft.world.item.ItemStack json(String json) {
-            return net.minecraft.world.item.ItemStack.CODEC.decode(MinecraftServer.getServer().registryAccess().createSerializationContext(JsonOps.INSTANCE), DataFixers.getDataFixer().update(References.ITEM_STACK, new Dynamic<>(MinecraftServer.getServer().registryAccess().createSerializationContext(JsonOps.INSTANCE), JsonParser.parseString(json)), MCVersions.V1_21_4, MCVersions.V1_21_7).getValue()).getOrThrow().getFirst();
+            return net.minecraft.world.item.ItemStack.CODEC.decode(MinecraftServer.getServer().registryAccess().createSerializationContext(JsonOps.INSTANCE), DataFixers.getDataFixer().update(References.ITEM_STACK, new Dynamic<>(MinecraftServer.getServer().registryAccess().createSerializationContext(JsonOps.INSTANCE), JsonParser.parseString(json)), MCVersions.V1_21_4, MCVersions.V1_21_8).getValue()).getOrThrow().getFirst();
         }
 
         @Nonnull
@@ -210,7 +210,7 @@ public class MinecraftAdapter {
         }
 
         public static net.minecraft.world.item.ItemStack tag(Tag tag) {
-            tag = DataFixers.getDataFixer().update(References.ITEM_STACK, new Dynamic<>(MinecraftServer.getServer().registryAccess().createSerializationContext(NbtOps.INSTANCE), tag), MCVersions.V1_21_4, MCVersions.V1_21_7).getValue();
+            tag = DataFixers.getDataFixer().update(References.ITEM_STACK, new Dynamic<>(MinecraftServer.getServer().registryAccess().createSerializationContext(NbtOps.INSTANCE), tag), MCVersions.V1_21_4, MCVersions.V1_21_8).getValue();
             return net.minecraft.world.item.ItemStack.CODEC.parse(MinecraftServer.getServer().registryAccess().createSerializationContext(NbtOps.INSTANCE), tag).getOrThrow();
         }
 
