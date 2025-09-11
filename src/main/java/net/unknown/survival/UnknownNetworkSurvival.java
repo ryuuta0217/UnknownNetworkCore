@@ -151,7 +151,7 @@ public class UnknownNetworkSurvival {
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "unknown:forge", new FMLConnectionListener());
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "unc_survival:open_gui", guiOpenListener);
 
-        DemolitionGun.BowPullIndicator.boot();
+        if (!UnknownNetworkCorePlugin.isFoliaPlatform()) DemolitionGun.BowPullIndicator.boot();
 
         if (isVaultEnabled() && !isJeconEnabled()) {
             VaultEconomy.hookVault();

@@ -32,6 +32,11 @@
 package net.unknown.core.bossbar;
 
 import com.destroystokyo.paper.event.server.ServerTickEndEvent;
+import io.papermc.paper.threadedregions.ThreadedRegionizer;
+import io.papermc.paper.threadedregions.TickData;
+import io.papermc.paper.threadedregions.TickRegionScheduler;
+import io.papermc.paper.threadedregions.TickRegions;
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
@@ -40,6 +45,7 @@ import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
@@ -49,13 +55,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class TPSBar implements Listener {
     private static final TPSBar INSTANCE = new TPSBar();
@@ -67,6 +72,10 @@ public class TPSBar implements Listener {
     private static double LAST_MSPT = 0;
 
     public static void initialize() {
+        if (UnknownNetworkCorePlugin.isFoliaPlatform()) {
+            Folia.initialize();
+            return;
+        }
         BAR.setMax(20);
 
         ListenerManager.registerListener(INSTANCE);
@@ -124,5 +133,85 @@ public class TPSBar implements Listener {
 
     public static void setAlwaysShow(Player player) {
         SELECTED_HIDE_PLAYERS.remove(player.getUniqueId());
+    }
+
+    public static class Folia implements Listener {
+        public static final Folia INSTANCE = new Folia();
+        private static final Map<UUID, CustomBossEvent> BARS = new HashMap<>();
+        private static final ThreadLocal<DecimalFormat> TWO_DECIMAL_PLACES = ThreadLocal.withInitial(() -> {
+            return new DecimalFormat("#,##0.00");
+        });
+
+        public static void initialize() {
+            ListenerManager.registerListener(INSTANCE);
+        }
+
+        private Folia() {
+
+        }
+
+        private static synchronized void createBossBar(Player player) {
+            CustomBossEvent bar = new CustomBossEvent(
+                    ResourceLocation.tryBySeparator("unknown-network:tps", ':'), Component.literal("..."));
+            bar.setMax(20);
+            bar.setColor(BossEvent.BossBarColor.RED);
+            BARS.put(player.getUniqueId(), bar);
+        }
+
+        private static CustomBossEvent getBossBar(Player player) {
+            return BARS.getOrDefault(player.getUniqueId(), null);
+        }
+
+        public static void showTPSBar(Player player) {
+            if (!BARS.containsKey(player.getUniqueId())) createBossBar(player);
+            BARS.get(player.getUniqueId()).addPlayer(MinecraftAdapter.player(player));
+        }
+
+        public static void hideTPSBar(Player player) {
+            if (!BARS.containsKey(player.getUniqueId())) return;
+            BARS.get(player.getUniqueId()).removePlayer(MinecraftAdapter.player(player));
+        }
+
+        private static Component buildDisplayName() {
+            long currentTime = System.nanoTime();
+            String time = DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalDateTime.now().atZone(ZoneId.of("Asia/Tokyo")));
+
+            ThreadedRegionizer.ThreadedRegion<TickRegions.TickRegionData, TickRegions.TickRegionSectionData> region = TickRegionScheduler.getCurrentRegion();
+            TickData.TickReportData tickReport5s = region.getData().getRegionSchedulingHandle().getTickReport5s(currentTime);
+
+            Component timeComponent = Component.literal("[" + time + "]").withStyle(ChatFormatting.GRAY);
+
+            long id = region.getData().id;
+            int playerCount = region.getData().getRegionStats().getPlayerCount();
+            int entityCount = region.getData().getRegionStats().getEntityCount();
+            int chunkCount = region.getData().getRegionStats().getChunkCount();
+            Component regionInfoComponent = Component.literal("([" + id + "] E: " + entityCount + "(P: " + playerCount + "), C: " + chunkCount + ")").withStyle(ChatFormatting.GREEN);
+
+            double tps = tickReport5s.tpsData().segmentAll().average();
+            Component tpsComponent = Component.literal(TWO_DECIMAL_PLACES.get().format(tps)).withStyle(ChatFormatting.GOLD);
+
+            double mspt = region.getData().getRegionSchedulingHandle().getTickReport5s(currentTime).timePerTickData().segmentAll().average() / 1.0E6;
+            Component msptComponent = Component.literal(TWO_DECIMAL_PLACES.get().format(mspt) + "ms").withStyle(ChatFormatting.AQUA);
+
+            return Component.empty().append(timeComponent).append(" ").append(regionInfoComponent).append(" | TPS: ").append(tpsComponent).append(" | MSPT: ").append(msptComponent);
+        }
+
+        @EventHandler
+        public void onPlayerJoin(PlayerJoinEvent event) {
+            if (SELECTED_HIDE_PLAYERS.contains(event.getPlayer().getUniqueId())) return;
+            showTPSBar(event.getPlayer());
+
+            event.getPlayer().getScheduler().runAtFixedRate(UnknownNetworkCorePlugin.getInstance(), (task) -> {
+                CustomBossEvent bar = getBossBar(event.getPlayer());
+                if (bar != null) {
+                    bar.setName(buildDisplayName());
+                    double tps = TickRegionScheduler.getCurrentRegion().getData().getRegionSchedulingHandle().getTickReport5s(System.nanoTime()).tpsData().segmentAll().average();
+                    bar.setProgress((float) (Mth.clamp(tps, 0, 20) / 20));
+                    if(tps > 15) bar.setColor(BossEvent.BossBarColor.GREEN);
+                    else if(tps > 10) bar.setColor(BossEvent.BossBarColor.YELLOW);
+                    else bar.setColor(BossEvent.BossBarColor.RED);
+                }
+            }, null, 20, 20);
+        }
     }
 }
