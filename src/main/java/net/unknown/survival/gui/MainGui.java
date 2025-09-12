@@ -158,11 +158,9 @@ public class MainGui extends GuiBase {
                         (e) -> {
                             e.getWhoClicked().closeInventory();
                             if (e.getWhoClicked() instanceof Player player) {
-                                AdvancementRewards.getAvailableAdvancements().forEach(advancement -> {
-                                    AdvancementProgress progress = player.getAdvancementProgress(advancement);
-                                    progress.getAwardedCriteria().forEach(progress::revokeCriteria);
-                                });
-                                NewMessageUtil.sendMessage(e.getWhoClicked(), Component.text("進捗をリセットしました", DefinedTextColor.YELLOW), true);
+                                if (AdvancementRewards.resetProgress(player)) {
+                                    NewMessageUtil.sendMessage(e.getWhoClicked(), Component.text("進捗をリセットしました", DefinedTextColor.YELLOW), true);
+                                }
                             }
                         },
                         (e) -> {

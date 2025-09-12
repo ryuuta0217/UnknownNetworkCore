@@ -93,6 +93,15 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         return JSON_PARSER;
     }
 
+    public static boolean isFoliaPlatform() {
+        try {
+            Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            return true;
+        } catch(ClassNotFoundException e) {
+            return false;
+        }
+    }
+
     @Override
     public void onLoad() {
         long start = System.nanoTime();
