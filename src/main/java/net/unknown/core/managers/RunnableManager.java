@@ -31,10 +31,13 @@
 
 package net.unknown.core.managers;
 
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.unknown.UnknownNetworkCorePlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.TimeUnit;
 
@@ -48,8 +51,7 @@ public final class RunnableManager {
 
     public static BukkitTask runDelayed(Runnable runnable, long delay) {
         if (UnknownNetworkCorePlugin.isFoliaPlatform()) {
-            Bukkit.getServer().getGlobalRegionScheduler().runDelayed(UnknownNetworkCorePlugin.getInstance(), (task) -> runnable.run(), delay);
-            return null;
+            return createFoliaBukkitTask(Bukkit.getServer().getGlobalRegionScheduler().runDelayed(UnknownNetworkCorePlugin.getInstance(), (task) -> runnable.run(), delay));
         }
         return createBukkitRunnable(runnable).runTaskLater(UnknownNetworkCorePlugin.getInstance(), delay);
     }
@@ -57,24 +59,21 @@ public final class RunnableManager {
     public static BukkitTask runRepeating(Runnable runnable, long delay, long interval) {
         if (UnknownNetworkCorePlugin.isFoliaPlatform()) {
             if (delay == 0) delay = 1;
-            Bukkit.getServer().getGlobalRegionScheduler().runAtFixedRate(UnknownNetworkCorePlugin.getInstance(), (task) -> runnable.run(), delay, interval);
-            return null;
+            return createFoliaBukkitTask(Bukkit.getServer().getGlobalRegionScheduler().runAtFixedRate(UnknownNetworkCorePlugin.getInstance(), (task) -> runnable.run(), delay, interval));
         }
         return createBukkitRunnable(runnable).runTaskTimer(UnknownNetworkCorePlugin.getInstance(), delay, interval);
     }
 
     public static BukkitTask runAsync(Runnable runnable) {
         if (UnknownNetworkCorePlugin.isFoliaPlatform()) {
-            Bukkit.getServer().getAsyncScheduler().runNow(UnknownNetworkCorePlugin.getInstance(), (task) -> runnable.run());
-            return null;
+            return createFoliaBukkitTask(Bukkit.getServer().getAsyncScheduler().runNow(UnknownNetworkCorePlugin.getInstance(), (task) -> runnable.run()));
         }
         return createBukkitRunnable(runnable).runTaskAsynchronously(UnknownNetworkCorePlugin.getInstance());
     }
 
     public static BukkitTask runAsyncDelayed(Runnable runnable, long delay) {
         if (UnknownNetworkCorePlugin.isFoliaPlatform()) {
-            Bukkit.getServer().getAsyncScheduler().runDelayed(UnknownNetworkCorePlugin.getInstance(), (task) -> runnable.run(), 50 * delay, TimeUnit.MILLISECONDS);
-            return null;
+            return createFoliaBukkitTask(Bukkit.getServer().getAsyncScheduler().runDelayed(UnknownNetworkCorePlugin.getInstance(), (task) -> runnable.run(), 50 * delay, TimeUnit.MILLISECONDS));
         }
         return createBukkitRunnable(runnable).runTaskLaterAsynchronously(UnknownNetworkCorePlugin.getInstance(), delay);
     }
@@ -82,8 +81,7 @@ public final class RunnableManager {
     public static BukkitTask runAsyncRepeating(Runnable runnable, long delay, long interval) {
         if (UnknownNetworkCorePlugin.isFoliaPlatform()) {
             if (delay == 0) delay = 1;
-            Bukkit.getServer().getAsyncScheduler().runAtFixedRate(UnknownNetworkCorePlugin.getInstance(), (task) -> runnable.run(), 50 * delay, 50 * interval, TimeUnit.MILLISECONDS);
-            return null;
+            return createFoliaBukkitTask(Bukkit.getServer().getAsyncScheduler().runAtFixedRate(UnknownNetworkCorePlugin.getInstance(), (task) -> runnable.run(), 50 * delay, 50 * interval, TimeUnit.MILLISECONDS));
         }
         return createBukkitRunnable(runnable).runTaskTimerAsynchronously(UnknownNetworkCorePlugin.getInstance(), delay, interval);
     }
@@ -93,6 +91,50 @@ public final class RunnableManager {
             @Override
             public void run() {
                 runnable.run();
+            }
+        };
+    }
+
+    private static BukkitTask createFoliaBukkitTask(ScheduledTask foliaTask) {
+        return  new BukkitTask() {
+            @Override
+            public int getTaskId() {
+                return foliaTask.hashCode();
+            }
+
+            @Override
+            public @NotNull Plugin getOwner() {
+                return foliaTask.getOwningPlugin();
+            }
+
+            @Override
+            public boolean isSync() {
+                return true;
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return foliaTask.isCancelled();
+            }
+
+            @Override
+            public void cancel() {
+                foliaTask.cancel();
+            }
+
+            @Override
+            public int hashCode() {
+                return foliaTask.hashCode();
+            }
+
+            @Override
+            public boolean equals(Object obj) {
+                return foliaTask.equals(obj);
+            }
+
+            @Override
+            public String toString() {
+                return foliaTask.toString();
             }
         };
     }
