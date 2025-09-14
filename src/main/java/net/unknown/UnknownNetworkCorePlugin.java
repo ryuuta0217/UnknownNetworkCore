@@ -68,6 +68,7 @@ import java.util.Locale;
 public class UnknownNetworkCorePlugin extends JavaPlugin {
     private static final JSONParser JSON_PARSER = new JSONParser();
     private static UnknownNetworkCorePlugin INSTANCE;
+    private static boolean BOOTSTRAPPED = false;
 
     public UnknownNetworkCorePlugin() {
         INSTANCE = this;
@@ -102,9 +103,17 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         }
     }
 
+    public static boolean isBootstrapped() {
+        return BOOTSTRAPPED;
+    }
+
     @Override
     public void onLoad() {
         long start = System.nanoTime();
+        try {
+            Class.forName("net.unknown.launchwrapper.Main");
+            BOOTSTRAPPED = true;
+        } catch (ClassNotFoundException ignored) {}
         getLogger().info("Plugin was loaded with environment: " + UnknownNetworkCore.getEnvironment().name());
         if (!this.getDataFolder().exists() && this.getDataFolder().mkdir()) {
             getLogger().info("Plugin folder created.");
