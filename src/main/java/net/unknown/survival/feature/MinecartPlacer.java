@@ -53,6 +53,7 @@ import org.bukkit.inventory.ItemStack;
 public class MinecartPlacer implements Listener {
     @EventHandler
     public void onInteractRail(PlayerInteractEvent event) {
+        if (event.getPlayer().getGameMode() == GameMode.SPECTATOR) return;
         if (event.getHand() == EquipmentSlot.OFF_HAND) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (!event.getClickedBlock().getType().name().endsWith("RAIL")) return;
