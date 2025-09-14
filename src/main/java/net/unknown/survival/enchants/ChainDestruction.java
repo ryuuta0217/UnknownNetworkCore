@@ -31,6 +31,7 @@
 
 package net.unknown.survival.enchants;
 
+import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
@@ -45,6 +46,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.BlockUtil;
@@ -114,17 +116,22 @@ public class ChainDestruction implements Listener {
 
         IGNORE_EVENT.put(player.getUUID(), new HashSet<>());
 
-        AtomicInteger delay = new AtomicInteger(0);
+        AtomicInteger delay = new AtomicInteger(1);
 
         toBreak.forEach(pos -> {
             RunnableManager.runDelayed(() -> {
                 if (player.getMainHandItem().equals(selectedItem)) {
                     if ((selectedItem.getMaxDamage() - selectedItem.getDamageValue()) > 1) {
                         IGNORE_EVENT.get(player.getUUID()).add(pos);
-                        try {
+                        if (UnknownNetworkCorePlugin.isFoliaPlatform()) {
+                            player.getBukkitEntity().getScheduler().run(UnknownNetworkCorePlugin.getInstance(), (t) -> {
+                                player.gameMode.destroyBlock(pos);
+                                IGNORE_EVENT.get(player.getUUID()).remove(pos);
+                            }, null);
+                        } else {
                             player.gameMode.destroyBlock(pos);
-                        } catch(Exception ignored) {}
-                        IGNORE_EVENT.get(player.getUUID()).remove(pos);
+                            IGNORE_EVENT.get(player.getUUID()).remove(pos);
+                        }
                     } else {
                         player.getBukkitEntity().sendActionBar(Component.text("耐久値がなくなりました", DefinedTextColor.RED));
                     }
