@@ -39,6 +39,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.unknown.core.util.MinecraftAdapter;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -58,8 +59,8 @@ public class MinecartPlacer implements Listener {
         Inventory playerInventory = event.getPlayer().getInventory();
         Location blockLocation = event.getClickedBlock().getLocation();
 
-        if (playerInventory.contains(Material.MINECART)) {
-            ItemStack minecartItem = playerInventory.getItem(event.getPlayer().getInventory().first(Material.MINECART));
+        if (playerInventory.contains(Material.MINECART) || event.getPlayer().getGameMode() == GameMode.CREATIVE) {
+            ItemStack minecartItem = event.getPlayer().getGameMode() == GameMode.CREATIVE ? new ItemStack(Material.MINECART) : playerInventory.getItem(event.getPlayer().getInventory().first(Material.MINECART));
             if (minecartItem != null) {
                 Minecart minecartEntity = AbstractMinecart.createMinecart(MinecraftAdapter.level(blockLocation.getWorld()), blockLocation.getX(), blockLocation.getY() + 0.0625, blockLocation.getZ(), EntityType.MINECART, EntitySpawnReason.DISPENSER, MinecraftAdapter.ItemStack.itemStack(minecartItem), MinecraftAdapter.player(event.getPlayer()));
                 if (MinecraftAdapter.level(blockLocation.getWorld()).addFreshEntity(minecartEntity)) {
