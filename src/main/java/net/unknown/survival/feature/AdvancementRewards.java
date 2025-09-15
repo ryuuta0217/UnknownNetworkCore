@@ -45,6 +45,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.advancement.Advancement;
+import org.bukkit.advancement.AdvancementProgress;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeModifier;
 import org.bukkit.enchantments.Enchantment;
@@ -55,13 +56,13 @@ import org.bukkit.event.player.PlayerAdvancementDoneEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
+import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class AdvancementRewards implements Listener {
+    public static final NamespacedKey PLAYER_REGISTRY_STATISTICS_KEY = new NamespacedKey("survival", "advancement_rewards");
     private static List<Advancement> AVAILABLE_ADVANCEMENTS;
     private static List<Advancement> AVAILABLE_ADVANCEMENT_RECIPES;
 
@@ -103,10 +104,13 @@ public class AdvancementRewards implements Listener {
 
     private static void test(Player player) {
         if (getUncompletedAdvancements(player).isEmpty()) {
-            if (PlayerData.of(player).getRegistries().getOrDefault(new NamespacedKey("survival", "advancement_rewards"), "completed", "false").equalsIgnoreCase("true")) return;
+            if (isCompleted(player)) return;
 
             Bukkit.broadcast(Component.empty().append(player.displayName()).append(Component.text("さんがすべての進捗を達成しました")).color(DefinedTextColor.GOLD));
-            PlayerData.of(player).getRegistries().put(new NamespacedKey("survival", "advancement_rewards"), "completed", "true");
+            setCompleted(player, true);
+            setCompletedAt(player, System.currentTimeMillis());
+            setEarnedAdvancementCount(player, getAvailableAdvancements().size());
+            setCompletionCount(player, getCompletionCount(player) + 1);
             List<ItemStack> rewards = new ArrayList<>() {{
                 add(new ItemStackBuilder(Material.NETHERITE_BLOCK, 16)
                         .lore(Component.text("全進捗達成報酬").color(DefinedTextColor.YELLOW))
@@ -179,6 +183,84 @@ public class AdvancementRewards implements Listener {
                 .stream()
                 .filter(advancement -> !player.getAdvancementProgress(advancement).isDone())
                 .toList();
+    }
+
+    public static boolean resetProgress(Player player) {
+        if (isCompleted(player)) {
+            addCompletionHistory(player, getCompletedAt(player), getEarnedAdvancementCount(player));
+            setCompleted(player, false);
+            setCompletedAt(player, -1);
+            setEarnedAdvancementCount(player, 0);
+        }
+
+        getAvailableAdvancements().forEach(advancement -> {
+            AdvancementProgress progress = player.getAdvancementProgress(advancement);
+            progress.getAwardedCriteria().forEach(progress::revokeCriteria);
+        });
+        return getUncompletedAdvancements(player).size() == getAvailableAdvancements().size();
+    }
+
+    public static boolean isCompleted(Player player) {
+        Map<String, String> playerRegistry = PlayerData.of(player).getRegistries().getRegistry(PLAYER_REGISTRY_STATISTICS_KEY);
+        return Boolean.parseBoolean(playerRegistry.getOrDefault("completed", "false"));
+    }
+
+    public static void setCompleted(Player player, boolean completed) {
+        PlayerData.of(player).getRegistries().put(PLAYER_REGISTRY_STATISTICS_KEY, "completed", String.valueOf(completed));
+    }
+
+    public static int getEarnedAdvancementCount(Player player) {
+        Map<String, String> playerRegistry = PlayerData.of(player).getRegistries().getRegistry(PLAYER_REGISTRY_STATISTICS_KEY);
+        return Integer.parseInt(playerRegistry.getOrDefault("earned_advancement_count", "0"));
+    }
+
+    public static void setEarnedAdvancementCount(Player player, int count) {
+        PlayerData.of(player).getRegistries().put(PLAYER_REGISTRY_STATISTICS_KEY, "earned_advancement_count", String.valueOf(count));
+    }
+
+    public static int getCompletionCount(Player player) {
+        Map<String, String> playerRegistry = PlayerData.of(player).getRegistries().getRegistry(PLAYER_REGISTRY_STATISTICS_KEY);
+        return Integer.parseInt(playerRegistry.getOrDefault("completion_count", "0"));
+    }
+
+    public static void setCompletionCount(Player player, int count) {
+        PlayerData.of(player).getRegistries().put(PLAYER_REGISTRY_STATISTICS_KEY, "completion_count", String.valueOf(count));
+    }
+
+    public static long getCompletedAt(Player player) {
+        Map<String, String> playerRegistry = PlayerData.of(player).getRegistries().getRegistry(PLAYER_REGISTRY_STATISTICS_KEY);
+        return Long.parseLong(playerRegistry.getOrDefault("completed_at", "0"));
+    }
+
+    public static void setCompletedAt(Player player, long timestamp) {
+        PlayerData.of(player).getRegistries().put(PLAYER_REGISTRY_STATISTICS_KEY, "completed_at", String.valueOf(timestamp));
+    }
+
+    public static LinkedHashMap<Long, Integer> getCompletionHistory(Player player) {
+        Map<String, String> playerRegistry = PlayerData.of(player).getRegistries().getRegistry(PLAYER_REGISTRY_STATISTICS_KEY);
+        JSONObject historyJson = new JSONObject(playerRegistry.getOrDefault("history", "{}"));
+        LinkedHashMap<Long, Integer> history = historyJson.toMap()
+                .entrySet()
+                .parallelStream()
+                .map(e -> Map.entry(Long.parseLong(e.getKey()), e.getValue() instanceof Integer ? (Integer) e.getValue() : 0))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (before, after) -> before, LinkedHashMap::new));
+        return history;
+    }
+
+    public static void setCompletionHistory(Player player, Map<Long, Integer> history) {
+        PlayerData.of(player).getRegistries().put(PLAYER_REGISTRY_STATISTICS_KEY, "history", new JSONObject(history).toString());
+    }
+
+    public static void addCompletionHistory(Player player, long completedAt, int advancementCount) {
+        LinkedHashMap<Long, Integer> history = getCompletionHistory(player);
+        history.put(completedAt, advancementCount);
+        setCompletionHistory(player, history);
+    }
+
+    public static void removeCompletionHistory(Player player, long completedAt) {
+        LinkedHashMap<Long, Integer> history = getCompletionHistory(player);
+        history.remove(completedAt);
+        setCompletionHistory(player, history);
     }
 }
 

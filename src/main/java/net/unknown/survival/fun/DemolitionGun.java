@@ -65,27 +65,29 @@ public class DemolitionGun implements Listener {
                         arrow.setDamage(arrow.getDamage() * (event.getBow().getType() == Material.BOW ? 12 : 6));
                         arrow.setGlowing(true);
                         arrow.setGravity(false);
-                        new BukkitRunnable() {
-                            @Override
-                            public void run() {
-                                if (!arrow.getLocation().getChunk().isLoaded()) {
-                                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> arrow.getLocation().getChunk().load());
-                                }
+                        if (!UnknownNetworkCorePlugin.isFoliaPlatform()) {
+                            new BukkitRunnable() {
+                                @Override
+                                public void run() {
+                                    if (!arrow.getLocation().getChunk().isLoaded()) {
+                                        Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> arrow.getLocation().getChunk().load());
+                                    }
 
-                                if (!arrow.isDead() && !arrow.isOnGround()) {
-                                    if (arrow.getTicksLived() > 150) arrow.setGravity(true);
-                                    arrow.getLocation().getWorld().spawnParticle(Particle.SONIC_BOOM, arrow.getLocation(), 8);
-                                } else {
-                                    arrow.setGlowing(false);
-                                    Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
-                                        arrow.remove();
-                                        bukkitPlayer.playSound(bukkitPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.8f);
-                                        return null;
-                                    });
-                                    this.cancel();
+                                    if (!arrow.isDead() && !arrow.isOnGround()) {
+                                        if (arrow.getTicksLived() > 150) arrow.setGravity(true);
+                                        arrow.getLocation().getWorld().spawnParticle(Particle.SONIC_BOOM, arrow.getLocation(), 8);
+                                    } else {
+                                        arrow.setGlowing(false);
+                                        Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
+                                            arrow.remove();
+                                            bukkitPlayer.playSound(bukkitPlayer.getLocation(), Sound.ENTITY_ENDERMAN_TELEPORT, 1.0f, 0.8f);
+                                            return null;
+                                        });
+                                        this.cancel();
+                                    }
                                 }
-                            }
-                        }.runTaskTimerAsynchronously(UnknownNetworkCorePlugin.getInstance(), 0L, 1L);
+                            }.runTaskTimerAsynchronously(UnknownNetworkCorePlugin.getInstance(), 0L, 1L);
+                        }
                     } else {
                         event.setCancelled(true);
                     }

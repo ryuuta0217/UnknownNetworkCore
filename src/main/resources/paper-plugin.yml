@@ -4,6 +4,7 @@ api-version: "1.21"
 bootstrapper: net.unknown.UnknownNetworkCorePluginBootstrap
 main: net.unknown.UnknownNetworkCorePlugin
 has-open-classloader: true
+folia-supported: true
 dependencies:
   server:
     Vault:

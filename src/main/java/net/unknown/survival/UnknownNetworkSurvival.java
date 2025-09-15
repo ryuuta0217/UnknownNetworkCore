@@ -71,7 +71,6 @@ import java.util.logging.Logger;
 
 public class UnknownNetworkSurvival {
     private static final Logger LOGGER = Logger.getLogger("UNC/Survival");
-    private static boolean BOOTSTRAPPED = false;
     private static boolean HOLOGRAPHIC_DISPLAYS_ENABLED = false;
     private static boolean WORLD_GUARD_ENABLED = false;
     private static boolean VAULT_ENABLED = false;
@@ -81,12 +80,6 @@ public class UnknownNetworkSurvival {
 
     public static void onLoad() {
         //DamageEnchant.register();
-        try {
-            Class.forName("net.unknown.launchwrapper.Main");
-            BOOTSTRAPPED = true;
-        } catch (ClassNotFoundException ignored) {
-        }
-
         UnknownNetworkDiscordBot.runAnotherThread(UnknownNetworkDiscordBot.defaultBuilder());
     }
 
@@ -137,9 +130,10 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new EconomyListener());
         ListenerManager.registerListener(new MinecartPlacer());
         ListenerManager.registerListener(new AdvancementRewards());
+        ListenerManager.registerListener(new FastLeafDecay());
         SuppressRaids.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
-        if (isBootstrapped()) {
+        if (UnknownNetworkCorePlugin.isBootstrapped()) {
             getLogger().info("Successfully Bootstrapped!");
             ListenerManager.registerListener(new BlockDisassembler());
             ListenerManager.registerListener(new Crusher());
@@ -151,7 +145,7 @@ public class UnknownNetworkSurvival {
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "unknown:forge", new FMLConnectionListener());
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "unc_survival:open_gui", guiOpenListener);
 
-        DemolitionGun.BowPullIndicator.boot();
+        if (!UnknownNetworkCorePlugin.isFoliaPlatform()) DemolitionGun.BowPullIndicator.boot();
 
         if (isVaultEnabled() && !isJeconEnabled()) {
             VaultEconomy.hookVault();
@@ -184,10 +178,6 @@ public class UnknownNetworkSurvival {
 
     public static Logger getLogger() {
         return LOGGER;
-    }
-
-    public static boolean isBootstrapped() {
-        return BOOTSTRAPPED;
     }
 
     public static boolean isHolographicDisplaysEnabled() {

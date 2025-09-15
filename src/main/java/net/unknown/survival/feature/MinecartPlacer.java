@@ -39,6 +39,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.unknown.core.util.MinecraftAdapter;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -52,19 +53,21 @@ import org.bukkit.inventory.ItemStack;
 public class MinecartPlacer implements Listener {
     @EventHandler
     public void onInteractRail(PlayerInteractEvent event) {
+        if (event.getPlayer().getGameMode() == GameMode.SPECTATOR) return;
         if (event.getHand() == EquipmentSlot.OFF_HAND) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         if (!event.getClickedBlock().getType().name().endsWith("RAIL")) return;
         Inventory playerInventory = event.getPlayer().getInventory();
         Location blockLocation = event.getClickedBlock().getLocation();
 
-        if (playerInventory.contains(Material.MINECART)) {
-            ItemStack minecartItem = playerInventory.getItem(event.getPlayer().getInventory().first(Material.MINECART));
+        if (playerInventory.contains(Material.MINECART) || event.getPlayer().getGameMode() == GameMode.CREATIVE) {
+            ItemStack minecartItem = event.getPlayer().getGameMode() == GameMode.CREATIVE ? new ItemStack(Material.MINECART) : playerInventory.getItem(event.getPlayer().getInventory().first(Material.MINECART));
             if (minecartItem != null) {
                 Minecart minecartEntity = AbstractMinecart.createMinecart(MinecraftAdapter.level(blockLocation.getWorld()), blockLocation.getX(), blockLocation.getY() + 0.0625, blockLocation.getZ(), EntityType.MINECART, EntitySpawnReason.DISPENSER, MinecraftAdapter.ItemStack.itemStack(minecartItem), MinecraftAdapter.player(event.getPlayer()));
                 if (MinecraftAdapter.level(blockLocation.getWorld()).addFreshEntity(minecartEntity)) {
                     MinecraftAdapter.level(blockLocation.getWorld()).gameEvent(GameEvent.ENTITY_PLACE, MinecraftAdapter.vec3(blockLocation), GameEvent.Context.of(MinecraftAdapter.player(event.getPlayer()), MinecraftAdapter.blockState(event.getClickedBlock())));
                     minecartItem.setAmount(minecartItem.getAmount() - 1);
+                    MinecraftAdapter.player(event.getPlayer()).startRiding(minecartEntity, true);
                 }
             }
         }

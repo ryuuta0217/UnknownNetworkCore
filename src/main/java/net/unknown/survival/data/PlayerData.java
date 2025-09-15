@@ -242,7 +242,9 @@ public class PlayerData extends ConfigurationBase {
         @Nullable
         public String put(NamespacedKey namespace, String key, String value) {
             if (!this.registry.containsKey(namespace)) this.registry.put(namespace, new HashMap<>());
-            return this.registry.get(namespace).put(key, value);
+            String oldValue = this.registry.get(namespace).put(key, value);
+            RunnableManager.runAsync(this.getPlayerData()::save);
+            return oldValue;
         }
 
         public boolean containsKey(NamespacedKey namespace, String key) {
