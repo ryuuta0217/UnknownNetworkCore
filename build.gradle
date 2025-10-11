@@ -8,7 +8,7 @@ plugins {
     id 'java'
     id 'application'
     id 'maven-publish'
-    id 'io.papermc.paperweight.userdev' version '+' // Enable Development of using Mojang Mapping.
+    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.17' // Enable Development of using Mojang Mapping.
     id 'xyz.jpenilla.run-paper' version '2.3.0' // Run Mojang Mapped or Spigot Mapped Server
     id 'com.github.johnrengelman.shadow' version '+' // fatJar
     id 'org.cadixdev.licenser' version '+' // Add License Header to source code headers.
