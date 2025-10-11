@@ -1,0 +1,46 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/daily/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:bow",
+      "count": 1
+    },
+    "title": {
+      "text": "スナイパー対決"
+    },
+    "description": [
+      {
+        "text": "10m以上離れたところから弓を使って自然スポーンしたスケルトンを10体倒す",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- デイリーPt 30Pt"
+        }
+      ]
+    ],
+    "x": 3.0,
+    "y": 3.0
+  },
+  "criteria": {
+    "0..10": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "0..10"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/daily_point_30"
+  }
+}

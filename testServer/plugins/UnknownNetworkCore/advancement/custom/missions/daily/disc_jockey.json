@@ -1,0 +1,46 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/daily/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:jukebox",
+      "count": 1
+    },
+    "title": {
+      "text": "ディスクジョッキー"
+    },
+    "description": [
+      {
+        "text": "ジュークボックスを2台使って、2つの異なるレコードを同時に再生する",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- デイリーPt 5Pt"
+        }
+      ]
+    ],
+    "x": 5.0,
+    "y": 1.0
+  },
+  "criteria": {
+    "disc_jockey": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "disc_jockey"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/daily_point_5"
+  }
+}

@@ -34,7 +34,9 @@ package net.unknown;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.locale.Language;
+import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.unknown.core.advancements.AdvancementManager;
 import net.unknown.core.athletic.Athletics;
 import net.unknown.core.block.MultiPageChest;
 import net.unknown.core.bossbar.TPSBar;
@@ -158,6 +160,8 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         ListenerManager.registerListener(SkinManager.INSTANCE);
         ListenerManager.registerListener(new PrivateMessageListener());
         ListenerManager.registerListener(new WhoisListener());
+        if (isBootstrapped()) ListenerManager.registerListener(AdvancementManager.INSTANCE);
+        if (isBootstrapped()) PacketManager.getInstance().registerOutgoingS2CListener(ClientboundUpdateAdvancementsPacket.class, AdvancementManager.INSTANCE);
         TPSBar.initialize();
         TabListPingManager.startTask();
         PlayerPrefixes.loadAll();
@@ -169,6 +173,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         Spy.registerModule(new PrivateMessageSpy());
         NameHistory.loadNameHistory();
         NameHistory.init();
+        if (isBootstrapped()) AdvancementManager.loadAdvancements(true);
         getLogger().info("");
         getLogger().info("");
         getLogger().info("""
