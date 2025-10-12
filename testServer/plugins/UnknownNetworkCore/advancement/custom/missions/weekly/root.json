@@ -1,0 +1,33 @@
+{
+  "sends_telemetry_event": false,
+  "display": {
+    "icon": {
+      "id": "minecraft:bell",
+      "count": 1
+    },
+    "title": {
+      "text": "ウィークリーミッション",
+      "color": "aqua",
+      "bold": true
+    },
+    "description": {
+      "text": "毎週日曜日0時に更新されるミッションをクリアして、報酬を受け取ろう！",
+      "color": "green"
+    },
+    "background": "minecraft:block/stone_bricks",
+    "announce_to_chat": false,
+    "show_toast": false,
+    "x": 0.0,
+    "y": 0.0
+  },
+  "criteria": {
+    "_": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "_"
+    ]
+  ]
+}

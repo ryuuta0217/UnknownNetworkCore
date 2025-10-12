@@ -1,0 +1,46 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/daily/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:lava_bucket",
+      "count": 1
+    },
+    "title": {
+      "text": "完全自殺マニュアル"
+    },
+    "description": [
+      {
+        "text": "5つの異なる死に方をする",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- デイリーPt 25Pt"
+        }
+      ]
+    ],
+    "x": 3.0,
+    "y": 1.0
+  },
+  "criteria": {
+    "0..5": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "0..5"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/daily_point_25"
+  }
+}

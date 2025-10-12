@@ -29,37 +29,8 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.commands;
+package net.unknown.core.advancements;
 
-import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSourceStack;
-import net.unknown.UnknownNetworkCorePlugin;
-import net.unknown.core.commands.vanilla.GamemodeCommand;
-import net.unknown.core.commands.vanilla.MsgCommand;
-import net.unknown.core.commands.vanilla.TimeCommand;
-import net.unknown.core.fireworks.ProgrammedFireworksCommand;
-
-public class Commands {
-    public static void init(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
-        CrashCommand.register(dispatcher);
-        EvalCommand.register(dispatcher);
-        PacketCommand.register(dispatcher);
-        SkinCommand.register(dispatcher);
-        NickCommand.register(dispatcher);
-        SetPoseCommand.register(dispatcher);
-        GamemodeCommand.register(dispatcher);
-        MsgCommand.register(dispatcher);
-        TeleportWorldCommand.register(dispatcher);
-        DeepFakeCommand.register(dispatcher);
-        SkullCommand.register(dispatcher);
-        TrashCommand.register(dispatcher);
-        TimeCommand.register(dispatcher);
-        SwapLocationCommand.register(dispatcher);
-        ProgrammedFireworksCommand.register(dispatcher);
-        VanishCommand.register(dispatcher);
-        WhoisCommand.register(dispatcher);
-        ToastCommand.register(dispatcher, buildContext);
-        SpyCommand.register(dispatcher);
-    }
+public enum AdvancementPlacingBehaviour {
+    ROOT_LEFT_TOP_GRID
 }

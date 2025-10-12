@@ -45,6 +45,7 @@ import net.unknown.core.enums.Permissions;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
+import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.ConsoleCommandSender;
@@ -53,15 +54,15 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class Spy implements Listener {
     private static final Spy INSTANCE = new Spy();
     private static final Logger LOGGER = Logger.getLogger("UNC/Spy");
+    private static final NamespacedKey PLAYER_REGISTRY_KEY = new NamespacedKey("unknown-network", "spy");
     private static final Set<SpyModule> MODULES = new HashSet<>();
     private static boolean FREEZE = false;
 
@@ -79,6 +80,14 @@ public class Spy implements Listener {
     @EventHandler
     public void onTickEnd(ServerTickEndEvent event) {
         MODULES.forEach(module -> module.onTickEnd(event));
+    }
+
+    public static Set<SpyModule> getRegisteredModules() {
+        return Collections.unmodifiableSet(MODULES);
+    }
+
+    public static SpyModule getModule(NamespacedKey moduleIdentifier) {
+        return MODULES.stream().filter(module -> module.getIdentifier().equals(moduleIdentifier)).findAny().orElse(null);
     }
 
     public static void registerModule(SpyModule module) {
@@ -106,6 +115,72 @@ public class Spy implements Listener {
         });
     }
 
+    public static boolean isModuleEnabled(Player player, SpyModule module) {
+        PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
+        Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
+        return !disabledModules.contains(module.getIdentifier().asString());
+    }
+
+    public static Set<SpyModule> getEnabledModules(Player player) {
+        PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
+        Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
+        return MODULES.stream().filter(module -> !disabledModules.contains(module.getIdentifier().toString())).collect(Collectors.toSet());
+    }
+
+    public static Set<NamespacedKey> getEnabledModuleIdentifiers(Player player) {
+        return getEnabledModules(player).stream().map(SpyModule::getIdentifier).collect(Collectors.toSet());
+    }
+
+    public static void enableModule(Player player, SpyModule module) {
+        PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
+
+        Set<String> enabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "enabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("enabled").split(", ?"))) : new HashSet<>();
+        Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : new HashSet<>();
+
+        enabledModules.add(module.getIdentifier().asString());
+        disabledModules.remove(module.getIdentifier().asString());
+        registries.put(PLAYER_REGISTRY_KEY, "enabled", String.join(",", enabledModules));
+        registries.put(PLAYER_REGISTRY_KEY, "disabled", String.join(",", disabledModules));
+    }
+
+    public static void enableModule(Player player, NamespacedKey moduleIdentifier) {
+        if (MODULES.stream().noneMatch(module -> module.getIdentifier().equals(moduleIdentifier))) throw new IllegalArgumentException("No such spy module registered with identifier: " + moduleIdentifier.asString());
+        MODULES.stream().filter(module -> module.getIdentifier().equals(moduleIdentifier)).findAny().ifPresent(module -> enableModule(player, module));
+    }
+
+    public static boolean isModuleDisabled(Player player, SpyModule module) {
+        PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
+        Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
+        return disabledModules.contains(module.getIdentifier().asString());
+    }
+
+    public static Set<SpyModule> getDisabledModules(Player player) {
+        PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
+        Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
+        return MODULES.stream().filter(module -> disabledModules.contains(module.getIdentifier().toString())).collect(Collectors.toSet());
+    }
+
+    public static Set<NamespacedKey> getDisabledModuleIdentifiers(Player player) {
+        return getDisabledModules(player).stream().map(SpyModule::getIdentifier).collect(Collectors.toSet());
+    }
+
+    public static void disableModule(Player player, SpyModule module) {
+        PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
+
+        Set<String> enabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "enabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("enabled").split(", ?"))) : new HashSet<>();
+        Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : new HashSet<>();
+
+        enabledModules.remove(module.getIdentifier().asString());
+        disabledModules.add(module.getIdentifier().asString());
+        registries.put(PLAYER_REGISTRY_KEY, "enabled", String.join(",", enabledModules));
+        registries.put(PLAYER_REGISTRY_KEY, "disabled", String.join(",", disabledModules));
+    }
+
+    public static void disableModule(Player player, NamespacedKey moduleIdentifier) {
+        if (MODULES.stream().noneMatch(module -> module.getIdentifier().equals(moduleIdentifier))) throw new IllegalArgumentException("No such spy module registered with identifier: " + moduleIdentifier.asString());
+        MODULES.stream().filter(module -> module.getIdentifier().equals(moduleIdentifier)).findAny().ifPresent(module -> disableModule(player, module));
+    }
+
     public static void unregisterAll() {
         if (FREEZE) throw new UnsupportedOperationException("Spy modules registry is already frozen!");
         MODULES.clear();
@@ -120,19 +195,20 @@ public class Spy implements Listener {
         FREEZE = false;
     }
 
-    public static Set<Audience> getSpyMessageReceivers(Predicate<Player> receiverRemoveIf, boolean logConsole) {
+    public static Set<Audience> getSpyMessageReceivers(SpyModule source, Predicate<Player> receiverRemoveIf, boolean logConsole) {
         Set<Audience> receivers = new HashSet<>();
         Bukkit.getOnlinePlayers()
                 .stream()
                 .filter(player -> player.isOp() || player.hasPermission(Permissions.FEATURE_SPY.getPermissionNode()))
                 .filter(player -> !receiverRemoveIf.test(player))
+                .filter(player -> isModuleEnabled(player, source))
                 .forEach(receivers::add);
         if (logConsole) receivers.add(Bukkit.getConsoleSender());
         return receivers;
     }
 
     public static void broadcastSpyMessage(SpyModule source, Component message, Predicate<Player> receiverRemoveIf, boolean logConsole, @Nullable UUID sender) {
-        Spy.getSpyMessageReceivers(receiverRemoveIf, logConsole).forEach(audience -> {
+        Spy.getSpyMessageReceivers(source, receiverRemoveIf, logConsole).forEach(audience -> {
             if (audience instanceof Player audiencePlayer) {
                 Component spyMessage = Component.empty().color(DefinedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true)
                         .append(source.getDisplayName())

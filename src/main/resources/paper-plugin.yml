@@ -59,14 +59,28 @@ permissions:
       minecraft.command.setpose: true
       minecraft.command.eval: true
       minecraft.command.crash: true
+      minecraft.command.teleportworld: true
+      minecraft.command.tpw: true
+      minecraft.command.deepfake: true
+      minecraft.command.swaplocation: true
       minecraft.command.vanish: true
+      minecraft.command.whois: true
+      minecraft.command.toast: true
+      minecraft.command.spy: true
       unknown.core.command.nick: true
       unknown.core.command.skin: true
       unknown.core.command.packet: true
       unknown.core.command.setpose: true
       unknown.core.command.eval: true
       unknown.core.command.crash: true
+      unknown.core.command.teleportworld: true
+      unknown.core.command.tpw: true
+      unknown.core.command.deepfake: true
+      unknown.core.command.swaplocation: true
       unknown.core.command.vanish: true
+      unknown.core.command.whois: true
+      unknown.core.command.toast: true
+      unknown.core.command.spy: true
       unknown.feature.see_vanished_players: true
   unknown.survival.default:
     default: true

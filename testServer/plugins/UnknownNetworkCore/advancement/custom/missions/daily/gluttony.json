@@ -1,0 +1,46 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/daily/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:cooked_chicken",
+      "count": 1
+    },
+    "title": {
+      "text": "飽食"
+    },
+    "description": [
+      {
+        "text": "空腹度が満腹から半分減った時点で何かを食べる",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- デイリーPt 10Pt"
+        }
+      ]
+    ],
+    "x": 2.0,
+    "y": 2.0
+  },
+  "criteria": {
+    "gluttony": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "gluttony"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/daily_point_10"
+  }
+}

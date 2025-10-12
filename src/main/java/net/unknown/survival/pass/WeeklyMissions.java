@@ -29,37 +29,36 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.commands;
+package net.unknown.survival.pass;
 
-import com.mojang.brigadier.CommandDispatcher;
-import net.minecraft.commands.CommandBuildContext;
-import net.minecraft.commands.CommandSourceStack;
-import net.unknown.UnknownNetworkCorePlugin;
-import net.unknown.core.commands.vanilla.GamemodeCommand;
-import net.unknown.core.commands.vanilla.MsgCommand;
-import net.unknown.core.commands.vanilla.TimeCommand;
-import net.unknown.core.fireworks.ProgrammedFireworksCommand;
+import com.mojang.serialization.JsonOps;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.critereon.ImpossibleTrigger;
+import net.minecraft.advancements.critereon.KilledTrigger;
+import net.minecraft.advancements.critereon.PlayerTrigger;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.unknown.core.advancements.AdvancementManager;
+import net.unknown.core.builder.advancement.DisplayInfoBuilder;
+import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.util.MinecraftAdapter;
+import net.unknown.core.util.NewMessageUtil;
+import net.unknown.survival.item.MendingSupportStickItem;
+import org.bukkit.Bukkit;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
 
-public class Commands {
-    public static void init(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
-        CrashCommand.register(dispatcher);
-        EvalCommand.register(dispatcher);
-        PacketCommand.register(dispatcher);
-        SkinCommand.register(dispatcher);
-        NickCommand.register(dispatcher);
-        SetPoseCommand.register(dispatcher);
-        GamemodeCommand.register(dispatcher);
-        MsgCommand.register(dispatcher);
-        TeleportWorldCommand.register(dispatcher);
-        DeepFakeCommand.register(dispatcher);
-        SkullCommand.register(dispatcher);
-        TrashCommand.register(dispatcher);
-        TimeCommand.register(dispatcher);
-        SwapLocationCommand.register(dispatcher);
-        ProgrammedFireworksCommand.register(dispatcher);
-        VanishCommand.register(dispatcher);
-        WhoisCommand.register(dispatcher);
-        ToastCommand.register(dispatcher, buildContext);
-        SpyCommand.register(dispatcher);
+import java.util.Optional;
+import java.util.stream.IntStream;
+
+public class WeeklyMissions {
+    public static void send(Player player) {
     }
 }

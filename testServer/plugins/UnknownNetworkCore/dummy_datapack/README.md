@@ -1,0 +1,2 @@
+# カスタム進捗編集用ダミーデータパック
+カスタム進捗をVisual Studio CodeでDatapack Helper Plusの強力な補完を機能させるために存在するフォルダです。

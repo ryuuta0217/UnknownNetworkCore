@@ -88,8 +88,8 @@ public class PrivateMessageSpy implements SpyModule, Listener {
         });
     }
 
-    private static void broadcastSpyMessage(PlayerChatMessage originalMessage, Component sourceDisplayName, Component targetDisplayName, Component message, Predicate<Player> receiverRemoveIf) {
-        Spy.getSpyMessageReceivers(receiverRemoveIf, true).forEach(audience -> {
+    private void broadcastSpyMessage(PlayerChatMessage originalMessage, Component sourceDisplayName, Component targetDisplayName, Component message, Predicate<Player> receiverRemoveIf) {
+        Spy.getSpyMessageReceivers(this, receiverRemoveIf, true).forEach(audience -> {
             if (audience instanceof Player audiencePlayer) {
                 ServerPlayer audienceMinecraftPlayer = MinecraftAdapter.player(audiencePlayer);
                 if (audienceMinecraftPlayer != null) {

@@ -131,8 +131,6 @@ public class PacketManager implements Listener {
                             if (event.isCancelled()) return;
                             super.write(ctx, event.getPacket(), promise);
                             return;
-                        } else {
-                            LOGGER.info("PacketManager detected unknown instance packet: " + msg.getClass().getName());
                         }
                         super.write(ctx, msg, promise);
                     }

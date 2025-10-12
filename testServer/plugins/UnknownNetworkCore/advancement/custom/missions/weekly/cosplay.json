@@ -1,0 +1,47 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/weekly/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:player_head",
+      "count": 1
+    },
+    "title": {
+      "text": "コスプレ"
+    },
+    "description": [
+      {
+        "text": "自分以外の誰かの頭を被る",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- ウィークリーPt 5Pt"
+        }
+      ]
+    ],
+    "x": 5.0,
+    "y": 1.0
+  },
+  "criteria": {
+    "0": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "0"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/weekly_point_5"
+  }
+}
+  
