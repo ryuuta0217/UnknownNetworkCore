@@ -143,14 +143,14 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
     public static Pair<ResourceLocation, Advancement> loadAdvancement(ResourceLocation id, @Nullable RegistryOps<JsonElement> serializationContext, String customAdvancementJson) throws IOException {
         if (id == null) throw new IllegalArgumentException("Advancement ID cannot be null.");
         LOGGER.info("Loading advancement " + id);
-        CustomAdvancementPreLoadEvent preLoadEvent = new CustomAdvancementPreLoadEvent(id, String.join("\n", Files.readAllLines(customAdvancementFile.toPath())));
+        CustomAdvancementPreLoadEvent preLoadEvent = new CustomAdvancementPreLoadEvent(id, customAdvancementJson);
         if (!preLoadEvent.callEvent()) return null;
         id = preLoadEvent.getId();
 
         /* Raw String JSON -> JSON Object */
         JsonElement elementObj = preLoadEvent.getJson(true);
         if (elementObj == null || !elementObj.isJsonObject() || !(elementObj instanceof JsonObject jsonObj)) { // Error Handling
-            throw new IllegalArgumentException("Invalid JSON in advancement file: " + customAdvancementFile.getAbsolutePath());
+            throw new IllegalArgumentException("Invalid JSON in advancement");
         }
 
         /* Custom Criteria Parsing */
@@ -203,7 +203,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
     }
 
     public static Pair<ResourceLocation, Advancement> loadAdvancement(ResourceLocation id, @Nullable RegistryOps<JsonElement> serializationContext, File customAdvancementFile) throws IOException {
-
+        return loadAdvancement(id, serializationContext, String.join("\n", Files.readAllLines(customAdvancementFile.toPath())));
     }
 
     public static Pair<ResourceLocation, Advancement> loadAdvancement(@Nullable String namespace, Path root, @Nullable RegistryOps<JsonElement> serializationContext, File customAdvancementFile) throws IOException {
