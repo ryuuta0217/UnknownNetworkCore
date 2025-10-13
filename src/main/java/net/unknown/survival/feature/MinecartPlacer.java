@@ -67,7 +67,7 @@ public class MinecartPlacer implements Listener {
                 if (MinecraftAdapter.level(blockLocation.getWorld()).addFreshEntity(minecartEntity)) {
                     MinecraftAdapter.level(blockLocation.getWorld()).gameEvent(GameEvent.ENTITY_PLACE, MinecraftAdapter.vec3(blockLocation), GameEvent.Context.of(MinecraftAdapter.player(event.getPlayer()), MinecraftAdapter.blockState(event.getClickedBlock())));
                     minecartItem.setAmount(minecartItem.getAmount() - 1);
-                    MinecraftAdapter.player(event.getPlayer()).startRiding(minecartEntity, true);
+                    MinecraftAdapter.player(event.getPlayer()).startRiding(minecartEntity, true, true);
                 }
             }
         }

@@ -658,7 +658,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
         Map<ResourceLocation, AdvancementProgress> toSetProgress = new HashMap<>();
 
         if (mergeVanilla) {
-            VanillaAdvancementLoader loader = new VanillaAdvancementLoader(player.getAdvancements(), player.getServer().getAdvancements());
+            VanillaAdvancementLoader loader = new VanillaAdvancementLoader(player.getAdvancements(), MinecraftServer.getServer().getAdvancements());
             try {
                 loader.load();
             } catch(Throwable t) {

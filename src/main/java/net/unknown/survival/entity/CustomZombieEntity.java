@@ -100,7 +100,7 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
     }
 
     public void reassessWeaponGoal() {
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             this.goalSelector.removeGoal(this.meleeGoal);
             this.goalSelector.removeGoal(this.bowGoal);
 
@@ -117,14 +117,14 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
     @Nullable
     @Override
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor world, DifficultyInstance difficulty, EntitySpawnReason spawnReason, @Nullable SpawnGroupData entityData) {
-        if (!this.level().isClientSide) this.reassessWeaponGoal();
+        if (!this.level().isClientSide()) this.reassessWeaponGoal();
         return super.finalizeSpawn(world, difficulty, spawnReason, entityData);
     }
 
     @Override
     public void setItemSlot(EquipmentSlot slot, ItemStack stack) {
         super.setItemSlot(slot, stack);
-        if (!this.level().isClientSide) {
+        if (!this.level().isClientSide()) {
             this.reassessWeaponGoal();
         }
     }

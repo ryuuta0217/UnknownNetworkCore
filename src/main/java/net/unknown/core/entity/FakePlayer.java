@@ -58,6 +58,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityReference;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -146,7 +147,7 @@ public class FakePlayer extends ServerPlayer {
                     return;
                 }
 
-                if (projectile.deflect(ProjectileDeflection.AIM_DEFLECT, this, this, true)) {
+                if (projectile.deflect(ProjectileDeflection.AIM_DEFLECT, this, EntityReference.of(this), true)) {
                     this.level().playSound((Player)null, this.getX(), this.getY(), this.getZ(), SoundEvents.PLAYER_ATTACK_NODAMAGE, this.getSoundSource());
                     return;
                 }
@@ -279,7 +280,7 @@ public class FakePlayer extends ServerPlayer {
                         EnchantmentHelper.doPostAttackEffects(serverLevel1, target, damageSource);
                     }
 
-                    if (!this.level().isClientSide && !weaponItem.isEmpty() && entity instanceof LivingEntity) {
+                    if (!this.level().isClientSide() && !weaponItem.isEmpty() && entity instanceof LivingEntity) {
                         if (flag5) {
                             weaponItem.postHurtEnemy((LivingEntity)entity, this);
                         }
@@ -337,7 +338,7 @@ public class FakePlayer extends ServerPlayer {
 
     public static class ServerGamePacketListenerImpl extends net.minecraft.server.network.ServerGamePacketListenerImpl {
         public ServerGamePacketListenerImpl(FakePlayer player) {
-            super(player.getServer(), new net.minecraft.network.Connection(PacketFlow.SERVERBOUND) {
+            super(MinecraftServer.getServer(), new net.minecraft.network.Connection(PacketFlow.SERVERBOUND) {
                 @Override
                 public void setListenerForServerboundHandshake(PacketListener packetListener) {
                     // Ignored all

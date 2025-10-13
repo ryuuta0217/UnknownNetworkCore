@@ -41,6 +41,8 @@ import net.minecraft.network.chat.FormattedText;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.StringDecomposer;
+import org.bukkit.Bukkit;
+import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +66,7 @@ public class Languages {
         try {
             LOGGER.info("Initializing...");
 
-            ASSETS.init(SharedConstants.VERSION_STRING);
+            ASSETS.init(Bukkit.getMinecraftVersion());
             ASSETS.getAssetsMatching("^minecraft/lang/.*").forEach((fileName, asset) -> {
                 String[] filePath = fileName.split("/");
                 String langCode = filePath[filePath.length - 1].split("\\.")[0];
@@ -73,7 +75,7 @@ public class Languages {
                 AVAILABLE_LANGUAGES.add(locale);
             });
 
-            LOGGER.info("Successfully initialized. Environment: Minecraft {}", SharedConstants.VERSION_STRING);
+            LOGGER.info("Successfully initialized. Environment: Minecraft {}", Bukkit.getMinecraftVersion());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -83,7 +85,7 @@ public class Languages {
         if (LOADED_LANGUAGES.containsKey(locale)) return;
         try {
             LOGGER.info("Loading language {}...", locale);
-            Asset languageAsset = ASSETS.getAssetMatching("^minecraft/lang/" + locale.toString().toLowerCase() + "." + (MinecraftUtil.isModernVersion(SharedConstants.VERSION_STRING) ? "json" : "lang"));
+            Asset languageAsset = ASSETS.getAssetMatching("^minecraft/lang/" + locale.toString().toLowerCase() + "." + (MinecraftUtil.isModernVersion(Bukkit.getMinecraftVersion()) ? "json" : "lang"));
             if (languageAsset == null) {
                 throw new IllegalArgumentException("Language " + locale + " is not available.");
             }
