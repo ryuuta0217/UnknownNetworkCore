@@ -771,16 +771,16 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
     @Override
     public void onSendingPacket(PacketSendingEvent<ClientboundUpdateAdvancementsPacket> event) {
         boolean clearExisting = event.getPacket().shouldReset();
-        List<AdvancementHolder> added = new ArrayList<>(event.getPacket().getAdded());
-        Set<ResourceLocation> removed = new HashSet<>(event.getPacket().getRemoved());
-        Map<ResourceLocation, AdvancementProgress> progressMap = new HashMap<>(event.getPacket().getProgress());
+        List<AdvancementHolder> added = new ArrayList<>(event.getPacket().getAdded() != null ? event.getPacket().getAdded() : Collections.emptyList());
+        Set<ResourceLocation> removed = new HashSet<>(event.getPacket().getRemoved() != null ? event.getPacket().getRemoved() : Collections.emptySet());
+        Map<ResourceLocation, AdvancementProgress> progressMap = new HashMap<>(event.getPacket().getProgress() != null ? event.getPacket().getProgress() : Collections.emptyMap());
         boolean showAdvancements = event.getPacket().shouldShowAdvancements();
 
         if (clearExisting) {
             added.addAll(ADVANCEMENTS.values());
 
             UUID player = event.getPlayer().getUniqueId();
-            progressMap.putAll(PROGRESSES.get(player));
+            progressMap.putAll(PROGRESSES.getOrDefault(player, Collections.emptyMap()));
             event.setPacket(new ClientboundUpdateAdvancementsPacket(true, added, removed, progressMap, showAdvancements));
         }
     }
