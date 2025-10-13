@@ -32,9 +32,9 @@
 package net.unknown.core.bossbar;
 
 import com.destroystokyo.paper.event.server.ServerTickEndEvent;
-import io.papermc.paper.threadedregions.ThreadedRegionizer;
-import io.papermc.paper.threadedregions.TickData;
-import io.papermc.paper.threadedregions.TickRegionScheduler;
+//import io.papermc.paper.threadedregions.ThreadedRegionizer;
+//import io.papermc.paper.threadedregions.TickData;
+//import io.papermc.paper.threadedregions.TickRegionScheduler;
 import io.papermc.paper.threadedregions.TickRegions;
 import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.minecraft.ChatFormatting;
@@ -149,7 +149,7 @@ public class TPSBar implements Listener {
         private Folia() {
 
         }
-
+/*
         private static synchronized void createBossBar(Player player) {
             CustomBossEvent bar = new CustomBossEvent(
                     ResourceLocation.tryBySeparator("unknown-network:tps", ':'), Component.literal("..."));
@@ -212,6 +212,6 @@ public class TPSBar implements Listener {
                     else bar.setColor(BossEvent.BossBarColor.RED);
                 }
             }, null, 20, 20);
-        }
+        }*/
     }
 }

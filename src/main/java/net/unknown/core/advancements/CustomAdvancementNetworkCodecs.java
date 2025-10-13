@@ -49,7 +49,7 @@ public class CustomAdvancementNetworkCodecs {
                             ItemStack.STRICT_CODEC.fieldOf("icon").forGetter(DisplayInfo::getIcon),
                             ComponentSerialization.CODEC.fieldOf("title").forGetter(DisplayInfo::getTitle),
                             ComponentSerialization.CODEC.fieldOf("description").forGetter(DisplayInfo::getDescription),
-                            ClientAsset.CODEC.optionalFieldOf("background").forGetter(DisplayInfo::getBackground),
+                            ClientAsset.ResourceTexture.CODEC.optionalFieldOf("background").forGetter(DisplayInfo::getBackground),
                             AdvancementType.CODEC.optionalFieldOf("frame", AdvancementType.TASK).forGetter(DisplayInfo::getType),
                             Codec.BOOL.optionalFieldOf("show_toast", true).forGetter(DisplayInfo::shouldShowToast),
                             Codec.BOOL.optionalFieldOf("announce_to_chat", true).forGetter(DisplayInfo::shouldAnnounceChat),

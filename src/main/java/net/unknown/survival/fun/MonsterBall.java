@@ -34,6 +34,7 @@ package net.unknown.survival.fun;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ProblemReporter;
@@ -45,6 +46,7 @@ import net.minecraft.world.entity.projectile.ThrownEgg;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.component.TypedEntityData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.unknown.core.managers.ListenerManager;
@@ -83,7 +85,7 @@ public class MonsterBall implements Listener {
                             ItemStack spawnEgg = new ItemStack(SpawnEggItem.byId(mob.getType()));
                             CompoundTag spawnEggTag = new CompoundTag();
                             spawnEggTag.put("EntityTag", entityTag);
-                            spawnEgg.set(DataComponents.ENTITY_DATA, CustomData.of(entityTag));
+                            spawnEgg.set(DataComponents.ENTITY_DATA, TypedEntityData.of(mob.getType(), entityTag));
 
                             ItemEntity e = new ItemEntity(mob.level(), mob.getX(), mob.getY(), mob.getZ(), spawnEgg);
                             mob.level().addFreshEntity(e, CreatureSpawnEvent.SpawnReason.EGG);

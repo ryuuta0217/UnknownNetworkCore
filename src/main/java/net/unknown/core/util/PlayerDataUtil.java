@@ -34,6 +34,7 @@ package net.unknown.core.util;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.players.NameAndId;
 import net.minecraft.util.ProblemReporter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -82,6 +83,6 @@ public class PlayerDataUtil {
 
     @Nullable
     public static CompoundTag getData(OfflinePlayer offlinePlayer) {
-        return offlinePlayer.hasPlayedBefore() ? DedicatedServer.getServer().playerDataStorage.load(offlinePlayer.getName(), offlinePlayer.getUniqueId().toString(), ProblemReporter.DISCARDING).orElse(null) : null;
+        return offlinePlayer.hasPlayedBefore() ? DedicatedServer.getServer().playerDataStorage.load(new NameAndId(offlinePlayer.getUniqueId(), offlinePlayer.getName())).orElse(null) : null;
     }
 }
