@@ -94,6 +94,7 @@ dependencies {
     annotationProcessor group: 'com.velocitypowered', name: 'velocity-api', version: '+'
     implementation group: 'io.ipinfo', name: 'ipinfo-api', version: '+'
     compileOnly group: "com.viaversion", name: "viaversion-api", version: "+"
+    compileOnly group: 'com.github.Gecolay.GSit', name: 'core', version: '+'
 }
 
 paperweight {
