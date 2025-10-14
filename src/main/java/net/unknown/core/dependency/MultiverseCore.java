@@ -331,7 +331,13 @@ public class MultiverseCore {
     }
 
     public static synchronized boolean regenerateWorld(LoadedMultiverseWorld world, @Nullable String seed, boolean keepGameRule) throws IllegalArgumentException, IllegalStateException {
-        if (!Bukkit.isPrimaryThread()) throw new IllegalStateException("This method must be called on the main thread.");
+        if (!Bukkit.isPrimaryThread()) {
+            try {
+                return Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> regenerateWorld(world, seed, keepGameRule)).get();
+            } catch (InterruptedException | ExecutionException e) {
+                throw new IllegalStateException("Failed to regenerate world " + world.getName(), e);
+            }
+        }
         if (!world.isLoaded()) throw new IllegalArgumentException("World " + world.getName() + " is not loaded.");
 
         RegenWorldOptions options = RegenWorldOptions.world(world);
