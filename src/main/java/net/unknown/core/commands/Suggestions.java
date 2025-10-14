@@ -42,9 +42,9 @@ import java.util.Arrays;
 
 public class Suggestions {
     public static final SuggestionProvider<CommandSourceStack> ALL_PLAYER_SUGGEST = (ctx, builder) -> {
-        return SharedSuggestionProvider.suggest(Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName).toList(), builder);
+        return SharedSuggestionProvider.suggest(Arrays.stream(Bukkit.getOfflinePlayers()).parallel().map(OfflinePlayer::getName), builder);
     };
     public static final SuggestionProvider<CommandSourceStack> WORLD_SUGGEST = (ctx, builder) -> {
-        return SharedSuggestionProvider.suggest(Bukkit.getWorlds().stream().map(World::getName), builder);
+        return SharedSuggestionProvider.suggest(Bukkit.getWorlds().stream().parallel().map(World::getName), builder);
     };
 }
