@@ -41,7 +41,7 @@ import net.unknown.core.athletic.Athletics;
 import net.unknown.core.block.MultiPageChest;
 import net.unknown.core.bossbar.TPSBar;
 import net.unknown.core.chat.CustomChatTypes;
-import net.unknown.core.feature.PrivateMessageListener;
+import net.unknown.core.feature.PrivateMessageNotification;
 import net.unknown.core.feature.WhoisListener;
 import net.unknown.core.feature.admin.spy.Spy;
 import net.unknown.core.feature.admin.spy.modules.CommandSpy;
@@ -158,7 +158,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         ListenerManager.registerListener(new Athletics.Listener());
         ListenerManager.registerListener(new MultiPageChest.Listener());
         ListenerManager.registerListener(SkinManager.INSTANCE);
-        ListenerManager.registerListener(new PrivateMessageListener());
+        ListenerManager.registerListener(new PrivateMessageNotification());
         ListenerManager.registerListener(new WhoisListener());
         if (isBootstrapped()) ListenerManager.registerListener(AdvancementManager.INSTANCE);
         if (isBootstrapped()) PacketManager.getInstance().registerOutgoingS2CListener(ClientboundUpdateAdvancementsPacket.class, AdvancementManager.INSTANCE);

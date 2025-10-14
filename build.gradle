@@ -94,6 +94,7 @@ dependencies {
     annotationProcessor group: 'com.velocitypowered', name: 'velocity-api', version: '+'
     implementation group: 'io.ipinfo', name: 'ipinfo-api', version: '+'
     compileOnly group: "com.viaversion", name: "viaversion-api", version: "+"
+    compileOnly group: 'com.github.Gecolay.GSit', name: 'core', version: '+'
 }
 
 paperweight {
@@ -169,6 +170,9 @@ runServer {
     systemProperty "file.encoding", System.getProperty("file.encoding", "UTF-8")
     systemProperty "sun.stdout.encoding", System.getProperty("sun.stdout.encoding", "UTF-8")
     systemProperty "sun.stderr.encoding", System.getProperty("sun.stderr.encoding", "UTF-8")
+    if (System.getProperty("spm", "false").equals("true")) { // for Single Plugin Mode Support
+        args("-Pplugins_SPM")
+    }
 }
 
 runDevBundleServer {
@@ -179,6 +183,9 @@ runDevBundleServer {
     systemProperty "file.encoding", System.getProperty("file.encoding", "UTF-8")
     systemProperty "sun.stdout.encoding", System.getProperty("sun.stdout.encoding", "UTF-8")
     systemProperty "sun.stderr.encoding", System.getProperty("sun.stderr.encoding", "UTF-8")
+    if (System.getProperty("spm", "false").equals("true")) { // for Single Plugin Mode Support
+        args("-Pplugins_SPM")
+    }
 }
 
 task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
@@ -190,6 +197,9 @@ task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
     systemProperty "file.encoding", System.getProperty("file.encoding", "UTF-8")
     systemProperty "sun.stdout.encoding", System.getProperty("sun.stdout.encoding", "UTF-8")
     systemProperty "sun.stderr.encoding", System.getProperty("sun.stderr.encoding", "UTF-8")
+    if (System.getProperty("spm", "false").equals("true")) { // for Single Plugin Mode Support
+        args("-Pplugins_SPM")
+    }
 }
 
 task copyArtifactToProxy(type: Copy) {

@@ -40,7 +40,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 
-public class PrivateMessageListener implements Listener {
+public class PrivateMessageNotification implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPrivateMessage(PrivateMessageEvent event) {
         ServerPlayer sender = event.getSource().getPlayer();
