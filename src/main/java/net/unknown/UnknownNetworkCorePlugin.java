@@ -46,6 +46,7 @@ import net.unknown.core.feature.WhoisListener;
 import net.unknown.core.feature.admin.spy.Spy;
 import net.unknown.core.feature.admin.spy.modules.CommandSpy;
 import net.unknown.core.feature.admin.spy.modules.PrivateMessageSpy;
+import net.unknown.core.feature.admin.spy.modules.Whois;
 import net.unknown.core.fixer.MultiverseInventoriesFixer;
 import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
@@ -171,6 +172,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         ThirdPartyPluginPermissionsFixer.scheduleNextTick();
         Spy.registerModule(new CommandSpy());
         Spy.registerModule(new PrivateMessageSpy());
+        Spy.registerModule(new Whois());
         NameHistory.loadNameHistory();
         NameHistory.init();
         if (isBootstrapped()) AdvancementManager.loadAdvancements(true);
