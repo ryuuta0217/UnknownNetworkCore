@@ -39,6 +39,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
+import net.unknown.core.feature.admin.spy.Spy;
 import net.unknown.shared.util.NameHistory;
 import net.unknown.shared.whois.Whois;
 import org.bukkit.Bukkit;
@@ -62,13 +63,8 @@ public class WhoisListener implements Listener {
         Whois.addUserByIp(event.getPlayer().getAddress().getAddress(), event.getPlayer().getUniqueId(), System.currentTimeMillis());
         if (Whois.getIpInfoCache() == null) return; // If not configured client
 
-        if (!event.getPlayer().hasPermission(Permissions.FEATURE_WHOIS.getPermissionNode())) {
-            Component whoisMessage = buildWhoisInformationMessage(event.getPlayer(), true); // Automatic show whois message is always masked
-            Bukkit.getOnlinePlayers()
-                    .stream()
-                    .filter(player -> player.hasPermission(Permissions.FEATURE_WHOIS.getPermissionNode()))
-                    .forEach(player -> player.sendMessage(whoisMessage));
-        }
+        Component whoisMessage = buildWhoisInformationMessage(event.getPlayer(), true); // Automatic show whois message is always masked
+        Spy.getModule(net.unknown.core.feature.admin.spy.modules.Whois.IDENTIFIER).broadcastSpyMessage(whoisMessage, (player) -> false, true, event.getPlayer().getUniqueId());
     }
 
     public static Component buildWhoisInformationMessage(Player target) {

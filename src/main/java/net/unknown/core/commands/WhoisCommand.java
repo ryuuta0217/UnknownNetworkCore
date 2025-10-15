@@ -42,22 +42,17 @@ import io.ipinfo.api.IPinfo;
 import io.ipinfo.api.model.IPResponse;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.ComponentBuilder;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.selector.EntitySelector;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.feature.WhoisListener;
-import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.BrigadierUtil;
-import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.core.util.TextBasePagination;
 import net.unknown.shared.whois.Whois;
@@ -67,15 +62,12 @@ import org.bukkit.OfflinePlayer;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class WhoisCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("whois");
-        builder.requires(Permissions.FEATURE_WHOIS::check)
+        builder.requires(Permissions.COMMAND_WHOIS::check)
                 .executes(WhoisCommand::showWhoisInformation)
                 .then(Commands.argument("target", EntityArgument.player())
                         .executes(WhoisCommand::showWhoisInformation))

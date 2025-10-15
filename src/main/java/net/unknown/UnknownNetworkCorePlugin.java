@@ -46,6 +46,7 @@ import net.unknown.core.feature.WhoisListener;
 import net.unknown.core.feature.admin.spy.Spy;
 import net.unknown.core.feature.admin.spy.modules.CommandSpy;
 import net.unknown.core.feature.admin.spy.modules.PrivateMessageSpy;
+import net.unknown.core.feature.admin.spy.modules.Whois;
 import net.unknown.core.fixer.MultiverseInventoriesFixer;
 import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
@@ -71,6 +72,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
     private static final JSONParser JSON_PARSER = new JSONParser();
     private static UnknownNetworkCorePlugin INSTANCE;
     private static boolean BOOTSTRAPPED = false;
+    private static int FOLIA_PLATFORM = -1; // -1 = unknow (not checked), 0 = no, 1 = yes
 
     public UnknownNetworkCorePlugin() {
         INSTANCE = this;
@@ -97,10 +99,16 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
     }
 
     public static boolean isFoliaPlatform() {
+        if (FOLIA_PLATFORM != -1) {
+            return FOLIA_PLATFORM == 1;
+        }
+
         try {
             Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            FOLIA_PLATFORM = 1;
             return true;
         } catch(ClassNotFoundException e) {
+            FOLIA_PLATFORM = 0;
             return false;
         }
     }
@@ -171,6 +179,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         ThirdPartyPluginPermissionsFixer.scheduleNextTick();
         Spy.registerModule(new CommandSpy());
         Spy.registerModule(new PrivateMessageSpy());
+        Spy.registerModule(new Whois());
         NameHistory.loadNameHistory();
         NameHistory.init();
         if (isBootstrapped()) AdvancementManager.loadAdvancements(true);

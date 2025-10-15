@@ -33,8 +33,6 @@ package net.unknown.core.enums;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.player.Player;
 import net.unknown.core.commands.*;
 import net.unknown.core.commands.vanilla.GamemodeCommand;
 import net.unknown.core.commands.vanilla.MsgCommand;
@@ -59,11 +57,11 @@ public enum Permissions {
     COMMAND_VANISH("unknown.core.command.vanish", "minecraft.command.vanish", 2, VanishCommand.class),
     COMMAND_TOAST("unknown.core.command.toast", "minecraft.command.toast", 2, ToastCommand.class),
     COMMAND_SPY("unknown.core.command.spy", "minecraft.command.spy", 2, SpyCommand.class),
+    COMMAND_WHOIS("unknown.core.command.whois", 2, null),
 
     FEATURE_USE_COLOR_CODE("unknown.feature.use_color_code", 2, null),
     FEATURE_SEE_VANISHED_PLAYERS("unknown.feature.see_vanished_players", 2, null),
     FEATURE_SPY("unknown.feature.spy", 2, null),
-    FEATURE_WHOIS("unknown.feature.whois", 2, null),
     FEATURE_WHOIS_UNMASKED("unknown.feature.whois.unmasked", 4, null);
 
     private final int opLevel;
