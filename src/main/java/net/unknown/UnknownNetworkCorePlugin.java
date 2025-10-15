@@ -72,6 +72,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
     private static final JSONParser JSON_PARSER = new JSONParser();
     private static UnknownNetworkCorePlugin INSTANCE;
     private static boolean BOOTSTRAPPED = false;
+    private static int FOLIA_PLATFORM = -1; // -1 = unknow (not checked), 0 = no, 1 = yes
 
     public UnknownNetworkCorePlugin() {
         INSTANCE = this;
@@ -98,10 +99,16 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
     }
 
     public static boolean isFoliaPlatform() {
+        if (FOLIA_PLATFORM != -1) {
+            return FOLIA_PLATFORM == 1;
+        }
+
         try {
             Class.forName("io.papermc.paper.threadedregions.RegionizedServer");
+            FOLIA_PLATFORM = 1;
             return true;
         } catch(ClassNotFoundException e) {
+            FOLIA_PLATFORM = 0;
             return false;
         }
     }
