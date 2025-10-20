@@ -108,11 +108,9 @@ public class ChooseExchangeItemView extends PaginationView<ExchangeItem, VoteTic
     public void exchangeItem(HumanEntity exchanger, ExchangeItem item, @Nullable String choiceIdentifier) {
         boolean isScriptMode = item instanceof ScriptExchangeItem;
 
-        ItemStack exchangeItem = null;
+        ItemStack exchangeItem;
         if (!item.hasMultipleChoices()) {
-            if (!isScriptMode) {
-                exchangeItem = item.getItem(exchanger, null).clone();
-            }
+            exchangeItem = item.getItem(exchanger, null).clone();
         } else {
             if (choiceIdentifier != null) {
                 exchangeItem = item.getItem(this.getGui().getPlayer(), choiceIdentifier);
