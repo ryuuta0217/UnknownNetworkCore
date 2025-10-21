@@ -56,14 +56,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 // Code name: Tempest
 public class Crusher implements Listener {
     private static final Component NAME = Component.literal("Crusher").withStyle(ChatFormatting.YELLOW, ChatFormatting.BOLD);
+    private static final Map<Integer, FakePlayer> FAKE_PLAYERS = new HashMap<>();
     public static final int RANGE = 2;
 
     @EventHandler
@@ -75,7 +73,7 @@ public class Crusher implements Listener {
 
             UUID placer = ((IMixinBlockEntity) dispenser).getPlacer();
 
-            FakePlayer player = new FakePlayer(dispenser, placer == null ? UUID.randomUUID() : placer);
+            FakePlayer player = FAKE_PLAYERS.computeIfAbsent(event.getBukkitBlock().getLocation().hashCode(), k -> new FakePlayer(dispenser, placer == null ? UUID.randomUUID() : placer));
             player.setItemInHand(InteractionHand.MAIN_HAND, event.getItem());
             if (player.getMainHandItem().equals(event.getItem())) {
                 //System.out.println("Validation completed - Dispenser's shoot item is in player's hand.");
