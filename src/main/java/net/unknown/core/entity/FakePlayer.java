@@ -312,6 +312,9 @@ public class FakePlayer extends ServerPlayer {
                 }
             }
         }
+    public void onEquipItem(EquipmentSlot slot, ItemStack oldItem, ItemStack newItem, boolean silent) {
+        super.onEquipItem(slot, oldItem, newItem, silent);
+        this.detectEquipmentUpdates();
     }
 
     public static GameProfile createFakeProfile(String name, UUID uniqueId, boolean validate) {
