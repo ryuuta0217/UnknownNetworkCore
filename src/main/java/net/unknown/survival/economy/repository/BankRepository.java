@@ -33,8 +33,8 @@ package net.unknown.survival.economy.repository;
 
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.shared.SharedConstants;
-import net.unknown.survival.economy.UnknownNetworkEconomy;
 import net.unknown.survival.economy.transaction.Transaction;
+import net.unknown.survival.economy.transaction.TransactionHistory;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -60,17 +60,17 @@ public class BankRepository implements Repository {
     private final UUID owner;
     private final String name;
     private BigDecimal balance;
-    private final Map<Long, Transaction> transactions;
+    private final TransactionHistory transactions;
 
-    public BankRepository(UUID owner, String name, BigDecimal balance, Map<Long, Transaction> transactions) {
+    public BankRepository(UUID owner, String name, BigDecimal balance, TransactionHistory transactions) {
         this.owner = owner;
         this.name = name;
         this.balance = balance;
-        this.transactions = new HashMap<>(transactions); // always mutable
+        this.transactions = transactions;
     }
 
     public BankRepository(UUID owner, String name, BigDecimal balance) {
-        this(owner, name, balance, Collections.emptyMap());
+        this(owner, name, balance, new TransactionHistory(Collections.emptyMap()));
     }
 
     /**
@@ -155,7 +155,7 @@ public class BankRepository implements Repository {
      * @param save ディスクへ保存するかどうか
      */
     public void auditTransaction(long timestamp, Transaction.Type type, BigDecimal amount, BigDecimal balance, boolean save) {
-        this.transactions.put(timestamp, new Transaction(type, amount, balance, null));
+        this.transactions.add(timestamp, new Transaction(type, amount, balance, null));
         if (save) RunnableManager.runAsync(this::save);
     }
 
@@ -174,7 +174,7 @@ public class BankRepository implements Repository {
 
                     config.set("transactions", null);
                     ConfigurationSection transactionsSection = config.createSection("transactions");
-                    this.transactions.forEach((timestamp, transaction) -> transaction.save(transactionsSection.createSection(String.valueOf(timestamp))));
+                    this.transactions.writeToConfigurationSection(transactionsSection);
 
                     config.save(file);
                 }
