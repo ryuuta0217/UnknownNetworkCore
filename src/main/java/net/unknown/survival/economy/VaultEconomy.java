@@ -104,7 +104,7 @@ public class VaultEconomy implements Economy {
      */
     @Override
     public String format(double amount) {
-        return amount + "円";
+        return amount + this.currencyNamePlural();
     }
 
     /**
