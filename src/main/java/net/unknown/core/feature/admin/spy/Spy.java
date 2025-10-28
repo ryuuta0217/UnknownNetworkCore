@@ -198,7 +198,7 @@ public class Spy implements Listener {
     public static Set<Audience> getSpyMessageReceivers(SpyModule source, Predicate<Player> receiverRemoveIf, boolean logConsole) {
         Set<Audience> receivers = new HashSet<>();
         Bukkit.getOnlinePlayers()
-                .stream()
+                .parallelStream()
                 .filter(player -> player.isOp() || player.hasPermission(Permissions.FEATURE_SPY.getPermissionNode()))
                 .filter(player -> !receiverRemoveIf.test(player))
                 .filter(player -> isModuleEnabled(player, source))
@@ -209,6 +209,6 @@ public class Spy implements Listener {
     }
 
     public static void broadcastSpyMessage(SpyModule source, Component message, Predicate<Player> receiverRemoveIf, boolean logConsole, @Nullable UUID sender) {
-        Spy.getSpyMessageReceivers(source, receiverRemoveIf, logConsole).forEach(audience -> audience.sendMessage(source.buildSpyMessage(audience, message)));
+        Spy.getSpyMessageReceivers(source, receiverRemoveIf, logConsole).parallelStream().forEach(audience -> audience.sendMessage(source.buildSpyMessage(audience, message)));
     }
 }
