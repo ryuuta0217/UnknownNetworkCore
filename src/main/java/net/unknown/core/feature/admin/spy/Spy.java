@@ -202,6 +202,7 @@ public class Spy implements Listener {
                 .filter(player -> player.isOp() || player.hasPermission(Permissions.FEATURE_SPY.getPermissionNode()))
                 .filter(player -> !receiverRemoveIf.test(player))
                 .filter(player -> isModuleEnabled(player, source))
+                .filter(player -> source.isValidSpyMessageReceiver(player))
                 .forEach(receivers::add);
         if (logConsole) receivers.add(Bukkit.getConsoleSender());
         return receivers;

@@ -52,6 +52,9 @@ public interface SpyModule {
     default boolean isDefaultEnabled() {
         return true;
     }
+    default boolean isValidSpyMessageReceiver(Player player) {
+        return true;
+    }
     default Component buildSpyMessage(Audience audience, Component message) {
         if (audience instanceof Player) {
             return Component.empty().color(DefinedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true)
