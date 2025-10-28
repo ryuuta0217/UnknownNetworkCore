@@ -46,6 +46,9 @@ public interface SpyModule {
     void onUnRegistering();
     NamespacedKey getIdentifier();
     Component getDisplayName();
+    default boolean isDefaultEnabled() {
+        return true;
+    }
     default void broadcastSpyMessage(Component message) {
         this.broadcastSpyMessage(message, (player) -> false, false);
     }

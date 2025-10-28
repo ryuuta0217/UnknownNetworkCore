@@ -118,13 +118,13 @@ public class Spy implements Listener {
     public static boolean isModuleEnabled(Player player, SpyModule module) {
         PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
-        return !disabledModules.contains(module.getIdentifier().asString());
+        return module.isDefaultEnabled() && !disabledModules.contains(module.getIdentifier().asString());
     }
 
     public static Set<SpyModule> getEnabledModules(Player player) {
         PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
-        return MODULES.stream().filter(module -> !disabledModules.contains(module.getIdentifier().toString())).collect(Collectors.toSet());
+        return MODULES.stream().filter(module -> module.isDefaultEnabled() && !disabledModules.contains(module.getIdentifier().toString())).collect(Collectors.toSet());
     }
 
     public static Set<NamespacedKey> getEnabledModuleIdentifiers(Player player) {
@@ -137,7 +137,7 @@ public class Spy implements Listener {
         Set<String> enabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "enabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("enabled").split(", ?"))) : new HashSet<>();
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : new HashSet<>();
 
-        enabledModules.add(module.getIdentifier().asString());
+        if (!module.isDefaultEnabled()) enabledModules.add(module.getIdentifier().asString());
         disabledModules.remove(module.getIdentifier().asString());
         registries.put(PLAYER_REGISTRY_KEY, "enabled", String.join(",", enabledModules));
         registries.put(PLAYER_REGISTRY_KEY, "disabled", String.join(",", disabledModules));
@@ -151,13 +151,13 @@ public class Spy implements Listener {
     public static boolean isModuleDisabled(Player player, SpyModule module) {
         PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
-        return disabledModules.contains(module.getIdentifier().asString());
+        return !module.isDefaultEnabled() || disabledModules.contains(module.getIdentifier().asString());
     }
 
     public static Set<SpyModule> getDisabledModules(Player player) {
         PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
-        return MODULES.stream().filter(module -> disabledModules.contains(module.getIdentifier().toString())).collect(Collectors.toSet());
+        return MODULES.stream().filter(module -> !module.isDefaultEnabled() || disabledModules.contains(module.getIdentifier().toString())).collect(Collectors.toSet());
     }
 
     public static Set<NamespacedKey> getDisabledModuleIdentifiers(Player player) {
@@ -171,7 +171,7 @@ public class Spy implements Listener {
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : new HashSet<>();
 
         enabledModules.remove(module.getIdentifier().asString());
-        disabledModules.add(module.getIdentifier().asString());
+        if (module.isDefaultEnabled()) disabledModules.add(module.getIdentifier().asString());
         registries.put(PLAYER_REGISTRY_KEY, "enabled", String.join(",", enabledModules));
         registries.put(PLAYER_REGISTRY_KEY, "disabled", String.join(",", disabledModules));
     }
