@@ -208,36 +208,6 @@ public class Spy implements Listener {
     }
 
     public static void broadcastSpyMessage(SpyModule source, Component message, Predicate<Player> receiverRemoveIf, boolean logConsole, @Nullable UUID sender) {
-        Spy.getSpyMessageReceivers(source, receiverRemoveIf, logConsole).forEach(audience -> {
-            if (audience instanceof Player audiencePlayer) {
-                Component spyMessage = Component.empty().color(DefinedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true)
-                        .append(source.getDisplayName())
-                        .append(Component.text(">"))
-                        .appendSpace()
-                        .append(message);
-                audience.sendMessage(spyMessage);
-                /*if (sender == null) {
-                    // audience.sendMessage(spyMessage);
-                } else {
-                    PlayerChatMessage chatMessage = PlayerChatMessage.unsigned(sender, PlainTextComponentSerializer.plainText().serialize(spyMessage))
-                            .withUnsignedContent(NewMessageUtil.convertAdventure2Minecraft(spyMessage));
-
-                    ServerPlayer audienceMinecraftPlayer = MinecraftAdapter.player(audiencePlayer);
-                    if (audienceMinecraftPlayer != null) {
-                        audienceMinecraftPlayer.sendChatMessage(chatMessage, false, ChatType);
-                    }
-                }*/
-            } else {
-                audience.sendMessage(Component.empty()
-                        .append(Component.text("[Spy]"))
-                        .appendSpace()
-                        .append(Component.empty()
-                                .append(Component.text("["))
-                                .append(source.getDisplayName())
-                                .append(Component.text("]")))
-                        .appendSpace()
-                        .append(message));
-            }
-        });
+        Spy.getSpyMessageReceivers(source, receiverRemoveIf, logConsole).forEach(audience -> audience.sendMessage(source.buildSpyMessage(audience, message)));
     }
 }
