@@ -36,6 +36,10 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
+import com.sk89q.worldguard.protection.flags.BooleanFlag;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import net.kyori.adventure.text.Component;
@@ -70,6 +74,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
@@ -318,6 +323,40 @@ public class ProtectionGuiUtil {
     public static Component coordinates2Str(BlockVector3 vec3) {
         return Component.translatable("chat.coordinates", TextColor.color(0xFFFF))
                 .args(Component.text(vec3.getX()), Component.text(vec3.getY()), Component.text(vec3.getZ()));
+    }
+
+    public static Component getStateFlagValueDisplayName(@Nonnull StateFlag stateFlag, @Nullable StateFlag.State state) {
+        String text;
+        TextColor color;
+        if (state != null) {
+            text = state == StateFlag.State.ALLOW ? "許可" : "拒否";
+            color = state == StateFlag.State.ALLOW ? DefinedTextColor.GREEN : DefinedTextColor.RED;
+        } else {
+            if (stateFlag.getDefault() == StateFlag.State.ALLOW) {
+                text = "許可 (デフォルト)";
+                color = DefinedTextColor.YELLOW;
+            } else {
+                text = "拒否 (デフォルト)";
+                color = DefinedTextColor.LIGHT_PURPLE;
+            }
+        }
+
+        return Component.text(text, color);
+    }
+
+    public static Component getBooleanFlagValueDisplayName(@Nonnull BooleanFlag boolFlag, @Nullable Boolean bool) {
+        if (bool == null) return Component.text("未設定", DefinedTextColor.YELLOW);
+        if (bool) return Component.text("有効", DefinedTextColor.GREEN);
+        else return Component.text("無効", DefinedTextColor.RED);
+    }
+
+    public static String getFlagDisplayName(Flag<?> flag) {
+        HashMap<Flag<?>, String> names = new HashMap<>() {{
+            put(Flags.BLOCK_BREAK, "ブロックの破壊");
+            put(Flags.BLOCK_PLACE, "ブロックの設置");
+        }};
+
+        return names.getOrDefault(flag, flag.getName());
     }
 
     public static class SelectionResult {
