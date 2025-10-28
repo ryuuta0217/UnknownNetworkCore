@@ -63,8 +63,20 @@ public class CustomChannelSpy implements SpyModule, Listener {
         return NAME;
     }
 
+    @Override
+    public boolean isDefaultEnabled() {
+        return false;
+    }
+
     @EventHandler
     public void onCustomChatChannel(CustomChatChannelEvent event) {
-
+        Component spyMessage = Component.empty()
+                .append(event.getChannel().getChannelPrefix(false))
+                .appendSpace()
+                .append(event.getSender().displayName())
+                .append(Component.text(":"))
+                .appendSpace()
+                .append(event.getMessage());
+        this.broadcastSpyMessage(spyMessage, (player) -> event.isReceiver(player) || event.getChannel().getOwner().equals(player.getUniqueId()) || event.getChannel().getPlayers().contains(player.getUniqueId()), false, event.getSender().getUniqueId());
     }
 }

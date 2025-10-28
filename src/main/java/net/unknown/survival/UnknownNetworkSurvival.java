@@ -34,6 +34,8 @@ package net.unknown.survival;
 import net.milkbowl.vault.economy.Economy;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.discord.UnknownNetworkDiscordBot;
+import net.unknown.core.feature.admin.spy.Spy;
+import net.unknown.core.feature.admin.spy.modules.CustomChannelSpy;
 import net.unknown.survival.economy.UnknownNetworkEconomy;
 import net.unknown.survival.economy.VaultEconomy;
 import net.unknown.core.managers.ListenerManager;
@@ -142,6 +144,8 @@ public class UnknownNetworkSurvival {
             ListenerManager.registerListener(new ConfigureHopperGui.Listener());
             ListenerManager.registerListener(new ChestLink());
         }
+
+        Spy.registerModule(new CustomChannelSpy());
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "unknown:forge", new FMLConnectionListener());
