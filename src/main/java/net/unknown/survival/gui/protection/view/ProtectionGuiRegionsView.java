@@ -64,12 +64,15 @@ import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.dependency.WorldEdit;
 import net.unknown.survival.dependency.WorldGuard;
+import net.unknown.survival.enums.Permissions;
 import net.unknown.survival.gui.protection.ProtectionGui;
 import net.unknown.survival.gui.protection.ProtectionGuiState;
 import net.unknown.survival.gui.protection.ProtectionGuiUtil;
+import net.unknown.survival.gui.protection.dialog.FlagSettingsDialog;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemFlag;
@@ -443,181 +446,11 @@ public class ProtectionGuiRegionsView extends ProtectionGuiViewBase {
                 case 31 -> {
                     this.gui.setGuiState(ProtectionGuiState.WAITING_CALLBACK);
                     this.gui.getPlayer().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
-                    event.getWhoClicked().showDialog(Dialog.create(builder -> builder.empty()
-                            .base(DialogBase.builder(Component.text("フラグの設定"))
-                                    .afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
-                                    .externalTitle(Component.text("フラグの設定(Ex)"))
-                                    .pause(false)
-                                    .body(Collections.singletonList(DialogBody.plainMessage(Component.text("保護領域「" + this.region.getId() + "」のフラグを設定してください"), 1024)))
-                                    .inputs(com.sk89q.worldguard.WorldGuard.getInstance()
-                                            .getFlagRegistry()
-                                            .getAll()
-                                            .parallelStream()
-                                            .filter(flag -> flag != Flags.BUILD)
-                                            .map(flag -> {
-                                                String flagName = flag.getName().replace('-', '_');
-                                                try {
-                                                    if (flag instanceof StateFlag stateFlag) {
-                                                        StateFlag.State defaultValue = stateFlag.getDefault();
-                                                        StateFlag.State currentValue = this.region.region().getFlag(stateFlag);
-
-                                                        int choice = 0;
-                                                        if (currentValue != null) {
-                                                            choice = currentValue == StateFlag.State.ALLOW ? 1 : 2;
-                                                        }
-
-                                                        return DialogInput.singleOption(
-                                                                flagName,
-                                                                256,
-                                                                Arrays.asList(
-                                                                        SingleOptionDialogInput.OptionEntry.create("unset", ProtectionGuiUtil.getStateFlagValueDisplayName(stateFlag, null), choice == 0),
-                                                                        SingleOptionDialogInput.OptionEntry.create("allow", ProtectionGuiUtil.getStateFlagValueDisplayName(stateFlag, StateFlag.State.ALLOW), choice == 1),
-                                                                        SingleOptionDialogInput.OptionEntry.create("deny", ProtectionGuiUtil.getStateFlagValueDisplayName(stateFlag, StateFlag.State.DENY), choice == 2)
-                                                                ),
-                                                                Component.text(ProtectionGuiUtil.getFlagDisplayName(flag)),
-                                                                true
-                                                        );
-                                                    }
-
-                                                    if (flag instanceof BooleanFlag boolFlag) {
-                                                        Boolean defaultValue = boolFlag.getDefault();
-                                                        Boolean currentValue = this.region.region().getFlag(boolFlag);
-                                                        if (defaultValue != null) {
-                                                            System.out.println("WHAT?! I've found non-null default value in BooleanFlag!");
-                                                        }
-
-                                                        return DialogInput.singleOption(
-                                                                flagName,
-                                                                256,
-                                                                Arrays.asList(
-                                                                        SingleOptionDialogInput.OptionEntry.create("unset", ProtectionGuiUtil.getBooleanFlagValueDisplayName(boolFlag, null), currentValue == null),
-                                                                        SingleOptionDialogInput.OptionEntry.create("true", ProtectionGuiUtil.getBooleanFlagValueDisplayName(boolFlag, true), Boolean.TRUE.equals(currentValue)),
-                                                                        SingleOptionDialogInput.OptionEntry.create("false", ProtectionGuiUtil.getBooleanFlagValueDisplayName(boolFlag, false), Boolean.FALSE.equals(currentValue))
-                                                                ),
-                                                                Component.text(ProtectionGuiUtil.getFlagDisplayName(flag)),
-                                                                true
-                                                        );
-                                                    }
-
-                                                    if (flag instanceof StringFlag strFlag) {
-                                                        String defaultValue = strFlag.getDefault();
-                                                        String currentValue = this.region.region().getFlag(strFlag);
-
-                                                        return DialogInput.text(
-                                                                flagName,
-                                                                256,
-                                                                Component.text(ProtectionGuiUtil.getFlagDisplayName(flag)),
-                                                                true,
-                                                                LegacyComponentSerializer.legacyAmpersand().serialize(LegacyComponentSerializer.legacySection().deserialize((currentValue != null ? currentValue : (defaultValue != null ? defaultValue : "")))),
-                                                                Integer.MAX_VALUE,
-                                                                TextDialogInput.MultilineOptions.create(null, null)
-                                                        );
-                                                    }
-
-                                                    if (flag instanceof IntegerFlag intFlag) {
-                                                        Integer defaultValue = intFlag.getDefault();
-                                                        Integer currentValue = this.region.region().getFlag(intFlag);
-
-                                                        return DialogInput.numberRange(flagName, 256, Component.text(ProtectionGuiUtil.getFlagDisplayName(flag)), "%s: %s", -1f, 100f, (currentValue != null ? Float.valueOf(currentValue) : (defaultValue != null ? Float.valueOf(defaultValue) : -1)), 1f);
-                                                    }
-                                                } catch(Throwable t) {
-                                                    System.out.println("Failed to construct input object for flag " + flag.getName() + ": " + t.getLocalizedMessage());
-                                                }
-                                                return null;
-                                            })
-                                            .filter(input -> input != null)
-                                            .sorted(Comparator.comparing(input -> input.key()))
-                                            .toList())
-                                    .canCloseWithEscape(true)
-                                    .build())
-                            .type(DialogType.confirmation(
-                                    ActionButton.create(Component.text("変更を保存", DefinedTextColor.GREEN), Component.text("この画面で変更したフラグの設定を適用して、保存します"), 128, DialogAction.customClick((response, audience) -> {
-                                        com.sk89q.worldguard.WorldGuard.getInstance()
-                                                .getFlagRegistry()
-                                                .getAll()
-                                                .parallelStream()
-                                                .forEach(flag -> {
-                                                    String flagName = flag.getName().replace('-', '_');
-                                                    if (flag instanceof StateFlag stateFlag) {
-                                                        String rawValue = response.getText(flagName);
-                                                        if (rawValue != null) {
-                                                            StateFlag.State oldState = this.region.region().getFlag(stateFlag);
-                                                            StateFlag.State state = rawValue.equals("unset") ? null : (rawValue.equals("allow") ? StateFlag.State.ALLOW : StateFlag.State.DENY);
-                                                            this.region.region().setFlag(stateFlag, state);
-                                                            if (!Objects.equals(oldState, state)) {
-                                                                NewMessageUtil.sendMessage(event.getWhoClicked(), Component.empty().append(Component.text("保護領域 " + this.region.getId() + " のフラグ " + ProtectionGuiUtil.getFlagDisplayName(flag) + " を "))
-                                                                        .append(ProtectionGuiUtil.getStateFlagValueDisplayName(stateFlag, oldState))
-                                                                        .append(Component.text(" から "))
-                                                                        .append(ProtectionGuiUtil.getStateFlagValueDisplayName(stateFlag, state))
-                                                                        .append(Component.text(" に変更しました")), true);
-                                                            }
-                                                        }
-                                                    }
-
-                                                    if (flag instanceof BooleanFlag boolFlag) {
-                                                        String rawValue = response.getText(flagName);
-                                                        if (rawValue != null) {
-                                                            Boolean oldValue = this.region.region().getFlag(boolFlag);
-                                                            Boolean value = rawValue.equals("unset") ? null : (rawValue.equals("true") ? true : false);
-                                                            this.region.region().setFlag(boolFlag, value);
-                                                            if (!Objects.equals(oldValue, value)) {
-                                                                NewMessageUtil.sendMessage(event.getWhoClicked(), Component.empty().append(Component.text("保護領域 " + this.region.getId() + " のフラグ " + ProtectionGuiUtil.getFlagDisplayName(flag) + " を "))
-                                                                        .append(ProtectionGuiUtil.getBooleanFlagValueDisplayName(boolFlag, oldValue))
-                                                                        .append(Component.text(" から "))
-                                                                        .append(ProtectionGuiUtil.getBooleanFlagValueDisplayName(boolFlag, value))
-                                                                        .append(Component.text(" に変更しました")), true);
-                                                            }
-                                                        }
-                                                    }
-
-                                                    if (flag instanceof StringFlag strFlag) {
-                                                        String rawValue = response.getText(flagName);
-                                                        if (rawValue != null) {
-                                                            String defaultValue = strFlag.getDefault();
-
-                                                            String oldValue = this.region.region().getFlag(strFlag);
-                                                            if (oldValue != null && oldValue.isEmpty()) oldValue = null;
-
-                                                            String value = rawValue.isEmpty() ? null : LegacyComponentSerializer.legacySection().serialize(LegacyComponentSerializer.legacyAmpersand().deserialize(rawValue));
-                                                            if (value != null && value.equals(defaultValue)) value = null;
-
-                                                            this.region.region().setFlag(strFlag, value);
-                                                            if (!Objects.equals(oldValue, value)) {
-                                                                NewMessageUtil.sendMessage(event.getWhoClicked(), Component.empty().append(Component.text("保護領域 " + this.region.getId() + " のフラグ " + ProtectionGuiUtil.getFlagDisplayName(flag) + " を "))
-                                                                        .append(Component.text(oldValue == null ? "null" : oldValue))
-                                                                        .append(Component.text(" から "))
-                                                                        .append(Component.text(value == null ? "null" : value))
-                                                                        .append(Component.text(" に変更しました")), true);
-                                                            }
-                                                        }
-                                                    }
-
-                                                    if (flag instanceof IntegerFlag intFlag) {
-                                                        Float rawValue = response.getFloat(flagName);
-                                                        if (rawValue != null) {
-                                                            Integer oldValue = this.region.region().getFlag(intFlag);
-                                                            Integer value = rawValue == -1 ? null : (int) ((float) rawValue);
-                                                            this.region.region().setFlag(intFlag, value);
-                                                            if (!Objects.equals(oldValue, value)) {
-                                                                NewMessageUtil.sendMessage(event.getWhoClicked(), Component.empty().append(Component.text("保護領域 " + this.region.getId() + " のフラグ " + ProtectionGuiUtil.getFlagDisplayName(flag) + " を "))
-                                                                        .append(Component.text(oldValue == null ? "null" : String.valueOf(oldValue)))
-                                                                        .append(Component.text(" から "))
-                                                                        .append(Component.text(value == null ? "null" : String.valueOf(value)))
-                                                                        .append(Component.text(" に変更しました")), true);
-                                                            }
-                                                        }
-                                                    }
-                                                });
-                                        this.gui.setGuiState(ProtectionGuiState.REGION_INFORMATION);
-                                        this.initialize();
-                                        this.gui.getPlayer().openInventory(this.gui.getInventory());
-                                    }, ClickCallback.Options.builder().uses(1).build())),
-                                    ActionButton.create(Component.text("キャンセル", DefinedTextColor.YELLOW), Component.text("この画面で変更したフラグの設定は破棄して、前の画面に戻ります"), 128, DialogAction.customClick((response, audience) -> {
-                                        this.gui.setGuiState(ProtectionGuiState.REGION_INFORMATION);
-                                        this.initialize();
-                                        this.gui.getPlayer().openInventory(this.gui.getInventory());
-                                    }, ClickCallback.Options.builder().uses(1).build())))
-                            )));
+                    event.getWhoClicked().showDialog(FlagSettingsDialog.createFlagEditorDialog((Player) event.getWhoClicked(), region, () -> {
+                        this.gui.setGuiState(ProtectionGuiState.REGION_INFORMATION);
+                        this.initialize();
+                        this.gui.getPlayer().openInventory(this.gui.getInventory());
+                    }));
                 }
 
                 // メンバー管理
