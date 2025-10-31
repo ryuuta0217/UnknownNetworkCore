@@ -31,6 +31,7 @@
 
 package net.unknown.survival.gui.protection.dialog;
 
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.registry.Keyed;
 import com.sk89q.worldguard.protection.flags.*;
 import io.papermc.paper.dialog.Dialog;
@@ -58,6 +59,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @SuppressWarnings("UnstableApiUsage")
 public class FlagSettingsDialog {
@@ -271,14 +273,32 @@ public class FlagSettingsDialog {
                         if (rawFlag instanceof SetFlag<?> flag) {
                             String rawValue = response.getText(getFlagNameForDialogInputKey(flag));
                             if (rawValue != null) {
-                                if (flag.getType() instanceof CommandStringFlag || flag.getType() instanceof StringFlag) {
-                                    Set<String> defaultValue = (Set<String>) flag.getDefault();
-                                    Set<String> oldValue = (Set<String>) region.region().getFlag(flag);
-                                    Set<String> value = new HashSet<>(Arrays.asList(rawValue.split("\n")));
+                                Set<?> defaultValue = flag.getDefault();
+                                Set<?> oldValue = region.region().getFlag(flag);
+                                Set<?> value = Arrays.stream(rawValue.split("\n")).parallel()
+                                        .map(entry -> {
+                                            FlagContext ctx = FlagContext.create()
+                                                    .setInput(entry)
+                                                    .setSender(BukkitAdapter.adapt(player))
+                                                    .build();
+
+                                            try {
+                                                return flag.getType().parseInput(ctx);
+                                            } catch (InvalidFlagFormatException e) {
+                                                return null;
+                                            }
+                                        })
+                                        .filter(Objects::nonNull)
+                                        .collect(Collectors.toSet());
+
+                                if (defaultValue != null && !defaultValue.isEmpty() && value.parallelStream().allMatch(defaultValue::contains)) {
+                                    value = null;
                                 }
 
-                                if (flag.getType() instanceof RegistryFlag<?>) { // RegistryFlag<? extends Keyed>
+                                region.region().setFlag((SetFlag) flag, value);
 
+                                if (!Objects.equals(oldValue, value) || (oldValue != null && value != null && !value.parallelStream().allMatch(oldValue::contains) && value.size() != oldValue.size())) {
+                                    NewMessageUtil.sendMessage(player, getSuccessfullyModifiedMessage(flag, region, Component.text(oldValue == null ? "null" : oldValue.toString()), Component.text(value == null ? "null" : value.toString())), true);
                                 }
                             }
                         }
