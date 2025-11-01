@@ -31,8 +31,11 @@
 
 package net.unknown.survival.gui.protection.dialog;
 
+import com.google.common.collect.Maps;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.registry.Keyed;
+import com.sk89q.worldedit.util.Location;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.*;
 import io.papermc.paper.dialog.Dialog;
 import io.papermc.paper.dialog.DialogResponseView;
@@ -46,6 +49,7 @@ import io.papermc.paper.registry.data.dialog.input.TextDialogInput;
 import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickCallback;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.NewMessageUtil;
@@ -53,11 +57,15 @@ import net.unknown.survival.dependency.WorldGuard;
 import net.unknown.survival.enums.Permissions;
 import net.unknown.survival.gui.protection.ProtectionGuiState;
 import net.unknown.survival.gui.protection.ProtectionGuiUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -228,6 +236,144 @@ public class FlagSettingsDialog {
                 }
         );
 
+        registerFlagHandler(LocationFlag.class,
+                (flag, region, player, width) -> {
+                    Location defaultValue = flag.getDefault();
+                    Location currentValue = region.region().getFlag(flag);
+
+                    return DialogInput.text(
+                            getFlagNameForDialogInputKey(flag),
+                            width,
+                            Component.text(ProtectionGuiUtil.getFlagDisplayName(flag)).append(Component.text(" (world, x, y, z, yaw, pitch), (here)")),
+                            true,
+                            (currentValue != null ? String.format("%s, %.2f, %.2f, %.2f, %.2f, %.2f", ((com.sk89q.worldedit.world.World) currentValue.getExtent()).getName(), currentValue.getX(), currentValue.getY(), currentValue.getZ(), currentValue.getYaw(), currentValue.getPitch()) : (defaultValue != null ? String.format("%s, %.2f,%.2f,%.2f,%.2f,%.2f", defaultValue.getExtent(), defaultValue.getX(), defaultValue.getY(), defaultValue.getZ(), defaultValue.getYaw(), defaultValue.getPitch()) : "")),
+                            Integer.MAX_VALUE,
+                            TextDialogInput.MultilineOptions.create(null, null)
+                    );
+                },
+                (flag, region, player, response) -> {
+                    String rawValue = response.getText(getFlagNameForDialogInputKey(flag));
+                    if (rawValue != null) {
+                        Location defaultValue = flag.getDefault();
+                        Location oldValue = region.region().getFlag(flag);
+                        Location value;
+
+                        rawValue = rawValue.replace(", ", ",");
+
+                        if (!rawValue.isEmpty()) {
+                            try {
+                                String world = null;
+                                if (rawValue.contains(",")) {
+                                    world = rawValue.substring(0, rawValue.indexOf(','));
+                                    rawValue = rawValue.substring(rawValue.indexOf(',') + 1);
+                                }
+                                // Its hacky but FlagContext.create().build() is calling Event internally, and that not allowed asynchronously call.
+                                // So we use reflection to create FlagContext instance directly.
+                                Constructor<FlagContext> ctxConstructor = (Constructor<FlagContext>) FlagContext.class.getDeclaredConstructors()[0];
+                                ctxConstructor.trySetAccessible();
+                                FlagContext ctx = ctxConstructor.newInstance(WorldGuardPlugin.inst().wrapPlayer(player), rawValue, Map.of("region", region.region()));
+                                // Tried this but thrown TimeoutException always.
+                                // Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> FlagContext.create().setInput(rawValue).build()).get();
+                                value = flag.parseInput(ctx);
+                                if (world != null) { // Parse world manually
+                                    World bukkitWorld = Bukkit.getWorld(world);
+                                    if (bukkitWorld == null) throw new IllegalArgumentException("World not found: " + world);
+                                    value.setExtent(BukkitAdapter.adapt(bukkitWorld));
+                                }
+                            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | InvalidFlagFormat e) {
+                                NewMessageUtil.sendErrorMessage(player, Component.text("フラグ " + ProtectionGuiUtil.getFlagDisplayName(flag) + " の入力値「" + rawValue + "」を解釈できませんでした").hoverEvent(HoverEvent.showText(Component.text(e.getLocalizedMessage(), DefinedTextColor.RED))));
+                                LOGGER.warn("Failed to parse LocationFlag value \"{}\" while parsing player {}'s input for flag {} in region {}", rawValue, player.getName(), flag.getName(), region.region().getId(), e);
+                                return;
+                            }
+                        } else {
+                            value = null;
+                        }
+
+                        if (Objects.equals(oldValue, value)) {
+                            return; // Nothing changed
+                        }
+
+                        if (defaultValue != null && value != null && value.equals(defaultValue)) {
+                            value = null;
+                        }
+
+                        region.region().setFlag(flag, value);
+
+                        if (!Objects.equals(oldValue, value)) {
+                            NewMessageUtil.sendMessage(player, getSuccessfullyModifiedMessage(flag, region, Component.text(oldValue == null ? "null" : oldValue.toString()), Component.text(value == null ? "null" : value.toString())), true);
+                        }
+                    }
+                }
+        );
+
+        registerUnsafeFlagHandler(RegistryFlag.class,
+                new DialogInputBuilder() {
+                    @Override
+                    public DialogInput buildDialogInput(Flag rawFlag, WorldGuard.WrappedProtectedRegion region, Player player, int width) {
+                        if (rawFlag instanceof RegistryFlag<?> flag) {
+                            Keyed defaultValue = flag.getDefault();
+                            Keyed currentValue = region.region().getFlag(flag);
+
+                            return DialogInput.text(
+                                    getFlagNameForDialogInputKey(flag),
+                                    width,
+                                    Component.text(ProtectionGuiUtil.getFlagDisplayName(flag)).appendSpace().append(Component.text(flag.getRegistry().values().toString())),
+                                    true,
+                                    (currentValue != null ? currentValue.id() : (defaultValue != null ? defaultValue.id() : "")),
+                                    Integer.MAX_VALUE,
+                                    TextDialogInput.MultilineOptions.create(null, null)
+                            );
+                        }
+                        return null;
+                    }
+                },
+                new SaveProcessor() {
+                    @Override
+                    public void processSave(Flag rawFlag, WorldGuard.WrappedProtectedRegion region, Player player, DialogResponseView response) {
+                        if (rawFlag instanceof RegistryFlag<?> flag) {
+                            String rawValue = response.getText(getFlagNameForDialogInputKey(flag));
+                            if (rawValue != null) {
+                                Keyed defaultValue = flag.getDefault();
+
+                                Keyed oldValue = region.region().getFlag(flag);
+
+                                Keyed value = null;
+                                if (!rawValue.isEmpty()) {
+                                    try {
+                                        // Its hacky but FlagContext.create().build() is calling Event internally, and that not allowed asynchronously call.
+                                        // So we use reflection to create FlagContext instance directly.
+                                        Constructor<FlagContext> ctxConstructor = (Constructor<FlagContext>) FlagContext.class.getDeclaredConstructors()[0];
+                                        ctxConstructor.trySetAccessible();
+                                        FlagContext ctx = ctxConstructor.newInstance(null, rawValue, Maps.newHashMap());
+                                        // Tried this but thrown TimeoutException always.
+                                        // Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> FlagContext.create().setInput(rawValue).build()).get();
+                                        value = flag.parseInput(ctx);
+                                    } catch (InvalidFlagFormat | InstantiationException | IllegalAccessException |
+                                             InvocationTargetException e) {
+                                        NewMessageUtil.sendErrorMessage(player, Component.text("フラグ " + ProtectionGuiUtil.getFlagDisplayName(flag) + " の入力値「" + rawValue + "」を解釈できませんでした").hoverEvent(HoverEvent.showText(Component.text(e.getLocalizedMessage(), DefinedTextColor.RED))));
+                                        LOGGER.warn("Failed to parse RegistryFlag value \"{}\" while parsing player {}'s input for flag {} in region {}", rawValue, player.getName(), flag.getName(), region.region().getId(), e);
+                                        return;
+                                    }
+                                }
+
+                                if (Objects.equals(oldValue, value)) {
+                                    return; // Nothing changed
+                                }
+
+                                if (defaultValue != null && value != null && value.id().equals(defaultValue.id())) {
+                                    value = null;
+                                }
+
+                                region.region().setFlag((RegistryFlag) flag, value);
+
+                                if (!Objects.equals(oldValue, value)) {
+                                    NewMessageUtil.sendMessage(player, getSuccessfullyModifiedMessage(flag, region, Component.text(oldValue == null ? "null" : oldValue.id()), Component.text(value == null ? "null" : value.id())), true);
+                                }
+                            }
+                        }
+                    }
+                });
+
         registerUnsafeFlagHandler(SetFlag.class,
                 new DialogInputBuilder() {
                     @Override
@@ -275,24 +421,37 @@ public class FlagSettingsDialog {
                             if (rawValue != null) {
                                 Set<?> defaultValue = flag.getDefault();
                                 Set<?> oldValue = region.region().getFlag(flag);
-                                Set<?> value = Arrays.stream(rawValue.split("\n")).parallel()
+                                Set<?> value = Arrays.stream(rawValue.split("\n"))
+                                        .filter(entry -> !entry.isEmpty())
                                         .map(entry -> {
-                                            FlagContext ctx = FlagContext.create()
-                                                    .setInput(entry)
-                                                    .setSender(BukkitAdapter.adapt(player))
-                                                    .build();
-
                                             try {
+                                                // Its hacky but FlagContext.create().build() is calling Event internally, and that not allowed asynchronously call.
+                                                // So we use reflection to create FlagContext instance directly.
+                                                Constructor<FlagContext> ctxConstructor = (Constructor<FlagContext>) FlagContext.class.getDeclaredConstructors()[0];
+                                                ctxConstructor.trySetAccessible();
+                                                FlagContext ctx = ctxConstructor.newInstance(null, entry, Maps.newHashMap());
+                                                // Tried this but thrown TimeoutException always.
+                                                // Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> FlagContext.create().setInput(entry).build()).get();
                                                 return flag.getType().parseInput(ctx);
-                                            } catch (InvalidFlagFormatException e) {
+                                            } catch (InvalidFlagFormat | InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                                                NewMessageUtil.sendErrorMessage(player, Component.text("フラグ " + ProtectionGuiUtil.getFlagDisplayName(flag) + " の行「" + entry + "」を解釈できませんでした").hoverEvent(HoverEvent.showText(Component.text(e.getLocalizedMessage(), DefinedTextColor.RED))));
+                                                LOGGER.warn("Failed to parse SetFlag entry \"{}\" while parsing player {}'s input for flag {} in region {}", entry, player.getName(), flag.getName(), region.region().getId(), e);
                                                 return null;
                                             }
                                         })
                                         .filter(Objects::nonNull)
                                         .collect(Collectors.toSet());
 
+                                if (oldValue != null && oldValue.containsAll(value) && value.size() == oldValue.size()) {
+                                    return; // Nothing changed
+                                }
+
+                                if (defaultValue == null && value.isEmpty()) {
+                                    value = null; // デフォルトで何も設定されておらず、ユーザーの入力も空欄だった場合は、「未設定」にするため、nullとする
+                                }
+
                                 if (defaultValue != null && !defaultValue.isEmpty() && value.parallelStream().allMatch(defaultValue::contains)) {
-                                    value = null;
+                                    value = null; // デフォルトで設定されているが、ユーザーの入力と完全に一致する場合は、「未設定」と解釈するため、nullとする
                                 }
 
                                 region.region().setFlag((SetFlag) flag, value);
