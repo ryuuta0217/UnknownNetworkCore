@@ -48,7 +48,7 @@ public class CoreProtect {
     }
 
     public static boolean isAPIEnabled() {
-        return net.coreprotect.CoreProtect.getInstance().getAPI() != null && net.coreprotect.CoreProtect.getInstance().getAPI().isEnabled();
+        return Bukkit.getPluginManager().getPlugin("CoreProtect") != null && net.coreprotect.CoreProtect.getInstance().getAPI() != null && net.coreprotect.CoreProtect.getInstance().getAPI().isEnabled();
     }
 
     public static CoreProtectAPI getAPI() {
