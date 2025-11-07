@@ -100,7 +100,6 @@ public class UnknownNetworkSurvival {
         //PlayerData.loadExists();
         CustomChannels.load();
         //AntiVillagerLag.startLoopTask();
-        PlayerDeathListener.load();
         UnknownNetworkEconomy.init();
         //AutomaticWorldRegeneration.getInstance();
         AutomatedRegenWorldManager.getInstance();
@@ -122,7 +121,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new PathfinderGrapple());
         ListenerManager.registerListener(new DemolitionGun());
         ListenerManager.registerListener(new MonsterBall());
-        ListenerManager.registerListener(new PlayerDeathListener());
+        ListenerManager.registerListener(new Graveyard());
         ListenerManager.registerListener(new ServerRestartListener());
         ListenerManager.registerListener(new ProtectedAreaTestStick());
         ListenerManager.registerListener(new PlayerJoinListener());
