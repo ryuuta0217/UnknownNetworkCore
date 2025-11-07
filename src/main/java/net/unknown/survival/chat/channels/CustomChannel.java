@@ -71,7 +71,7 @@ public class CustomChannel extends ChatChannel {
         this.players.addAll(players);
     }
 
-    private Component getChannelPrefix(boolean space) {
+    public Component getChannelPrefix(boolean space) {
         Component c = Component.empty()
                 .append(Component.text("["))
                 .append(this.displayName) // チャンネル名

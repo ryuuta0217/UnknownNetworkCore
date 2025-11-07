@@ -41,6 +41,7 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.Function;
 import org.mozilla.javascript.ScriptableObject;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class ScriptExchangeItem implements ExchangeItem {
@@ -226,10 +227,10 @@ public class ScriptExchangeItem implements ExchangeItem {
         return this.onExchangedCompiled;
     }
 
-    public void execOnExchangedFunction(HumanEntity player, @Nullable String choiceIdentifier) {
+    public void execOnExchangedFunction(HumanEntity player, @Nullable String choiceIdentifier, @Nonnull ItemStack exchangedItem) {
         Function onExchanged = this.getOnExchangedFunction();
         if (onExchanged == null) return;
 
-        onExchanged.call(EvalManager.getRhinoContext(), this.getExecutionScope(), null, new Object[]{player, choiceIdentifier});
+        onExchanged.call(EvalManager.getRhinoContext(), this.getExecutionScope(), null, new Object[]{player, choiceIdentifier, exchangedItem});
     }
 }

@@ -37,13 +37,25 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.domains.GroupDomain;
 import com.sk89q.worldguard.domains.PlayerDomain;
+import com.sk89q.worldguard.protection.flags.*;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.action.DialogAction;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
+import io.papermc.paper.registry.data.dialog.input.DialogInput;
+import io.papermc.paper.registry.data.dialog.input.SingleOptionDialogInput;
+import io.papermc.paper.registry.data.dialog.input.TextDialogInput;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickCallback;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.define.DefinedTextColor;
@@ -52,12 +64,15 @@ import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.dependency.WorldEdit;
 import net.unknown.survival.dependency.WorldGuard;
+import net.unknown.survival.enums.Permissions;
 import net.unknown.survival.gui.protection.ProtectionGui;
 import net.unknown.survival.gui.protection.ProtectionGuiState;
 import net.unknown.survival.gui.protection.ProtectionGuiUtil;
+import net.unknown.survival.gui.protection.dialog.FlagSettingsDialog;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemFlag;
@@ -302,6 +317,7 @@ public class ProtectionGuiRegionsView extends ProtectionGuiViewBase {
         }
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     private static class RegionInfoView extends ProtectionGuiViewBase {
         private final ProtectionGuiRegionsView regionsView;
         private final WorldGuard.WrappedProtectedRegion region;
@@ -428,7 +444,13 @@ public class ProtectionGuiRegionsView extends ProtectionGuiViewBase {
 
                 // フラグ管理
                 case 31 -> {
-
+                    this.gui.setGuiState(ProtectionGuiState.WAITING_CALLBACK);
+                    this.gui.getPlayer().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
+                    event.getWhoClicked().showDialog(FlagSettingsDialog.createFlagEditorDialog((Player) event.getWhoClicked(), region, () -> {
+                        this.gui.setGuiState(ProtectionGuiState.REGION_INFORMATION);
+                        this.initialize();
+                        this.gui.getPlayer().openInventory(this.gui.getInventory());
+                    }));
                 }
 
                 // メンバー管理

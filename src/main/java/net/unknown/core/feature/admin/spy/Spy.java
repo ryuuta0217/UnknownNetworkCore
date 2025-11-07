@@ -118,13 +118,13 @@ public class Spy implements Listener {
     public static boolean isModuleEnabled(Player player, SpyModule module) {
         PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
-        return !disabledModules.contains(module.getIdentifier().asString());
+        return module.isDefaultEnabled() && !disabledModules.contains(module.getIdentifier().asString());
     }
 
     public static Set<SpyModule> getEnabledModules(Player player) {
         PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
-        return MODULES.stream().filter(module -> !disabledModules.contains(module.getIdentifier().toString())).collect(Collectors.toSet());
+        return MODULES.stream().filter(module -> module.isDefaultEnabled() && !disabledModules.contains(module.getIdentifier().toString())).collect(Collectors.toSet());
     }
 
     public static Set<NamespacedKey> getEnabledModuleIdentifiers(Player player) {
@@ -137,7 +137,7 @@ public class Spy implements Listener {
         Set<String> enabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "enabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("enabled").split(", ?"))) : new HashSet<>();
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : new HashSet<>();
 
-        enabledModules.add(module.getIdentifier().asString());
+        if (!module.isDefaultEnabled()) enabledModules.add(module.getIdentifier().asString());
         disabledModules.remove(module.getIdentifier().asString());
         registries.put(PLAYER_REGISTRY_KEY, "enabled", String.join(",", enabledModules));
         registries.put(PLAYER_REGISTRY_KEY, "disabled", String.join(",", disabledModules));
@@ -151,13 +151,13 @@ public class Spy implements Listener {
     public static boolean isModuleDisabled(Player player, SpyModule module) {
         PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
-        return disabledModules.contains(module.getIdentifier().asString());
+        return !module.isDefaultEnabled() || disabledModules.contains(module.getIdentifier().asString());
     }
 
     public static Set<SpyModule> getDisabledModules(Player player) {
         PlayerData.PlayerRegistry registries = PlayerData.of(player).getRegistries();
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : Collections.emptySet();
-        return MODULES.stream().filter(module -> disabledModules.contains(module.getIdentifier().toString())).collect(Collectors.toSet());
+        return MODULES.stream().filter(module -> !module.isDefaultEnabled() || disabledModules.contains(module.getIdentifier().toString())).collect(Collectors.toSet());
     }
 
     public static Set<NamespacedKey> getDisabledModuleIdentifiers(Player player) {
@@ -171,7 +171,7 @@ public class Spy implements Listener {
         Set<String> disabledModules = registries.containsKey(PLAYER_REGISTRY_KEY, "disabled") ? new HashSet<>(Arrays.asList(registries.getRegistry(PLAYER_REGISTRY_KEY).get("disabled").split(", ?"))) : new HashSet<>();
 
         enabledModules.remove(module.getIdentifier().asString());
-        disabledModules.add(module.getIdentifier().asString());
+        if (module.isDefaultEnabled()) disabledModules.add(module.getIdentifier().asString());
         registries.put(PLAYER_REGISTRY_KEY, "enabled", String.join(",", enabledModules));
         registries.put(PLAYER_REGISTRY_KEY, "disabled", String.join(",", disabledModules));
     }
@@ -198,46 +198,17 @@ public class Spy implements Listener {
     public static Set<Audience> getSpyMessageReceivers(SpyModule source, Predicate<Player> receiverRemoveIf, boolean logConsole) {
         Set<Audience> receivers = new HashSet<>();
         Bukkit.getOnlinePlayers()
-                .stream()
+                .parallelStream()
                 .filter(player -> player.isOp() || player.hasPermission(Permissions.FEATURE_SPY.getPermissionNode()))
                 .filter(player -> !receiverRemoveIf.test(player))
                 .filter(player -> isModuleEnabled(player, source))
+                .filter(player -> source.isValidSpyMessageReceiver(player))
                 .forEach(receivers::add);
         if (logConsole) receivers.add(Bukkit.getConsoleSender());
         return receivers;
     }
 
     public static void broadcastSpyMessage(SpyModule source, Component message, Predicate<Player> receiverRemoveIf, boolean logConsole, @Nullable UUID sender) {
-        Spy.getSpyMessageReceivers(source, receiverRemoveIf, logConsole).forEach(audience -> {
-            if (audience instanceof Player audiencePlayer) {
-                Component spyMessage = Component.empty().color(DefinedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true)
-                        .append(source.getDisplayName())
-                        .append(Component.text(">"))
-                        .appendSpace()
-                        .append(message);
-                audience.sendMessage(spyMessage);
-                /*if (sender == null) {
-                    // audience.sendMessage(spyMessage);
-                } else {
-                    PlayerChatMessage chatMessage = PlayerChatMessage.unsigned(sender, PlainTextComponentSerializer.plainText().serialize(spyMessage))
-                            .withUnsignedContent(NewMessageUtil.convertAdventure2Minecraft(spyMessage));
-
-                    ServerPlayer audienceMinecraftPlayer = MinecraftAdapter.player(audiencePlayer);
-                    if (audienceMinecraftPlayer != null) {
-                        audienceMinecraftPlayer.sendChatMessage(chatMessage, false, ChatType);
-                    }
-                }*/
-            } else {
-                audience.sendMessage(Component.empty()
-                        .append(Component.text("[Spy]"))
-                        .appendSpace()
-                        .append(Component.empty()
-                                .append(Component.text("["))
-                                .append(source.getDisplayName())
-                                .append(Component.text("]")))
-                        .appendSpace()
-                        .append(message));
-            }
-        });
+        Spy.getSpyMessageReceivers(source, receiverRemoveIf, logConsole).parallelStream().forEach(audience -> audience.sendMessage(source.buildSpyMessage(audience, message)));
     }
 }

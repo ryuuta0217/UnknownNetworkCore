@@ -75,7 +75,7 @@ public class VoteManager implements Listener {
                 NewMessageUtil.sendMessage(player, Component.text("あなたも投票してみませんか？", DefinedTextColor.GREEN)
                         .appendNewline()
                         .append(Component.text("投票する: ", DefinedTextColor.AQUA)
-                                .append(Component.text("monocraft", Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl("https://monocraft.net/servers/hWvNPIBskVkZ743kWt8S/vote")))
+                                .append(Component.text("MinePortal", Style.style(DefinedTextColor.LIGHT_PURPLE, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl("https://mineportal.jp/servers/clrfb56sk0000harc49a1a8mg")))
                                 .append(Component.space())
                                 .append(Component.text("JMS", Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl("https://minecraft.jp/servers/play.mc-unknown.net/vote")))), false);
             }

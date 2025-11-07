@@ -33,7 +33,10 @@ package net.unknown.core.feature.admin.spy;
 
 import com.destroystokyo.paper.event.server.ServerTickEndEvent;
 import com.destroystokyo.paper.event.server.ServerTickStartEvent;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.unknown.core.define.DefinedTextColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 
@@ -46,6 +49,31 @@ public interface SpyModule {
     void onUnRegistering();
     NamespacedKey getIdentifier();
     Component getDisplayName();
+    default boolean isDefaultEnabled() {
+        return true;
+    }
+    default boolean isValidSpyMessageReceiver(Player player) {
+        return true;
+    }
+    default Component buildSpyMessage(Audience audience, Component message) {
+        if (audience instanceof Player) {
+            return Component.empty().color(DefinedTextColor.DARK_GRAY).decoration(TextDecoration.ITALIC, true)
+                    .append(this.getDisplayName())
+                    .append(Component.text(">"))
+                    .appendSpace()
+                    .append(message);
+        } else {
+            return Component.empty()
+                    .append(Component.text("[Spy]"))
+                    .appendSpace()
+                    .append(Component.empty()
+                            .append(Component.text("["))
+                            .append(this.getDisplayName())
+                            .append(Component.text("]")))
+                    .appendSpace()
+                    .append(message);
+        }
+    }
     default void broadcastSpyMessage(Component message) {
         this.broadcastSpyMessage(message, (player) -> false, false);
     }

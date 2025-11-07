@@ -29,41 +29,40 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.dependency;
+package net.unknown.survival.feature;
 
-import net.coreprotect.CoreProtectAPI;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.attribute.Attribute;
+import org.bukkit.entity.EntityType;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
+import java.util.Random;
+import java.util.Set;
 
-public class CoreProtect {
-    public static boolean isEnabled() {
-        return isPluginEnabled() && isAPIEnabled();
-    }
+public class BabyCreature implements Listener {
+    private static final Random RANDOM = new Random();
+    private static final Set<CreatureSpawnEvent.SpawnReason> CAPABLE_REASONS = Set.of(
+            CreatureSpawnEvent.SpawnReason.NATURAL,
+            CreatureSpawnEvent.SpawnReason.SPAWNER,
+            CreatureSpawnEvent.SpawnReason.DEFAULT
+    );
+    private static final Set<EntityType> CAPABLE_TYPES = Set.of(
+            EntityType.SPIDER,
+            EntityType.SKELETON
+    );
 
-    public static boolean isPluginEnabled() {
-        return Bukkit.getPluginManager().isPluginEnabled("CoreProtect");
-    }
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onMobSpawn(CreatureSpawnEvent event) {
+        if (CAPABLE_REASONS.contains(event.getSpawnReason())) {
+            if (!CAPABLE_TYPES.contains(event.getEntityType())) {
+                return;
+            }
 
-    public static boolean isAPIEnabled() {
-        return Bukkit.getPluginManager().getPlugin("CoreProtect") != null && net.coreprotect.CoreProtect.getInstance().getAPI() != null && net.coreprotect.CoreProtect.getInstance().getAPI().isEnabled();
-    }
-
-    public static CoreProtectAPI getAPI() {
-        if (!isEnabled()) throw new IllegalStateException("CoreProtect is not enabled!");
-        return net.coreprotect.CoreProtect.getInstance().getAPI();
-    }
-
-    public static UUID getLastPlaced(Location location) {
-        if (!isEnabled()) throw new IllegalStateException("CoreProtect is not enabled!");
-        return getAPI().blockLookup(location.getBlock(), Integer.MAX_VALUE)
-                .stream()
-                .map(blockChange -> getAPI().parseResult(blockChange))
-                .filter(result -> result.getActionId() == 1)
-                .findFirst()
-                .map(result -> result.getPlayer() != null ? Bukkit.getOfflinePlayer(result.getPlayer()).getUniqueId() : null)
-                .orElse(null);
+            if (RANDOM.nextFloat() < 0.25f) {
+                event.getEntity().getAttribute(Attribute.SCALE).setBaseValue(0.5);
+            }
+        }
     }
 }

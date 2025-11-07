@@ -34,6 +34,8 @@ package net.unknown.survival;
 import net.milkbowl.vault.economy.Economy;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.discord.UnknownNetworkDiscordBot;
+import net.unknown.core.feature.admin.spy.Spy;
+import net.unknown.core.feature.admin.spy.modules.CustomChannelSpy;
 import net.unknown.survival.economy.UnknownNetworkEconomy;
 import net.unknown.survival.economy.VaultEconomy;
 import net.unknown.core.managers.ListenerManager;
@@ -98,7 +100,6 @@ public class UnknownNetworkSurvival {
         //PlayerData.loadExists();
         CustomChannels.load();
         //AntiVillagerLag.startLoopTask();
-        PlayerDeathListener.load();
         UnknownNetworkEconomy.init();
         //AutomaticWorldRegeneration.getInstance();
         AutomatedRegenWorldManager.getInstance();
@@ -120,7 +121,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new PathfinderGrapple());
         ListenerManager.registerListener(new DemolitionGun());
         ListenerManager.registerListener(new MonsterBall());
-        ListenerManager.registerListener(new PlayerDeathListener());
+        ListenerManager.registerListener(new Graveyard());
         ListenerManager.registerListener(new ServerRestartListener());
         ListenerManager.registerListener(new ProtectedAreaTestStick());
         ListenerManager.registerListener(new PlayerJoinListener());
@@ -132,6 +133,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new AdvancementRewards());
         ListenerManager.registerListener(new FastLeafDecay());
         ListenerManager.registerListener(new GSitListener());
+        ListenerManager.registerListener(new BabyCreature());
         SuppressRaids.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
         if (UnknownNetworkCorePlugin.isBootstrapped()) {
@@ -141,6 +143,8 @@ public class UnknownNetworkSurvival {
             ListenerManager.registerListener(new ConfigureHopperGui.Listener());
             ListenerManager.registerListener(new ChestLink());
         }
+
+        Spy.registerModule(new CustomChannelSpy());
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "unknown:forge", new FMLConnectionListener());

@@ -66,7 +66,8 @@ public enum Permissions {
 
     NOTIFY_MODDED_PLAYER("unknown.survival.notify.mod", 2, null),
     ENTITY_EDITOR("unknown.survival.entity_editor", 2, null),
-    OPEN_GUI("unknown.survival.open_gui", 0, null);
+    OPEN_GUI("unknown.survival.open_gui", 0, null),
+    FEATURE_EDIT_ANY_FLAGS("unknown.survival.feature.edit_any_flags", 4, null);
 
     private final int opLevel;
     private final String[] permissionNodes;
