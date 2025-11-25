@@ -40,6 +40,7 @@ import net.unknown.survival.commands.home.HomeCommand;
 import net.unknown.survival.commands.home.HomesCommand;
 import net.unknown.survival.commands.home.SetHomeCommand;
 import net.unknown.survival.commands.home.admin.*;
+import net.unknown.survival.commands.village.VillageCommand;
 import org.bukkit.entity.LivingEntity;
 
 public enum Permissions {
@@ -63,6 +64,9 @@ public enum Permissions {
     COMMAND_SUPPRESSRAID("unknown.survival.command.suppressraid", "minecraft.command.suppressraid", 4, SuppressRaidCommand.class),
     COMMAND_VOTE("unknown.survival.command.vote", "minecraft.command.vote", 0, VoteCommand.class),
     COMMAND_VOTE_MANAGE("unknown.survival.command.vote.manage", 2, VoteCommand.class),
+    COMMAND_VILLAGE("unknown.survival.command.village", 0, VillageCommand.class),
+    COMMAND_VILLAGES("unknown.survival.command.villages", 0, VillageCommand.class),
+    COMMAND_VILLAGES_MANAGE("unknown.survival.command.villages.manage", 2, VillageCommand.class),
 
     NOTIFY_MODDED_PLAYER("unknown.survival.notify.mod", 2, null),
     ENTITY_EDITOR("unknown.survival.entity_editor", 2, null),
