@@ -51,6 +51,7 @@ import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
@@ -86,15 +87,15 @@ public class VillageCommand {
                             );
                         })
                         .executes(VillageCommand::execTeleport)
-                        .then(Commands.argument("対象", EntityArgument.players())
+                        .then(Commands.argument("対象", EntityArgument.entities())
                                 .executes(VillageCommand::execTeleport)));
         dispatcher.register(builder);
     }
 
     private static int execTeleport(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        Collection<ServerPlayer> targets;
+        Collection<? extends Entity> targets;
         if (BrigadierUtil.isArgumentKeyExists(ctx, "対象")) {
-            targets = EntityArgument.getPlayers(ctx, "対象");
+            targets = EntityArgument.getEntities(ctx, "対象");
         } else {
             targets = Set.of(ctx.getSource().getPlayerOrException());
         }
@@ -113,8 +114,9 @@ public class VillageCommand {
         }
         ServerLevel level = MinecraftAdapter.level(location.getWorld());
 
-        List<ServerPlayer> successPlayers = targets.stream().filter(player -> player.teleportTo(level, location.getX(), location.getY(), location.getZ(), Collections.emptySet(), location.getYaw(), location.getPitch(), false, PlayerTeleportEvent.TeleportCause.COMMAND)).toList();
-        if (successPlayers.size() > 1) NewMessageUtil.sendMessage(ctx.getSource(), Component.empty().append(Component.text(successPlayers.size())).append(Component.text("人を")).appendSpace().append(village.getDisplayName()).appendSpace().append(Component.text("にテレポートさせました")));
+        List<? extends Entity> successPlayers = targets.stream().filter(player -> player.teleportTo(level, location.getX(), location.getY(), location.getZ(), Collections.emptySet(), location.getYaw(), location.getPitch(), false, PlayerTeleportEvent.TeleportCause.COMMAND)).toList();
+        boolean isAllPlayer = successPlayers.parallelStream().allMatch(entity -> entity instanceof ServerPlayer);
+        if (successPlayers.size() > 1) NewMessageUtil.sendMessage(ctx.getSource(), Component.empty().append(Component.text(successPlayers.size())).append(Component.text((isAllPlayer ? "人" : "のエンティティ") + "を")).appendSpace().append(village.getDisplayName()).appendSpace().append(Component.text("にテレポートさせました")));
         else NewMessageUtil.sendMessage(ctx.getSource(), Component.empty().append(village.getDisplayName()).appendSpace().append(Component.text("にテレポートしました")));
         return targets.size();
     }
