@@ -51,7 +51,6 @@ import net.minecraft.world.entity.player.Player;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
-import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
@@ -154,7 +153,19 @@ public class ChannelCommand {
                                         .executes(ctx -> showGlobalOption(ctx, GlobalOptions.KANA_CONVERT, false)))
                                 .then(Commands.literal("set")
                                         .then(Commands.argument("有効", BoolArgumentType.bool())
-                                                .executes(ctx -> setGlobalOption(ctx, GlobalOptions.KANA_CONVERT)))))));
+                                                .executes(ctx -> setGlobalOption(ctx, GlobalOptions.KANA_CONVERT)))))
+                        .then(Commands.literal("useMiniMessage")
+                                .then(Commands.literal("get")
+                                        .executes(ctx -> showGlobalOption(ctx, GlobalOptions.USE_MINI_MESSAGE, false)))
+                                .then(Commands.literal("set")
+                                        .then(Commands.argument("有効", BoolArgumentType.bool())
+                                                .executes(ctx -> setGlobalOption(ctx, GlobalOptions.USE_MINI_MESSAGE)))))
+                        .then(Commands.literal("headPrefix")
+                                .then(Commands.literal("get")
+                                        .executes(ctx -> showGlobalOption(ctx, GlobalOptions.HEAD_PREFIX, false)))
+                                .then(Commands.literal("set")
+                                        .then(Commands.argument("有効", BoolArgumentType.bool())
+                                                .executes(ctx -> setGlobalOption(ctx, GlobalOptions.HEAD_PREFIX)))))));
 
         dispatcher.register(builder);
     }
@@ -736,6 +747,42 @@ public class ChannelCommand {
                 if (!(newValue instanceof Boolean))
                     throw new IllegalArgumentException("Requires \"Boolean\" but found \"" + newValue.getClass().getName() + "\"");
                 PlayerData.of(uniqueId).getChatData().setUseKanaConvert((boolean) newValue);
+            }
+        },
+        USE_MINI_MESSAGE("MiniMessageの使用") {
+            @Override
+            public Object getArgument(CommandContext<CommandSourceStack> ctx) {
+                return BoolArgumentType.getBool(ctx, "有効");
+            }
+
+            @Override
+            public Object getValue(UUID uniqueId) {
+                return PlayerData.of(uniqueId).getChatData().isUseMiniMessage();
+            }
+
+            @Override
+            public void setValue(UUID uniqueId, Object newValue) {
+                if (!(newValue instanceof Boolean))
+                    throw new IllegalArgumentException("Requires \"Boolean\" but found \"" + newValue.getClass().getName() + "\"");
+                PlayerData.of(uniqueId).getChatData().setUseMiniMessage((boolean) newValue);
+            }
+        },
+        HEAD_PREFIX("プレイヤーの頭の表示") {
+            @Override
+            public Object getArgument(CommandContext<CommandSourceStack> ctx) {
+                return BoolArgumentType.getBool(ctx, "有効");
+            }
+
+            @Override
+            public Object getValue(UUID uniqueId) {
+                return PlayerData.of(uniqueId).getChatData().isShowHeadPrefix();
+            }
+
+            @Override
+            public void setValue(UUID uniqueId, Object newValue) {
+                if (!(newValue instanceof Boolean))
+                    throw new IllegalArgumentException("Requires \"Boolean\" but found \"" + newValue.getClass().getName() + "\"");
+                PlayerData.of(uniqueId).getChatData().setShowHeadPrefix((boolean) newValue);
             }
         };
 
