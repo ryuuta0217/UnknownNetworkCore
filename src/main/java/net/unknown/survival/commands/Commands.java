@@ -42,6 +42,7 @@ import net.unknown.survival.commands.home.SetHomeCommand;
 import net.unknown.survival.commands.home.admin.*;
 import net.unknown.survival.commands.village.VillageCommand;
 import net.unknown.survival.commands.village.VillagesCommand;
+import net.unknown.survival.commands.warp.WarpCommand;
 
 public class Commands {
     public static void init(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
@@ -81,5 +82,7 @@ public class Commands {
 
         VillageCommand.register(dispatcher);
         VillagesCommand.register(dispatcher, buildContext);
+
+        WarpCommand.register(dispatcher);
     }
 }
