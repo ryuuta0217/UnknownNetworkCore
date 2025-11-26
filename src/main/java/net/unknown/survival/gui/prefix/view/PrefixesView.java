@@ -42,11 +42,13 @@ import net.unknown.core.gui.SignGui;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.prefix.Prefix;
 import net.unknown.core.util.NewMessageUtil;
+import net.unknown.survival.enums.Permissions;
 import net.unknown.survival.gui.MainGui;
 import net.unknown.survival.gui.prefix.PrefixGui;
 import net.unknown.core.gui.view.PaginationView;
 import net.unknown.survival.gui.prefix.PrefixGuiState;
 import org.bukkit.Material;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
@@ -82,24 +84,11 @@ public class PrefixesView extends PaginationView<Prefix, PrefixGui> {
                 },
                 (event, view) -> {
                     gui.setState(PrefixGuiState.WAITING_CALLBACK);
-                    new SignGui()
-                            .withTarget(player)
-                            .withLines(Component.empty(),
-                                    Component.text("^^^^^^^^^^^^^^^^^^^^"),
-                                    Component.text("接頭辞を入力"),
-                                    Component.text("\"&r\"が最後ﾆ挿入ｻﾚﾏｽ"))
-                            .onComplete(lines -> {
-                                String raw = "&7[&r" + PlainTextComponentSerializer.plainText().serialize(lines.get(0)) + "&7]&r";
-                                Component colored = LegacyComponentSerializer.legacyAmpersand().deserialize(raw);
-                                Prefix prefix = PlayerPrefixes.addPrefix(player, colored);
-                                NewMessageUtil.sendMessage(event.getWhoClicked(), Component.empty()
-                                        .append(Component.text("接頭辞 "))
-                                        .append(prefix.getPrefix())
-                                        .append(Component.text(" を追加しました")));
-                                player.openInventory(gui.getInventory());
-                                gui.setState(PrefixGuiState.AVAILABLE_PREFIXES);
-                                view.setData(PlayerPrefixes.getPrefixesSorted(player), true);
-                            }).open();
+                    if (player.hasPermission(Permissions.FEATURE_LONG_PREFIX.getPermissionNode())) {
+                        createSignGuiForOperator(event.getWhoClicked(), gui, view, player).open();
+                    } else {
+                        createSignGuiForNormalPlayer(event.getWhoClicked(), gui, view, player).open();
+                    }
                 },
                 (event, view) -> {
                     event.getWhoClicked().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
@@ -127,5 +116,47 @@ public class PrefixesView extends PaginationView<Prefix, PrefixGui> {
         } else {
             super.onClick(event);
         }
+    }
+
+    private static SignGui createSignGuiForNormalPlayer(HumanEntity whoClicked, PrefixGui gui, PaginationView<Prefix, PrefixGui> view, Player player) {
+        return new SignGui()
+                .withTarget(player)
+                .withLines(Component.empty(),
+                        Component.text("^^^^^^^^^^^^^^^^^^^^"),
+                        Component.text("接頭辞を入力"),
+                        Component.text("\"&r\"が最後ﾆ挿入ｻﾚﾏｽ"))
+                .onComplete(lines -> {
+                    String raw = "&7[&r" + PlainTextComponentSerializer.plainText().serialize(lines.get(0)) + "&7]&r";
+                    Component colored = LegacyComponentSerializer.legacyAmpersand().deserialize(raw);
+                    Prefix prefix = PlayerPrefixes.addPrefix(player, colored);
+                    NewMessageUtil.sendMessage(whoClicked, Component.empty()
+                            .append(Component.text("接頭辞 "))
+                            .append(prefix.getPrefix())
+                            .append(Component.text(" を追加しました")));
+                    player.openInventory(gui.getInventory());
+                    gui.setState(PrefixGuiState.AVAILABLE_PREFIXES);
+                    view.setData(PlayerPrefixes.getPrefixesSorted(player), true);
+                });
+    }
+
+    private static SignGui createSignGuiForOperator(HumanEntity whoClicked, PrefixGui gui, PaginationView<Prefix, PrefixGui> view, Player player) {
+        return new SignGui()
+                .withTarget(player)
+                .withLines(Component.text("&7[&r"),
+                        Component.text("&7]"),
+                        Component.text("^^^^^^^^^^^^^^^^^^^^"),
+                        Component.text("接頭辞を入力"))
+                .onComplete(lines -> {
+                    String raw = PlainTextComponentSerializer.plainText().serialize(lines.get(0)) + PlainTextComponentSerializer.plainText().serialize(lines.get(1)) + "&r";
+                    Component colored = LegacyComponentSerializer.legacyAmpersand().deserialize(raw);
+                    Prefix prefix = PlayerPrefixes.addPrefix(player, colored);
+                    NewMessageUtil.sendMessage(whoClicked, Component.empty()
+                            .append(Component.text("接頭辞 "))
+                            .append(prefix.getPrefix())
+                            .append(Component.text(" を追加しました")));
+                    player.openInventory(gui.getInventory());
+                    gui.setState(PrefixGuiState.AVAILABLE_PREFIXES);
+                    view.setData(PlayerPrefixes.getPrefixesSorted(player), true);
+                });
     }
 }

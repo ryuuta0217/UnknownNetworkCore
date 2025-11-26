@@ -125,3 +125,4 @@ permissions:
       unknown.survival.command.villages.manage: true
       unknown.survival.notify.mod: true
       unknown.survival.notify.whois: true
+      unknown.survival.feature.long_prefix: true
