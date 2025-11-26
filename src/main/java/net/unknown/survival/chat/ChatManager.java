@@ -38,6 +38,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.object.ObjectContents;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.define.DefinedTextColor;
@@ -104,6 +105,7 @@ public class ChatManager implements Listener {
         }
 
         event.renderer(((source, sourceDisplayName, message, viewer) -> {
+            if (chatConfig.isShowHeadPrefix()) sourceDisplayName = Component.empty().append(Component.object(ObjectContents.playerHead(source.getUniqueId()))).appendSpace().append(sourceDisplayName);
             return Component.empty()
                     .append(sourceDisplayName)
                     .append(Component.text(":"))
