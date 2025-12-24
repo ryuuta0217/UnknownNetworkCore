@@ -34,17 +34,15 @@ package net.unknown.survival.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.MinecraftServer;
-import net.unknown.UnknownNetworkCorePlugin;
-import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.survival.commands.admin.LastTpCommand;
 import net.unknown.survival.commands.home.DelHomeCommand;
 import net.unknown.survival.commands.home.HomeCommand;
 import net.unknown.survival.commands.home.HomesCommand;
 import net.unknown.survival.commands.home.SetHomeCommand;
 import net.unknown.survival.commands.home.admin.*;
-
-import java.lang.reflect.Field;
+import net.unknown.survival.commands.village.VillageCommand;
+import net.unknown.survival.commands.village.VillagesCommand;
+import net.unknown.survival.commands.warp.WarpCommand;
 
 public class Commands {
     public static void init(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext buildContext) {
@@ -81,5 +79,10 @@ public class Commands {
         ShulkerBoxCommand.register(dispatcher);
 
         AutomatedRegenWorldCommand.register(dispatcher);
+
+        VillageCommand.register(dispatcher);
+        VillagesCommand.register(dispatcher, buildContext);
+
+        WarpCommand.register(dispatcher);
     }
 }

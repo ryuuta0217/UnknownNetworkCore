@@ -36,6 +36,7 @@ import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.discord.UnknownNetworkDiscordBot;
 import net.unknown.core.feature.admin.spy.Spy;
 import net.unknown.core.feature.admin.spy.modules.CustomChannelSpy;
+import net.unknown.survival.data.Villages;
 import net.unknown.survival.economy.UnknownNetworkEconomy;
 import net.unknown.survival.economy.VaultEconomy;
 import net.unknown.core.managers.ListenerManager;
@@ -103,6 +104,7 @@ public class UnknownNetworkSurvival {
         UnknownNetworkEconomy.init();
         //AutomaticWorldRegeneration.getInstance();
         AutomatedRegenWorldManager.getInstance();
+        Villages.getInstance();
 
         CustomEnchantments.initialize();
         GNArms.initialize();
@@ -178,7 +180,7 @@ public class UnknownNetworkSurvival {
     }
 
     public static void onDisable() {
-
+        Villages.save(true, false);
     }
 
     public static Logger getLogger() {

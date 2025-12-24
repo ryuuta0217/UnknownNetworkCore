@@ -352,8 +352,29 @@ public class ProtectionGuiUtil {
 
     public static String getFlagDisplayName(Flag<?> flag) {
         HashMap<Flag<?>, String> names = new HashMap<>() {{
+            put(Flags.ALLOWED_CMDS, "許可するｺﾏﾝﾄﾞ (ﾘｽﾄにないｺﾏﾝﾄﾞは使用できなくなります)");
             put(Flags.BLOCK_BREAK, "ブロックの破壊");
             put(Flags.BLOCK_PLACE, "ブロックの設置");
+            put(Flags.TRAMPLE_BLOCKS, "ブロックの踏み荒らし (耕地や卵など)");
+            put(Flags.BLOCKED_CMDS, "禁止するｺﾏﾝﾄﾞ (ﾘｽﾄにないｺﾏﾝﾄﾞが使用可能になります)");
+            put(Flags.BREEZE_WIND_CHARGE, "ﾌﾞﾘｰｽﾞの放ったｳｨﾝﾄﾞﾁｬｰｼﾞによる地形破壊");
+            put(Flags.BUILD, "[特殊] 建築");
+            put(Flags.CHEST_ACCESS, "チェスト等へのアクセス");
+            put(Flags.CHORUS_TELEPORT, "ｺｰﾗｽﾌﾙｰﾂの使用");
+            put(Flags.COPPER_FADE, "銅の自然な酸化");
+            put(Flags.CORAL_FADE, "サンゴの水中以外での枯死");
+            put(Flags.CREEPER_EXPLOSION, "クリーパーの爆発による地形破壊");
+            put(Flags.CROP_GROWTH, "作物の成長");
+            put(Flags.DAMAGE_ANIMALS, "動物への攻撃");
+            put(Flags.DENY_MESSAGE, "拒否時のメッセージ");
+            put(Flags.DENY_SPAWN, "スポーンを禁止するエンティティ");
+            put(Flags.ENDERDRAGON_BLOCK_DAMAGE, "エンダードラゴンによる地形破壊");
+            put(Flags.ENDER_BUILD, "エンダーマンによるブロックの破壊/設置");
+            put(Flags.ENDERPEARL, "エンダーパールの使用");
+            put(Flags.ENTITY_ITEM_FRAME_DESTROY, "アイテムフレームの破壊");
+            put(Flags.ENTITY_PAINTING_DESTROY, "絵画の破壊");
+            put(Flags.ENTRY, "保護領域への侵入");
+            put(Flags.ENTRY_DENY_MESSAGE, "保護領域への侵入拒否のメッセージ");
         }};
 
         return names.getOrDefault(flag, flag.getName());

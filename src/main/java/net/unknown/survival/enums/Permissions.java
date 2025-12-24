@@ -40,6 +40,7 @@ import net.unknown.survival.commands.home.HomeCommand;
 import net.unknown.survival.commands.home.HomesCommand;
 import net.unknown.survival.commands.home.SetHomeCommand;
 import net.unknown.survival.commands.home.admin.*;
+import net.unknown.survival.commands.village.VillageCommand;
 import org.bukkit.entity.LivingEntity;
 
 public enum Permissions {
@@ -63,11 +64,15 @@ public enum Permissions {
     COMMAND_SUPPRESSRAID("unknown.survival.command.suppressraid", "minecraft.command.suppressraid", 4, SuppressRaidCommand.class),
     COMMAND_VOTE("unknown.survival.command.vote", "minecraft.command.vote", 0, VoteCommand.class),
     COMMAND_VOTE_MANAGE("unknown.survival.command.vote.manage", 2, VoteCommand.class),
+    COMMAND_VILLAGE("unknown.survival.command.village", 0, VillageCommand.class),
+    COMMAND_VILLAGES("unknown.survival.command.villages", 0, VillageCommand.class),
+    COMMAND_VILLAGES_MANAGE("unknown.survival.command.villages.manage", 2, VillageCommand.class),
 
     NOTIFY_MODDED_PLAYER("unknown.survival.notify.mod", 2, null),
     ENTITY_EDITOR("unknown.survival.entity_editor", 2, null),
     OPEN_GUI("unknown.survival.open_gui", 0, null),
-    FEATURE_EDIT_ANY_FLAGS("unknown.survival.feature.edit_any_flags", 4, null);
+    FEATURE_EDIT_ANY_FLAGS("unknown.survival.feature.edit_any_flags", 4, null),
+    FEATURE_LONG_PREFIX("unknown.survival.feature.long_prefix", 2, null);
 
     private final int opLevel;
     private final String[] permissionNodes;
@@ -98,7 +103,10 @@ public enum Permissions {
     }
 
     public boolean check(CommandSourceStack commandSourceStack) {
-        return (testPermissionNode(commandSourceStack) && testCommandPermissionNode(commandSourceStack)) && testOpLevel(commandSourceStack);
+        boolean hasOpLevel = testOpLevel(commandSourceStack);
+        boolean hasPermissionNode = testPermissionNode(commandSourceStack);
+        boolean hasCommandPermissionNode = testCommandPermissionNode(commandSourceStack);
+        return hasOpLevel || (hasPermissionNode && hasCommandPermissionNode);
     }
 
     private boolean testOpLevel(CommandSourceStack commandSourceStack) {

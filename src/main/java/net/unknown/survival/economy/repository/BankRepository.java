@@ -102,7 +102,7 @@ public class BankRepository implements Repository {
         if (value.compareTo(BigDecimal.ZERO) > 0) throw new IllegalArgumentException("金額は0以上である必要があります。");
         this.balance = this.balance.add(value);
         long timestamp = System.currentTimeMillis();
-        this.auditTransaction(timestamp, Transaction.Type.DEPOSIT, value, this.balance, false);
+        this.auditTransaction(timestamp, Transaction.Type.DEPOSIT, null, value, this.balance, false);
         RunnableManager.runAsync(this::save);
         return this.balance;
     }
@@ -118,7 +118,7 @@ public class BankRepository implements Repository {
         if (value.compareTo(BigDecimal.ZERO) > 0) throw new IllegalArgumentException("金額は0以上である必要があります。");
         this.balance = this.balance.subtract(value);
         long timestamp = System.currentTimeMillis();
-        this.auditTransaction(timestamp, Transaction.Type.WITHDRAW, value, this.balance, false);
+        this.auditTransaction(timestamp, Transaction.Type.WITHDRAW, null, value, this.balance, false);
         RunnableManager.runAsync(this::save);
         return this.balance;
     }
@@ -141,8 +141,8 @@ public class BankRepository implements Repository {
      * @param amount 取引金額
      * @param balance 取引後の残高
      */
-    public void auditTransaction(long timestamp, Transaction.Type type, BigDecimal amount, BigDecimal balance) {
-        this.auditTransaction(timestamp, type, amount, balance, true);
+    public void auditTransaction(long timestamp, Transaction.Type type, String content, BigDecimal amount, BigDecimal balance) {
+        this.auditTransaction(timestamp, type, content, amount, balance, true);
     }
 
     /**
@@ -154,8 +154,8 @@ public class BankRepository implements Repository {
      * @param balance 取引後の残高
      * @param save ディスクへ保存するかどうか
      */
-    public void auditTransaction(long timestamp, Transaction.Type type, BigDecimal amount, BigDecimal balance, boolean save) {
-        this.transactions.add(timestamp, new Transaction(type, amount, balance, null));
+    public void auditTransaction(long timestamp, Transaction.Type type, String content, BigDecimal amount, BigDecimal balance, boolean save) {
+        this.transactions.add(timestamp, new Transaction(type, content, amount, balance, null));
         if (save) RunnableManager.runAsync(this::save);
     }
 

@@ -93,6 +93,8 @@ permissions:
       minecraft.command.tppet: true
       minecraft.command.fly: true
       minecraft.command.vote: true
+      minecraft.command.village: true
+      minecraft.command.villages: true
       unknown.survival.command.spawn: true
       unknown.survival.command.home: true
       unknown.survival.command.homes: true
@@ -101,6 +103,8 @@ permissions:
       unknown.survival.command.tppet: true
       unknown.survival.command.fly: true
       unknown.survival.command.vote: true
+      unknown.survival.command.village: true
+      unknown.survival.command.villages: true
       unknown.survival.open_gui: true
   unknown.survival.admin:
     default: op
@@ -118,5 +122,7 @@ permissions:
       unknown.survival.command.findhome: true
       unknown.survival.command.sethomecount: true
       unknown.survival.command.vote.manage: true
+      unknown.survival.command.villages.manage: true
       unknown.survival.notify.mod: true
       unknown.survival.notify.whois: true
+      unknown.survival.feature.long_prefix: true

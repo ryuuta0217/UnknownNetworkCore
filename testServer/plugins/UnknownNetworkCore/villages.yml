@@ -1,0 +1,11 @@
+test:aiteru:
+  name: aiteru
+  display_name: '"aiteru_test"'
+  description: '"hello, world!"'
+  location:
+    world: world
+    x: -13.01787073175194
+    y: -59.4375
+    z: 11.916694855585567
+    yaw: 153.92001
+    pitch: 18.549969
