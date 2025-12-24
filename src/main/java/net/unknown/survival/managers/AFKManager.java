@@ -31,7 +31,7 @@
 
 package net.unknown.survival.managers;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.unknown.core.packet.event.PacketReceivedEvent;
 import net.unknown.core.packet.listener.IncomingPacketListener;

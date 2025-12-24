@@ -45,13 +45,13 @@ public class PrivateMessageNotification implements Listener {
     public void onPrivateMessage(PrivateMessageEvent event) {
         ServerPlayer sender = event.getSource().getPlayer();
         if (sender != null) {
-            sender.playNotifySound(SoundEvents.PISTON_EXTEND, SoundSource.PLAYERS, 0.5f, 2);
+            sender.playSound(SoundEvents.PISTON_EXTEND, 0.5f, 2);
         }
 
         event.getReceivers().forEach(player -> {
             ServerPlayer minecraftPlayer = MinecraftAdapter.player(player);
             if (minecraftPlayer != null) {
-                minecraftPlayer.playNotifySound(SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.PLAYERS, 0.5f, 1);
+                minecraftPlayer.playSound(SoundEvents.EXPERIENCE_ORB_PICKUP, 0.5f, 1);
             }
         });
     }

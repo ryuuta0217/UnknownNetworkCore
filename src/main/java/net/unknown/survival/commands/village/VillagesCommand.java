@@ -44,11 +44,11 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.ComponentArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.commands.arguments.IdentifierArgument;
 import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.unknown.core.define.DefinedTextColor;
@@ -74,7 +74,7 @@ public class VillagesCommand {
                         .executes(VillagesCommand::execList))
                 .then(Commands.literal("add")
                         .requires(Permissions.COMMAND_VILLAGES_MANAGE::check)
-                        .then(Commands.argument("識別子", ResourceLocationArgument.id())
+                        .then(Commands.argument("識別子", IdentifierArgument.id())
                                 .then(Commands.argument("名前", StringArgumentType.string())
                                         .then(Commands.argument("表示名", ComponentArgument.textComponent(buildContext))
                                                 .then(Commands.argument("説明", ComponentArgument.textComponent(buildContext))
@@ -84,7 +84,7 @@ public class VillagesCommand {
                                                                         .executes(VillagesCommand::execAdd))))))))
                 .then(Commands.literal("remove")
                         .requires(Permissions.COMMAND_VILLAGES_MANAGE::check)
-                        .then(Commands.argument("識別子", ResourceLocationArgument.id())
+                        .then(Commands.argument("識別子", IdentifierArgument.id())
                                 .suggests((ctx, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(Villages.getVillages().keySet(), suggestionsBuilder))
                                 .executes(VillagesCommand::execRemove)));
 
@@ -118,7 +118,7 @@ public class VillagesCommand {
     }
 
     private static int execAdd(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ResourceLocation identifier = ResourceLocationArgument.getId(ctx, "識別子");
+        Identifier identifier = IdentifierArgument.getId(ctx, "識別子");
         Village existVillage = Villages.getVillage(identifier);
         if (existVillage != null) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), Component.empty().append(Component.text("識別子").appendSpace().append(Component.text(identifier.toString()))).appendSpace().append(Component.text("は既に、村")).appendSpace().append(existVillage.getDisplayName()).appendSpace().append(Component.text("で使用されています")));
@@ -137,7 +137,7 @@ public class VillagesCommand {
     }
 
     private static int execRemove(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ResourceLocation identifier = ResourceLocationArgument.getId(ctx, "識別子");
+        Identifier identifier = IdentifierArgument.getId(ctx, "識別子");
         Village village = Villages.getVillage(identifier);
         if (village == null) {
             NewMessageUtil.sendErrorMessage(ctx.getSource(), Component.empty().append(Component.text("識別子").appendSpace().append(Component.text(identifier.toString()))).appendSpace().append(Component.text("の村は見つかりませんでした")));

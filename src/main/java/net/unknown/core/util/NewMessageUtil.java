@@ -47,9 +47,11 @@ import net.minecraft.network.chat.ComponentContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.util.parsing.packrat.commands.Grammar;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.unknown.core.define.DefinedTextColor;
 import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -279,7 +281,7 @@ public class NewMessageUtil {
     /* VERBOSE MESSAGES */
     /* START - Minecraft Components */
     public static void sendVerboseMessage(CommandSourceStack source, Component component, boolean broadcastToOps) {
-        if (source.hasPermission(2, "unknown.core.verbose")) sendMessage(source, component.copy().withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), broadcastToOps);
+        if (source.hasPermission(Permissions.COMMANDS_GAMEMASTER, "unknown.core.verbose")) sendMessage(source, component.copy().withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC), broadcastToOps);
     }
 
     public static void sendVerboseMessage(CommandSourceStack source, Component component) {
@@ -405,13 +407,13 @@ public class NewMessageUtil {
                 //  ワールドA(sendCommandFeedback: false) で実行されたコマンドがワールドB(sendCommandFeedback: true)のワールドで表示される
                 //  → プレイヤーの行動追跡に若干の難が生まれる？
                 //  ただし、実行者のワールドAがtrueでも受信者のいるワールドBがfalseだとフィードバックを受信できない
-                if (player.level().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
+                if (player.level().getGameRules().get(GameRules.SEND_COMMAND_FEEDBACK)) {
                     player.sendSystemMessage(msg);
                 }
             }
         });
 
-        if (source.source != source.getServer() && source.getServer().getGameRules().getBoolean(GameRules.RULE_LOGADMINCOMMANDS) && !SpigotConfig.silentCommandBlocks) {
+        if (source.source != source.getServer() && source.getServer().getLevel(Level.OVERWORLD).getGameRules().get(GameRules.LOG_ADMIN_COMMANDS) && !SpigotConfig.silentCommandBlocks) {
             source.getServer().sendSystemMessage(msg);
         }
     }

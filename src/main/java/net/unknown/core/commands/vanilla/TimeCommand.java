@@ -50,6 +50,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.commands.ExecuteCommand;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.level.Level;
 import net.unknown.core.commands.Suggestions;
@@ -69,7 +70,7 @@ import java.util.Random;
 public class TimeCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("time");
-        builder.requires(ctx -> ctx.hasPermission(2));
+        builder.requires(ctx -> ctx.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
 
         for (TickName tick : TickName.values()) {
             builder.then(Commands.literal("set")

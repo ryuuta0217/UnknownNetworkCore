@@ -31,7 +31,7 @@
 
 package net.unknown.survival.feature.gnarms.module;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.unknown.annotations.MethodsNonnullByDefault;
 import net.unknown.survival.feature.gnarms.GNArms;
@@ -61,7 +61,7 @@ public interface GNModule {
 
     GNArms.Type[] getAcceptableGNArmTypes();
 
-    ResourceLocation getId();
+    Identifier getId();
 
     String getName();
 }

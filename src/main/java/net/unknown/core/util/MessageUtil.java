@@ -41,7 +41,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.world.level.BaseCommandBlock;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.unknown.core.define.DefinedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -161,7 +161,7 @@ public class MessageUtil {
         Set<CommandSender> recipients = new HashSet<>();
 
         if (sentBy.source instanceof BaseCommandBlock commandBlock) {
-            boolean commandBlockOutput = commandBlock.getLevel().getGameRules().getBoolean(GameRules.RULE_COMMANDBLOCKOUTPUT);
+            boolean commandBlockOutput = commandBlock.getLevel().getGameRules().get(GameRules.COMMAND_BLOCK_OUTPUT);
             if (!commandBlockOutput) return;
         }
 

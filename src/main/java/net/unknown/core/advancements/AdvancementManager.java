@@ -39,7 +39,7 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.advancements.*;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.resources.RegistryOps;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.ServerAdvancementManager;
@@ -83,10 +83,10 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
     public static final AdvancementManager INSTANCE = new AdvancementManager();
     private static final Logger LOGGER = Logger.getLogger("UNC/Advancements");
 
-    private static final Map<ResourceLocation, AdvancementHolder> ADVANCEMENTS = new HashMap<>();
-    private static final Map<ResourceLocation, Pair<Float, Float>> ADVANCEMENT_POSITIONS = new HashMap<>();
+    private static final Map<Identifier, AdvancementHolder> ADVANCEMENTS = new HashMap<>();
+    private static final Map<Identifier, Pair<Float, Float>> ADVANCEMENT_POSITIONS = new HashMap<>();
     private static AdvancementPlacingBehaviour PLACING_BEHAVIOUR = AdvancementPlacingBehaviour.ROOT_LEFT_TOP_GRID;
-    private static final Map<UUID, Map<ResourceLocation, AdvancementProgress>> PROGRESSES = new HashMap<>();
+    private static final Map<UUID, Map<Identifier, AdvancementProgress>> PROGRESSES = new HashMap<>();
 
     private AdvancementManager() {
         if (!UnknownNetworkCorePlugin.isBootstrapped()) throw new IllegalStateException("To use AdvancementManager must be server launched by UnknownNetworkBootstrap environment.");
@@ -111,14 +111,14 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
         final Path customAdvancementsDirPath = customAdvancementsDir.toPath();
         final RegistryOps<JsonElement> serializationContext = MinecraftServer.getServer().registryAccess().createSerializationContext(JsonOps.INSTANCE);
         try {
-            Map<ResourceLocation, Advancement> advancements = new HashMap<>();
+            Map<Identifier, Advancement> advancements = new HashMap<>();
             AtomicInteger loadCount = new AtomicInteger(0);
             AtomicInteger failCount = new AtomicInteger(0);
 
             try (Stream<Path> tree = Files.walk(customAdvancementsDirPath)) {
                 tree.parallel().map(Path::toFile).filter(file -> !file.isDirectory() && file.getName().endsWith(".json")).forEach(file -> {
                     try {
-                        Pair<ResourceLocation, Advancement> parseResult = loadAdvancement(null, customAdvancementsDirPath, serializationContext, file);
+                        Pair<Identifier, Advancement> parseResult = loadAdvancement(null, customAdvancementsDirPath, serializationContext, file);
                         advancements.put(parseResult.getFirst(), parseResult.getSecond());
                     } catch (IOException e) {
                         LOGGER.log(Level.WARNING, "An error occurred while loading custom advancement from file " + file.getAbsolutePath(), e);
@@ -140,7 +140,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
         }
     }
 
-    public static Pair<ResourceLocation, Advancement> loadAdvancement(ResourceLocation id, @Nullable RegistryOps<JsonElement> serializationContext, String customAdvancementJson) throws IOException {
+    public static Pair<Identifier, Advancement> loadAdvancement(Identifier id, @Nullable RegistryOps<JsonElement> serializationContext, String customAdvancementJson) throws IOException {
         if (id == null) throw new IllegalArgumentException("Advancement ID cannot be null.");
         LOGGER.info("Loading advancement " + id);
         CustomAdvancementPreLoadEvent preLoadEvent = new CustomAdvancementPreLoadEvent(id, customAdvancementJson);
@@ -202,12 +202,12 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
         return Pair.of(id, advancement.get().getFirst());
     }
 
-    public static Pair<ResourceLocation, Advancement> loadAdvancement(ResourceLocation id, @Nullable RegistryOps<JsonElement> serializationContext, File customAdvancementFile) throws IOException {
+    public static Pair<Identifier, Advancement> loadAdvancement(Identifier id, @Nullable RegistryOps<JsonElement> serializationContext, File customAdvancementFile) throws IOException {
         return loadAdvancement(id, serializationContext, String.join("\n", Files.readAllLines(customAdvancementFile.toPath())));
     }
 
-    public static Pair<ResourceLocation, Advancement> loadAdvancement(@Nullable String namespace, Path root, @Nullable RegistryOps<JsonElement> serializationContext, File customAdvancementFile) throws IOException {
-        ResourceLocation id = parseIdFromPath(namespace == null ? "unknown-network" : namespace, root, customAdvancementFile.toPath());
+    public static Pair<Identifier, Advancement> loadAdvancement(@Nullable String namespace, Path root, @Nullable RegistryOps<JsonElement> serializationContext, File customAdvancementFile) throws IOException {
+        Identifier id = parseIdFromPath(namespace == null ? "unknown-network" : namespace, root, customAdvancementFile.toPath());
         if (id == null) throw new IllegalArgumentException("Failed to parse advancement ID from path: root=" + root + ", file=" + customAdvancementFile.toPath());
         return loadAdvancement(id, serializationContext, customAdvancementFile);
     }
@@ -224,7 +224,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
             try {
                 JsonElement element = JsonParser.parseString(String.join("\n", Files.readAllLines(progressFile.toPath())));
                 if (element != null && element.isJsonObject() && element instanceof JsonObject object) {
-                    object.keySet().stream().map(ResourceLocation::tryParse).forEach(id -> {
+                    object.keySet().stream().map(Identifier::tryParse).forEach(id -> {
                         try {
                             AdvancementProgress progress = AdvancementProgress.CODEC.decode(MinecraftServer.getServer().registryAccess().createSerializationContext(JsonOps.INSTANCE), object.get(id.toString())).getOrThrow().getFirst();
                             Optional.ofNullable(getAdvancement(id)).ifPresentOrElse(advHolder -> progress.update(advHolder.value().requirements()), () -> LOGGER.warning("Unknown advancement " + id + " found in progress file for player " + playerUniqueId + ", skipping requirements update. May its bug, inspect the file."));
@@ -293,11 +293,11 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
         ADVANCEMENTS.put(loadEvent.getId(), loadEvent.getHolder());
     }
 
-    public static void register(ResourceLocation id, Advancement advancement) {
+    public static void register(Identifier id, Advancement advancement) {
         register(new AdvancementHolder(id, advancement));
     }
 
-    public static void register(Pair<ResourceLocation, Advancement> pair) {
+    public static void register(Pair<Identifier, Advancement> pair) {
         register(new AdvancementHolder(pair.getFirst(), pair.getSecond()));
     }
 
@@ -308,7 +308,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param uniqueId Player UUID
      * @param id Advancement ID
      */
-    public static void resetProgress(UUID uniqueId, ResourceLocation id) {
+    public static void resetProgress(UUID uniqueId, Identifier id) {
         if (!ADVANCEMENTS.containsKey(id)) throw new IllegalArgumentException("Unknown advancement " + id);
         Advancement advancement = ADVANCEMENTS.get(id).value();
         AdvancementProgress progress = new AdvancementProgress();
@@ -345,7 +345,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param id Advancement ID
      * @return AdvancementHolder or null if not found
      */
-    public static AdvancementHolder getAdvancement(ResourceLocation id) {
+    public static AdvancementHolder getAdvancement(Identifier id) {
         return ADVANCEMENTS.getOrDefault(id, null);
     }
 
@@ -357,9 +357,9 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param id Advancement ID
      * @return AdvancementProgress
      */
-    public static AdvancementProgress getProgress(ServerPlayer player, ResourceLocation id) {
+    public static AdvancementProgress getProgress(ServerPlayer player, Identifier id) {
         if (getAdvancement(id) == null) throw new IllegalArgumentException("Unknown advancement " + id);
-        Map<ResourceLocation, AdvancementProgress> progresses = PROGRESSES.getOrDefault(player.getUUID(), null);
+        Map<Identifier, AdvancementProgress> progresses = PROGRESSES.getOrDefault(player.getUUID(), null);
         if (progresses == null || !progresses.containsKey(id)) {
             resetProgress(player.getUUID(), id);
             progresses = PROGRESSES.getOrDefault(player.getUUID(), Collections.emptyMap()); // Reload after reset
@@ -402,7 +402,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param name Criterion name
      * @return true if the criterion was granted, false if it was already granted
      */
-    public static boolean grantProgress(ServerPlayer player, ResourceLocation id, String name) {
+    public static boolean grantProgress(ServerPlayer player, Identifier id, String name) {
         AdvancementProgress progress = getProgress(player, id);
         boolean granted = progress.grantProgress(name);
         RunnableManager.runAsync(() -> saveProgress(player.getUUID()));
@@ -441,7 +441,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * Grant a criterion for a player.
      * If the criterion is already granted, nothing will happen.
      *
-     * @deprecated To be slow; use AdvancementHolder or ResourceLocation variant instead. Because it needs to search the map for the advancement.
+     * @deprecated To be slow; use AdvancementHolder or Identifier variant instead. Because it needs to search the map for the advancement.
      * @param player ServerPlayer
      * @param advancement Advancement
      * @param name Criterion name
@@ -461,7 +461,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param name Criterion name
      * @return true if the criterion was revoked, false if it was not granted
      */
-    public static boolean revokeProgress(ServerPlayer player, ResourceLocation id, String name) {
+    public static boolean revokeProgress(ServerPlayer player, Identifier id, String name) {
         AdvancementProgress progress = getProgress(player, id);
         boolean revoked = progress.revokeProgress(name);
         RunnableManager.runAsync(() -> saveProgress(player.getUUID()));
@@ -478,22 +478,22 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
     }
 
     /**
-     * Parse a ResourceLocation from a file path.
+     * Parse a Identifier from a file path.
      * The path will be relativized to the base path, and the namespace will be prepended.
      * The file extension will be removed, and any leading "../" or "./" will be removed.
      *
      * @param namespace Namespace to use
      * @param a Base path
      * @param b File path
-     * @return ResourceLocation or null if the path is invalid
+     * @return Identifier or null if the path is invalid
      */
-    public static ResourceLocation parseIdFromPath(String namespace, Path a, Path b) {
+    public static Identifier parseIdFromPath(String namespace, Path a, Path b) {
         String relativePath = a.relativize(b).toString();
         if (File.separatorChar != '/') relativePath = relativePath.replace(File.separatorChar, '/');
         if (relativePath.endsWith(".json")) relativePath = relativePath.substring(0, relativePath.length() - 5);
         if (relativePath.startsWith("../")) relativePath = relativePath.substring(3);
         if (relativePath.startsWith("./")) relativePath = relativePath.substring(2);
-        return ResourceLocation.tryBuild(namespace, relativePath);
+        return Identifier.tryBuild(namespace, relativePath);
     }
 
     /**
@@ -654,8 +654,8 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      */
     public static void send(boolean clearExists, ServerPlayer player, boolean showAdvancements, boolean mergeVanilla) {
         List<AdvancementHolder> toEarn = new ArrayList<>();
-        Set<ResourceLocation> toRemove = new HashSet<>();
-        Map<ResourceLocation, AdvancementProgress> toSetProgress = new HashMap<>();
+        Set<Identifier> toRemove = new HashSet<>();
+        Map<Identifier, AdvancementProgress> toSetProgress = new HashMap<>();
 
         if (mergeVanilla) {
             VanillaAdvancementLoader loader = new VanillaAdvancementLoader(player.getAdvancements(), MinecraftServer.getServer().getAdvancements());
@@ -704,7 +704,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param advancements Map of advancements
      */
     @Deprecated
-    private static void initAdvancementPosition(Map<ResourceLocation, Advancement> advancements) {
+    private static void initAdvancementPosition(Map<Identifier, Advancement> advancements) {
         advancements.entrySet()
                 .stream()
                 .filter(e -> e.getValue().isRoot())
@@ -722,10 +722,10 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param advancement Advancement
      */
     @Deprecated
-    private static void placeAdvancementGracefully(ResourceLocation id, Advancement advancement) {
+    private static void placeAdvancementGracefully(Identifier id, Advancement advancement) {
         if (PLACING_BEHAVIOUR == AdvancementPlacingBehaviour.ROOT_LEFT_TOP_GRID) {
             if (!advancement.isRoot()) {
-                ResourceLocation parentId = advancement.parent().orElse(null);
+                Identifier parentId = advancement.parent().orElse(null);
                 if (parentId == null) {
                     LOGGER.warning("Could not find parent advancement for advancement " + id + ", skipping positioning.");
                     return;
@@ -772,8 +772,8 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
     public void onSendingPacket(PacketSendingEvent<ClientboundUpdateAdvancementsPacket> event) {
         boolean clearExisting = event.getPacket().shouldReset();
         List<AdvancementHolder> added = new ArrayList<>(event.getPacket().getAdded() != null ? event.getPacket().getAdded() : Collections.emptyList());
-        Set<ResourceLocation> removed = new HashSet<>(event.getPacket().getRemoved() != null ? event.getPacket().getRemoved() : Collections.emptySet());
-        Map<ResourceLocation, AdvancementProgress> progressMap = new HashMap<>(event.getPacket().getProgress() != null ? event.getPacket().getProgress() : Collections.emptyMap());
+        Set<Identifier> removed = new HashSet<>(event.getPacket().getRemoved() != null ? event.getPacket().getRemoved() : Collections.emptySet());
+        Map<Identifier, AdvancementProgress> progressMap = new HashMap<>(event.getPacket().getProgress() != null ? event.getPacket().getProgress() : Collections.emptyMap());
         boolean showAdvancements = event.getPacket().shouldShowAdvancements();
 
         if (clearExisting) {
@@ -799,8 +799,8 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
         private final Codec<?> codec;
 
         private final Set<AdvancementHolder> toAdd = new HashSet<>();
-        private final Set<ResourceLocation> toRemove = new HashSet<>();
-        private final Map<ResourceLocation, AdvancementProgress> toSetProgress = new HashMap<>();
+        private final Set<Identifier> toRemove = new HashSet<>();
+        private final Map<Identifier, AdvancementProgress> toSetProgress = new HashMap<>();
 
         public VanillaAdvancementLoader(PlayerAdvancements parent, ServerAdvancementManager manager) {
             this.parent = parent;
@@ -874,15 +874,15 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
             return this.toAdd;
         }
 
-        public Set<ResourceLocation> toRemove() {
+        public Set<Identifier> toRemove() {
             return this.toRemove;
         }
 
-        public Map<ResourceLocation, AdvancementProgress> toSetProgress() {
+        public Map<Identifier, AdvancementProgress> toSetProgress() {
             return this.toSetProgress;
         }
 
-        private static void Data$forEach(Object target, BiConsumer<ResourceLocation, AdvancementProgress> action) {
+        private static void Data$forEach(Object target, BiConsumer<Identifier, AdvancementProgress> action) {
             if (!target.getClass().getName().endsWith("PlayerAdvancements$Data")) throw new IllegalArgumentException("Target must be an instance of PlayerAdvancements.Data");
             try {
                 Method forEachMethod = target.getClass().getDeclaredMethod("forEach", BiConsumer.class);

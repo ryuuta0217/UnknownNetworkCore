@@ -31,7 +31,7 @@
 
 package net.unknown.survival.feature.gnarms.module;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.unknown.survival.feature.gnarms.module.drive.FlyModule;
 import org.slf4j.LoggerFactory;
 
@@ -39,21 +39,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GNModules {
-    private static final Map<ResourceLocation, GNModule> ALL_MODULES = new HashMap<>();
+    private static final Map<Identifier, GNModule> ALL_MODULES = new HashMap<>();
     public static final GNModule FLY = FlyModule.INSTANCE;
 
-    public static void registerMapping(ResourceLocation id, GNModule module) {
+    public static void registerMapping(Identifier id, GNModule module) {
         if (ALL_MODULES.containsKey(id)) {
             LoggerFactory.getLogger("GNModules").warn("Overwriting already mapped Module " + id + " from " + ALL_MODULES.get(id) + " to " + module);
         }
         ALL_MODULES.put(id, module);
     }
 
-    public static boolean isModule(ResourceLocation id) {
+    public static boolean isModule(Identifier id) {
         return ALL_MODULES.containsKey(id);
     }
 
-    public static GNModule getModule(ResourceLocation id) {
+    public static GNModule getModule(Identifier id) {
         return ALL_MODULES.get(id);
     }
 }

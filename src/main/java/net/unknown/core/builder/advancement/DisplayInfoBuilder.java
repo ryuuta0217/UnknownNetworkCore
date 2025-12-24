@@ -35,7 +35,7 @@ import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
@@ -47,7 +47,7 @@ public class DisplayInfoBuilder {
     private Component description;
     private ItemStack icon;
     @Nullable
-    private ResourceLocation background;
+    private Identifier background;
     private AdvancementType type = AdvancementType.TASK;
     private boolean showToast = true;
     private boolean announceChat = true;
@@ -72,7 +72,7 @@ public class DisplayInfoBuilder {
         return this;
     }
 
-    public DisplayInfoBuilder background(ResourceLocation background) {
+    public DisplayInfoBuilder background(Identifier background) {
         this.background = background;
         return this;
     }
@@ -118,7 +118,7 @@ public class DisplayInfoBuilder {
         Objects.requireNonNull(this.description);
         Objects.requireNonNull(this.icon);
         Objects.requireNonNull(this.type);
-        DisplayInfo displayInfo = new DisplayInfo(icon, title, description, Optional.of(new ClientAsset.ResourceTexture(background == null ? ResourceLocation.tryParse("minecraft:air") : background)), type, showToast, announceChat, hidden);
+        DisplayInfo displayInfo = new DisplayInfo(icon, title, description, Optional.of(new ClientAsset.ResourceTexture(background == null ? Identifier.tryParse("minecraft:air") : background)), type, showToast, announceChat, hidden);
         displayInfo.setLocation(this.x, this.y);
         return displayInfo;
     }

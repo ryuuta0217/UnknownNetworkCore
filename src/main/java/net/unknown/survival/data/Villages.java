@@ -34,7 +34,7 @@ package net.unknown.survival.data;
 import com.ryuuta0217.util.LocationRef;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.unknown.core.configurations.ConfigurationBase;
 import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.RunnableManager;
@@ -49,8 +49,8 @@ import java.util.*;
 public class Villages extends ConfigurationBase {
     private static final Villages INSTANCE = new Villages();
 
-    private Map<ResourceLocation, Village> villages;
-    private Set<ResourceLocation> dirtyVillages;
+    private Map<Identifier, Village> villages;
+    private Set<Identifier> dirtyVillages;
 
     private Villages() {
         super("villages.yml", false, "UNC/Villages");
@@ -65,7 +65,7 @@ public class Villages extends ConfigurationBase {
             ConfigurationSection villageRawData = this.getConfig().getConfigurationSection(identifierStr);
             if (villageRawData != null) {
                 try {
-                    ResourceLocation identifier = ResourceLocation.parse(identifierStr);
+                    Identifier identifier = Identifier.parse(identifierStr);
                     String name = villageRawData.getString("name", "不明な村");
                     Component displayName = GsonComponentSerializer.gson().deserialize(villageRawData.getString("display_name", "{}"));
                     Component description = GsonComponentSerializer.gson().deserialize(villageRawData.getString("description", "{}"));
@@ -81,18 +81,18 @@ public class Villages extends ConfigurationBase {
         });
     }
 
-    public static Map<ResourceLocation, Village> getVillages() {
+    public static Map<Identifier, Village> getVillages() {
         return Collections.unmodifiableMap(Villages.getInstance().villages);
     }
 
     @Nullable
-    public static Village getVillage(ResourceLocation identifier) {
+    public static Village getVillage(Identifier identifier) {
         return Villages.getInstance().villages.getOrDefault(identifier, null);
     }
 
     @Nullable
     public static Village getVillage(String identifier) {
-        return getVillage(ResourceLocation.parse(identifier));
+        return getVillage(Identifier.parse(identifier));
     }
 
     @Nullable
@@ -105,7 +105,7 @@ public class Villages extends ConfigurationBase {
         return getVillages().values().parallelStream().filter(village -> village.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 
-    public static void setVillage(ResourceLocation identifier, Village village) {
+    public static void setVillage(Identifier identifier, Village village) {
         Villages.getInstance().villages.put(identifier, village);
         Villages.getInstance().dirtyVillages.add(identifier);
         save(false, true);
@@ -121,42 +121,42 @@ public class Villages extends ConfigurationBase {
         save(false, true);
     }
 
-    public static void addVillage(ResourceLocation identifier, String name, Component displayName, Component description, LocationRef location) {
+    public static void addVillage(Identifier identifier, String name, Component displayName, Component description, LocationRef location) {
         addVillage(new Village(identifier, name, displayName, description, location));
     }
 
-    public static void addVillage(ResourceLocation identifier, String name, Component displayName, Component description, Location location) {
+    public static void addVillage(Identifier identifier, String name, Component displayName, Component description, Location location) {
         addVillage(identifier, name, displayName, description, new LocationRef(location));
     }
 
     public static void addVillage(String identifier, String name, Component displayName, Component description, LocationRef location) {
-        addVillage(ResourceLocation.parse(identifier), name, displayName, description, location);
+        addVillage(Identifier.parse(identifier), name, displayName, description, location);
     }
 
     public static void addVillage(String identifier, String name, Component displayName, Component description, Location location) {
-        addVillage(ResourceLocation.parse(identifier),name, displayName, description, new LocationRef(location));
+        addVillage(Identifier.parse(identifier),name, displayName, description, new LocationRef(location));
     }
 
     public static void addVillage(String namespace, String path, String name, Component displayName, Component description, LocationRef location) {
-        addVillage(ResourceLocation.parse(namespace + ":" + path), name, displayName, description, location);
+        addVillage(Identifier.parse(namespace + ":" + path), name, displayName, description, location);
     }
 
     public static void addVillage(String namespace, String path, String name, Component displayName, Component description, Location location) {
-        addVillage(ResourceLocation.parse(namespace + ":" + path), name, displayName, description, new LocationRef(location));
+        addVillage(Identifier.parse(namespace + ":" + path), name, displayName, description, new LocationRef(location));
     }
 
-    public static void removeVillage(ResourceLocation identifier) {
+    public static void removeVillage(Identifier identifier) {
         Villages.getInstance().villages.remove(identifier);
         Villages.getInstance().dirtyVillages.add(identifier);
         save(false, true);
     }
 
     public static void removeVillage(String identifier) {
-        removeVillage(ResourceLocation.parse(identifier));
+        removeVillage(Identifier.parse(identifier));
     }
 
     public static void removeVillage(String namespace, String path) {
-        removeVillage(ResourceLocation.parse(namespace + ":" + path));
+        removeVillage(Identifier.parse(namespace + ":" + path));
     }
 
     public static void save(boolean completely, boolean async) {
@@ -179,7 +179,7 @@ public class Villages extends ConfigurationBase {
         return INSTANCE;
     }
 
-    private void writeToConfig(@Nonnull ResourceLocation identifier, @Nullable Village village) {
+    private void writeToConfig(@Nonnull Identifier identifier, @Nullable Village village) {
         String identifierStr = identifier.toString();
 
         if (village == null) {

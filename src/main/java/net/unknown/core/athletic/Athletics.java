@@ -33,7 +33,7 @@ package net.unknown.core.athletic;
 
 import com.ryuuta0217.util.StringUtil;
 import net.kyori.adventure.text.Component;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;

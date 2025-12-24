@@ -40,6 +40,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Relative;
 import net.minecraft.world.phys.Vec2;
@@ -50,7 +51,7 @@ import java.util.EnumSet;
 public class SwapLocationCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("swaplocation");
-        builder.requires(source -> source.hasPermission(2));
+        builder.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
         builder.then(Commands.argument("target", EntityArgument.entity())
                         .executes(ctx -> execute(ctx.getSource(), ctx.getSource().getEntityOrException(), EntityArgument.getEntity(ctx, "target")))
                         .then(Commands.argument("destination", EntityArgument.entity())

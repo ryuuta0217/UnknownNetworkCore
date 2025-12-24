@@ -38,7 +38,7 @@ import de.bluecolored.bluemap.common.rendermanager.WorldRegionRenderTask;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.world.BossEvent;
 import net.unknown.core.managers.ListenerManager;
@@ -57,7 +57,7 @@ import java.util.List;
 public class BlueMapBar implements Listener {
     private static final BlueMapBar INSTANCE = new BlueMapBar();
     public static final CustomBossEvent BAR = new CustomBossEvent(
-            ResourceLocation.tryBySeparator("unknown-network:bluemap_progress", ':'), buildDisplayName(Collections.emptyList(), null));
+            Identifier.tryBySeparator("unknown-network:bluemap_progress", ':'), buildDisplayName(Collections.emptyList(), null));
     public static BukkitTask UPDATE_TASK;
 
     public static void initialize() {

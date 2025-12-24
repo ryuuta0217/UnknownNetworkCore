@@ -39,8 +39,8 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.commands.arguments.IdentifierArgument;
+import net.minecraft.resources.Identifier;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.feature.admin.spy.Spy;
@@ -59,7 +59,7 @@ public class SpyCommand {
                 .then(Commands.literal("list")
                         .executes(SpyCommand::showSpyModules))
                 .then(Commands.literal("enable")
-                        .then(Commands.argument("module", ResourceLocationArgument.id())
+                        .then(Commands.argument("module", IdentifierArgument.id())
                                 .suggests((ctx, suggestionBuilder) -> {
                                     if (ctx.getSource().isPlayer()) {
                                         Player player = ctx.getSource().getPlayer().getBukkitEntity();
@@ -75,7 +75,7 @@ public class SpyCommand {
                                 })
                                 .executes(SpyCommand::enableModule)))
                 .then(Commands.literal("disable")
-                        .then(Commands.argument("module", ResourceLocationArgument.id())
+                        .then(Commands.argument("module", IdentifierArgument.id())
                                 .suggests((ctx, suggestionBuilder) -> {
                                     if (ctx.getSource().isPlayer()) {
                                         Player player = ctx.getSource().getPlayer().getBukkitEntity();
@@ -117,7 +117,7 @@ public class SpyCommand {
     }
 
     private static int enableModule(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ResourceLocation identifierRL = ResourceLocationArgument.getId(ctx, "module");
+        Identifier identifierRL = IdentifierArgument.getId(ctx, "module");
         NamespacedKey identifier = CraftNamespacedKey.fromMinecraft(identifierRL);
         SpyModule module = Spy.getModule(identifier);
         if (module == null) {
@@ -136,7 +136,7 @@ public class SpyCommand {
     }
 
     private static int disableModule(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        ResourceLocation identifierRL = ResourceLocationArgument.getId(ctx, "module");
+        Identifier identifierRL = IdentifierArgument.getId(ctx, "module");
         NamespacedKey identifier = CraftNamespacedKey.fromMinecraft(identifierRL);
         SpyModule module = Spy.getModule(identifier);
         if (module == null) {

@@ -34,7 +34,7 @@ package net.unknown.survival.feature;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
@@ -78,7 +78,7 @@ public class SuppressRaids extends ConfigurationBase implements Listener {
             ConfigurationSection suppressRaidsSection = this.getConfig().getConfigurationSection("suppress-raids");
             suppressRaidsSection.getKeys(false).forEach(levelKey -> {
                 ConfigurationSection levelSection = suppressRaidsSection.getConfigurationSection(levelKey);
-                ResourceKey<Level> level = ResourceKey.create(Registries.DIMENSION, ResourceLocation.tryParse(levelKey));
+                ResourceKey<Level> level = ResourceKey.create(Registries.DIMENSION, Identifier.tryParse(levelKey));
                 Set<Pair<BlockPos, Double>> leveledSuppressRaids = new HashSet<>();
                 levelSection.getKeys(false).forEach(centerPosKey -> {
                     ConfigurationSection suppressRaidSection = levelSection.getConfigurationSection(centerPosKey);
@@ -101,7 +101,7 @@ public class SuppressRaids extends ConfigurationBase implements Listener {
         this.getConfig().set("suppress-raids", null);
         ConfigurationSection suppressRaidsSection = this.getConfig().createSection("suppress-raids");
         this.suppressRaids.forEach((levelKey, leveledSuppressRaids) -> {
-            ConfigurationSection levelSection = suppressRaidsSection.createSection(levelKey.location().toString());
+            ConfigurationSection levelSection = suppressRaidsSection.createSection(levelKey.identifier().toString());
             leveledSuppressRaids.forEach(suppressRaid -> {
                 BlockPos centerPos = suppressRaid.getLeft();
                 ConfigurationSection suppressRaidSection = levelSection.createSection(centerPos.getX() + "," + centerPos.getY() + "," + centerPos.getZ());

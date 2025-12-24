@@ -38,6 +38,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.server.permissions.Permissions;
 import net.minecraft.world.entity.player.Player;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.skin.Skin;
@@ -53,7 +54,7 @@ import java.util.UUID;
 public class DeepFakeCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("deepfake");
-        builder.requires(source -> source.hasPermission(4) && source.getEntity() instanceof Player);
+        builder.requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_OWNER) && source.getEntity() instanceof Player);
         builder.then(Commands.argument("プレイヤー名", StringArgumentType.word())
                 .suggests(Suggestions.ALL_PLAYER_SUGGEST)
                 .executes(ctx -> {

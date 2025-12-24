@@ -33,20 +33,20 @@ package net.unknown.survival.data.model;
 
 import com.ryuuta0217.util.LocationRef;
 import net.kyori.adventure.text.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.survival.data.Villages;
 import org.bukkit.Location;
 import org.bukkit.World;
 
 public class Village {
-    private final ResourceLocation identifier;
+    private final Identifier identifier;
     private String name;
     private Component displayName;
     private Component description;
     private LocationRef location;
 
-    public Village(ResourceLocation identifier, String name, Component displayName, Component description, LocationRef location) {
+    public Village(Identifier identifier, String name, Component displayName, Component description, LocationRef location) {
         this.identifier = identifier;
         this.name = name;
         this.displayName = displayName;
@@ -54,7 +54,7 @@ public class Village {
         this.location = location;
     }
 
-    public ResourceLocation getIdentifier() {
+    public Identifier getIdentifier() {
         return this.identifier;
     }
 

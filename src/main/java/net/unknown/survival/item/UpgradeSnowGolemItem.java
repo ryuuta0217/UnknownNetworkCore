@@ -37,7 +37,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -45,7 +45,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.animal.SnowGolem;
+import net.minecraft.world.entity.animal.golem.SnowGolem;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -131,7 +131,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
         if (snowmanUpgradeLevel < 1) return; // アップグレードされていない場合は何もしない
 
         if (!(event.getEntity() instanceof Snowball snowball)) return;
-        if (!(MinecraftAdapter.entity(snowball) instanceof net.minecraft.world.entity.projectile.Snowball minecraftSnowball)) return;
+        if (!(MinecraftAdapter.entity(snowball) instanceof net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball minecraftSnowball)) return;
 
         if (!(event.getHitEntity() instanceof LivingEntity hitEntity)) return;
         if (!(MinecraftAdapter.entity(hitEntity) instanceof net.minecraft.world.entity.LivingEntity minecraftHitEntity)) return;
@@ -153,7 +153,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
     }
 
     // Obtained from net.minecraft.world.entity.Mob#doHurtTarget(Entity)
-    private static void doHurtTargetBySnowGolemWithSnowball(SnowGolem source, net.minecraft.world.entity.projectile.Snowball weapon, Entity target) {
+    private static void doHurtTargetBySnowGolemWithSnowball(SnowGolem source, net.minecraft.world.entity.projectile.throwableitemprojectile.Snowball weapon, Entity target) {
         float damage = (float) source.getAttributeValue(Attributes.ATTACK_DAMAGE);
         float knockback = (float) source.getAttributeValue(Attributes.ATTACK_KNOCKBACK);
 
@@ -211,7 +211,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             setUpgradeLevel(snowman, upgradeLevel);
 
             /* Damage */
-            ResourceLocation damageAttributeModifierName = ResourceLocation.parse("UNC:DamageModifier");
+            Identifier damageAttributeModifierName = Identifier.parse("UNC:DamageModifier");
 
             if (!golem.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE)) {
                 golem.getAttributes().registerAttribute(Attributes.ATTACK_DAMAGE);
@@ -235,7 +235,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
             /* End of Damage */
 
             /* KnockBack */
-            ResourceLocation kbAttributeModifierName = ResourceLocation.parse("UNC:KBModifier");
+            Identifier kbAttributeModifierName = Identifier.parse("UNC:KBModifier");
 
             if (!golem.getAttributes().hasAttribute(Attributes.ATTACK_KNOCKBACK)) {
                 golem.getAttributes().registerAttribute(Attributes.ATTACK_KNOCKBACK);
