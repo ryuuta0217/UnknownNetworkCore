@@ -34,12 +34,12 @@ package net.unknown.core.managers;
 import io.papermc.paper.advancement.AdvancementDisplay;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.*;
-import net.minecraft.advancements.critereon.ImpossibleTrigger;
+import net.minecraft.advancements.criterion.ImpossibleTrigger;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.*;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
@@ -67,15 +67,15 @@ public class ToastManager {
     }
 
     public static void showAdvancementToast(ServerPlayer player, @Nullable String idStr, DisplayInfoBuilder info) {
-        ResourceLocation id;
+        Identifier id;
         if (idStr == null) {
-            id = ResourceLocation.fromNamespaceAndPath("unknown-network", "dummy_" + String.valueOf(UUID.randomUUID()).split("-")[0]);
+            id = Identifier.fromNamespaceAndPath("unknown-network", "dummy_" + String.valueOf(UUID.randomUUID()).split("-")[0]);
         } else if(idStr.contains(":")) {
             String namespace = idStr.split(":", 2)[0];
             String path = idStr.split(":", 2)[1];
-            id = ResourceLocation.fromNamespaceAndPath(namespace, path);
+            id = Identifier.fromNamespaceAndPath(namespace, path);
         } else {
-            id = ResourceLocation.fromNamespaceAndPath("unknown-network", idStr);
+            id = Identifier.fromNamespaceAndPath("unknown-network", idStr);
         }
 
         info.showToast(true);
@@ -100,7 +100,7 @@ public class ToastManager {
 
     public static void showRecipeUnlockToast(ServerPlayer player, RecipeType<?> type, Ingredient ingredient, RecipeCategory category, Item item, int count) {
         RecipeManager recipeManager = MinecraftServer.getServer().getRecipeManager();
-        ResourceKey<Recipe<?>> key = ResourceKey.create(Registries.RECIPE, ResourceLocation.fromNamespaceAndPath("unknown-network", "recipes/dummy_" + String.valueOf(UUID.randomUUID()).split("-")[0]));
+        ResourceKey<Recipe<?>> key = ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath("unknown-network", "recipes/dummy_" + String.valueOf(UUID.randomUUID()).split("-")[0]));
         Map<ResourceKey<Recipe<?>>, Recipe<?>> recipes = new HashMap<>();
 
         RecipeOutput recipeOutput = new RecipeOutput() {

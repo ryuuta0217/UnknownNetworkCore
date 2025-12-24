@@ -33,7 +33,7 @@ package net.unknown.core.advancements.event;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -47,22 +47,22 @@ import java.nio.file.Files;
 public class CustomAdvancementPreLoadEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
 
-    @Nonnull private ResourceLocation id;
+    @Nonnull private Identifier id;
     @Nonnull private String rawJson;
     @Nullable private JsonElement json;
     private boolean cancelled;
 
-    public CustomAdvancementPreLoadEvent(@Nonnull ResourceLocation id, @Nonnull String rawJson) {
+    public CustomAdvancementPreLoadEvent(@Nonnull Identifier id, @Nonnull String rawJson) {
         super(!Bukkit.isPrimaryThread());
         this.id = id;
         this.rawJson = rawJson;
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return this.id;
     }
 
-    public void setId(@Nonnull ResourceLocation id) {
+    public void setId(@Nonnull Identifier id) {
         this.id = id;
     }
 

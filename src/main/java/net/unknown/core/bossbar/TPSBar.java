@@ -40,7 +40,7 @@ import io.papermc.paper.threadedregions.scheduler.ScheduledTask;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.util.Mth;
@@ -67,7 +67,7 @@ public class TPSBar implements Listener {
     private static final Set<UUID> SELECTED_HIDE_PLAYERS = new HashSet<>();
 
     public static final CustomBossEvent BAR = new CustomBossEvent(
-            ResourceLocation.tryBySeparator("unknown-network:tps", ':'), buildDisplayName(0, 0));
+            Identifier.tryBySeparator("unknown-network:tps", ':'), buildDisplayName(0, 0));
 
     private static double LAST_MSPT = 0;
 
@@ -152,7 +152,7 @@ public class TPSBar implements Listener {
 /*
         private static synchronized void createBossBar(Player player) {
             CustomBossEvent bar = new CustomBossEvent(
-                    ResourceLocation.tryBySeparator("unknown-network:tps", ':'), Component.literal("..."));
+                    Identifier.tryBySeparator("unknown-network:tps", ':'), Component.literal("..."));
             bar.setMax(20);
             bar.setColor(BossEvent.BossBarColor.RED);
             BARS.put(player.getUniqueId(), bar);

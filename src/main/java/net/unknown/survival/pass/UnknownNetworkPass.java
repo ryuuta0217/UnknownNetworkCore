@@ -37,7 +37,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.unknown.core.advancements.AdvancementManager;
 import net.unknown.core.builder.advancement.DisplayInfoBuilder;
 import net.unknown.core.define.DefinedTextColor;
@@ -56,9 +56,9 @@ public class UnknownNetworkPass {
                         .description(NewMessageUtil.convertAdventure2Minecraft(Component.text("UNパスとは？").appendNewline().append(Component.text("様々なミッションをクリアすることで、ミッションポイントがたまり、報酬を受け取ることができます！")).appendNewline().appendNewline().append(Component.text("毎月更新！"))))
                         .announceChat(false)
                         .showToast(true)
-                        .background(ResourceLocation.tryBySeparator("minecraft:block/chiseled_polished_blackstone", ':'))
+                        .background(Identifier.tryBySeparator("minecraft:block/chiseled_polished_blackstone", ':'))
                         .build())
-                .build(ResourceLocation.tryBySeparator("unknown-network:pass/root", ':')));
+                .build(Identifier.tryBySeparator("unknown-network:pass/root", ':')));
 
         AdvancementManager.register(Advancement.Builder.advancement()
                 .display(new DisplayInfoBuilder()
@@ -67,9 +67,9 @@ public class UnknownNetworkPass {
                         .description(NewMessageUtil.convertAdventure2Minecraft(Component.text("毎日更新されるミッションをクリアして、報酬を受け取ろう！")))
                         .announceChat(false)
                         .showToast(true)
-                        .background(ResourceLocation.tryBySeparator("minecraft:block/crafting_table_top", ':'))
+                        .background(Identifier.tryBySeparator("minecraft:block/crafting_table_top", ':'))
                         .build())
-                .build(ResourceLocation.tryBySeparator("unknown-network:missions/daily/root", ':')));
+                .build(Identifier.tryBySeparator("unknown-network:missions/daily/root", ':')));
 
         AdvancementManager.send(true, MinecraftAdapter.player(player), true, true);
     }

@@ -40,7 +40,7 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.block.Block;
@@ -100,7 +100,7 @@ public class RegistryUtil {
         return null;
     }
 
-    public static <T> T forceRegister(Registry<T> registry, ResourceLocation id, T value) {
+    public static <T> T forceRegister(Registry<T> registry, Identifier id, T value) {
         if (!unfreeze(registry)) LOGGER.warning("Failed to unfreeze Registry! But continue force registering.");
         Registry.register(registry, id, value);
         /*if(registry == BuiltInRegistries.ENCHANTMENT && value instanceof Enchantment enchant) { // Currently unused - Bukkit is implemented global Registry system. this system is inherit from NMS registry.
@@ -197,7 +197,7 @@ public class RegistryUtil {
                         continue;
                     }
 
-                    /*ResourceLocation key = CraftMagicNumbers.key(material);
+                    /*Identifier key = CraftMagicNumbers.key(material);
                     BuiltInRegistries.ITEM.getOptional(key).ifPresent((item) -> {
                         MATERIAL_ITEM.put(material, item);
                     });

@@ -31,7 +31,7 @@
 
 package net.unknown.survival.feature.gnarms.module.drive;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.unknown.survival.feature.gnarms.GNArms;
@@ -139,8 +139,8 @@ public class FlyModule implements GNModule {
     }
 
     @Override
-    public ResourceLocation getId() {
-        return ResourceLocation.tryBySeparator("gnarms:fly", ':');
+    public Identifier getId() {
+        return Identifier.tryBySeparator("gnarms:fly", ':');
     }
 
     @Override

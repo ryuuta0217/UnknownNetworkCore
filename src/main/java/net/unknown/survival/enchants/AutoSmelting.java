@@ -44,7 +44,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.SmeltingRecipe;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -90,10 +90,10 @@ public class AutoSmelting implements Listener {
                 })
                 .toList();
 
-        if (level.getGameRules().getBoolean(GameRules.RULE_DOBLOCKDROPS) && event.isDropItems() && newDrops.size() > 0) {
+        if (level.getGameRules().get(GameRules.BLOCK_DROPS) && event.isDropItems() && newDrops.size() > 0) {
             event.setDropItems(false);
             newDrops.forEach(minecraftDropStack -> Block.popResource(level, blockPos, minecraftDropStack));
-            player.playNotifySound(SoundEvents.GENERIC_BURN, SoundSource.BLOCKS, 0.3f, 1.0f);
+            player.playSound(SoundEvents.GENERIC_BURN, 0.3f, 1.0f);
         }
     }
 }

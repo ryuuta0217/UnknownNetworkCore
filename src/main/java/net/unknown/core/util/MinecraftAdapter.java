@@ -56,7 +56,7 @@ import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.PlayerChatMessage;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.datafix.DataFixers;
 import net.minecraft.util.datafix.fixes.References;
@@ -164,7 +164,7 @@ public class MinecraftAdapter {
     public static net.minecraft.network.chat.ChatType chatType(net.kyori.adventure.chat.ChatType adventure) {
         Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().lookup(Registries.CHAT_TYPE).orElse(null);
         if (chatTypes != null) {
-            return chatTypes.get(ResourceLocation.tryBySeparator(adventure.key().asString(), ':')).map(Holder.Reference::value).orElse(null);
+            return chatTypes.get(Identifier.tryBySeparator(adventure.key().asString(), ':')).map(Holder.Reference::value).orElse(null);
         }
         throw new IllegalStateException("Failed to get Minecraft's ChatType registry, early access?");
     }
@@ -172,7 +172,7 @@ public class MinecraftAdapter {
     public static net.kyori.adventure.chat.ChatType chatType(@Nonnull net.minecraft.network.chat.ChatType minecraft) {
         Registry<ChatType> chatTypes = MinecraftServer.getServer().registryAccess().lookup(Registries.CHAT_TYPE).orElse(null);
         if (chatTypes != null) {
-            ResourceLocation minecraftKey = chatTypes.getKey(minecraft);
+            Identifier minecraftKey = chatTypes.getKey(minecraft);
             if (minecraftKey != null) {
                 return net.kyori.adventure.chat.ChatType.chatType(Key.key(minecraftKey.toString()));
             }

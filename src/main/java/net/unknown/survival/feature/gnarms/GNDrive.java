@@ -35,7 +35,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.papermc.paper.adventure.PaperAdventure;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.ChatFormatting;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.*;
@@ -43,7 +43,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.ComponentUtils;
 import net.minecraft.network.chat.Style;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.item.Item;
@@ -291,8 +291,8 @@ public class GNDrive implements GN, Listener {
                 .filter(tag -> tag instanceof StringTag)
                 .map(Tag::asString)
                 .map(Optional::get)
-                .filter(id -> id.chars().allMatch(c -> ResourceLocation.isAllowedInResourceLocation((char) c)))
-                .map(ResourceLocation::tryParse)
+                .filter(id -> id.chars().allMatch(c -> Identifier.isAllowedInIdentifier((char) c)))
+                .map(Identifier::tryParse)
                 .filter(GNModules::isModule)
                 .map(GNModules::getModule)
                 .collect(Collectors.toUnmodifiableSet());
@@ -304,8 +304,8 @@ public class GNDrive implements GN, Listener {
                 .filter(tag -> tag instanceof StringTag)
                 .map(Tag::asString)
                 .map(Optional::get)
-                .filter(id -> id.chars().allMatch(c -> ResourceLocation.isAllowedInResourceLocation((char) c)))
-                .map(ResourceLocation::tryParse)
+                .filter(id -> id.chars().allMatch(c -> Identifier.isAllowedInIdentifier((char) c)))
+                .map(Identifier::tryParse)
                 .filter(GNModules::isModule)
                 .map(GNModules::getModule)
                 .collect(Collectors.toUnmodifiableSet());
@@ -325,8 +325,8 @@ public class GNDrive implements GN, Listener {
                 .map(tag -> (StringTag) tag)
                 .forEach(tag -> allModulesIds.add(tag.asString().get()));
         return allModulesIds.stream()
-                .filter(id -> id.chars().allMatch(c -> ResourceLocation.isAllowedInResourceLocation((char) c)))
-                .map(ResourceLocation::tryParse)
+                .filter(id -> id.chars().allMatch(c -> Identifier.isAllowedInIdentifier((char) c)))
+                .map(Identifier::tryParse)
                 .filter(GNModules::isModule)
                 .map(GNModules::getModule)
                 .collect(Collectors.toUnmodifiableSet());

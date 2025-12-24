@@ -104,7 +104,7 @@ public class UnknownNetworkCorePluginBootstrap implements PluginBootstrap {
                     ),
                     LootItemRandomChanceCondition.randomChance(EnchantmentLevelProvider.forEnchantmentLevel(LevelBasedValue.perLevel(0.15f)))
             );
-            e.registry().register(TypedKey.create(RegistryKey.ENCHANTMENT, Key.key("unknown-network:thorns")), builder -> new Builder(ench.build(ResourceLocation.parse("unknown-network:thorns"))));
+            e.registry().register(TypedKey.create(RegistryKey.ENCHANTMENT, Key.key("unknown-network:thorns")), builder -> new Builder(ench.build(Identifier.parse("unknown-network:thorns"))));
         });*/
     }
 /*

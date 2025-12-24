@@ -39,7 +39,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.gamerules.GameRules;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.util.BrigadierUtil;
 import org.bukkit.GameMode;
@@ -62,7 +62,7 @@ public class GamemodeCommand {
                 builder.then(Commands.literal(mode)
                         .executes(ctx -> setMode(ctx, getGameModeFromString(mode), Collections.singletonList((ServerPlayer) ctx.getSource().getEntity())))
                         .then(Commands.argument("targets", EntityArgument.players())
-                                .requires(source -> source.hasPermission(2, Permissions.COMMAND_GAMEMODE.getPermissionNode() + ".other"))
+                                .requires(source -> source.hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER, Permissions.COMMAND_GAMEMODE.getPermissionNode() + ".other"))
                                 .executes(ctx -> setMode(ctx, getGameModeFromString(mode), EntityArgument.getPlayers(ctx, "targets")))));
             }
 
@@ -71,10 +71,10 @@ public class GamemodeCommand {
 
         for (String mode : new String[] {"s", "c", "a", "sp"}) {
             LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("gm" + mode);
-            builder.requires(clw -> clw.hasPermission(2) || clw.getBukkitSender().hasPermission("minecraft.command.gm" + mode)); // TODO プレイヤー指定対応
+            builder.requires(clw -> clw.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER) || clw.getBukkitSender().hasPermission("minecraft.command.gm" + mode)); // TODO プレイヤー指定対応
             builder.executes(ctx -> setMode(ctx, getGameModeFromString(mode), Collections.singleton(ctx.getSource().getPlayerOrException())))
                     .then(Commands.argument("targets", EntityArgument.players())
-                            .requires(source -> source.hasPermission(2, "minecraft.command.gm" + mode + ".other"))
+                            .requires(source -> source.hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER, "minecraft.command.gm" + mode + ".other"))
                             .executes(ctx -> setMode(ctx, getGameModeFromString(mode), EntityArgument.getPlayers(ctx, "targets"))));
             dispatcher.register(builder);
         }
@@ -102,7 +102,7 @@ public class GamemodeCommand {
             source.sendSuccess(() -> Component.translatable("commands.gamemode.success.self", gameModeTranslation), true);
         } else {
             //　実行者と対象が一致しない
-            if (source.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
+            if (source.getLevel().getGameRules().get(GameRules.SEND_COMMAND_FEEDBACK)) {
                 // gameRule commandFeedbackがtrue
                 player.sendSystemMessage(Component.translatable("gameMode.changed", gameModeTranslation));
             }

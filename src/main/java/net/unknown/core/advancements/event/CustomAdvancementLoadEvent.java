@@ -34,7 +34,7 @@ package net.unknown.core.advancements.event;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.unknown.core.builder.advancement.DisplayInfoBuilder;
 import org.bukkit.Bukkit;
 import org.bukkit.event.Cancellable;
@@ -47,18 +47,18 @@ import java.util.Objects;
 public class CustomAdvancementLoadEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
 
-    private final ResourceLocation id;
+    private final Identifier id;
     private Advancement advancement;
     private AdvancementHolder holder;
     private boolean cancelled;
 
-    public CustomAdvancementLoadEvent(final ResourceLocation id, Advancement advancement) {
+    public CustomAdvancementLoadEvent(final Identifier id, Advancement advancement) {
         super(!Bukkit.isPrimaryThread());
         this.id = id;
         this.advancement = advancement;
     }
 
-    public ResourceLocation getId() {
+    public Identifier getId() {
         return this.id;
     }
 

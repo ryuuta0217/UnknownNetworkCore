@@ -37,7 +37,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.*;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.Map;
@@ -67,7 +67,7 @@ public class CustomAdvancementNetworkCodecs {
             .validate(criteria -> criteria.isEmpty() ? DataResult.error(() -> "Advancement criteria cannot be empty") : DataResult.success(criteria));
     public static final Codec<Advancement> ADVANCEMENT_CODEC = RecordCodecBuilder.<Advancement>create( /* Supports positioning: DISPLAY_INFO_CODEC */
                     instance -> instance.group(
-                                    ResourceLocation.CODEC.optionalFieldOf("parent").forGetter(Advancement::parent),
+                                    Identifier.CODEC.optionalFieldOf("parent").forGetter(Advancement::parent),
                                     DISPLAY_INFO_CODEC.optionalFieldOf("display").forGetter(Advancement::display),
                                     AdvancementRewards.CODEC.optionalFieldOf("rewards", AdvancementRewards.EMPTY).forGetter(Advancement::rewards),
                                     CRITERIA_CODEC.fieldOf("criteria").forGetter(Advancement::criteria),

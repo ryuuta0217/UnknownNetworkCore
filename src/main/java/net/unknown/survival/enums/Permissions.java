@@ -33,6 +33,7 @@ package net.unknown.survival.enums;
 
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.permissions.Permission;
 import net.unknown.survival.commands.*;
 import net.unknown.survival.commands.admin.LastTpCommand;
 import net.unknown.survival.commands.home.DelHomeCommand;
@@ -110,7 +111,15 @@ public enum Permissions {
     }
 
     private boolean testOpLevel(CommandSourceStack commandSourceStack) {
-        return (this.opLevel <= 4 && this.opLevel >= 0 ? commandSourceStack.hasPermission(this.opLevel) : true);
+        Permission permission = switch(this.opLevel) {
+            case 1 -> net.minecraft.server.permissions.Permissions.COMMANDS_MODERATOR;
+            case 2 -> net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER;
+            case 3 -> net.minecraft.server.permissions.Permissions.COMMANDS_ADMIN;
+            case 4 -> net.minecraft.server.permissions.Permissions.COMMANDS_OWNER;
+            default -> null;
+        };
+
+        return (this.opLevel <= 4 && this.opLevel >= 1 ? commandSourceStack.permissions().hasPermission(permission) : true);
     }
 
     private boolean testPermissionNode(CommandSourceStack commandSourceStack) {
