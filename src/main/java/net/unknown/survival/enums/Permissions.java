@@ -103,7 +103,10 @@ public enum Permissions {
     }
 
     public boolean check(CommandSourceStack commandSourceStack) {
-        return (testPermissionNode(commandSourceStack) && testCommandPermissionNode(commandSourceStack)) && testOpLevel(commandSourceStack);
+        boolean hasOpLevel = testOpLevel(commandSourceStack);
+        boolean hasPermissionNode = testPermissionNode(commandSourceStack);
+        boolean hasCommandPermissionNode = testCommandPermissionNode(commandSourceStack);
+        return hasOpLevel || (hasPermissionNode && hasCommandPermissionNode);
     }
 
     private boolean testOpLevel(CommandSourceStack commandSourceStack) {
