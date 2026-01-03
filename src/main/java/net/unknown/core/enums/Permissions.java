@@ -40,6 +40,8 @@ import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.commands.vanilla.TimeCommand;
 import net.unknown.core.fireworks.ProgrammedFireworksCommand;
 
+import java.util.Arrays;
+
 public enum Permissions {
     COMMAND_CRASH("unknown.core.command.crash", "minecraft.command.crash", 4, CrashCommand.class),
     COMMAND_EVAL("unknown.core.command.eval", "minecraft.command.eval", 4, EvalCommand.class),
@@ -81,6 +83,12 @@ public enum Permissions {
         this.commandClass = commandClass;
     }
 
+    Permissions(String[] permissionNodes, int opLevel, Class<?> commandClass) {
+        this.opLevel = opLevel;
+        this.permissionNodes = permissionNodes;
+        this.commandClass = commandClass;
+    }
+
     public String getPermissionNode() {
         return this.permissionNodes[0];
     }
@@ -111,6 +119,10 @@ public enum Permissions {
 
     private boolean testPermissionNode(CommandSourceStack commandSourceStack) {
         return commandSourceStack.getBukkitSender().hasPermission(this.permissionNodes[0]);
+    }
+
+    private boolean testPermissionNodes(CommandSourceStack commandSourceStack) {
+        return Arrays.stream(this.permissionNodes).allMatch(permissionNode -> commandSourceStack.getBukkitSender().hasPermission(permissionNode));
     }
 
     private boolean testCommandPermissionNode(CommandSourceStack commandSourceStack) {

@@ -44,6 +44,8 @@ import net.unknown.survival.commands.home.admin.*;
 import net.unknown.survival.commands.village.VillageCommand;
 import org.bukkit.entity.LivingEntity;
 
+import java.util.Arrays;
+
 public enum Permissions {
     /* HOME */
     COMMAND_HOME("unknown.survival.command.home", "minecraft.command.home", 0, HomeCommand.class),
@@ -91,6 +93,12 @@ public enum Permissions {
         this.commandClass = commandClass;
     }
 
+    Permissions(String[] permissionNodes, int opLevel, Class<?> commandClass) {
+        this.opLevel = opLevel;
+        this.permissionNodes = permissionNodes;
+        this.commandClass = commandClass;
+    }
+
     public String getPermissionNode() {
         return this.permissionNodes[0];
     }
@@ -124,6 +132,10 @@ public enum Permissions {
 
     private boolean testPermissionNode(CommandSourceStack commandSourceStack) {
         return commandSourceStack.getBukkitSender().hasPermission(this.permissionNodes[0]);
+    }
+
+    private boolean testPermissionNodes(CommandSourceStack commandSourceStack) {
+        return Arrays.stream(this.permissionNodes).allMatch(permissionNode -> commandSourceStack.getBukkitSender().hasPermission(permissionNode));
     }
 
     private boolean testCommandPermissionNode(CommandSourceStack commandSourceStack) {
