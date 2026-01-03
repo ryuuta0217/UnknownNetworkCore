@@ -50,6 +50,8 @@ permissions:
       unknown.core.command.trash: true
       minecraft.command.reply: true
       unknown.core.command.reply: true
+      minecraft.command.hidearmors: true
+      unknown.core.command.hidearmors: true
   unknown.core.admin:
     default: op
     children:

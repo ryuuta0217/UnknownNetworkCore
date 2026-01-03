@@ -40,6 +40,8 @@ import net.unknown.core.commands.vanilla.MsgCommand;
 import net.unknown.core.commands.vanilla.TimeCommand;
 import net.unknown.core.fireworks.ProgrammedFireworksCommand;
 
+import java.util.Arrays;
+
 public enum Permissions {
     COMMAND_CRASH("unknown.core.command.crash", "minecraft.command.crash", 4, CrashCommand.class),
     COMMAND_EVAL("unknown.core.command.eval", "minecraft.command.eval", 4, EvalCommand.class),
@@ -59,6 +61,7 @@ public enum Permissions {
     COMMAND_TOAST("unknown.core.command.toast", "minecraft.command.toast", 2, ToastCommand.class),
     COMMAND_SPY("unknown.core.command.spy", "minecraft.command.spy", 2, SpyCommand.class),
     COMMAND_WHOIS("unknown.core.command.whois", 2, null),
+    COMMAND_HIDEARMORS("unknown.core.command.hidearmors", 0, HideArmorsCommand.class),
 
     FEATURE_USE_COLOR_CODE("unknown.feature.use_color_code", 2, null),
     FEATURE_SEE_VANISHED_PLAYERS("unknown.feature.see_vanished_players", 2, null),
@@ -78,6 +81,12 @@ public enum Permissions {
     Permissions(String permissionNode, String commandPermissionNode, int opLevel, Class<?> commandClass) {
         this.opLevel = opLevel;
         this.permissionNodes = new String[]{ permissionNode, commandPermissionNode };
+        this.commandClass = commandClass;
+    }
+
+    Permissions(String[] permissionNodes, int opLevel, Class<?> commandClass) {
+        this.opLevel = opLevel;
+        this.permissionNodes = permissionNodes;
         this.commandClass = commandClass;
     }
 
@@ -111,6 +120,10 @@ public enum Permissions {
 
     private boolean testPermissionNode(CommandSourceStack commandSourceStack) {
         return commandSourceStack.getBukkitSender().hasPermission(this.permissionNodes[0]);
+    }
+
+    private boolean testPermissionNodes(CommandSourceStack commandSourceStack) {
+        return Arrays.stream(this.permissionNodes).allMatch(permissionNode -> commandSourceStack.getBukkitSender().hasPermission(permissionNode));
     }
 
     private boolean testCommandPermissionNode(CommandSourceStack commandSourceStack) {
