@@ -61,5 +61,6 @@ public class Commands {
         WhoisCommand.register(dispatcher);
         ToastCommand.register(dispatcher, buildContext);
         SpyCommand.register(dispatcher);
+        HideArmorsCommand.register(dispatcher);
     }
 }
