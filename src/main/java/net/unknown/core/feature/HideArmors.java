@@ -1,24 +1,87 @@
+/*
+ * Copyright (c) 2023 Unknown Network Developers and contributors.
+ *
+ * All rights reserved.
+ *
+ * NOTICE: This license is subject to change without prior notice.
+ *
+ * Redistribution and use in source and binary forms, *without modification*,
+ *     are permitted provided that the following conditions are met:
+ *
+ * I. Redistributions of source code must retain the above copyright notice,
+ *     this list of conditions and the following disclaimer.
+ *
+ * II. Redistributions in binary form must reproduce the above copyright notice,
+ *     this list of conditions and the following disclaimer in the
+ *     documentation and/or other materials provided with the distribution.
+ *
+ * III. Neither the name of Unknown Network nor the names of its contributors may be used to
+ *     endorse or promote products derived from this software without specific prior written permission.
+ *
+ * IV. This source code and binaries is provided by the copyright holders and contributors "AS-IS" and
+ *     any express or implied warranties, including, but not limited to, the implied warranties of
+ *     merchantability and fitness for a particular purpose are disclaimed.
+ *     In not event shall the copyright owner or contributors be liable for
+ *     any direct, indirect, incidental, special, exemplary, or consequential damages
+ *     (including but not limited to procurement of substitute goods or services;
+ *     loss of use data or profits; or business interruption) however caused and on any theory of liability,
+ *     whether in contract, strict liability, or tort (including negligence or otherwise)
+ *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
+ */
+
 package net.unknown.core.feature;
 
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.ItemStack;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.packet.PacketManager;
 import net.unknown.core.packet.event.PacketSendingEvent;
 import net.unknown.core.packet.listener.OutgoingPacketListener;
+import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryOpenEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.*;
 
 public class HideArmors implements Listener {
     private static final HideArmors INSTANCE = new HideArmors();
+    private static final List<Pair<EquipmentSlot, ItemStack>> EMPTY_EQUIPMENTS = new ArrayList<>() {{
+        add(new Pair<>(EquipmentSlot.HEAD, ItemStack.EMPTY));
+        add(new Pair<>(EquipmentSlot.CHEST, ItemStack.EMPTY));
+        add(new Pair<>(EquipmentSlot.LEGS, ItemStack.EMPTY));
+        add(new Pair<>(EquipmentSlot.FEET, ItemStack.EMPTY));
+    }};
 
+    private final BukkitTask loopTask = RunnableManager.runAsyncRepeating(() -> {
+        this.players.forEach((uuid, mode) -> {
+            OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
+            if (offlinePlayer.isOnline()) {
+                Player player = offlinePlayer.getPlayer();
+
+                Collection<? extends Player> viewers = Bukkit.getOnlinePlayers();
+                if (mode == Mode.HIDE_OTHERS) {
+                    viewers = viewers.parallelStream()
+                            .filter(viewer -> !viewer.getUniqueId().equals(uuid)) // Exclude itself from viewers
+                            .toList();
+                }
+
+                ClientboundSetEquipmentPacket updatePacket = new ClientboundSetEquipmentPacket(player.getEntityId(), EMPTY_EQUIPMENTS, false);
+                viewers.parallelStream().forEach(viewer -> MinecraftAdapter.player(viewer).connection.send(updatePacket));
+            }
+        });
+    }, 20L, 20L);
     private final Map<UUID, Mode> players = new HashMap<>();
     private final Map<UUID, OutgoingPacketListener<ClientboundSetEquipmentPacket>> listeners = new HashMap<>();
 
@@ -66,13 +129,24 @@ public class HideArmors implements Listener {
             @Override
             public void onSendingPacket(PacketSendingEvent<ClientboundSetEquipmentPacket> event) {
                 if (event.getPacket().getEntity() == player.getEntityId()) {
+                    List<Pair<EquipmentSlot, ItemStack>> originalList = event.getPacket().getSlots();
+                    List<Pair<EquipmentSlot, ItemStack>> modifiedList = originalList.stream()
+                            .map(pair -> {
+                                if (pair.getFirst().isArmor()) {
+                                    return new Pair<>(pair.getFirst(), ItemStack.EMPTY);
+                                } else {
+                                    return pair;
+                                }
+                            })
+                            .toList();
+
                     if (mode == Mode.COMPLETELY_HIDE) {
-                        event.setPacket(new ClientboundSetEquipmentPacket(player.getEntityId(), Collections.emptyList(), true));
+                        event.setPacket(new ClientboundSetEquipmentPacket(player.getEntityId(), modifiedList, true));
                         return;
                     }
 
                     if (mode == Mode.HIDE_OTHERS && !event.getReceiver().getUUID().equals(player.getUniqueId())) {
-                        event.setPacket(new ClientboundSetEquipmentPacket(player.getEntityId(), Collections.emptyList(), true));
+                        event.setPacket(new ClientboundSetEquipmentPacket(player.getEntityId(), modifiedList, true));
                     }
                 }
             }
