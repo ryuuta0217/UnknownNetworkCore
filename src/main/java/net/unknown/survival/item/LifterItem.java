@@ -203,15 +203,9 @@ public class LifterItem extends UnknownNetworkItem implements Listener {
 
     @Override
     public UnknownNetworkItemStack<? extends UnknownNetworkItem> createItemStack() {
-        return new Stack(this.createItemStackBuilder(Material.LADDER)
+        return UnknownNetworkItemStack.of(this.createItemStackBuilder(Material.LADDER)
                 .maxStackSize(1)
                 .custom(is -> is.editMeta(meta -> meta.itemName(Component.translatable("unknown-network.item.lifter", "リフター"))))
-                .build());
-    }
-
-    public static class Stack extends UnknownNetworkItemStack<LifterItem> {
-        public Stack(ItemStack handle) {
-            super(handle, Items.LIFTER_ITEM);
-        }
+                .build(), Items.LIFTER_ITEM);
     }
 }
