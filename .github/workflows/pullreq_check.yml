@@ -22,25 +22,28 @@ jobs:
         env:
           BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
         run: ./gradlew clean compileJava jar shadowJar reobfJar --info --profile
+      - name: Set short SHA
+        if: always()
+        run: echo "short_sha=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - name: Save artifacts (for Paper)
         uses: actions/upload-artifact@v4
         with:
-          name: UnknownNetworkCore
+          name: UnknownNetworkCore-${{ env.short_sha }}.zip
           path: "build/libs/UnknownNetworkCore.jar"
       - name: Save artifacts (for Spigot)
         uses: actions/upload-artifact@v4
         with:
-          name: UnknownNetworkCore-spigot
+          name: UnknownNetworkCore-spigot-${{env.short_sha}}.zip
           path: "build/libs/UnknownNetworkCore-spigot.jar"
       - name: Upload gradle build profiling report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: build_report
+          name: UnknownNetworkCore_${{env.short_sha}}_build_report.zip
           path: "build/reports/profile/*"
       - name: Upload gradle build error report
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: build_error_report
+          name: UnknownNetworkCore_${{env.short_sha}}_build_error_report.zip
           path: "build/reports/problems/*"
