@@ -1,0 +1,65 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/daily/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:armor_stand",
+      "count": 1
+    },
+    "title": {
+      "text": "北京ビキニ"
+    },
+    "description": [
+      {
+        "text": "チェストプレート以外の装備を着る",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- デイリーPt 5Pt"
+        }
+      ]
+    ],
+    "x": 0.0,
+    "y": 1.0
+  },
+  "criteria": {
+    "armor": {
+      "trigger": "minecraft:tick",
+      "conditions": {
+        "player": {
+          "equipment": {
+            "head": {
+              "items": "#minecraft:head_armor"
+            },
+            "chest": {
+              "items": "minecraft:air"
+            },
+            "legs": {
+              "items": "#minecraft:leg_armor"
+            },
+            "feet": {
+              "items": "#minecraft:foot_armor"
+            }
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "armor"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/daily_point_5"
+  }
+}
+  

@@ -9,7 +9,8 @@ libs/*
 # testServer ignores and exceptions
 testServer/*
 testServer/config/
-testServer/plugins/*
+testServer/plugins/*/
+!testServer/plugins/
 !testServer/plugins/UnknownNetworkCore/
 testServer/plugins_SPM/*
 !testServer/plugins_SPM/UnknownNetworkCore/

@@ -1,0 +1,47 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/weekly/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:red_bed",
+      "count": 1
+    },
+    "title": {
+      "text": "ギネス記録更新"
+    },
+    "description": [
+      {
+        "text": "ゲーム内で12日間寝ずに過ごす",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- ウィークリーPt 15Pt"
+        }
+      ]
+    ],
+    "x": 4.0,
+    "y": 3.0
+  },
+  "criteria": {
+    "0..12": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "0..12"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/weekly_point_15"
+  }
+}
+  

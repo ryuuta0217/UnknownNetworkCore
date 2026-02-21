@@ -1,0 +1,12 @@
+config-version: 3
+homeGroupItems:
+  default: WHITE_WOOL
+homes:
+  default: {}
+home-default-group: default
+home-base-count: 5
+home-additional-count: 0
+force-global-chat-prefix: g.
+use-kana-convert: false
+use-minimessage: false
+registries: {}

@@ -1,0 +1,55 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/daily/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:cactus_flower",
+      "count": 1
+    },
+    "title": {
+      "text": "はなかっぱ"
+    },
+    "description": [
+      {
+        "text": "サボテンの花を頭にかぶる",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- デイリーPt 5Pt"
+        }
+      ]
+    ],
+    "x": 4.0,
+    "y": 2.0
+  },
+  "criteria": {
+    "hanakappa": {
+      "trigger": "minecraft:tick",
+      "conditions": {
+        "player": {
+          "equipment": {
+            "head": {
+              "items": "minecraft:cactus_flower"
+            }
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "hanakappa"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/daily_point_5"
+  }
+}

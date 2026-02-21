@@ -1,0 +1,47 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/weekly/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:oak_boat",
+      "count": 1
+    },
+    "title": {
+      "text": "送料無料"
+    },
+    "description": [
+      {
+        "text": "一度に3500円以上買い物をする",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- ウィークリーPt 10Pt"
+        }
+      ]
+    ],
+    "x": 1.0,
+    "y": 2.0
+  },
+  "criteria": {
+    "0..3500": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "0..3500"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/weekly_point_10"
+  }
+}
+  

@@ -1,0 +1,47 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/weekly/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:magma_block",
+      "count": 1
+    },
+    "title": {
+      "text": "ととのう"
+    },
+    "description": [
+      {
+        "text": "マグマに浸かった後30秒以内に水に浸かり、外気浴を行う",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- ウィークリーPt 5Pt"
+        }
+      ]
+    ],
+    "x": 1.0,
+    "y": 3.0
+  },
+  "criteria": {
+    "0": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "0"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/weekly_point_5"
+  }
+}
+  

@@ -1,0 +1,46 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/daily/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:bone",
+      "count": 1
+    },
+    "title": {
+      "text": "ブリーダー"
+    },
+    "description": [
+      {
+        "text": "動物を10体繁殖させる",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- デイリーPt 10Pt"
+        }
+      ]
+    ],
+    "x": 2.0,
+    "y": 1.0
+  },
+  "criteria": {
+    "0..10": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "0..10"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/daily_point_10"
+  }
+}

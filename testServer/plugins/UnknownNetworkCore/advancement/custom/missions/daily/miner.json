@@ -1,0 +1,49 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/daily/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:diamond_pickaxe",
+      "count": 1
+    },
+    "title": {
+      "text": "炭鉱夫"
+    },
+    "description": [
+      {
+        "translate": "%sを%s個回収する",
+        "with": [
+          "<ore>",
+          "<count>"
+        ]
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- デイリーPt 30Pt"
+        }
+      ]
+    ],
+    "x": 7.0,
+    "y": 2.0
+  },
+  "criteria": {
+    "0..<count>": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "0..<count>"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/daily_point_30"
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "sends_telemetry_event": false,
+  "parent": "unknown-network:missions/weekly/root",
+  "display": {
+    "icon": {
+      "id": "minecraft:emerald",
+      "count": 1
+    },
+    "title": {
+      "text": "交易のプロ"
+    },
+    "description": [
+      {
+        "text": "村人との取引を20回完了する",
+        "color": "green"
+      },
+      {
+        "text": "\n\n"
+      },
+      [
+        {
+          "text": "報酬:\n",
+          "color": "gold"
+        },
+        {
+          "text": "- ウィークリーPt 10Pt"
+        }
+      ]
+    ],
+    "x": 0.0,
+    "y": 3.0
+  },
+  "criteria": {
+    "0..20": {
+      "trigger": "minecraft:impossible"
+    }
+  },
+  "requirements": [
+    [
+      "0..20"
+    ]
+  ],
+  "rewards": {
+    "function": "unknown-network:dummy/weekly_point_10"
+  }
+}
+  
