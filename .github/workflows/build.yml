@@ -23,7 +23,7 @@ jobs:
           BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
           NEXUS_USERNAME: ${{secrets.NEXUS_USERNAME}}
           NEXUS_PASSWORD: ${{secrets.NEXUS_PASSWORD}}
-        run: ./gradlew compileJava jar shadowJar reobfJar publish
+        run: ./gradlew compileJava jar shadowJar reobfJar publish --info --profile
       - name: Save artifacts (for Paper)
         uses: actions/upload-artifact@v4
         with:
@@ -34,4 +34,15 @@ jobs:
         with:
           name: UnknownNetworkCore-spigot
           path: "build/libs/UnknownNetworkCore-spigot.jar"
-
+      - name: Upload gradle build profiling report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build_report
+          path: "build/reports/profile/*"
+      - name: Upload gradle build error report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build_error_report
+          path: "build/reports/problems/*"

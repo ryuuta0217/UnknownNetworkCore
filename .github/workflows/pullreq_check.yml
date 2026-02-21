@@ -21,8 +21,26 @@ jobs:
       - name: Build
         env:
           BRANCH_NAME: ${{ steps.extract_branch.outputs.branch }}
-        run: ./gradlew clean compileJava jar shadowJar reobfJar
-      - name: Save artifacts
-        uses: actions/upload-artifact@v2
+        run: ./gradlew clean compileJava jar shadowJar reobfJar --info --profile
+      - name: Save artifacts (for Paper)
+        uses: actions/upload-artifact@v4
         with:
-          path: "build/libs/*UnknownNetworkCore*.jar"
+          name: UnknownNetworkCore
+          path: "build/libs/UnknownNetworkCore.jar"
+      - name: Save artifacts (for Spigot)
+        uses: actions/upload-artifact@v4
+        with:
+          name: UnknownNetworkCore-spigot
+          path: "build/libs/UnknownNetworkCore-spigot.jar"
+      - name: Upload gradle build profiling report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build_report
+          path: "build/reports/profile/*"
+      - name: Upload gradle build error report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: build_error_report
+          path: "build/reports/problems/*"
