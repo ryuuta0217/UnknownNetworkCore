@@ -12,7 +12,8 @@ testServer/config/
 testServer/plugins/*/
 !testServer/plugins/
 !testServer/plugins/UnknownNetworkCore/
-testServer/plugins_SPM/*
+testServer/plugins_SPM/*/
+!testServer/plugins_SPM/
 !testServer/plugins_SPM/UnknownNetworkCore/
 !testServer/world/data/scoreboard.dat
 !testServer/world/datapacks/
