@@ -8,17 +8,32 @@ libs/*
 
 # testServer ignores and exceptions
 testServer/*
-testServer/config/
+
+testServer/config/*/
+!testServer/config/
+
 testServer/plugins/*/
 !testServer/plugins/
 !testServer/plugins/UnknownNetworkCore/
+
 testServer/plugins_SPM/*/
 !testServer/plugins_SPM/
 !testServer/plugins_SPM/UnknownNetworkCore/
+
+testServer/world/*/
+!testServer/world
+
+testServer/world/data/*
+!testServer/world/data/
 !testServer/world/data/scoreboard.dat
+
 !testServer/world/datapacks/
+
+testServer/world/playerdata/*
+!testServer/world/playerdata/
 !testServer/world/playerdata/*.dat
 !testServer/*/paper-world.yml
+
 !testServer/bukkit.yml
 !testServer/eula.txt
 !testServer/ops.json
