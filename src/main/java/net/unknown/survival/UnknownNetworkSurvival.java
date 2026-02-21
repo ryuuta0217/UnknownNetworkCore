@@ -36,6 +36,8 @@ import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.discord.UnknownNetworkDiscordBot;
 import net.unknown.core.feature.admin.spy.Spy;
 import net.unknown.core.feature.admin.spy.modules.CustomChannelSpy;
+import net.unknown.core.managers.BossBarManager;
+import net.unknown.survival.bossbar.SurvivalVisibilityHandler;
 import net.unknown.survival.data.Villages;
 import net.unknown.survival.economy.UnknownNetworkEconomy;
 import net.unknown.survival.economy.VaultEconomy;
@@ -111,6 +113,8 @@ public class UnknownNetworkSurvival {
         BlueMapBar.initialize();
         UNCUpdateCheckTask.start();
         DebugStickEntityEditor.Listener.register();
+
+        BossBarManager.getInstance().setVisibilityHandler(new SurvivalVisibilityHandler());
 
         Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCorePlugin.getInstance());
 
