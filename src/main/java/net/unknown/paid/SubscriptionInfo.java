@@ -29,34 +29,53 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.item;
+package net.unknown.paid;
 
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
+import org.json.JSONObject;
 
-public class UnknownNetworkItemStack<T extends UnknownNetworkItem> {
-    private final ItemStack handle;
-    private final T item;
+public class SubscriptionInfo {
+    public static final SubscriptionInfo NO_SUBSCRIPTION = new SubscriptionInfo(null, -1, -1);
 
-    public static <I extends UnknownNetworkItem> UnknownNetworkItemStack<I> of(ItemStack handle, I item) {
-        return new UnknownNetworkItemStack<>(handle, item);
+    private final SubscriptionType type;
+    private final long since;
+    private final long until;
+
+    public static SubscriptionInfo read(JSONObject json) {
+        if (json.has("type") && json.has("since") && json.has("until")) {
+            SubscriptionType type = json.getEnum(SubscriptionType.class, "type");
+            long since = json.getLong("since");
+            long until = json.getLong("until");
+            return new SubscriptionInfo(type, since, until);
+        } else {
+            return NO_SUBSCRIPTION;
+        }
     }
 
-    public UnknownNetworkItemStack(ItemStack handle, T item) {
-        if (!item.equals(handle)) throw new IllegalArgumentException("Item mismatch (expected: " + item.getId() + ", actual: " + handle.getItemMeta().getPersistentDataContainer().getOrDefault(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, "unknown (vanilla?)") + ")");
-        this.handle = handle;
-        this.item = item;
+    public SubscriptionInfo(SubscriptionType type, long since, long until) {
+        this.type = type;
+        this.since = since;
+        this.until = until;
     }
 
-    public ItemStack getHandle() {
-        return this.handle;
+    public SubscriptionType getType() {
+        return this.type;
     }
 
-    public UnknownNetworkItem getItem() {
-        return this.item;
+    public long getSince() {
+        return this.since;
     }
 
-    public static void insertUNStackInfo(ItemStack handle, UnknownNetworkItem item) {
-        handle.editMeta(meta -> meta.getPersistentDataContainer().set(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, item.getId().asString()));
+    public long getUntil() {
+        return this.until;
+    }
+
+    public JSONObject toJSON() {
+        JSONObject json = new JSONObject();
+        if (this.type != null) {
+            json.put("type", this.type.name());
+            json.put("since", this.since);
+            json.put("until", this.until);
+        }
+        return json;
     }
 }

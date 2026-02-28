@@ -62,6 +62,7 @@ public enum Permissions {
     COMMAND_SPY("unknown.core.command.spy", "minecraft.command.spy", 2, SpyCommand.class),
     COMMAND_WHOIS("unknown.core.command.whois", 2, null),
     COMMAND_HIDEARMORS("unknown.core.command.hidearmors", 0, HideArmorsCommand.class),
+    COMMAND_BARS("unknown.core.command.bars", 0, BarsCommand.class),
 
     FEATURE_USE_COLOR_CODE("unknown.feature.use_color_code", 2, null),
     FEATURE_SEE_VANISHED_PLAYERS("unknown.feature.see_vanished_players", 2, null),

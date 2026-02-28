@@ -46,6 +46,7 @@ import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.unknown.UnknownNetworkCorePlugin;
+import net.unknown.core.managers.BossBarManager;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
@@ -64,7 +65,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class TPSBar implements Listener {
     private static final TPSBar INSTANCE = new TPSBar();
-    private static final Set<UUID> SELECTED_HIDE_PLAYERS = new HashSet<>();
 
     public static final CustomBossEvent BAR = new CustomBossEvent(
             Identifier.tryBySeparator("unknown-network:tps", ':'), buildDisplayName(0, 0));
@@ -79,6 +79,7 @@ public class TPSBar implements Listener {
         BAR.setMax(20);
 
         ListenerManager.registerListener(INSTANCE);
+        BossBarManager.getInstance().register(BAR);
 
         RunnableManager.runAsyncRepeating(() -> {
             double tps = Mth.clamp(1000 / LAST_MSPT, 0, 20);
@@ -105,34 +106,8 @@ public class TPSBar implements Listener {
     }
 
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        if (!SELECTED_HIDE_PLAYERS.contains(event.getPlayer().getUniqueId())) showTPSBar(event.getPlayer());
-    }
-
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        hideTPSBar(event.getPlayer());
-    }
-
-    @EventHandler
     public void onTickEnd(ServerTickEndEvent event) {
         LAST_MSPT = event.getTickDuration();
-    }
-
-    public static void showTPSBar(Player player) {
-        BAR.addPlayer(MinecraftAdapter.player(player));
-    }
-
-    public static void hideTPSBar(Player player) {
-        BAR.removePlayer(MinecraftAdapter.player(player));
-    }
-
-    public static void setAlwaysHidden(Player target) {
-        SELECTED_HIDE_PLAYERS.add(target.getUniqueId());
-    }
-
-    public static void setAlwaysShow(Player player) {
-        SELECTED_HIDE_PLAYERS.remove(player.getUniqueId());
     }
 
     public static class Folia implements Listener {

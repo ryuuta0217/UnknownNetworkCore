@@ -62,5 +62,6 @@ public class Commands {
         ToastCommand.register(dispatcher, buildContext);
         SpyCommand.register(dispatcher);
         HideArmorsCommand.register(dispatcher);
+        BarsCommand.register(dispatcher);
     }
 }

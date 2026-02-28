@@ -29,34 +29,14 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.item;
+package net.unknown.proxy;
 
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
+import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 
-public class UnknownNetworkItemStack<T extends UnknownNetworkItem> {
-    private final ItemStack handle;
-    private final T item;
-
-    public static <I extends UnknownNetworkItem> UnknownNetworkItemStack<I> of(ItemStack handle, I item) {
-        return new UnknownNetworkItemStack<>(handle, item);
-    }
-
-    public UnknownNetworkItemStack(ItemStack handle, T item) {
-        if (!item.equals(handle)) throw new IllegalArgumentException("Item mismatch (expected: " + item.getId() + ", actual: " + handle.getItemMeta().getPersistentDataContainer().getOrDefault(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, "unknown (vanilla?)") + ")");
-        this.handle = handle;
-        this.item = item;
-    }
-
-    public ItemStack getHandle() {
-        return this.handle;
-    }
-
-    public UnknownNetworkItem getItem() {
-        return this.item;
-    }
-
-    public static void insertUNStackInfo(ItemStack handle, UnknownNetworkItem item) {
-        handle.editMeta(meta -> meta.getPersistentDataContainer().set(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, item.getId().asString()));
+public class HostNameLogging {
+    @Subscribe
+    public void onJoin(PlayerChooseInitialServerEvent event) {
+        event.getPlayer().getRawVirtualHost().ifPresent(hostname -> UnknownNetworkProxyCore.getInstance().getLogger().info("Player " + event.getPlayer().getUsername() + " is connecting with hostname: " + hostname));
     }
 }

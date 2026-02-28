@@ -29,34 +29,10 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.item;
+package net.unknown.paid;
 
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
-
-public class UnknownNetworkItemStack<T extends UnknownNetworkItem> {
-    private final ItemStack handle;
-    private final T item;
-
-    public static <I extends UnknownNetworkItem> UnknownNetworkItemStack<I> of(ItemStack handle, I item) {
-        return new UnknownNetworkItemStack<>(handle, item);
-    }
-
-    public UnknownNetworkItemStack(ItemStack handle, T item) {
-        if (!item.equals(handle)) throw new IllegalArgumentException("Item mismatch (expected: " + item.getId() + ", actual: " + handle.getItemMeta().getPersistentDataContainer().getOrDefault(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, "unknown (vanilla?)") + ")");
-        this.handle = handle;
-        this.item = item;
-    }
-
-    public ItemStack getHandle() {
-        return this.handle;
-    }
-
-    public UnknownNetworkItem getItem() {
-        return this.item;
-    }
-
-    public static void insertUNStackInfo(ItemStack handle, UnknownNetworkItem item) {
-        handle.editMeta(meta -> meta.getPersistentDataContainer().set(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, item.getId().asString()));
-    }
+public enum SubscriptionState {
+    INACTIVE,
+    ACTIVE,
+    EXPIRED
 }

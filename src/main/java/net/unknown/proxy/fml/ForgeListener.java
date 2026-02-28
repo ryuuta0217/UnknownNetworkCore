@@ -65,13 +65,10 @@ public class ForgeListener {
                         p.handlePluginMessage(UnknownNetworkProxyCore.getInstance().getProxy().getPlayer(player).orElse(null), channel, content);
                     }
                 }
-
-                return channel.equals("minecraft:brand");
             } catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
                 e.printStackTrace();
             }
-
-            return false;
+            return true;
         });
     }
 

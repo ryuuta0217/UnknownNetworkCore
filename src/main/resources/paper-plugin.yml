@@ -52,6 +52,8 @@ permissions:
       unknown.core.command.reply: true
       minecraft.command.hidearmors: true
       unknown.core.command.hidearmors: true
+      minecraft.command.bars: true
+      unknown.core.command.bars: true
   unknown.core.admin:
     default: op
     children:

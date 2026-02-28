@@ -29,34 +29,24 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.item;
+package net.unknown.survival.bossbar;
 
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.persistence.PersistentDataType;
+import net.minecraft.resources.Identifier;
+import net.unknown.core.managers.BossBarManager;
+import net.unknown.survival.data.PlayerData;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
 
-public class UnknownNetworkItemStack<T extends UnknownNetworkItem> {
-    private final ItemStack handle;
-    private final T item;
+public class SurvivalVisibilityHandler implements BossBarManager.VisibilityHandler {
+    private static final NamespacedKey REGISTRY_KEY = new NamespacedKey("survival", "bossbar_visibility");
 
-    public static <I extends UnknownNetworkItem> UnknownNetworkItemStack<I> of(ItemStack handle, I item) {
-        return new UnknownNetworkItemStack<>(handle, item);
+    @Override
+    public boolean isVisible(Player player, Identifier identifier) {
+        return PlayerData.of(player).getRegistries().getOrDefault(REGISTRY_KEY, identifier.toString(), "true").equalsIgnoreCase("true");
     }
 
-    public UnknownNetworkItemStack(ItemStack handle, T item) {
-        if (!item.equals(handle)) throw new IllegalArgumentException("Item mismatch (expected: " + item.getId() + ", actual: " + handle.getItemMeta().getPersistentDataContainer().getOrDefault(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, "unknown (vanilla?)") + ")");
-        this.handle = handle;
-        this.item = item;
-    }
-
-    public ItemStack getHandle() {
-        return this.handle;
-    }
-
-    public UnknownNetworkItem getItem() {
-        return this.item;
-    }
-
-    public static void insertUNStackInfo(ItemStack handle, UnknownNetworkItem item) {
-        handle.editMeta(meta -> meta.getPersistentDataContainer().set(UnknownNetworkItem.ID_CONTAINER_ID, PersistentDataType.STRING, item.getId().asString()));
+    @Override
+    public void setVisible(Player player, Identifier identifier, boolean visible) {
+        PlayerData.of(player).getRegistries().put(REGISTRY_KEY, identifier.toString(), Boolean.toString(visible));
     }
 }

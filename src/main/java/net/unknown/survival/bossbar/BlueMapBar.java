@@ -41,21 +41,15 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.world.BossEvent;
-import net.unknown.core.managers.ListenerManager;
+import net.unknown.core.managers.BossBarManager;
 import net.unknown.core.managers.RunnableManager;
-import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.Bukkit;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Collections;
 import java.util.List;
 
-public class BlueMapBar implements Listener {
-    private static final BlueMapBar INSTANCE = new BlueMapBar();
+public class BlueMapBar {
     public static final CustomBossEvent BAR = new CustomBossEvent(
             Identifier.tryBySeparator("unknown-network:bluemap_progress", ':'), buildDisplayName(Collections.emptyList(), null));
     public static BukkitTask UPDATE_TASK;
@@ -66,7 +60,7 @@ public class BlueMapBar implements Listener {
         BAR.setMax(100);
         BAR.setColor(BossEvent.BossBarColor.YELLOW);
 
-        ListenerManager.registerListener(INSTANCE);
+        BossBarManager.getInstance().register(BAR);
 
         UPDATE_TASK = RunnableManager.runAsyncRepeating(() -> {
             RenderManager renderManager = BukkitPlugin.getInstance().getPlugin().getRenderManager();
@@ -89,15 +83,5 @@ public class BlueMapBar implements Listener {
             return baseComponent.append(currentTask instanceof WorldRegionRenderTask renderTask ? Component.literal(renderTask.getMap().getName()) : Component.empty()).append(Component.literal(currentTask.getDetail().orElse(currentTask.getDescription())))
                     .append((otherRenderingTaskCount > 0 ? Component.literal(" | Remaining " + otherRenderingTaskCount + " task" + (otherRenderingTaskCount > 1 ? "s": "")) : Component.empty()));
         }
-    }
-
-    @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        BAR.addPlayer(MinecraftAdapter.player(event.getPlayer()));
-    }
-
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        BAR.removePlayer(MinecraftAdapter.player(event.getPlayer()));
     }
 }
