@@ -163,6 +163,7 @@ public class UnknownNetworkProxyCore {
         this.proxy.getEventManager().register(this, new PingListener());
         this.proxy.getEventManager().register(this, new ChatLogging());
         this.proxy.getEventManager().register(this, new ServerDisconnectListener());
+        this.proxy.getEventManager().register(this, new HostNameLogging());
         this.proxy.getChannelRegistrar().register(MinecraftChannelIdentifier.forDefaultNamespace("brand"), MinecraftChannelIdentifier.forDefaultNamespace("register"), ForgePlayer.FORGE_HANDSHAKE_IDENTIFIER, ForgePlayer.FORGE_LOGIN_IDENTIFIER);
         LOBBY = this.proxy.getServer("lobby").orElse(null);
         SURVIVAL = this.proxy.getServer("survival").orElse(null);
