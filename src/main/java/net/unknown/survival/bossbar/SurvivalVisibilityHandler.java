@@ -48,5 +48,7 @@ public class SurvivalVisibilityHandler implements BossBarManager.VisibilityHandl
     @Override
     public void setVisible(Player player, Identifier identifier, boolean visible) {
         PlayerData.of(player).getRegistries().put(REGISTRY_KEY, identifier.toString(), Boolean.toString(visible));
+
+        BossBarManager.getInstance().updateBossBarVisibility(player, identifier);
     }
 }

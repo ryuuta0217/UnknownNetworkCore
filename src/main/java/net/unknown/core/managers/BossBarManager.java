@@ -160,6 +160,8 @@ public class BossBarManager implements Listener {
             if (dataContainer != null) {
                 dataContainer.set(CraftNamespacedKey.fromMinecraft(identifier), PersistentDataType.BOOLEAN, visible);
             }
+
+            BossBarManager.getInstance().updateBossBarVisibility(player, identifier);
         }
     }
 }
