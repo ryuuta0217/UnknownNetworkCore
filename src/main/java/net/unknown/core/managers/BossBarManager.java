@@ -34,6 +34,7 @@ package net.unknown.core.managers;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.unknown.core.util.MinecraftAdapter;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.craftbukkit.util.CraftNamespacedKey;
 import org.bukkit.entity.Player;
@@ -88,6 +89,31 @@ public class BossBarManager implements Listener {
 
     public VisibilityHandler getVisibilityHandler() {
         return this.visibilityHandler;
+    }
+
+    public void updateBossBarVisibility(Player player, Identifier identifier) {
+        this.registeredBossBars.parallelStream()
+                .filter(bossBar -> bossBar.getTextId().equals(identifier))
+                .findAny()
+                .ifPresent(bossBar -> {
+                    if (this.visibilityHandler.isVisible(player, bossBar.getTextId())) {
+                        bossBar.addPlayer(MinecraftAdapter.player(player));
+                    } else {
+                        bossBar.removePlayer(MinecraftAdapter.player(player));
+                    }
+                });
+    }
+
+    public void updateBossBarVisibility(Player player) {
+        this.registeredBossBars.forEach(bossBar -> this.updateBossBarVisibility(player, bossBar.getTextId()));
+    }
+
+    public void updateBossBarVisibility(Identifier identifier) {
+        Bukkit.getOnlinePlayers().forEach(player -> this.updateBossBarVisibility(player, identifier));
+    }
+
+    public void updateBossBarVisibility() {
+        this.registeredBossBars.forEach(bossBar -> Bukkit.getOnlinePlayers().forEach(this::updateBossBarVisibility));
     }
 
     @EventHandler
