@@ -57,7 +57,9 @@ public class BossBarManager implements Listener {
     private final Set<CustomBossEvent> registeredBossBars = new HashSet<>();
     private VisibilityHandler visibilityHandler = new DefaultVisibilityHandler();
 
-    private BossBarManager() {}
+    private BossBarManager() {
+        ListenerManager.registerListener(this);
+    }
 
     public static BossBarManager getInstance() {
         return INSTANCE;
