@@ -164,6 +164,8 @@ public class VoteCommand {
         NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
                 .append(Component.text("投票リンク:", DefinedTextColor.AQUA))
                 .appendSpace()
+                .append(Component.text("MinePortal", DefinedTextColor.LIGHT_PURPLE).clickEvent(ClickEvent.openUrl("https://mineportal.jp/servers/clrfb56sk0000harc49a1a8mg")))
+                .appendSpace()
                 .append(Component.text("JMS", DefinedTextColor.GOLD).clickEvent(ClickEvent.openUrl("https://minecraft.jp/servers/play.mc-unknown.net/vote")))
                 .appendSpace()
                 .append(Component.text("monocraft", DefinedTextColor.GOLD).clickEvent(ClickEvent.openUrl("https://monocraft.net/servers/hWvNPIBskVkZ743kWt8S/vote"))));
