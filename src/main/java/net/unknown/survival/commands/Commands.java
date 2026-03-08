@@ -84,5 +84,6 @@ public class Commands {
         VillagesCommand.register(dispatcher, buildContext);
 
         WarpCommand.register(dispatcher);
+        PrefixCommand.register(dispatcher, buildContext);
     }
 }
