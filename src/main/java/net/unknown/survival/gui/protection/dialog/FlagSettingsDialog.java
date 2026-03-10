@@ -484,7 +484,7 @@ public class FlagSettingsDialog {
                                         add("passthrough");
                                         add("build");
                                     }};
-                                    return disabledFlags.contains(flag.getName());
+                                    return !disabledFlags.contains(flag.getName());
                                 })
                                 .map(flag -> tryBuildDialogInput(flag, region, player, 256))
                                 .filter(Objects::nonNull)
