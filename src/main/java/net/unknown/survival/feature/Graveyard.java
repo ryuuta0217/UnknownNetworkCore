@@ -382,10 +382,21 @@ public class Graveyard implements Listener {
         return getGraveyardOwnerUUID(block.getState());
     }
 
-    private static UUID getGraveyardOwnerUUID(BlockState blockState) {
-        if (!(blockState instanceof Container container)) return null;
+    private static UUID getGraveyardOwnerUUID(BlockState blockStateA) {
+        Block blockB = getGraveyardPart(blockStateA.getBlock());
+
+        Container container;
+        if (blockStateA instanceof Container containerA && containerA.getPersistentDataContainer().has(OWNER_DATA_KEY, PersistentDataType.INTEGER_ARRAY)) {
+            container = containerA;
+        } else if (blockB != null && blockB.getState() instanceof Container containerB && containerB.getPersistentDataContainer().has(OWNER_DATA_KEY, PersistentDataType.INTEGER_ARRAY)) {
+            container = containerB;
+        } else {
+            return null;
+        }
+
         int[] ownerUniqueIdArr = container.getPersistentDataContainer().get(OWNER_DATA_KEY, PersistentDataType.INTEGER_ARRAY);
-        if (ownerUniqueIdArr == null) return null;
+        if (ownerUniqueIdArr == null) return null; // ここにはおそらく到達しない
+
         return UUIDUtil.uuidFromIntArray(ownerUniqueIdArr);
     }
 
