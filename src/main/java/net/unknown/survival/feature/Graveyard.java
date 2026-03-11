@@ -193,15 +193,11 @@ public class Graveyard implements Listener {
     @Nullable
     private static Pair<Chest, Chest> getGraveyard(Block blockA) {
         if (getGraveyardOwnerUUID(blockA) == null) return null;
-        System.out.println("getGraveyardOwnerUUID(blockA) != null");
 
         if (blockA.getBlockData() instanceof org.bukkit.block.data.type.Chest chestBlockA && blockA.getState() instanceof Chest chestA) {
-            System.out.println("blockA is Chest");
             if (chestBlockA.getType() == org.bukkit.block.data.type.Chest.Type.SINGLE) {
-                System.out.println("chestBlockA is SINGLE");
                 return Pair.of(chestA, null);
             } else {
-                System.out.println("chestBlockA is LARGE");
                 Block blockB = getGraveyardPart(blockA);
                 if (blockB != null && getGraveyardOwnerUUID(blockB) != null) {
                     if (blockB.getBlockData() instanceof org.bukkit.block.data.type.Chest chestBlockB && blockB.getState() instanceof Chest chestB) {
