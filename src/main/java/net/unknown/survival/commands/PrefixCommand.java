@@ -126,7 +126,6 @@ public class PrefixCommand {
                             .append(createdAtComponent)
                             .appendSpace()
                             .append(Component.text("[×]", DefinedTextColor.RED).hoverEvent(HoverEvent.showText(Component.text("接頭辞を削除"))).clickEvent(ClickEvent.runCommand("/prefix remove " + prefix.getCreatedAt() + " show_list_after_remove")))
-                            // TODO: 削除ボタン "[X]" (hoverEvent: showText: "この接頭辞を削除" (color: red), clickEvent: suggestCommand: "/prefix remove ${createdAt}")
                             .append(Component.text(":"))
                             .appendSpace()
                             .append(prefix.getPrefix())
