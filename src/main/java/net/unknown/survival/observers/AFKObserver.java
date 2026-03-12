@@ -31,14 +31,16 @@
 
 package net.unknown.survival.observers;
 
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerInputPacket;
 import net.minecraft.util.Util;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.packet.event.PacketReceivedEvent;
 import net.unknown.core.packet.listener.IncomingPacketListener;
 import net.unknown.core.packet.PacketManager;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 
 import java.util.concurrent.TimeUnit;
 
@@ -46,7 +48,19 @@ public class AFKObserver {
     private AFKObserver() {}
 
     public static void initialize() {
-        PacketManager.getInstance().registerIncomingC2SListener(ServerboundMovePlayerPacket.class, new MoveListener());
+        PacketManager.getInstance().registerIncomingC2SListener(ServerboundPlayerInputPacket.class, new IncomingPacketListener<>() {
+            @Override
+            public void onPacketReceived(PacketReceivedEvent<ServerboundPlayerInputPacket> event) {
+                onAction(event.getPlayer(), Util.getMillis());
+            }
+        });
+
+        PacketManager.getInstance().registerIncomingC2SListener(ServerboundPlayerActionPacket.class, new IncomingPacketListener<>() {
+            @Override
+            public void onPacketReceived(PacketReceivedEvent<ServerboundPlayerActionPacket> event) {
+                onAction(event.getPlayer(), Util.getMillis());
+            }
+        });
 
         RunnableManager.runAsyncRepeating(() -> { // AFK state checker, run every seconds
             Bukkit.getOnlinePlayers().parallelStream().forEach(player -> {
@@ -64,20 +78,13 @@ public class AFKObserver {
         }, 0L, 20L);
     }
 
-    public static class MoveListener extends IncomingPacketListener<ServerboundMovePlayerPacket> {
-        public MoveListener() {
-            super(false);
-        }
-
-        @Override
-        public void onPacketReceived(PacketReceivedEvent<ServerboundMovePlayerPacket> event) {
-            PlayerData.of(event.getPlayer()).getSessionData().setLastActionTime(Util.getMillis());
-            RunnableManager.runAsync(() -> {
-                PlayerData data = PlayerData.of(event.getPlayer());
-                if (data.getSessionData().isAfk()) {
-                    data.getSessionData().setAfk(false, null, true);
-                }
-            });
-        }
+    private static void onAction(Player player, long lastActionTime) {
+        PlayerData.of(player).getSessionData().setLastActionTime(lastActionTime);
+        RunnableManager.runAsync(() -> {
+            PlayerData data = PlayerData.of(player);
+            if (data.getSessionData().isAfk()) {
+                data.getSessionData().setAfk(false, null, true);
+            }
+        });
     }
 }
