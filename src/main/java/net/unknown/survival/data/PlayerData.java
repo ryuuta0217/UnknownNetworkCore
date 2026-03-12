@@ -499,6 +499,10 @@ public class PlayerData extends ConfigurationBase {
             return this.isAfk;
         }
 
+        public String getAfkReason() {
+            return this.afkReason;
+        }
+
         public void setAfk(boolean afk) {
             this.setAfk(afk, null);
         }
