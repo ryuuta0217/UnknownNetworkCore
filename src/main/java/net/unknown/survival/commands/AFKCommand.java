@@ -64,7 +64,7 @@ public class AFKCommand {
 
         PlayerData.SessionData sessionData = PlayerData.of(ctx.getSource().getPlayerOrException().getUUID()).getSessionData();
         sessionData.setAfk(!sessionData.isAfk(), reason, true);
-        NewMessageUtil.sendMessage(ctx.getSource(), Component.text(sessionData.isAfk() ? "離席状態を設定しました" : "離席状態を解除しました"));
+        NewMessageUtil.sendMessage(ctx.getSource(), Component.text(sessionData.isAfk() ? "離席状態を設定しました" : "離席状態を解除しました"), false);
         return sessionData.isAfk() ? 1 : 0;
     }
 }
