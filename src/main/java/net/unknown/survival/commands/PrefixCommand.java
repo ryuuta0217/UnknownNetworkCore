@@ -137,7 +137,7 @@ public class PrefixCommand {
 
         Component header = Component.text("===== 接頭辞一覧(" + prefixes.size() + ") =====", DefinedTextColor.GOLD).append(Component.newline());
 
-        ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(Component.empty().append(header).append(lines)), false);
+        NewMessageUtil.sendMessage(ctx.getSource(), Component.empty().append(header).append(lines), false);
         return prefixes.size();
     }
 
@@ -147,10 +147,10 @@ public class PrefixCommand {
         ServerPlayer player = ctx.getSource().getPlayerOrException();
 
         Prefix newPrefix = PlayerPrefixes.addPrefix(player.getUUID(), newPrefixComponent);
-        ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(Component.empty()
+        NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
                 .append(Component.text("接頭辞 "))
                 .append(newPrefix.getPrefix())
-                .append(Component.text(" を追加しました (作成日時 " + newPrefix.getCreatedAt() + ")"))), true);
+                .append(Component.text(" を追加しました (作成日時 " + newPrefix.getCreatedAt() + ")")), true);
         return 0;
     }
 
@@ -165,12 +165,12 @@ public class PrefixCommand {
                 .findAny()
                 .ifPresentOrElse(prefix -> {
                     PlayerPrefixes.removePrefix(player.getUUID(), prefix);
-                    ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(Component.empty()
+                    NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
                             .append(Component.text("接頭辞 "))
                             .append(prefix.getPrefix())
-                            .append(Component.text(" を削除しました"))), true);
+                            .append(Component.text(" を削除しました")), true);
                 }, () -> {
-                    ctx.getSource().sendFailure(NewMessageUtil.convertAdventure2Minecraft(Component.text("指定された作成日時に一致する接頭辞が見つかりませんでした")));
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), Component.text("指定された作成日時に一致する接頭辞が見つかりませんでした"));
                 });
         return 0;
     }
@@ -187,20 +187,20 @@ public class PrefixCommand {
                 .ifPresentOrElse(newPrefix -> {
                     Prefix oldPrefix = PlayerPrefixes.getActivePrefix(player.getUUID());
                     if (oldPrefix != null && oldPrefix.isTemporary()) {
-                        ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(Component.empty()
+                        NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
                                 .append(Component.text("設定されていた接頭辞 "))
                                 .append(oldPrefix.getPrefix())
-                                .append(Component.text(" は「一時的」としてマークされていました。接頭辞リストには残らず、削除されます"))), true);
+                                .append(Component.text(" は「一時的」としてマークされていました。接頭辞リストには残らず、削除されます")), true);
                     }
 
                     PlayerPrefixes.setPrefix(player.getUUID(), newPrefix);
-                    ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(Component.empty()
+                    NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
                             .append(Component.text("接頭辞を "))
                             .append(oldPrefix != null ? Component.empty().append(oldPrefix.getPrefix()).append(Component.text(" から ")) : Component.empty())
                             .append(newPrefix.getPrefix())
-                            .append(Component.text(" に変更しました"))), true);
+                            .append(Component.text(" に変更しました")), true);
                 }, () -> {
-                    ctx.getSource().sendFailure(NewMessageUtil.convertAdventure2Minecraft(Component.text("指定された作成日時に一致する接頭辞が見つかりませんでした")));
+                    NewMessageUtil.sendErrorMessage(ctx.getSource(), Component.text("指定された作成日時に一致する接頭辞が見つかりませんでした"));
                 });
         return 0;
     }
@@ -213,18 +213,18 @@ public class PrefixCommand {
         Prefix newPrefix = new Prefix(newPrefixComponent, System.currentTimeMillis(), true);
         Prefix oldPrefix = PlayerPrefixes.getActivePrefix(player.getUUID());
         if (oldPrefix != null && oldPrefix.isTemporary()) {
-            ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(Component.empty()
+            NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
                     .append(Component.text("設定されていた接頭辞 "))
                     .append(oldPrefix.getPrefix())
-                    .append(Component.text(" は「一時的」としてマークされていました。接頭辞リストには残らず、削除されます"))), true);
+                    .append(Component.text(" は「一時的」としてマークされていました。接頭辞リストには残らず、削除されます")), true);
         }
 
         PlayerPrefixes.setPrefix(player.getUUID(), newPrefix);
-        ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(Component.empty()
+        NewMessageUtil.sendMessage(ctx.getSource(), Component.empty()
                 .append(Component.text("接頭辞を "))
                 .append(oldPrefix != null ? Component.empty().append(oldPrefix.getPrefix()).append(Component.text(" から ")) : Component.empty())
                 .append(newPrefix.getPrefix())
-                .append(Component.text(" に変更しました (一時的)"))), true);
+                .append(Component.text(" に変更しました (一時的)")), true);
         return 0;
     }
 }
