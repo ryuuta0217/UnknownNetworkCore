@@ -55,13 +55,6 @@ public class AFKObserver {
             }
         });
 
-        PacketManager.getInstance().registerIncomingC2SListener(ServerboundPlayerActionPacket.class, new IncomingPacketListener<>() {
-            @Override
-            public void onPacketReceived(PacketReceivedEvent<ServerboundPlayerActionPacket> event) {
-                onAction(event.getPlayer(), Util.getMillis());
-            }
-        });
-
         RunnableManager.runAsyncRepeating(() -> { // AFK state checker, run every seconds
             Bukkit.getOnlinePlayers().parallelStream().forEach(player -> {
                 PlayerData data = PlayerData.of(player);
