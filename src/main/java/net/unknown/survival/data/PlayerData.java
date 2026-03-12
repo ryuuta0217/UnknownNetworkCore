@@ -515,7 +515,7 @@ public class PlayerData extends ConfigurationBase {
             this.isAfk = afk;
             this.afkReason = reason;
             if (triggerEvent && this.getPlayerData().isOnline()) {
-                Bukkit.getPluginManager().callEvent(new PlayerAFKStatusChangedEvent(this.getPlayerData().asPlayer(), false, reason));
+                Bukkit.getPluginManager().callEvent(new PlayerAFKStatusChangedEvent(this.getPlayerData().asPlayer(), afk, reason));
             }
         }
 
