@@ -72,6 +72,7 @@ public enum Permissions {
     COMMAND_VILLAGES_MANAGE("unknown.survival.command.villages.manage", 2, VillageCommand.class),
     COMMAND_PREFIX("unknown.survival.command.prefix", 0, PrefixCommand.class),
     COMMAND_PREFIX_MANAGE("unknown.survival.command.prefix.manage", 2, PrefixCommand.class),
+    COMMAND_AFK("unknown.survival.command.afk", 0, AFKCommand.class),
 
     NOTIFY_MODDED_PLAYER("unknown.survival.notify.mod", 2, null),
     ENTITY_EDITOR("unknown.survival.entity_editor", 2, null),

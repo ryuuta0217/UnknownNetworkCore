@@ -45,6 +45,7 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
+import net.unknown.survival.observers.AFKObserver;
 import net.unknown.survival.vote.data.VoteTicketExchangeItems;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
@@ -114,6 +115,8 @@ public class UnknownNetworkSurvival {
         UNCUpdateCheckTask.start();
         DebugStickEntityEditor.Listener.register();
 
+        AFKObserver.initialize();
+
         BossBarManager.getInstance().setVisibilityHandler(new SurvivalVisibilityHandler());
 
         Bukkit.getPluginManager().registerEvents(ModifiableBlockBreakEvent.Listener.getInstance(), UnknownNetworkCorePlugin.getInstance());
@@ -140,6 +143,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new FastLeafDecay());
         ListenerManager.registerListener(new GSitListener());
         ListenerManager.registerListener(new BabyCreature());
+        ListenerManager.registerListener(new AFKListener());
         SuppressRaids.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
         if (UnknownNetworkCorePlugin.isBootstrapped()) {

@@ -29,42 +29,48 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.managers;
+package net.unknown.survival.events;
 
-import net.minecraft.util.Util;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.unknown.core.packet.event.PacketReceivedEvent;
-import net.unknown.core.packet.listener.IncomingPacketListener;
-import net.unknown.core.packet.PacketManager;
-import net.unknown.survival.data.PlayerData;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 
-public class AFKManager {
-    private static boolean INITIALIZED = false;
-    private static AFKManager INSTANCE = null;
+import javax.annotation.Nullable;
 
-    public static void initialize() {
-        if (!INITIALIZED) {
-            INSTANCE = new AFKManager();
-            INITIALIZED = true;
-        } else {
-            throw new IllegalStateException("AFKManager is already initialized.");
-        }
+public class PlayerAFKStatusChangedEvent extends Event {
+    private static final HandlerList HANDLERS = new HandlerList();
+
+    private final Player player;
+    private final boolean isAfk;
+    private final String reason;
+
+    public PlayerAFKStatusChangedEvent(Player player, boolean isAfk, @Nullable String reason) {
+        super(!Bukkit.isPrimaryThread());
+        this.player = player;
+        this.isAfk = isAfk;
+        this.reason = reason;
     }
 
-    private final MoveListener moveListener = new MoveListener();
-
-    public AFKManager() {
-        PacketManager.getInstance().registerIncomingC2SListener(ServerboundMovePlayerPacket.class, this.moveListener);
+    public Player getPlayer() {
+        return this.player;
     }
 
-    public static class MoveListener extends IncomingPacketListener<ServerboundMovePlayerPacket> {
-        public MoveListener() {
-            super(false);
-        }
+    public boolean isAFK() {
+        return this.isAfk;
+    }
 
-        @Override
-        public void onPacketReceived(PacketReceivedEvent<ServerboundMovePlayerPacket> event) {
-            PlayerData.of(event.getPlayer()).getSessionData().setLastActionTime(Util.getMillis());
-        }
+    public String getReason() {
+        return this.reason;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
+
+    @Override
+    public @NotNull HandlerList getHandlers() {
+        return HANDLERS;
     }
 }

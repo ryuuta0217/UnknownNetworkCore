@@ -39,6 +39,7 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.model.HomeGroup;
+import net.unknown.survival.events.PlayerAFKStatusChangedEvent;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -503,8 +504,15 @@ public class PlayerData extends ConfigurationBase {
         }
 
         public void setAfk(boolean afk, @Nullable String reason) {
+            this.setAfk(afk, reason, true);
+        }
+
+        public void setAfk(boolean afk, String reason, boolean triggerEvent) {
             this.isAfk = afk;
             this.afkReason = reason;
+            if (triggerEvent && this.getPlayerData().isOnline()) {
+                Bukkit.getPluginManager().callEvent(new PlayerAFKStatusChangedEvent(this.getPlayerData().asPlayer(), false, reason));
+            }
         }
 
         public long getLastActionTime() {

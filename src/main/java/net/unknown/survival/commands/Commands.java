@@ -85,5 +85,7 @@ public class Commands {
 
         WarpCommand.register(dispatcher);
         PrefixCommand.register(dispatcher, buildContext);
+
+        AFKCommand.register(dispatcher);
     }
 }
