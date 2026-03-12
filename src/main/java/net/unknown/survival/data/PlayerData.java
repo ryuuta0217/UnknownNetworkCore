@@ -484,6 +484,7 @@ public class PlayerData extends ConfigurationBase {
         private final PlayerData parent;
         private long lastActionTime = 0L;
         private boolean isAfk = false;
+        private String afkReason = null;
 
         public SessionData(PlayerData parent) {
             this.parent = parent;
@@ -498,7 +499,12 @@ public class PlayerData extends ConfigurationBase {
         }
 
         public void setAfk(boolean afk) {
+            this.setAfk(afk, null);
+        }
+
+        public void setAfk(boolean afk, @Nullable String reason) {
             this.isAfk = afk;
+            this.afkReason = reason;
         }
 
         public long getLastActionTime() {
