@@ -33,6 +33,7 @@ package net.unknown.survival.listeners;
 
 import net.kyori.adventure.text.Component;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.managers.VanishManager;
 import net.unknown.survival.events.PlayerAFKStatusChangedEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
@@ -41,6 +42,8 @@ import org.bukkit.event.Listener;
 public class AFKListener implements Listener {
     @EventHandler
     public void onPlayerAFK(PlayerAFKStatusChangedEvent event) {
+        if (VanishManager.isVanished(event.getPlayer())) return;
+
         if (event.isAFK()) {
             Bukkit.broadcast(Component.empty().color(DefinedTextColor.GRAY)
                     .append(Component.text("*"))
