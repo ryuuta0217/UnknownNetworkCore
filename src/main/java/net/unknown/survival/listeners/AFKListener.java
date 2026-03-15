@@ -38,8 +38,15 @@ import net.unknown.survival.events.PlayerAFKStatusChangedEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerQuitEvent;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class AFKListener implements Listener {
+    private final Map<UUID, Component> playerListNameCache = new HashMap<>();
+
     @EventHandler
     public void onPlayerAFK(PlayerAFKStatusChangedEvent event) {
         if (VanishManager.isVanished(event.getPlayer())) return;
@@ -53,6 +60,11 @@ public class AFKListener implements Listener {
                     .append(Component.text("は"))
                     .append(event.getReason() != null ? Component.text(event.getReason() + "のため") : Component.empty())
                     .append(Component.text("現在退席中です")));
+
+            this.playerListNameCache.put(event.getPlayer().getUniqueId(), event.getPlayer().playerListName());
+            event.getPlayer().playerListName(Component.empty()
+                    .append(Component.text("[AFK" + (event.getReason() != null ? ": " + event.getReason() : "") + "]", DefinedTextColor.GRAY))
+                    .append(event.getPlayer().playerListName()));
         } else {
             Bukkit.broadcast(Component.empty().color(DefinedTextColor.GRAY)
                     .append(Component.text("*"))
@@ -60,6 +72,16 @@ public class AFKListener implements Listener {
                     .append(event.getPlayer().displayName())
                     .appendSpace()
                     .append(Component.text("が復帰しました")));
+
+            if (this.playerListNameCache.containsKey(event.getPlayer().getUniqueId())) {
+                event.getPlayer().playerListName(this.playerListNameCache.get(event.getPlayer().getUniqueId()));
+                this.playerListNameCache.remove(event.getPlayer().getUniqueId());
+            }
         }
+    }
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        this.playerListNameCache.remove(event.getPlayer().getUniqueId());
     }
 }
