@@ -46,6 +46,7 @@ import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.observers.AFKObserver;
+import net.unknown.survival.observers.PerformanceObserver;
 import net.unknown.survival.vote.data.VoteTicketExchangeItems;
 import net.unknown.survival.data.Warps;
 import net.unknown.survival.dependency.WorldGuard;
@@ -116,6 +117,7 @@ public class UnknownNetworkSurvival {
         DebugStickEntityEditor.Listener.register();
 
         AFKObserver.initialize();
+        PerformanceObserver.initialize();
 
         BossBarManager.getInstance().setVisibilityHandler(new SurvivalVisibilityHandler());
 
