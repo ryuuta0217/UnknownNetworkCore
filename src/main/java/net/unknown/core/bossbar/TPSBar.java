@@ -31,7 +31,6 @@
 
 package net.unknown.core.bossbar;
 
-import com.destroystokyo.paper.event.server.ServerTickEndEvent;
 //import io.papermc.paper.threadedregions.ThreadedRegionizer;
 //import io.papermc.paper.threadedregions.TickData;
 //import io.papermc.paper.threadedregions.TickRegionScheduler;
@@ -50,8 +49,8 @@ import net.unknown.core.managers.BossBarManager;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
+import net.unknown.survival.observers.PerformanceObserver;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -63,13 +62,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class TPSBar implements Listener {
+public class TPSBar {
     private static final TPSBar INSTANCE = new TPSBar();
 
     public static final CustomBossEvent BAR = new CustomBossEvent(
             Identifier.tryBySeparator("unknown-network:tps", ':'), buildDisplayName(0, 0));
-
-    private static double LAST_MSPT = 0;
 
     public static void initialize() {
         if (UnknownNetworkCorePlugin.isFoliaPlatform()) {
@@ -78,12 +75,11 @@ public class TPSBar implements Listener {
         }
         BAR.setMax(20);
 
-        ListenerManager.registerListener(INSTANCE);
         BossBarManager.getInstance().register(BAR);
 
         RunnableManager.runAsyncRepeating(() -> {
-            double tps = Mth.clamp(1000 / LAST_MSPT, 0, 20);
-            Component displayName = buildDisplayName(tps, LAST_MSPT);
+            double tps = PerformanceObserver.getTPS();
+            Component displayName = buildDisplayName(PerformanceObserver.getTPS(), PerformanceObserver.getMSPT());
             BAR.setName(displayName);
             BAR.setProgress((float) (tps / 20));
             if(tps > 15) BAR.setColor(BossEvent.BossBarColor.GREEN);
@@ -103,11 +99,6 @@ public class TPSBar implements Listener {
                 .append(Component.literal("TPS: " + tpsStr).withStyle(ChatFormatting.GOLD))
                 .append(" | ")
                 .append(Component.literal("MSPT: " + millisecondsPerTick + "ms").withStyle(ChatFormatting.AQUA));
-    }
-
-    @EventHandler
-    public void onTickEnd(ServerTickEndEvent event) {
-        LAST_MSPT = event.getTickDuration();
     }
 
     public static class Folia implements Listener {
