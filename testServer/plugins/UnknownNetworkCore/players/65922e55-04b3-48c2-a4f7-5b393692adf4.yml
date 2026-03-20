@@ -6,6 +6,7 @@ use-kana-convert: true
 home-default-group: default
 reply-target: 65922e55-04b3-48c2-a4f7-5b393692adf4
 use-minimessage: true
+show-head-prefix: false
 homeGroupItems:
   default: WHITE_WOOL
   test: WHITE_WOOL
@@ -212,4 +213,17 @@ homes:
   test: {}
   helloworld: {}
   testw: {}
-registries: {}
+registries:
+  unknown-network:sidebar/channel_chat_active_channel:
+    enabled: 'true'
+  unknown-network:sidebar:
+    enabled: 'true'
+  unknown-network:sidebar/igt:
+    use_two_lines: 'true'
+    label: ゲーム内時間
+    use_number_format: 'false'
+  unknown-network:sidebar/tps:
+    enabled: 'true'
+  unknown-network:sidebar/spacer_2:
+    priority: '6'
+    enabled: 'true'
