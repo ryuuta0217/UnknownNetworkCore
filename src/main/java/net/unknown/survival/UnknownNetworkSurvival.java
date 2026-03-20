@@ -45,6 +45,8 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
+import net.unknown.survival.feature.sidebar.Sidebar;
+import net.unknown.survival.feature.sidebar.modules.*;
 import net.unknown.survival.observers.AFKObserver;
 import net.unknown.survival.observers.PerformanceObserver;
 import net.unknown.survival.vote.data.VoteTicketExchangeItems;
@@ -157,6 +159,22 @@ public class UnknownNetworkSurvival {
         }
 
         Spy.registerModule(new CustomChannelSpy());
+
+        // Sidebar registration
+        Sidebar.registerModule(new SpacerSidebarModule(0, 25, false)); // 25, defaultDisabled
+        Sidebar.registerModule(new InGameTimeSidebarModule()); // 20, defaultEnabled
+        Sidebar.registerModule(new SpacerSidebarModule(1, 15, true)); // 15, defaultEnabled
+        Sidebar.registerModule(new TPSSidebarModule()); // 10, defaultDisabled
+        Sidebar.registerModule(new SpacerSidebarModule(2, 5, false)); // 5, defaultDisabled
+        Sidebar.registerModule(new ChannelChatActiveChannelSidebarModule()); // 5, defaultEnabled
+        Sidebar.registerModule(new SpacerSidebarModule(3, 3, true)); // 3, defaultEnabled
+        Sidebar.registerModule(new MoneySidebarModule()); // 0
+        Sidebar.registerModule(new SpacerSidebarModule(4, -3, true)); // -3, defaultDisabled
+        Sidebar.registerModule(new CurrentWorldSidebarModule()); // -5, defaultEnabled
+        Sidebar.registerModule(new SpacerSidebarModule(5, -5, false)); // -5, defaultDisabled
+        Sidebar.registerModule(new SpacerSidebarModule(6, -15, false)); // -15, defaultDisabled
+        Sidebar.registerModule(new SpacerSidebarModule(7, -25, false)); // -25, defaultDisabled
+        Sidebar.registerModule(new FooterSidebarModule()); // -2147483647, forceEnabled
 
         Bukkit.getMessenger().registerOutgoingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "BungeeCord");
         Bukkit.getMessenger().registerIncomingPluginChannel(UnknownNetworkCorePlugin.getInstance(), "unknown:forge", new FMLConnectionListener());

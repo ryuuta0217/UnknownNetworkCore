@@ -100,6 +100,7 @@ permissions:
       minecraft.command.village: true
       minecraft.command.villages: true
       minecraft.command.prefix: true
+      minecraft.command.sidebar: true
       unknown.survival.command.spawn: true
       unknown.survival.command.home: true
       unknown.survival.command.homes: true
@@ -111,6 +112,7 @@ permissions:
       unknown.survival.command.village: true
       unknown.survival.command.villages: true
       unknown.survival.command.prefix: true
+      unknown.survival.command.sidebar: true
       unknown.survival.open_gui: true
   unknown.survival.admin:
     default: op

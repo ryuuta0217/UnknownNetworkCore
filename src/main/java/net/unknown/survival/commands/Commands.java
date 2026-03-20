@@ -87,5 +87,6 @@ public class Commands {
         PrefixCommand.register(dispatcher, buildContext);
 
         AFKCommand.register(dispatcher);
+        SidebarCommand.register(dispatcher);
     }
 }
