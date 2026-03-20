@@ -29,21 +29,48 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared.util;
+package net.unknown.survival.events;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
+import org.jetbrains.annotations.NotNull;
 
-public class TickUtil {
-    public static long realTime2TickTime(LocalDateTime now) {
-        java.time.LocalDateTime base = (now.getHour() < 6 ? now.minusDays(1) : now).with(java.time.LocalTime.of(6, 0));
-        long diffSeconds = java.time.Duration.between(base, now).toSeconds();
-        return java.lang.Math.round(diffSeconds * 0.2777777777777778);
+import javax.annotation.Nullable;
+
+public class PlayerAFKStatusChangedEvent extends Event {
+    private static final HandlerList HANDLERS = new HandlerList();
+
+    private final Player player;
+    private final boolean isAfk;
+    private final String reason;
+
+    public PlayerAFKStatusChangedEvent(Player player, boolean isAfk, @Nullable String reason) {
+        super(!Bukkit.isPrimaryThread());
+        this.player = player;
+        this.isAfk = isAfk;
+        this.reason = reason;
     }
 
-    public static LocalTime tickTime2RealTime(long tick) {
-        if (tick < 0 || tick > 24000) throw new IllegalArgumentException("0 - 24000: " + tick);
-        double seconds = tick / 0.2777777777777778;
-        return LocalTime.of(6, 0).plusSeconds(Math.round(seconds));
+    public Player getPlayer() {
+        return this.player;
+    }
+
+    public boolean isAFK() {
+        return this.isAfk;
+    }
+
+    public String getReason() {
+        return this.reason;
+    }
+
+    public static HandlerList getHandlerList() {
+        return HANDLERS;
+    }
+
+    @Override
+    public @NotNull HandlerList getHandlers() {
+        return HANDLERS;
     }
 }

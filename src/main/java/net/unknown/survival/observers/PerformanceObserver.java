@@ -29,21 +29,27 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.shared.util;
+package net.unknown.survival.observers;
 
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import com.destroystokyo.paper.event.server.ServerTickEndEvent;
+import net.minecraft.util.Mth;
+import net.unknown.core.managers.ListenerManager;
+import org.bukkit.event.EventPriority;
 
-public class TickUtil {
-    public static long realTime2TickTime(LocalDateTime now) {
-        java.time.LocalDateTime base = (now.getHour() < 6 ? now.minusDays(1) : now).with(java.time.LocalTime.of(6, 0));
-        long diffSeconds = java.time.Duration.between(base, now).toSeconds();
-        return java.lang.Math.round(diffSeconds * 0.2777777777777778);
+public class PerformanceObserver {
+    private static double LAST_MSPT = -1;
+
+    public static void initialize() {
+        ListenerManager.registerEventListener(ServerTickEndEvent.class, null, EventPriority.MONITOR, true, (listener, event) -> {
+            LAST_MSPT = event.getTickDuration();
+        });
     }
 
-    public static LocalTime tickTime2RealTime(long tick) {
-        if (tick < 0 || tick > 24000) throw new IllegalArgumentException("0 - 24000: " + tick);
-        double seconds = tick / 0.2777777777777778;
-        return LocalTime.of(6, 0).plusSeconds(Math.round(seconds));
+    public static double getTPS() {
+        return Mth.clamp(1000 / LAST_MSPT, 0, 20);
+    }
+
+    public static double getMSPT() {
+        return LAST_MSPT;
     }
 }

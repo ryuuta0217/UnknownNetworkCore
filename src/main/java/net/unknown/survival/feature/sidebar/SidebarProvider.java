@@ -29,42 +29,28 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.managers;
+package net.unknown.survival.feature.sidebar;
 
-import net.minecraft.util.Util;
-import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
-import net.unknown.core.packet.event.PacketReceivedEvent;
-import net.unknown.core.packet.listener.IncomingPacketListener;
-import net.unknown.core.packet.PacketManager;
+import net.kyori.adventure.text.Component;
+import net.minecraft.world.scores.Objective;
 import net.unknown.survival.data.PlayerData;
+import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Player;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 
-public class AFKManager {
-    private static boolean INITIALIZED = false;
-    private static AFKManager INSTANCE = null;
-
-    public static void initialize() {
-        if (!INITIALIZED) {
-            INSTANCE = new AFKManager();
-            INITIALIZED = true;
-        } else {
-            throw new IllegalStateException("AFKManager is already initialized.");
-        }
+public interface SidebarProvider {
+    default boolean isSidebarEnabled(Player player) {
+        return PlayerData.of(player).getRegistries().getOrDefault(new NamespacedKey("unknown-network", "sidebar"), "enabled", "true").equals("true");
     }
-
-    private final MoveListener moveListener = new MoveListener();
-
-    public AFKManager() {
-        PacketManager.getInstance().registerIncomingC2SListener(ServerboundMovePlayerPacket.class, this.moveListener);
+    default void setSidebarEnabled(Player player, boolean enabled) {
+        PlayerData.of(player).getRegistries().put(new NamespacedKey("unknown-network", "sidebar"), "enabled", String.valueOf(enabled));
     }
-
-    public static class MoveListener extends IncomingPacketListener<ServerboundMovePlayerPacket> {
-        public MoveListener() {
-            super(false);
-        }
-
-        @Override
-        public void onPacketReceived(PacketReceivedEvent<ServerboundMovePlayerPacket> event) {
-            PlayerData.of(event.getPlayer()).getSessionData().setLastActionTime(Util.getMillis());
-        }
-    }
+    Component getTitle(Player player);
+    Objective createNewSidebarObjective(Player player);
+    void displayUpdate(Player player);
+    void deltaUpdate(Player player, SidebarModule module, String identifier, InternalSidebarLine newLine);
+    void tick(Player player);
+    void onPlayerJoin(PlayerJoinEvent event);
+    void onPlayerQuit(PlayerQuitEvent event);
 }

@@ -2,6 +2,8 @@ build/
 libs/*
 !libs/HolographicDisplays.jar
 !libs/BlueMap*.jar
+!libs/NuVotifier*.jar
+!libs/GSit*.jar
 !libs/gradle/
 .idea/
 .gradle/

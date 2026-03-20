@@ -58,7 +58,6 @@ repositories {
     maven { url = "https://files.minecraftforge.net/maven/" }
     maven { url = "https://maven.quiltmc.org/repository/release/" }
     maven { url = "https://maven.enginehub.org/repo/" }
-    maven { url = "https://jitpack.io" }
     maven { url = "https://repo.codemc.io/" } // VaultAPI
     maven { url = "https://repo.ryuuta0217.com/repository/unknown-network/" }
     maven { url = "https://repo.onarandombox.com/content/groups/public/" } // Multiverse-(Core|Inventories|Portals|NetherPortals) repo
@@ -79,7 +78,6 @@ dependencies {
     compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'cb82965c'
     launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'cb82965c'
     implementation group: 'org.mozilla', name: 'rhino', version: '1.7.15'
-    compileOnly group: 'com.github.NuVotifier', name: 'NuVotifier', version: '+'
     implementation group: 'net.dv8tion', name: 'JDA', version: '+'
     implementation group: 'org.json', name: 'json', version: '+'
     compileOnly group: 'org.mvplugins.multiverse.core', name: 'multiverse-core', version: '+'
@@ -94,7 +92,6 @@ dependencies {
     annotationProcessor group: 'com.velocitypowered', name: 'velocity-api', version: '+'
     implementation group: 'io.ipinfo', name: 'ipinfo-api', version: '+'
     compileOnly group: "com.viaversion", name: "viaversion-api", version: "+"
-    compileOnly group: 'com.github.Gecolay.GSit', name: 'core', version: '+'
 }
 
 paperweight {

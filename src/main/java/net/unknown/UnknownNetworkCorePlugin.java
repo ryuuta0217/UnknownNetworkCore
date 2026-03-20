@@ -50,6 +50,7 @@ import net.unknown.core.feature.admin.spy.modules.Whois;
 import net.unknown.core.fixer.MultiverseInventoriesFixer;
 import net.unknown.core.fixer.ThirdPartyPluginPermissionsFixer;
 import net.unknown.core.gui.SignGui;
+import net.unknown.core.managers.BossBarManager;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.packet.PacketManager;
 import net.unknown.core.managers.TrashManager;
@@ -168,6 +169,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         ListenerManager.registerListener(SkinManager.INSTANCE);
         ListenerManager.registerListener(new PrivateMessageNotification());
         ListenerManager.registerListener(new WhoisListener());
+        ListenerManager.registerListener(BossBarManager.getInstance());
         if (isBootstrapped()) ListenerManager.registerListener(AdvancementManager.INSTANCE);
         if (isBootstrapped()) PacketManager.getInstance().registerOutgoingS2CListener(ClientboundUpdateAdvancementsPacket.class, AdvancementManager.INSTANCE);
         TPSBar.initialize();

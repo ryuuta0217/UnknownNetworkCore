@@ -83,6 +83,20 @@ public class UnknownNetworkCorePluginBootstrap implements PluginBootstrap {
             }
         });
 
+        ctx.getLogger().info(Component.text("Registering handler for bane_of_arthropods enchantment max level set to 10"));
+        ctx.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd(), event -> {
+            if (event.key().key().equals(Key.key("minecraft:bane_of_arthropods"))) {
+                event.builder().maxLevel(10);
+            }
+        });
+
+        ctx.getLogger().info(Component.text("Registering handler for impaling enchantment max level set to 10"));
+        ctx.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.entryAdd(), event -> {
+            if (event.key().key().equals(Key.key("minecraft:impaling"))) {
+                event.builder().maxLevel(10);
+            }
+        });
+
         /*ctx.getLogger().info(Component.text("Registering handler for unknown enchantment"));
         ctx.getLifecycleManager().registerEventHandler(RegistryEvents.ENCHANTMENT.freeze(), e -> {
             Conversions conversions = BuiltInRegistries.BUILT_IN_CONVERSIONS;

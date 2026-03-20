@@ -193,15 +193,11 @@ public class Graveyard implements Listener {
     @Nullable
     private static Pair<Chest, Chest> getGraveyard(Block blockA) {
         if (getGraveyardOwnerUUID(blockA) == null) return null;
-        System.out.println("getGraveyardOwnerUUID(blockA) != null");
 
         if (blockA.getBlockData() instanceof org.bukkit.block.data.type.Chest chestBlockA && blockA.getState() instanceof Chest chestA) {
-            System.out.println("blockA is Chest");
             if (chestBlockA.getType() == org.bukkit.block.data.type.Chest.Type.SINGLE) {
-                System.out.println("chestBlockA is SINGLE");
                 return Pair.of(chestA, null);
             } else {
-                System.out.println("chestBlockA is LARGE");
                 Block blockB = getGraveyardPart(blockA);
                 if (blockB != null && getGraveyardOwnerUUID(blockB) != null) {
                     if (blockB.getBlockData() instanceof org.bukkit.block.data.type.Chest chestBlockB && blockB.getState() instanceof Chest chestB) {
@@ -382,10 +378,21 @@ public class Graveyard implements Listener {
         return getGraveyardOwnerUUID(block.getState());
     }
 
-    private static UUID getGraveyardOwnerUUID(BlockState blockState) {
-        if (!(blockState instanceof Container container)) return null;
+    private static UUID getGraveyardOwnerUUID(BlockState blockStateA) {
+        Block blockB = getGraveyardPart(blockStateA.getBlock());
+
+        Container container;
+        if (blockStateA instanceof Container containerA && containerA.getPersistentDataContainer().has(OWNER_DATA_KEY, PersistentDataType.INTEGER_ARRAY)) {
+            container = containerA;
+        } else if (blockB != null && blockB.getState() instanceof Container containerB && containerB.getPersistentDataContainer().has(OWNER_DATA_KEY, PersistentDataType.INTEGER_ARRAY)) {
+            container = containerB;
+        } else {
+            return null;
+        }
+
         int[] ownerUniqueIdArr = container.getPersistentDataContainer().get(OWNER_DATA_KEY, PersistentDataType.INTEGER_ARRAY);
-        if (ownerUniqueIdArr == null) return null;
+        if (ownerUniqueIdArr == null) return null; // ここにはおそらく到達しない
+
         return UUIDUtil.uuidFromIntArray(ownerUniqueIdArr);
     }
 
