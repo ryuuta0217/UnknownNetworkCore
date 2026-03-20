@@ -64,6 +64,7 @@ public class AFKListener implements Listener {
             this.playerListNameCache.put(event.getPlayer().getUniqueId(), event.getPlayer().playerListName());
             event.getPlayer().playerListName(Component.empty()
                     .append(Component.text("[AFK" + (event.getReason() != null ? ": " + event.getReason() : "") + "]", DefinedTextColor.GRAY))
+                    .appendSpace()
                     .append(event.getPlayer().playerListName()));
         } else {
             Bukkit.broadcast(Component.empty().color(DefinedTextColor.GRAY)
