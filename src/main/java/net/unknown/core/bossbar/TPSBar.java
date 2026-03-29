@@ -42,7 +42,6 @@ import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.bossevents.CustomBossEvent;
 import net.minecraft.server.level.ServerBossEvent;
-import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.managers.BossBarManager;
@@ -91,14 +90,12 @@ public class TPSBar {
     // format: [HH:mm:ss] TPS: tps | MSPT: mspt
     private static Component buildDisplayName(double tps, double millisecondsPerTick) {
         String time = DateTimeFormatter.ofPattern("HH:mm:ss").format(LocalDateTime.now().atZone(ZoneId.of("Asia/Tokyo")));
-        String[] tpsStrArr = String.valueOf(tps).split("\\.");
-        String tpsStr = tpsStrArr[0] + "." + tpsStrArr[1].substring(0, Mth.clamp(4, 1, tpsStrArr[1].length()));
         return Component.literal("")
                 .append(Component.literal("[" + time + "]").withStyle(ChatFormatting.GRAY))
                 .append(" ")
-                .append(Component.literal("TPS: " + tpsStr).withStyle(ChatFormatting.GOLD))
+                .append(Component.literal("TPS: " + PerformanceObserver.getScaledString(2, tps)).withStyle(ChatFormatting.GOLD))
                 .append(" | ")
-                .append(Component.literal("MSPT: " + millisecondsPerTick + "ms").withStyle(ChatFormatting.AQUA));
+                .append(Component.literal("MSPT: " + PerformanceObserver.getScaledString(4, millisecondsPerTick) + "ms").withStyle(ChatFormatting.AQUA));
     }
 
     public static class Folia implements Listener {
