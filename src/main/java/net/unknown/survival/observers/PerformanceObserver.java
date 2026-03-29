@@ -36,6 +36,9 @@ import net.minecraft.util.Mth;
 import net.unknown.core.managers.ListenerManager;
 import org.bukkit.event.EventPriority;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+
 public class PerformanceObserver {
     private static double LAST_MSPT = -1;
 
@@ -51,5 +54,11 @@ public class PerformanceObserver {
 
     public static double getMSPT() {
         return LAST_MSPT;
+    }
+
+    public static String getScaledString(int scale, double value) {
+        BigDecimal bd = new BigDecimal(value);
+        bd = bd.setScale(scale, RoundingMode.UP);
+        return bd.toPlainString();
     }
 }
