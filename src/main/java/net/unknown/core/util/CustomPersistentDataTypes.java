@@ -29,36 +29,55 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.observers;
+package net.unknown.core.util;
 
-import com.destroystokyo.paper.event.server.ServerTickEndEvent;
-import net.minecraft.util.Mth;
-import net.unknown.core.managers.ListenerManager;
-import org.bukkit.event.EventPriority;
+import org.bukkit.persistence.PersistentDataAdapterContext;
+import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+public interface CustomPersistentDataTypes {
+    PersistentDataType<String[], String[]> STRING_ARRAY = new PrimitivePersistentDataType<>(String[].class);
 
-public class PerformanceObserver {
-    private static double LAST_MSPT = -1;
+    /**
+     * A default implementation that simply exists to pass on the retrieved or
+     * inserted value to the next layer.
+     * <p>
+     * This implementation does not add any kind of logic, but is used to
+     * provide default implementations for the primitive types.
+     *
+     * @param <P> the generic type of the primitive objects
+     */
+    // Obtained from bukkit org.bukkit.persistence.PersistentDataType 2026/03/25, version = 1.21.11
+    class PrimitivePersistentDataType<P> implements PersistentDataType<P, P> {
 
-    public static void initialize() {
-        ListenerManager.registerEventListener(ServerTickEndEvent.class, null, EventPriority.MONITOR, true, (listener, event) -> {
-            LAST_MSPT = event.getTickDuration();
-        });
-    }
+        private final Class<P> primitiveType;
 
-    public static double getTPS() {
-        return Mth.clamp(1000 / LAST_MSPT, 0, 20);
-    }
+        PrimitivePersistentDataType(@NotNull Class<P> primitiveType) {
+            this.primitiveType = primitiveType;
+        }
 
-    public static double getMSPT() {
-        return LAST_MSPT;
-    }
+        @NotNull
+        @Override
+        public Class<P> getPrimitiveType() {
+            return primitiveType;
+        }
 
-    public static String getScaledString(int scale, double value) {
-        BigDecimal bd = new BigDecimal(value);
-        bd = bd.setScale(scale, RoundingMode.UP);
-        return bd.toPlainString();
+        @NotNull
+        @Override
+        public Class<P> getComplexType() {
+            return primitiveType;
+        }
+
+        @NotNull
+        @Override
+        public P toPrimitive(@NotNull P complex, @NotNull PersistentDataAdapterContext context) {
+            return complex;
+        }
+
+        @NotNull
+        @Override
+        public P fromPrimitive(@NotNull P primitive, @NotNull PersistentDataAdapterContext context) {
+            return primitive;
+        }
     }
 }

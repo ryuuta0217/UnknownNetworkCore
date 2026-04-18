@@ -471,7 +471,7 @@ public class FlagSettingsDialog {
                         .afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
                         .externalTitle(Component.text("フラグの設定(Ex)"))
                         .pause(false)
-                        .body(Collections.singletonList(DialogBody.plainMessage(Component.text("保護領域「" + region.getId() + "」のフラグを設定してください"), 1024)))
+                        .body(Collections.singletonList(DialogBody.plainMessage(Component.text("保護領域「" + region.getId() + "」のフラグを設定してください"), 200)))
                         .inputs(com.sk89q.worldguard.WorldGuard.getInstance()
                                 .getFlagRegistry()
                                 .getAll()
@@ -486,7 +486,7 @@ public class FlagSettingsDialog {
                                     }};
                                     return !disabledFlags.contains(flag.getName());
                                 })
-                                .map(flag -> tryBuildDialogInput(flag, region, player, 256))
+                                .map(flag -> tryBuildDialogInput(flag, region, player, 300))
                                 .filter(Objects::nonNull)
                                 .sorted(Comparator.comparing(DialogInput::key))
                                 .toList())

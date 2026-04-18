@@ -42,6 +42,7 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.network.chat.Component;
 import net.unknown.core.util.BrigadierUtil;
+import net.unknown.survival.enums.Permissions;
 import net.unknown.survival.world.regen.AutomatedRegenWorldManager;
 
 import java.time.*;
@@ -51,7 +52,7 @@ import java.time.format.DateTimeFormatter;
 public class AutomatedRegenWorldCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("automatedregenworld");
-
+        builder.requires(Permissions.COMMAND_AUTOMATEDREGENWORLD::check);
         builder.then(Commands.literal("add")
                 .then(Commands.argument("date", StringArgumentType.string())
                         .suggests((ctx, suggestionsBuilder) -> suggestionsBuilder.suggest("\"" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm")) + "\"").buildFuture())
@@ -70,7 +71,7 @@ public class AutomatedRegenWorldCommand {
                 .then(Commands.literal("reload")
                         .executes(AutomatedRegenWorldCommand::reloadTasks));
 
-        dispatcher.register(LiteralArgumentBuilder.<CommandSourceStack>literal("arw").redirect(dispatcher.register(builder)));
+        dispatcher.register(LiteralArgumentBuilder.<CommandSourceStack>literal("arw").requires(Permissions.COMMAND_ARW::check).redirect(dispatcher.register(builder)));
     }
 
     public static int addTask(CommandContext<CommandSourceStack> ctx) {

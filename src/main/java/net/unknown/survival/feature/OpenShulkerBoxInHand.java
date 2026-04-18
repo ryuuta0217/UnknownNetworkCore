@@ -38,6 +38,7 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.survival.data.PlayerData;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Tag;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Player;
 import org.bukkit.event.*;
@@ -60,7 +61,7 @@ public class OpenShulkerBoxInHand implements Listener {
 
     @EventHandler
     public void onInventoryClick(InventoryClickEvent event) {
-        if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null && event.getCurrentItem().getItemMeta().getPersistentDataContainer().has(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN) && event.getCurrentItem().getItemMeta().getPersistentDataContainer().get(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN)) {
+        if (event.getCurrentItem() != null && event.getCurrentItem().getItemMeta() != null && isOpenedShulkerBox(event.getCurrentItem())) {
             event.setCancelled(true);
             return;
         }
@@ -143,6 +144,15 @@ public class OpenShulkerBoxInHand implements Listener {
                         1, ListenerManager.TimeType.MINUTES, () -> {});
                 whoOpen.openInventory(shulkerBoxInventory);
                 return true;
+            }
+        }
+        return false;
+    }
+
+    public static boolean isOpenedShulkerBox(ItemStack shulkerBox) {
+        if (Tag.SHULKER_BOXES.isTagged(shulkerBox.getType())) {
+            if (shulkerBox.getItemMeta().getPersistentDataContainer().has(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN)) {
+                return Boolean.TRUE.equals(shulkerBox.getItemMeta().getPersistentDataContainer().get(PERSISTENT_DATA_CONTAINER_KEY, PersistentDataType.BOOLEAN));
             }
         }
         return false;
