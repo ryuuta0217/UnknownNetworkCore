@@ -58,7 +58,6 @@ import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.skin.SkinManager;
 import net.unknown.core.tab.TabListPingManager;
 import net.unknown.core.util.Languages;
-import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.shared.VersionInfo;
 import net.unknown.shared.util.NameHistory;
 import org.bukkit.Bukkit;
@@ -129,11 +128,9 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         if (!this.getDataFolder().exists() && this.getDataFolder().mkdir()) {
             getLogger().info("Plugin folder created.");
         }
-        ObfuscationUtil.loadAllMappings();
         Languages.init();
         Languages.load(Locale.JAPAN);
         Language.inject(Languages.getLanguage(Locale.JAPAN));
-        getLogger().info("Server launched in " + ObfuscationUtil.OBF_STATE);
         /*ObfuscationUtil.getMapping().forEach((mojangName, clazz) -> {
             try {
                 Class<?> spigotClass = Class.forName(clazz.getEffectiveClassName());

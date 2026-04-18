@@ -185,7 +185,7 @@ public class VoteCommand {
         }
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容からアイテムのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        ItemStack minecraftStack = item.createItemStack(count, false);
+        ItemStack minecraftStack = item.createItemStack(count);
         org.bukkit.inventory.ItemStack bukkitStack = MinecraftAdapter.ItemStack.itemStack(minecraftStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
@@ -214,7 +214,7 @@ public class VoteCommand {
         }
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容から表示アイテムのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        ItemStack minecraftDisplayStack = displayItem.createItemStack(count, false);
+        ItemStack minecraftDisplayStack = displayItem.createItemStack(count);
         org.bukkit.inventory.ItemStack bukkitDisplayStack = MinecraftAdapter.ItemStack.itemStack(minecraftDisplayStack);
 
 
@@ -246,15 +246,15 @@ public class VoteCommand {
         }
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容から表示アイテムのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        ItemStack minecraftDisplayItemStack = displayItem.createItemStack(1, false);
+        ItemStack minecraftDisplayItemStack = displayItem.createItemStack(1);
         org.bukkit.inventory.ItemStack bukkitDisplayItemStack = MinecraftAdapter.ItemStack.itemStack(minecraftDisplayItemStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容からコンテナのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        ItemStack minecraftContainerStack = container.createItemStack(1, false);
+        ItemStack minecraftContainerStack = container.createItemStack(1);
         org.bukkit.inventory.ItemStack bukkitContainerStack = MinecraftAdapter.ItemStack.itemStack(minecraftContainerStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容からアイテムのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        ItemStack minecraftStack = item.createItemStack(count, false);
+        ItemStack minecraftStack = item.createItemStack(count);
         org.bukkit.inventory.ItemStack bukkitStack = MinecraftAdapter.ItemStack.itemStack(minecraftStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
@@ -287,11 +287,11 @@ public class VoteCommand {
         }
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容から表示アイテムのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        ItemStack minecraftDisplayItemStack = displayItem.createItemStack(1, false);
+        ItemStack minecraftDisplayItemStack = displayItem.createItemStack(1);
         org.bukkit.inventory.ItemStack bukkitDisplayItemStack = MinecraftAdapter.ItemStack.itemStack(minecraftDisplayItemStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力内容からコンテナのItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        ItemStack minecraftContainerStack = container.createItemStack(1, false);
+        ItemStack minecraftContainerStack = container.createItemStack(1);
         org.bukkit.inventory.ItemStack bukkitContainerStack = MinecraftAdapter.ItemStack.itemStack(minecraftContainerStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("VoteTicketExchangeItemのインスタンスを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
@@ -391,7 +391,7 @@ public class VoteCommand {
         }
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力された内容からItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        ItemStack minecraftItemStack = item.createItemStack(1, false);
+        ItemStack minecraftItemStack = item.createItemStack(1);
         org.bukkit.inventory.ItemStack bukkitItemStack = MinecraftAdapter.ItemStack.itemStack(minecraftItemStack);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたItemStackをVoteTicketExchangeItemに設定しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
@@ -429,7 +429,7 @@ public class VoteCommand {
         ContainerExchangeItem containerExchangeItem = ((ContainerExchangeItem) exchangeItem);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力された内容からItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        ItemStack minecraftContainer = container.createItemStack(1, false);
+        ItemStack minecraftContainer = container.createItemStack(1);
         org.bukkit.inventory.ItemStack bukkitContainer = MinecraftAdapter.ItemStack.itemStack(minecraftContainer);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたItemStackをVoteTicketExchangeItemに設定しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
@@ -486,7 +486,7 @@ public class VoteCommand {
         SelectableItem selectableItem = ((SelectableItem) exchangeItem);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("入力された内容からItemStackを作成しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));
-        ItemStack minecraftChoice = choice.createItemStack(count, false);
+        ItemStack minecraftChoice = choice.createItemStack(count);
         org.bukkit.inventory.ItemStack bukkitChoice = MinecraftAdapter.ItemStack.itemStack(minecraftChoice);
 
         NewMessageUtil.sendVerboseMessage(ctx.getSource(), Component.text("作成されたItemStackをVoteTicketExchangeItemの選択肢に追加しています...", DefinedTextColor.GRAY, TextDecoration.ITALIC));

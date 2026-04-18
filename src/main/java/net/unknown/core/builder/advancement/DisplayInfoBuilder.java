@@ -37,6 +37,7 @@ import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -118,7 +119,7 @@ public class DisplayInfoBuilder {
         Objects.requireNonNull(this.description);
         Objects.requireNonNull(this.icon);
         Objects.requireNonNull(this.type);
-        DisplayInfo displayInfo = new DisplayInfo(icon, title, description, Optional.of(new ClientAsset.ResourceTexture(background == null ? Identifier.tryParse("minecraft:air") : background)), type, showToast, announceChat, hidden);
+        DisplayInfo displayInfo = new DisplayInfo(ItemStackTemplate.fromNonEmptyStack(icon), title, description, Optional.of(new ClientAsset.ResourceTexture(background == null ? Identifier.tryParse("minecraft:air") : background)), type, showToast, announceChat, hidden);
         displayInfo.setLocation(this.x, this.y);
         return displayInfo;
     }

@@ -69,8 +69,8 @@ public class RegistryUtil {
     public static <T> boolean unfreeze(Registry<T> registry) {
         if (registry instanceof MappedRegistry<T>) {
             try {
-                ObfuscationUtil.Class mappedRegistry = ObfuscationUtil.getClassByMojangName("net.minecraft.core.MappedRegistry");
-                Field frozenField = mappedRegistry.getFieldByMojangName("frozen").getField();
+                Class<MappedRegistry> mappedRegistry = MappedRegistry.class;
+                Field frozenField = mappedRegistry.getDeclaredField("frozen");
                 if (frozenField == null || !frozenField.trySetAccessible()) return false;
                 frozenField.set(registry, false);
                 return true;

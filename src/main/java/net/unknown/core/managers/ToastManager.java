@@ -98,7 +98,7 @@ public class ToastManager {
         player.connection.send(new ClientboundUpdateAdvancementsPacket(false, Collections.emptyList(), Set.of(id), Collections.emptyMap(), true));
     }
 
-    public static void showRecipeUnlockToast(ServerPlayer player, RecipeType<?> type, Ingredient ingredient, RecipeCategory category, Item item, int count) {
+    public static void showRecipeUnlockToast(ServerPlayer player, RecipeType<?> type, Ingredient ingredient, RecipeCategory category, @Nullable CookingBookCategory cookingCategory, Item item, int count) {
         RecipeManager recipeManager = MinecraftServer.getServer().getRecipeManager();
         ResourceKey<Recipe<?>> key = ResourceKey.create(Registries.RECIPE, Identifier.fromNamespaceAndPath("unknown-network", "recipes/dummy_" + String.valueOf(UUID.randomUUID()).split("-")[0]));
         Map<ResourceKey<Recipe<?>>, Recipe<?>> recipes = new HashMap<>();
@@ -121,9 +121,11 @@ public class ToastManager {
         };
 
         if (type == RecipeType.SMELTING) {
-            SimpleCookingRecipeBuilder.smelting(ingredient, category, item, 0f, Integer.MAX_VALUE).unlockedBy("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
+            Objects.requireNonNull(cookingCategory, "Cooking category must be provided for smelting recipe");
+            SimpleCookingRecipeBuilder.smelting(ingredient, category, cookingCategory, item, 0f, Integer.MAX_VALUE).unlockedBy("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
         } else if (type == RecipeType.BLASTING) {
-            SimpleCookingRecipeBuilder.blasting(ingredient, category, item, 0f, Integer.MAX_VALUE).unlockedBy("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
+            Objects.requireNonNull(cookingCategory, "Cooking category must be provided for blasting recipe");
+            SimpleCookingRecipeBuilder.blasting(ingredient, category, cookingCategory, item, 0f, Integer.MAX_VALUE).unlockedBy("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
         } else if (type == RecipeType.SMOKING) {
             SimpleCookingRecipeBuilder.smoking(ingredient, category, item, 0f, Integer.MAX_VALUE).unlockedBy("impossible", CriteriaTriggers.IMPOSSIBLE.createCriterion(new ImpossibleTrigger.TriggerInstance())).save(recipeOutput, key);
         } else if (type == RecipeType.CAMPFIRE_COOKING) {

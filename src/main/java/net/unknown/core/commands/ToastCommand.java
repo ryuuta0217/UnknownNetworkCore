@@ -50,6 +50,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CookingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.unknown.core.builder.advancement.DisplayInfoBuilder;
@@ -57,6 +58,7 @@ import net.unknown.core.enums.Permissions;
 import net.unknown.core.managers.ToastManager;
 import net.unknown.core.util.NewMessageUtil;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -87,13 +89,24 @@ public class ToastCommand {
         );
         recipeTypes.forEach((name, type) -> {
             for (RecipeCategory category : RecipeCategory.values()) {
+                LiteralArgumentBuilder<CommandSourceStack> subTree = Commands.literal(category.name().toLowerCase());
+                if (type == RecipeType.SMELTING || type == RecipeType.BLASTING) {
+                    for (CookingBookCategory cookingCategory : CookingBookCategory.values()) {
+                        subTree.then(Commands.literal(cookingCategory.name().toLowerCase())
+                                .then(Commands.argument("item", ItemArgument.item(buildContext))
+                                        .then(Commands.argument("count", IntegerArgumentType.integer(1))
+                                                .executes(ctx -> executeRecipe(ctx, type, category, cookingCategory)))));
+                    }
+                } else {
+                    subTree.then(Commands.argument("item", ItemArgument.item(buildContext))
+                            .then(Commands.argument("count", IntegerArgumentType.integer(1))
+                                    .executes(ctx -> executeRecipe(ctx, type, category, null))));
+                }
+
                 targetsNode.then(Commands.literal("recipe")
                         .then(Commands.literal(name.toLowerCase())
                                 .then(Commands.argument("ingredient", ItemArgument.item(buildContext))
-                                        .then(Commands.literal(category.name().toLowerCase())
-                                                .then(Commands.argument("item", ItemArgument.item(buildContext))
-                                                        .then(Commands.argument("count", IntegerArgumentType.integer(1))
-                                                                .executes(ctx -> executeRecipe(ctx, type, category))))))));
+                                        .then(subTree))));
             }
         });
 
@@ -104,7 +117,7 @@ public class ToastCommand {
 
     private static int executeAdvancement(CommandContext<CommandSourceStack> ctx, AdvancementType type) throws CommandSyntaxException {
         Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
-        ItemStack icon = ItemArgument.getItem(ctx, "icon").createItemStack(1, false);
+        ItemStack icon = ItemArgument.getItem(ctx, "icon").createItemStack(1);
         Component title = ComponentArgument.getRawComponent(ctx, "title");
         Component description = ComponentArgument.getRawComponent(ctx, "description");
 
@@ -119,14 +132,14 @@ public class ToastCommand {
         return targets.size();
     }
 
-    private static int executeRecipe(CommandContext<CommandSourceStack> ctx, RecipeType<?> type, RecipeCategory category) throws CommandSyntaxException {
+    private static int executeRecipe(CommandContext<CommandSourceStack> ctx, RecipeType<?> type, RecipeCategory category, @Nullable CookingBookCategory cookingCategory) throws CommandSyntaxException {
         Collection<ServerPlayer> targets = EntityArgument.getPlayers(ctx, "targets");
-        Ingredient ingredient = Ingredient.of(ItemArgument.getItem(ctx, "ingredient").getItem());
-        Item item = ItemArgument.getItem(ctx, "item").getItem();
+        Ingredient ingredient = Ingredient.of(ItemArgument.getItem(ctx, "ingredient").item().value());
+        Item item = ItemArgument.getItem(ctx, "item").item().value();
         int count = IntegerArgumentType.getInteger(ctx, "count");
 
         targets.forEach(player -> {
-            ToastManager.showRecipeUnlockToast(player, type, ingredient, category, item, count);
+            ToastManager.showRecipeUnlockToast(player, type, ingredient, category, cookingCategory, item, count);
         });
         NewMessageUtil.sendMessage(ctx.getSource(), net.kyori.adventure.text.Component.text((targets.size() == 1 ? targets.iterator().next().displayName : targets.size()) + "にトースト通知を送信しました"));
         return targets.size();

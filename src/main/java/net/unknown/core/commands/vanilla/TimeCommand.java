@@ -68,6 +68,7 @@ import java.util.Iterator;
 import java.util.Random;
 
 public class TimeCommand {
+    /*
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("time");
         builder.requires(ctx -> ctx.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER));
@@ -238,4 +239,5 @@ public class TimeCommand {
         DAYTIME,
         GAMETIME
     }
+     */
 }

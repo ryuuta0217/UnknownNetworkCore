@@ -82,7 +82,7 @@ public class AutoSmelting implements Listener {
                 .map(minecraftDropStack -> {
                     List<RecipeHolder<SmeltingRecipe>> recipes = MinecraftServer.getServer().getRecipeManager().recipes.getRecipesFor(RecipeType.SMELTING, new SingleRecipeInput(minecraftDropStack), level).toList();
                     if (recipes.size() > 0) {
-                        ItemStack smeltingResult = recipes.get(0).value().assemble(new SingleRecipeInput(minecraftDropStack), level.registryAccess());
+                        ItemStack smeltingResult = recipes.get(0).value().assemble(new SingleRecipeInput(minecraftDropStack));
                         smeltingResult.setCount(minecraftDropStack.getCount());
                         return smeltingResult;
                     }
