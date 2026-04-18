@@ -82,7 +82,7 @@ public class MonsterBall implements Listener {
                             entityTag.remove("Motion");
                             entityTag.remove("Rotation");
 
-                            ItemStack spawnEgg = new ItemStack(SpawnEggItem.byId(mob.getType()));
+                            ItemStack spawnEgg = new ItemStack(SpawnEggItem.byId(mob.getType()).get());
                             CompoundTag spawnEggTag = new CompoundTag();
                             spawnEggTag.put("EntityTag", entityTag);
                             spawnEgg.set(DataComponents.ENTITY_DATA, TypedEntityData.of(mob.getType(), entityTag));

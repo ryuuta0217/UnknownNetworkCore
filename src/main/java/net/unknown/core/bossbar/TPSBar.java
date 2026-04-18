@@ -64,8 +64,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TPSBar {
     private static final TPSBar INSTANCE = new TPSBar();
 
-    public static final CustomBossEvent BAR = new CustomBossEvent(
-            Identifier.tryBySeparator("unknown-network:tps", ':'), buildDisplayName(0, 0));
+    public static final CustomBossEvent BAR = new CustomBossEvent(UUID.randomUUID(),
+            Identifier.tryBySeparator("unknown-network:tps", ':'), buildDisplayName(0, 0),
+            () -> {});
 
     public static void initialize() {
         if (UnknownNetworkCorePlugin.isFoliaPlatform()) {

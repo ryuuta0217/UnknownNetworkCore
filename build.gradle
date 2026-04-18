@@ -8,10 +8,10 @@ plugins {
     id 'java'
     id 'application'
     id 'maven-publish'
-    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.18' // Enable Development of using Mojang Mapping.
+    id 'io.papermc.paperweight.userdev' version '2.0.0-beta.21' // Enable Development of using Mojang Mapping.
     id 'xyz.jpenilla.run-paper' version '2.3.0' // Run Mojang Mapped or Spigot Mapped Server
-    id 'com.github.johnrengelman.shadow' version '+' // fatJar
-    id 'org.cadixdev.licenser' version '+' // Add License Header to source code headers.
+    id 'com.gradleup.shadow' version '9.4.1' // fatJar
+    id "com.diffplug.spotless" version "8.4.0" // Add License Header to source code headers.
     id "de.undercouch.download" version "+" // File Downloader
     id 'com.palantir.git-version' version '+' // Git Information Getter
     id "org.jetbrains.gradle.plugin.idea-ext" version "1.0.1" // IntelliJ IDEA Plugin
@@ -23,32 +23,24 @@ group 'net.unknown'
 version versionDetails().gitHash[0..7]
 def styledVersion = "git-" + project.name + "-" + (versionDetails().branchName != null ? versionDetails().branchName : System.getenv("BRANCH_NAME")) + "-" + versionDetails().gitHash[0..7];
 
-compileJava.dependsOn = ["licenseFormat"]
+compileJava.dependsOn = ["spotlessApply"]
 compileJava.options.encoding = "UTF-8"
 javadoc.options.encoding = "UTF-8"
 processResources.filteringCharset = "UTF-8"
 
-java.sourceCompatibility = JavaVersion.VERSION_21
-java.targetCompatibility = JavaVersion.VERSION_21
-compileJava.options.release.set(21)
+java.sourceCompatibility = JavaVersion.VERSION_25
+java.targetCompatibility = JavaVersion.VERSION_25
+compileJava.options.release.set(25)
 
 configurations {
     launchwrapper
 }
 
-license {
-    header = project.file("src/main/java/net/unknown/HEADER.txt")
-    include '**/*.java'
-
-    matching(includes: ['**/com/ryuuta0217/**/*.java']) {
-        header = project.file("src/main/java/com/ryuuta0217/HEADER.txt")
+spotless {
+    java {
+        licenseHeaderFile 'src/main/java/net/unknown/HEADER.txt'
+        target 'src/main/java/net/unknown/**/*.java'
     }
-
-    properties {
-        organization = 'Unknown Network'
-        year = 2023
-    }
-    newLine = true
 }
 
 repositories {
@@ -66,9 +58,9 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.11-R0.1-SNAPSHOT")
+    paperweight.paperDevBundle("26.1.1.build.+")
     compileOnly fileTree(dir: "libs", include: "*.jar")
-    compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '7.0.14', {
+    compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '7.0.16', {
         exclude group: 'com.google.code.gson', module: 'gson'
         exclude group: 'com.google.guava', module: 'guava'
         exclude group: 'it.unimi.dsi', module: 'fastutil'
@@ -94,10 +86,6 @@ dependencies {
     compileOnly group: "com.viaversion", name: "viaversion-api", version: "+"
 }
 
-paperweight {
-    reobfArtifactConfiguration = ReobfArtifactConfiguration.getMOJANG_PRODUCTION()
-}
-
 def generateTemplates = tasks.register("generateTemplates", Copy) { task ->
     def props = [
         'version': styledVersion
@@ -114,7 +102,6 @@ sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
 
 rootProject.idea.project.settings.taskTriggers.afterSync generateTemplates
 
-import io.papermc.paperweight.userdev.ReobfArtifactConfiguration
 import org.apache.tools.ant.filters.ReplaceTokens
 
 processResources {
@@ -142,10 +129,6 @@ jar {
 
 shadowJar {
     archiveFileName = archiveBaseName.get() + "." + archiveExtension.get()
-}
-
-reobfJar {
-    outputJar = layout.buildDirectory.file("libs/${project.name}-spigot.jar")
 }
 
 runMojangMappedServer {
@@ -185,7 +168,7 @@ runDevBundleServer {
     }
 }
 
-task runWrappedServer(type: JavaExec, dependsOn: reobfJar) {
+task runWrappedServer(type: JavaExec, dependsOn: shadowJar) {
     classpath(configurations.launchwrapper)
     args("--nogui", "--add-plugin=../build/libs/UnknownNetworkCore.jar")
     workingDir(project.file("testServer"))
@@ -204,7 +187,7 @@ task copyArtifactToProxy(type: Copy) {
     into project.file("testProxy/plugins")
 }
 
-copyArtifactToProxy.dependsOn(shadowJar, reobfJar)
+copyArtifactToProxy.dependsOn(shadowJar)
 publish.dependsOn(shadowJar)
 
 artifacts {
@@ -212,7 +195,6 @@ artifacts {
     //sourceJar
     //javaDocJar
     shadowJar
-    reobfJar
 }
 
 publishing {
@@ -221,10 +203,6 @@ publishing {
             groupId = 'net.unknown'
             artifactId = project.name
             version = version
-
-            artifact(reobfJar.outputJar) {
-                classifier = 'spigot'
-            }
 
             artifact(shadowJar) {
                 classifier = null
@@ -265,6 +243,5 @@ publishing {
 
     publishReleasePublicationToMavenRepository {
         dependsOn shadowJar
-        dependsOn reobfJar
     }
 }

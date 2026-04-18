@@ -41,7 +41,6 @@ import net.minecraft.world.item.ItemStack;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
-import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.core.util.ReflectionUtil;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.entity.Player;
@@ -96,14 +95,14 @@ public class OtherPlayerEnderChest extends PlayerEnderChestContainer implements 
 
         NonNullList<ItemStack> items = this.player.getEnderChestInventory().items;
 
-        try {
-            ObfuscationUtil.Class obfuscatedSimpleContainerClass = ObfuscationUtil.getClassByName(SimpleContainer.class.getName());
-            if (obfuscatedSimpleContainerClass == null) throw new IllegalStateException("What? SimpleContainer is not obfuscated? Class name is " + SimpleContainer.class.getName());
-
-            ReflectionUtil.setFinalObject(obfuscatedSimpleContainerClass.getFieldByMojangName("items").getField(), this, items);
-        } catch(NoSuchFieldException e) {
-            e.printStackTrace(); // ここには到達しないでほしい (お祈り)
-        }
+//        try {
+//            ObfuscationUtil.Class obfuscatedSimpleContainerClass = ObfuscationUtil.getClassByName(SimpleContainer.class.getName());
+//            if (obfuscatedSimpleContainerClass == null) throw new IllegalStateException("What? SimpleContainer is not obfuscated? Class name is " + SimpleContainer.class.getName());
+//
+//            ReflectionUtil.setFinalObject(obfuscatedSimpleContainerClass.getFieldByMojangName("items").getField(), this, items);
+//        } catch(NoSuchFieldException e) {
+//            e.printStackTrace(); // ここには到達しないでほしい (お祈り)
+//        }
 
         this.saveTask = RunnableManager.runRepeating(() -> {
             if (this.active && this.dirty && !this.online) {

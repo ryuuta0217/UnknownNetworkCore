@@ -37,7 +37,6 @@ import net.minecraft.commands.CommandSourceStack;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.commands.vanilla.GamemodeCommand;
 import net.unknown.core.commands.vanilla.MsgCommand;
-import net.unknown.core.commands.vanilla.TimeCommand;
 import net.unknown.core.fireworks.ProgrammedFireworksCommand;
 
 public class Commands {
@@ -54,7 +53,7 @@ public class Commands {
         DeepFakeCommand.register(dispatcher);
         SkullCommand.register(dispatcher);
         TrashCommand.register(dispatcher);
-        TimeCommand.register(dispatcher);
+//        TimeCommand.register(dispatcher);
         SwapLocationCommand.register(dispatcher);
         ProgrammedFireworksCommand.register(dispatcher);
         VanishCommand.register(dispatcher);

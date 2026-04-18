@@ -41,7 +41,6 @@ import net.minecraft.world.item.ItemStack;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
-import net.unknown.core.util.ObfuscationUtil;
 import net.unknown.core.util.ReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.craftbukkit.inventory.CraftInventory;

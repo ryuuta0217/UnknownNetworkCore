@@ -37,7 +37,6 @@ import net.minecraft.server.permissions.Permission;
 import net.unknown.core.commands.*;
 import net.unknown.core.commands.vanilla.GamemodeCommand;
 import net.unknown.core.commands.vanilla.MsgCommand;
-import net.unknown.core.commands.vanilla.TimeCommand;
 import net.unknown.core.fireworks.ProgrammedFireworksCommand;
 
 import java.util.Arrays;
@@ -52,7 +51,7 @@ public enum Permissions {
 
     COMMAND_MSG("minecraft.command.msg", 0, MsgCommand.class),
     COMMAND_GAMEMODE("minecraft.command.gamemode", 2, GamemodeCommand.class),
-    COMMAND_TIME("minecraft.command.time", 2, TimeCommand.class),
+    // COMMAND_TIME("minecraft.command.time", 2, TimeCommand.class),
     COMMAND_REPLY("unknown.core.command.reply", 0, MsgCommand.class),
     COMMAND_TELEPORTWORLD("unknown.core.command.teleportworld", 2, TeleportWorldCommand.class),
     COMMAND_TRASH("unknown.core.command.trash", "minecraft.command.trash", 0, TrashCommand.class),

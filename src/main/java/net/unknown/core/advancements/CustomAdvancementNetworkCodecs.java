@@ -39,6 +39,7 @@ import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 
 import java.util.Map;
 import java.util.Optional;
@@ -46,7 +47,7 @@ import java.util.Optional;
 public class CustomAdvancementNetworkCodecs {
     public static final Codec<DisplayInfo> DISPLAY_INFO_CODEC = RecordCodecBuilder.create( /* Supports positioning: x, y */
             instance -> instance.group(
-                            ItemStack.STRICT_CODEC.fieldOf("icon").forGetter(DisplayInfo::getIcon),
+                            ItemStack.CODEC.fieldOf("icon").forGetter(info -> info.getIcon().create()),
                             ComponentSerialization.CODEC.fieldOf("title").forGetter(DisplayInfo::getTitle),
                             ComponentSerialization.CODEC.fieldOf("description").forGetter(DisplayInfo::getDescription),
                             ClientAsset.ResourceTexture.CODEC.optionalFieldOf("background").forGetter(DisplayInfo::getBackground),
@@ -58,7 +59,7 @@ public class CustomAdvancementNetworkCodecs {
                             Codec.FLOAT.optionalFieldOf("y", 0f).forGetter(DisplayInfo::getY)
                     )
                     .apply(instance, (icon, title, description, background, frame, showToast, announceToChat, hidden, x, y) -> {
-                        DisplayInfo displayInfo = new DisplayInfo(icon, title, description, background, frame, showToast, announceToChat, hidden);
+                        DisplayInfo displayInfo = new DisplayInfo(ItemStackTemplate.fromNonEmptyStack(icon), title, description, background, frame, showToast, announceToChat, hidden);
                         displayInfo.setLocation(x, y);
                         return displayInfo;
                     })

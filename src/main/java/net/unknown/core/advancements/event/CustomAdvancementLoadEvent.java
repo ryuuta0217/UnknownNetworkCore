@@ -83,7 +83,7 @@ public class CustomAdvancementLoadEvent extends Event implements Cancellable {
         DisplayInfoBuilder builder = new DisplayInfoBuilder();
         builder.title(displayInfo.getTitle());
         builder.description(displayInfo.getDescription());
-        builder.icon(displayInfo.getIcon());
+        builder.icon(displayInfo.getIcon().create());
         builder.background(displayInfo.getBackground().isEmpty() ? null : displayInfo.getBackground().get().id());
         builder.type(displayInfo.getType());
         builder.showToast(displayInfo.shouldShowToast());

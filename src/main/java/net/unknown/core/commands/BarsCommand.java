@@ -61,19 +61,19 @@ public class BarsCommand {
                 .executes(BarsCommand::showStatus)
                 .then(Commands.literal("toggle")
                         .then(Commands.argument("identifier", IdentifierArgument.id())
-                                .suggests((ctx, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::getTextId), suggestionsBuilder))
+                                .suggests((ctx, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::customId), suggestionsBuilder))
                                 .executes(BarsCommand::toggle)
                                 .then(Commands.argument("targets", EntityArgument.players())
                                         .executes(BarsCommand::toggle))))
                 .then(Commands.literal("show")
                         .then(Commands.argument("identifier", IdentifierArgument.id())
-                                .suggests((ctx, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::getTextId), suggestionsBuilder))
+                                .suggests((ctx, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::customId), suggestionsBuilder))
                                 .executes(BarsCommand::show)
                                 .then(Commands.argument("targets", EntityArgument.players())
                                         .executes(BarsCommand::show))))
                 .then(Commands.literal("hide")
                         .then(Commands.argument("identifier", IdentifierArgument.id())
-                                .suggests((ctx, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::getTextId), suggestionsBuilder))
+                                .suggests((ctx, suggestionsBuilder) -> SharedSuggestionProvider.suggestResource(BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::customId), suggestionsBuilder))
                                 .executes(BarsCommand::hide)
                                 .then(Commands.argument("targets", EntityArgument.players())
                                         .executes(BarsCommand::hide))))
@@ -91,18 +91,18 @@ public class BarsCommand {
         ctx.getSource().sendSuccess(() -> {
             MutableComponent statusMessage = Component.literal("===== 登録されているボスバー (" + BossBarManager.getInstance().getRegisteredBossBars().size() + ") =====");
             BossBarManager.getInstance().getRegisteredBossBars().forEach(bossBar -> {
-                boolean visible = BossBarManager.getInstance().getVisibilityHandler().isVisible(player.getBukkitEntity(), bossBar.getTextId());
-                statusMessage.append("\n").append(Component.literal("["  + (visible ? "S" : "H") + "]").withStyle(visible ? ChatFormatting.GREEN : ChatFormatting.RED)).append(" - ").append(bossBar.getTextId().toString());
+                boolean visible = BossBarManager.getInstance().getVisibilityHandler().isVisible(player.getBukkitEntity(), bossBar.customId());
+                statusMessage.append("\n").append(Component.literal("["  + (visible ? "S" : "H") + "]").withStyle(visible ? ChatFormatting.GREEN : ChatFormatting.RED)).append(" - ").append(bossBar.customId().toString());
             });
             return statusMessage;
         }, false);
 
-        return Math.toIntExact(BossBarManager.getInstance().getRegisteredBossBars().stream().filter(bossBar -> BossBarManager.getInstance().getVisibilityHandler().isVisible(player.getBukkitEntity(), bossBar.getTextId())).count());
+        return Math.toIntExact(BossBarManager.getInstance().getRegisteredBossBars().stream().filter(bossBar -> BossBarManager.getInstance().getVisibilityHandler().isVisible(player.getBukkitEntity(), bossBar.customId())).count());
     }
 
     private static int toggle(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Identifier identifier = IdentifierArgument.getId(ctx, "identifier");
-        if (BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::getTextId).noneMatch(registeredIdentifier -> registeredIdentifier.equals(identifier))) {
+        if (BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::customId).noneMatch(registeredIdentifier -> registeredIdentifier.equals(identifier))) {
             ctx.getSource().sendFailure(Component.literal("指定された識別子のボスバーは存在しません。"));
             return -1;
         }
@@ -122,7 +122,7 @@ public class BarsCommand {
 
     private static int show(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Identifier identifier = IdentifierArgument.getId(ctx, "identifier");
-        if (BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::getTextId).noneMatch(registeredIdentifier -> registeredIdentifier.equals(identifier))) {
+        if (BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::customId).noneMatch(registeredIdentifier -> registeredIdentifier.equals(identifier))) {
             ctx.getSource().sendFailure(Component.literal("指定された識別子のボスバーは存在しません。"));
             return -1;
         }
@@ -155,7 +155,7 @@ public class BarsCommand {
 
     private static int hide(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Identifier identifier = IdentifierArgument.getId(ctx, "identifier");
-        if (BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::getTextId).noneMatch(registeredIdentifier -> registeredIdentifier.equals(identifier))) {
+        if (BossBarManager.getInstance().getRegisteredBossBars().parallelStream().map(CustomBossEvent::customId).noneMatch(registeredIdentifier -> registeredIdentifier.equals(identifier))) {
             ctx.getSource().sendFailure(Component.literal("指定された識別子のボスバーは存在しません。"));
             return -1;
         }

@@ -71,8 +71,8 @@ public class BossBarManager implements Listener {
     }
 
     public void register(CustomBossEvent bossBar) {
-        this.registeredBossBars.stream().filter(existingBossBar -> existingBossBar.getTextId().equals(bossBar.getTextId())).findAny().ifPresent(existingBossBar -> {
-            throw new IllegalArgumentException("Identifier duplication detected for identifier " + bossBar.getTextId() + ". Cannot register same identifier boss bars. Existing boss bar: " + existingBossBar);
+        this.registeredBossBars.stream().filter(existingBossBar -> existingBossBar.customId().equals(bossBar.customId())).findAny().ifPresent(existingBossBar -> {
+            throw new IllegalArgumentException("Identifier duplication detected for identifier " + bossBar.customId() + ". Cannot register same identifier boss bars. Existing boss bar: " + existingBossBar);
         });
 
         this.registeredBossBars.add(bossBar);
@@ -93,10 +93,10 @@ public class BossBarManager implements Listener {
 
     public void updateBossBarVisibility(Player player, Identifier identifier) {
         this.registeredBossBars.parallelStream()
-                .filter(bossBar -> bossBar.getTextId().equals(identifier))
+                .filter(bossBar -> bossBar.customId().equals(identifier))
                 .findAny()
                 .ifPresent(bossBar -> {
-                    if (this.visibilityHandler.isVisible(player, bossBar.getTextId())) {
+                    if (this.visibilityHandler.isVisible(player, bossBar.customId())) {
                         bossBar.addPlayer(MinecraftAdapter.player(player));
                     } else {
                         bossBar.removePlayer(MinecraftAdapter.player(player));
@@ -105,7 +105,7 @@ public class BossBarManager implements Listener {
     }
 
     public void updateBossBarVisibility(Player player) {
-        this.registeredBossBars.forEach(bossBar -> this.updateBossBarVisibility(player, bossBar.getTextId()));
+        this.registeredBossBars.forEach(bossBar -> this.updateBossBarVisibility(player, bossBar.customId()));
     }
 
     public void updateBossBarVisibility(Identifier identifier) {
@@ -119,7 +119,7 @@ public class BossBarManager implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
         this.registeredBossBars.forEach(bossBar -> {
-            if (this.visibilityHandler.isVisible(event.getPlayer(), bossBar.getTextId())) {
+            if (this.visibilityHandler.isVisible(event.getPlayer(), bossBar.customId())) {
                 bossBar.addPlayer(MinecraftAdapter.player(event.getPlayer()));
             }
         });

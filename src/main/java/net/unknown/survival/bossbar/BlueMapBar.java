@@ -48,10 +48,12 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class BlueMapBar {
-    public static final CustomBossEvent BAR = new CustomBossEvent(
-            Identifier.tryBySeparator("unknown-network:bluemap_progress", ':'), buildDisplayName(Collections.emptyList(), null));
+    public static final CustomBossEvent BAR = new CustomBossEvent(UUID.randomUUID(),
+            Identifier.tryBySeparator("unknown-network:bluemap_progress", ':'), buildDisplayName(Collections.emptyList(), null),
+            () -> {});
     public static BukkitTask UPDATE_TASK;
 
     public static void initialize() {
