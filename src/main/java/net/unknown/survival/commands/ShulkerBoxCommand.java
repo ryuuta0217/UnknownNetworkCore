@@ -40,13 +40,14 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.unknown.core.util.NewMessageUtil;
+import net.unknown.survival.enums.Permissions;
 import net.unknown.survival.feature.OpenShulkerBoxInHand;
 
 // /<shulkerbox|sb> <how-open> <click|inventory> <mode>
 public class ShulkerBoxCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> builder = LiteralArgumentBuilder.literal("shulkerbox");
-        builder.requires(source -> true);
+        builder.requires(Permissions.COMMAND_SHULKERBOX::checkAndIsPlayer);
 
         LiteralArgumentBuilder<CommandSourceStack> clickNode = Commands.literal("click")
                 .executes(ShulkerBoxCommand::showClickOpenMode);
@@ -70,7 +71,7 @@ public class ShulkerBoxCommand {
         LiteralCommandNode<CommandSourceStack> node = dispatcher.register(builder);
 
         LiteralArgumentBuilder<CommandSourceStack> aliasBuilder = Commands.literal("sb")
-                        .requires(source -> true)
+                        .requires(Permissions.COMMAND_SHULKERBOX::checkAndIsPlayer)
                                 .redirect(node);
 
         dispatcher.register(aliasBuilder);
