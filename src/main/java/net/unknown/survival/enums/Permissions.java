@@ -76,6 +76,8 @@ public enum Permissions {
     COMMAND_SIDEBAR("unknown.survival.command.sidebar", 0, SidebarCommand.class),
     COMMAND_SHULKERBOX("unknown.survival.command.shulkerbox", "minecraft.command.shulkerbox", 0, ShulkerBoxCommand.class),
     COMMAND_SB("unknown.survival.command.shulkerbox", "minecraft.command.sb", 0, ShulkerBoxCommand.class),
+    COMMAND_AUTOMATEDREGENWORLD("unknown.survival.command.automatedregenworld", "minecraft.command.automatedregenworld", 2, AutomatedRegenWorldCommand.class),
+    COMMAND_ARW("unknown.survival.command.automatedregenworld", "minecraft.command.arw", 2, AutomatedRegenWorldCommand.class),
 
     NOTIFY_MODDED_PLAYER("unknown.survival.notify.mod", 2, null),
     ENTITY_EDITOR("unknown.survival.entity_editor", 2, null),

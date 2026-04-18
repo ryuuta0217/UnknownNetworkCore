@@ -104,6 +104,8 @@ permissions:
       minecraft.command.sidebar: true
       minecraft.command.shulkerbox: true
       minecraft.command.sb: true
+      minecraft.command.automatedregenworld: true
+      minecraft.command.arw: true
       unknown.survival.command.spawn: true
       unknown.survival.command.home: true
       unknown.survival.command.homes: true
@@ -118,6 +120,8 @@ permissions:
       unknown.survival.command.afk: true
       unknown.survival.command.sidebar: true
       unknown.survival.command.shulkerbox: true
+      unknown.survival.command.automatedregenworld: true
+      unknown.survival.command.arw: true
       unknown.survival.open_gui: true
   unknown.survival.admin:
     default: op
