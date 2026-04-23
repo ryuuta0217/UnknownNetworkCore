@@ -47,10 +47,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.player.PlayerChangedWorldEvent;
-import org.bukkit.event.player.PlayerGameModeChangeEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerToggleFlightEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
@@ -276,6 +273,13 @@ public class FlightManager {
         public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
             if (event.getPlayer().equals(this.player)) {
                 FlightManager.disableFlight(this.player, EndReason.WORLD_CHANGED);
+            }
+        }
+
+        @EventHandler
+        public void onPlayerRespawn(PlayerRespawnEvent event) {
+            if (event.getPlayer().equals(this.player)) {
+                event.getPlayer().setAllowFlight(true);
             }
         }
 
