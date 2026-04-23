@@ -122,7 +122,7 @@ public class FlightManager {
         EMPTY_BALANCE("所持金が不足しているため"),
         GAME_MODE_CHANGED("ゲームモードが変更されたため"),
         QUIT("ログアウトしたため"),
-	    WORLD_CHANGED("別のワールドに移動したため"),
+	    @Deprecated WORLD_CHANGED("別のワールドに移動したため"),
         IN_GROUND(MAX_ON_GROUND_MINUTES + "分間地上にいたため"),
         SIX_ENCOUNT_TOMATO("トマトと6回出会ったため"),
         SELF_END("");
@@ -272,7 +272,7 @@ public class FlightManager {
         @EventHandler
         public void onPlayerChangedWorld(PlayerChangedWorldEvent event) {
             if (event.getPlayer().equals(this.player)) {
-                FlightManager.disableFlight(this.player, EndReason.WORLD_CHANGED);
+                event.getPlayer().setAllowFlight(true);
             }
         }
 
