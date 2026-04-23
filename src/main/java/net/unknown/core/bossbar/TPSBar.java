@@ -94,9 +94,9 @@ public class TPSBar {
         return Component.literal("")
                 .append(Component.literal("[" + time + "]").withStyle(ChatFormatting.GRAY))
                 .append(" ")
-                .append(Component.literal("TPS: " + PerformanceObserver.getScaledString(2, tps)).withStyle(ChatFormatting.GOLD))
+                .append(Component.literal("TPS: " + PerformanceObserver.getScaledString(1, tps)).withStyle(ChatFormatting.GOLD))
                 .append(" | ")
-                .append(Component.literal("MSPT: " + PerformanceObserver.getScaledString(4, millisecondsPerTick) + "ms").withStyle(ChatFormatting.AQUA));
+                .append(Component.literal("MSPT: " + PerformanceObserver.getScaledString(3, millisecondsPerTick) + "ms").withStyle(ChatFormatting.AQUA));
     }
 
     public static class Folia implements Listener {
