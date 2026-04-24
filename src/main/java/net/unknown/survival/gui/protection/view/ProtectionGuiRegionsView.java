@@ -505,6 +505,7 @@ public class ProtectionGuiRegionsView extends ProtectionGuiViewBase {
                                 List<ProtectedRegion> intersectedRegions = newRegion.getIntersectingRegions(manager.getRegions().values())
                                         .stream()
                                         .filter(intersectedRegion -> !intersectedRegion.getId().equals(region.getId()))
+                                        .filter(intersectedRegion -> !intersectedRegion.getOwners().contains(this.gui.getPlayer().getUniqueId()))
                                         .toList();
                                 if (intersectedRegions.size() > 0) {
                                     ProtectionGuiUtil.showRegionAreaIntersectedError(intersectedRegions, this, ProtectionGuiState.REGION_INFORMATION);
