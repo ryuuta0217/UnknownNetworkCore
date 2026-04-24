@@ -38,25 +38,45 @@ import net.minecraft.world.entity.vehicle.minecart.Minecart;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.gameevent.GameEvent;
+import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+
 public class MinecartPlacer implements Listener {
+    private static final Set<UUID> RAIL_PLACEMENT_COOLDOWN_PLAYERS = new HashSet<>();
+
+    @EventHandler(priority = EventPriority.MONITOR)
+    public void onBlockPlace(BlockPlaceEvent event) {
+        if (Tag.RAILS.isTagged(event.getBlockPlaced().getType())) {
+            RAIL_PLACEMENT_COOLDOWN_PLAYERS.add(event.getPlayer().getUniqueId());
+            RunnableManager.runAsyncDelayed(() -> RAIL_PLACEMENT_COOLDOWN_PLAYERS.remove(event.getPlayer().getUniqueId()), 20 * 2);
+        }
+    }
+
     @EventHandler
     public void onInteractRail(PlayerInteractEvent event) {
         if (event.getPlayer().getGameMode() == GameMode.SPECTATOR) return;
         if (event.getHand() == EquipmentSlot.OFF_HAND) return;
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-        if (!event.getClickedBlock().getType().name().endsWith("RAIL")) return;
+        if (event.getClickedBlock() == null) return; // ここがtrueになるわけはないが、念のため
+        if (!Tag.RAILS.isTagged(event.getClickedBlock().getType())) return;
+        if (RAIL_PLACEMENT_COOLDOWN_PLAYERS.contains(event.getPlayer().getUniqueId())) return;
         Inventory playerInventory = event.getPlayer().getInventory();
         Location blockLocation = event.getClickedBlock().getLocation();
 
