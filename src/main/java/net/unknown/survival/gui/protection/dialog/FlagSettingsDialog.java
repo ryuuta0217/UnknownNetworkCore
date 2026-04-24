@@ -73,6 +73,12 @@ import java.util.stream.Collectors;
 public class FlagSettingsDialog {
     private static final Logger LOGGER = LoggerFactory.getLogger("UNC/ProtectionGui/FlagSettingsDialog");
     private static final Map<String, FlagHandler<?, ?>> FLAG_HANDLERS = new HashMap<>();
+    private static final Set<String> GLOBALLY_EDITING_ALLOWED_FLAGS = new HashSet<>() {{
+        add("pvp");
+        add("use");
+        add("pistons");
+        add("tnt");
+    }};
 
     static {
         init();
@@ -480,11 +486,7 @@ public class FlagSettingsDialog {
                                     if (player.hasPermission(Permissions.FEATURE_EDIT_ANY_FLAGS.getPermissionNode())) {
                                         return true;
                                     }
-                                    HashSet<Object> disabledFlags = new HashSet<>() {{
-                                        add("passthrough");
-                                        add("build");
-                                    }};
-                                    return !disabledFlags.contains(flag.getName());
+                                    return GLOBALLY_EDITING_ALLOWED_FLAGS.contains(flag.getName());
                                 })
                                 .map(flag -> tryBuildDialogInput(flag, region, player, 300))
                                 .filter(Objects::nonNull)
