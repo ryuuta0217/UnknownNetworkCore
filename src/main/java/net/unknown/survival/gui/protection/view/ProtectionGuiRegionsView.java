@@ -345,9 +345,11 @@ public class ProtectionGuiRegionsView extends ProtectionGuiViewBase {
                     .lore(Component.text("現在の名前: " + this.region.getId(), DefinedTextColor.AQUA))
                     .build());
 
-            this.gui.getInventory().setItem(31, new ItemStackBuilder(Material.SHIELD)
-                    .displayName(Component.text("フラグの設定", Style.style(DefinedTextColor.YELLOW, TextDecoration.ITALIC.withState(false))))
-                    .build());
+            if (this.gui.getPlayer().hasPermission(Permissions.FEATURE_EDIT_FLAGS.getPermissionNode())) {
+                this.gui.getInventory().setItem(31, new ItemStackBuilder(Material.SHIELD)
+                        .displayName(Component.text("フラグの設定", Style.style(DefinedTextColor.YELLOW, TextDecoration.ITALIC.withState(false))))
+                        .build());
+            }
 
             this.gui.getInventory().setItem(33, new ItemStackBuilder(Material.DIAMOND_CHESTPLATE)
                     .displayName(Component.text("メンバーの管理", Style.style(DefinedTextColor.LIGHT_PURPLE, TextDecoration.ITALIC.withState(false))))
@@ -444,6 +446,7 @@ public class ProtectionGuiRegionsView extends ProtectionGuiViewBase {
 
                 // フラグ管理
                 case 31 -> {
+                    if (!this.gui.getPlayer().hasPermission(Permissions.FEATURE_EDIT_FLAGS.getPermissionNode())) return;
                     this.gui.setGuiState(ProtectionGuiState.WAITING_CALLBACK);
                     this.gui.getPlayer().closeInventory(InventoryCloseEvent.Reason.PLUGIN);
                     event.getWhoClicked().showDialog(FlagSettingsDialog.createFlagEditorDialog((Player) event.getWhoClicked(), region, () -> {

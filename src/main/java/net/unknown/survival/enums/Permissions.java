@@ -83,7 +83,8 @@ public enum Permissions {
     ENTITY_EDITOR("unknown.survival.entity_editor", 2, null),
     OPEN_GUI("unknown.survival.open_gui", 0, null),
     FEATURE_EDIT_ANY_FLAGS("unknown.survival.feature.edit_any_flags", 4, null),
-    FEATURE_LONG_PREFIX("unknown.survival.feature.long_prefix", 2, null);
+    FEATURE_LONG_PREFIX("unknown.survival.feature.long_prefix", 2, null),
+    FEATURE_EDIT_FLAGS("unknown.survival.feature.edit_flags", 0, null);
 
     private final int opLevel;
     private final String[] permissionNodes;

@@ -486,7 +486,7 @@ public class FlagSettingsDialog {
                                     if (player.hasPermission(Permissions.FEATURE_EDIT_ANY_FLAGS.getPermissionNode())) {
                                         return true;
                                     }
-                                    return GLOBALLY_EDITING_ALLOWED_FLAGS.contains(flag.getName());
+                                    return player.hasPermission(Permissions.FEATURE_EDIT_FLAGS.getPermissionNode()) && GLOBALLY_EDITING_ALLOWED_FLAGS.contains(flag.getName());
                                 })
                                 .map(flag -> tryBuildDialogInput(flag, region, player, 300))
                                 .filter(Objects::nonNull)
