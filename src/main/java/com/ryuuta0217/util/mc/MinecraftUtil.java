@@ -37,11 +37,13 @@ public class MinecraftUtil {
     /**
      * Check if the version is modern (1.13+)
      *
-     * @param version Version id (e.g. 1.12.2, 1.13.2, 1.14.4, 1.15.2, 1.16.5, 1.17.1, 1.18.1, 1.19.1, 1.20.1)
+     * @param version Version id (e.g. 1.12.2, 1.13.2, 1.14.4, 1.15.2, 1.16.5, 1.17.1, 1.18.1, 1.19.1, 1.20.1, 26.1)
      * @return True if the version is modern (1.13+)
      */
     public static boolean isModernVersion(String version) {
         int[] versionParts = getVersionParts(version);
-        return versionParts[0] >= 1 && versionParts[1] >= 13;
+        boolean isAfter1_13 = versionParts[0] >= 1 && versionParts[1] >= 13;
+        boolean isAfter26_1 = versionParts[0] >= 26 && versionParts[1] >= 1;
+        return isAfter1_13 || isAfter26_1;
     }
 }
