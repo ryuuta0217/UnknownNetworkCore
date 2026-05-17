@@ -87,7 +87,7 @@ public class UnknownNetworkDiscordBot {
 
     public static void runAnotherThread(JDABuilder builder) {
         if (JDA_THREAD != null && JDA_THREAD.isAlive()) throw new IllegalThreadStateException("Bot is already running?");
-        JDA_THREAD = new Thread(builder::build);
+        JDA_THREAD = new Thread(() -> UnknownNetworkDiscordBot.JDA = builder.build());
         JDA_THREAD.setName("UnknownNetworkDiscordBot - JDA main thread");
         JDA_THREAD.start();
     }
