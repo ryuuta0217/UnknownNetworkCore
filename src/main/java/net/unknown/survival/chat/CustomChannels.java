@@ -31,15 +31,19 @@
 
 package net.unknown.survival.chat;
 
+import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.unknown.UnknownNetworkCorePlugin;
+import net.unknown.core.discord.UnknownNetworkDiscordBot;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.survival.chat.channels.CustomChannel;
 import net.unknown.survival.chat.channels.GlobalChannel;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.jspecify.annotations.NonNull;
 
 import javax.annotation.Nullable;
 import java.io.File;
@@ -57,6 +61,22 @@ public class CustomChannels {
 
     private static final File CONFIG_FILE = new File(UnknownNetworkCorePlugin.getInstance().getDataFolder(), "custom_channels.yml");
     private static YamlConfiguration CONFIG;
+
+    static {
+        if (UnknownNetworkDiscordBot.getJDA() != null) {
+            UnknownNetworkDiscordBot.getJDA().addEventListener(new ListenerAdapter() {
+                @Override
+                public void onMessageReceived(@NonNull MessageReceivedEvent event) {
+                    if (event.isWebhookMessage()) return;
+                    CHANNELS.forEach((channelName, channel) -> {
+                        if (channel.getDiscordChannelId() != null && channel.getDiscordChannelId().equals(event.getChannel().getId())) {
+                            channel.sendSystemMessage(Component.text("[D²] " + event.getAuthor().getName() + ": " + event.getMessage().getContentDisplay()));
+                        }
+                    });
+                }
+            });
+        }
+    }
 
     public static void load() {
         try {
