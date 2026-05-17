@@ -33,6 +33,9 @@ package net.unknown.survival.chat.channels;
 
 import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
+import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.pointer.Pointer;
 import net.kyori.adventure.text.Component;
@@ -40,7 +43,9 @@ import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.discord.UnknownNetworkDiscordBot;
 import net.unknown.core.managers.RunnableManager;
+import net.unknown.core.skin.SkinManager;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
 import net.unknown.survival.events.CustomChatChannelEvent;
@@ -51,6 +56,8 @@ import org.bukkit.entity.Player;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class CustomChannel extends ChatChannel {
@@ -139,6 +146,37 @@ public class CustomChannel extends ChatChannel {
 
         //customEvent.getReceivers().forEach(receiver -> receiver.sendMessage((customEvent.getSender() == null ? Identity.nil() : customEvent.getSender().identity()), customEvent.getRenderedMessage()));
 
+        if (this.discordChannelId != null && UnknownNetworkDiscordBot.getJDA() != null) {
+            TextChannel targetDiscordChannel = UnknownNetworkDiscordBot.getJDA().getTextChannelById(this.discordChannelId);
+            if (targetDiscordChannel != null) {
+                RunnableManager.runAsync(() -> {
+                    try {
+                        List<Webhook> webhooks = targetDiscordChannel.retrieveWebhooks().complete();
+
+                        final String webhookName = "UNC_CustomChannel";
+                        Webhook targetWebhook = webhooks.parallelStream().filter(webhook -> webhook.getName().equalsIgnoreCase(webhookName)).findAny().orElse(null);
+                        if (targetWebhook == null) targetWebhook = targetDiscordChannel.createWebhook(webhookName).complete();
+
+                        Pattern texturePattern = Pattern.compile("https?://.+?(?<texture>\\w{60,64})\"");
+                        Matcher matcher = texturePattern.matcher(SkinManager.getPlayerSkinRepository(event.getPlayer().getUniqueId()).getSeenSkin().getDecodedBase64());
+                        String texture = null;
+                        if (matcher.find()) texture = matcher.group("texture");
+
+                        String avatarUrl = "https://crafthead.net/helm/" + event.getPlayer().getUniqueId().toString().replace("-", "") + "/128";
+                        if (texture != null) {
+                            avatarUrl = "https://crafthead.net/helm/" + texture + "/128";
+                        }
+
+                        String message = PlainTextComponentSerializer.plainText().serialize(customEvent.getMessage());
+                        targetWebhook.sendMessage(message).setUsername(PlainTextComponentSerializer.plainText().serialize(event.getPlayer().displayName())).setAvatarUrl(avatarUrl).queue();
+                    } catch (InsufficientPermissionException e) {
+                        // Ignore permission issues
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        }
     }
 
     public Component getDisplayName() {
