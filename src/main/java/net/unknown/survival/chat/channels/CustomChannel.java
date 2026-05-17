@@ -49,6 +49,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -57,6 +58,7 @@ public class CustomChannel extends ChatChannel {
     private final UUID owner;
     private final String channelName;
     private Component displayName;
+    private String discordChannelId;
 
     public CustomChannel(String channelName, Component displayName, UUID owner) {
         this(channelName, displayName, owner, Collections.emptyList());
@@ -149,6 +151,16 @@ public class CustomChannel extends ChatChannel {
 
     public void setDisplayName(Component displayName) {
         this.displayName = displayName;
+        RunnableManager.runAsync(CustomChannels::save);
+    }
+
+    @Nullable
+    public String getDiscordChannelId() {
+        return this.discordChannelId;
+    }
+
+    public void setDiscordChannelId(String discordChannelId) {
+        this.discordChannelId = discordChannelId;
         RunnableManager.runAsync(CustomChannels::save);
     }
 

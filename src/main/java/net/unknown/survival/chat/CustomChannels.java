@@ -134,6 +134,8 @@ public class CustomChannels {
             CONFIG.set("channels." + channelName + ".display_name", GsonComponentSerializer.gson().serialize(channel.getDisplayName()));
             CONFIG.set("channels." + channelName + ".owner", channel.getOwner().toString());
             CONFIG.set("channels." + channelName + ".players", channel.getPlayers().stream().filter(p -> !p.equals(channel.getOwner())).map(UUID::toString).toList());
+            if (channel.getDiscordChannelId() != null) CONFIG.set("channels." + channelName + ".discord_channel_id", channel.getDiscordChannelId());
+            else CONFIG.set("channels." + channelName + ".discord_channel_id", null);
         });
         try {
             CONFIG.save(CONFIG_FILE);
