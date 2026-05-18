@@ -34,10 +34,12 @@ package net.unknown.survival.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
+import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
@@ -48,6 +50,7 @@ import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.network.chat.*;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.unknown.core.discord.UnknownNetworkDiscordBot;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.BrigadierUtil;
 import net.unknown.core.util.MessageUtil;
@@ -138,7 +141,10 @@ public class ChannelCommand {
                                 .suggests(Suggestions.OWNED_CHANNELS_SUGGEST)
                                 .then(Commands.literal("displayName")
                                         .then(Commands.argument("表示名", ComponentArgument.textComponent(buildContext))
-                                                .executes(ChannelCommand::modifyChannelDisplayName)))));
+                                                .executes(ChannelCommand::modifyChannelDisplayName)))
+                                .then(Commands.literal("discordChannelId")
+                                        .then(Commands.argument("DiscordチャンネルID", LongArgumentType.longArg(0))
+                                                .executes(ChannelCommand::modifyDiscordChannelId)))));
 
         builder.then(Commands.literal("options")
                 .then(Commands.literal("global")
@@ -698,6 +704,43 @@ public class ChannelCommand {
                 .append(displayName)
                 .append(Component.literal(" に変更しました")));
         return 0;
+    }
+
+    private static int modifyDiscordChannelId(CommandContext<CommandSourceStack> ctx) {
+        String channelName = StringArgumentType.getString(ctx, "チャンネル名");
+        long discordChannelId = LongArgumentType.getLong(ctx, "DiscordチャンネルID");
+
+        CustomChannel channel = CustomChannels.getChannel(channelName);
+        if (channel == null) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "チャンネル " + channelName + " は存在しません");
+            return -1;
+        }
+
+        if (UnknownNetworkDiscordBot.getJDA() != null) {
+            TextChannel discordChannel = UnknownNetworkDiscordBot.getJDA().getTextChannelById(discordChannelId);
+            if (discordChannel == null) {
+                NewMessageUtil.sendErrorMessage(ctx.getSource(), "Discordでテキストチャンネル" + discordChannelId + " が見つかりません");
+                return -2;
+            }
+
+            channel.setDiscordChannelId(discordChannel.getId());
+            NewMessageUtil.sendMessage(ctx.getSource(), Component.literal("チャンネル ")
+                    .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                    .append(Component.literal("(" + channel.getChannelName() + ")").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                    .append(Component.literal(" の連携Discordチャンネルを "))
+                    .append(Component.literal(discordChannel.getName() + " (" + discordChannel.getId() + ")").withStyle(ChatFormatting.BOLD))
+                    .append(Component.literal(" に変更しました")));
+            return 0;
+        } else {
+            channel.setDiscordChannelId(String.valueOf(discordChannelId));
+            NewMessageUtil.sendMessage(ctx.getSource(), Component.literal("チャンネル ")
+                    .append(NewMessageUtil.convertAdventure2Minecraft(channel.getDisplayName()))
+                    .append(Component.literal("(" + channel.getChannelName() + ")").withStyle(ChatFormatting.GRAY, ChatFormatting.ITALIC))
+                    .append(Component.literal(" の連携DiscordチャンネルIDを "))
+                    .append(Component.literal(String.valueOf(discordChannelId)).withStyle(ChatFormatting.BOLD))
+                    .append(Component.literal(" に変更しました")));
+            return 1;
+        }
     }
 
     private static int showGlobalOption(CommandContext<CommandSourceStack> ctx, GlobalOptions type, boolean set) throws CommandSyntaxException {

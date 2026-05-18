@@ -123,6 +123,7 @@ permissions:
       unknown.survival.command.automatedregenworld: true
       unknown.survival.command.arw: true
       unknown.survival.open_gui: true
+      unknown.survival.feature.edit_flags: true
   unknown.survival.admin:
     default: op
     children:
