@@ -53,12 +53,12 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 public class MinecartPlacer implements Listener {
-    private static final Map<UUID, BukkitTask> RAIL_PLACEMENT_COOLDOWN_PLAYERS = new HashSet<>();
+    private static final Map<UUID, BukkitTask> RAIL_PLACEMENT_COOLDOWN_PLAYERS = new HashMap<>();
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onBlockPlace(BlockPlaceEvent event) {
