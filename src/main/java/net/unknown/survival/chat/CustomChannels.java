@@ -70,7 +70,7 @@ public class CustomChannels {
                     if (event.isWebhookMessage()) return;
                     CHANNELS.forEach((channelName, channel) -> {
                         if (channel.getDiscordChannelId() != null && channel.getDiscordChannelId().equals(event.getChannel().getId())) {
-                            channel.sendSystemMessage(Component.text("[D²] " + event.getAuthor().getName() + ": " + event.getMessage().getContentDisplay()));
+                            channel.sendSystemMessage(Component.text("[D²] " + event.getAuthor().getName() + ": " + event.getMessage().getContentDisplay()), false);
                         }
                     });
                 }
