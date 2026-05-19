@@ -39,6 +39,7 @@ import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.pointer.Pointer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -230,8 +231,14 @@ public class CustomChannel extends ChatChannel {
     }
 
     public void sendSystemMessage(Component message) {
-        this.sendMessage(null, Component.empty().style(Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC))
-                .append(this.getChannelPrefix(true))
+        this.sendSystemMessage(message, true);
+    }
+
+    public void sendSystemMessage(Component message, boolean italic) {
+        TextComponent baseComponent = Component.empty();
+        if (italic) baseComponent = baseComponent.style(Style.style(DefinedTextColor.GRAY, TextDecoration.ITALIC));
+
+        this.sendMessage(null, baseComponent.append(this.getChannelPrefix(true))
                 .append(message));
     }
 

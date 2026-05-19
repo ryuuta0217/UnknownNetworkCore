@@ -39,6 +39,7 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 public class CustomChatChannelEvent extends Event implements Cancellable {
@@ -49,7 +50,7 @@ public class CustomChatChannelEvent extends Event implements Cancellable {
     private boolean cancelled = false;
     private Component message;
 
-    public CustomChatChannelEvent(boolean async, Player sender, Component message, Set<Player> receivers, CustomChannel channel) {
+    public CustomChatChannelEvent(boolean async, @Nullable Player sender, Component message, Set<Player> receivers, CustomChannel channel) {
         super(async);
         this.sender = sender;
         this.message = message;
@@ -62,6 +63,7 @@ public class CustomChatChannelEvent extends Event implements Cancellable {
         return handlers;
     }
 
+    @Nullable
     public Player getSender() {
         return sender;
     }
