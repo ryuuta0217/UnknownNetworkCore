@@ -73,12 +73,17 @@ public class CustomChannel extends ChatChannel {
     }
 
     public CustomChannel(String channelName, Component displayName, UUID owner, List<UUID> players) {
+        this(channelName, displayName, owner, players, null);
+    }
+
+    public CustomChannel(String channelName, Component displayName, UUID owner, List<UUID> players, @Nullable String discordChannelId) {
         super(channelName, ChannelType.CUSTOM);
         this.channelName = channelName;
         this.displayName = displayName;
         this.owner = owner;
         this.players.add(owner);
         this.players.addAll(players);
+        this.discordChannelId = discordChannelId;
     }
 
     public Component getChannelPrefix(boolean space) {
