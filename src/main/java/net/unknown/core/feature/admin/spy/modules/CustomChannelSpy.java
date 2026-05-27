@@ -70,6 +70,7 @@ public class CustomChannelSpy implements SpyModule, Listener {
 
     @EventHandler
     public void onCustomChatChannel(CustomChatChannelEvent event) {
+        if (event.getSender() == null) return;
         Component spyMessage = Component.empty()
                 .append(event.getChannel().getChannelPrefix(false))
                 .appendSpace()
