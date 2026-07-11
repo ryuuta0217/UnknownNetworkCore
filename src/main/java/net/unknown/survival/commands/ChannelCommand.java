@@ -160,6 +160,12 @@ public class ChannelCommand {
                                 .then(Commands.literal("set")
                                         .then(Commands.argument("有効", BoolArgumentType.bool())
                                                 .executes(ctx -> setGlobalOption(ctx, GlobalOptions.KANA_CONVERT)))))
+                        .then(Commands.literal("jisKanaConvert")
+                                .then(Commands.literal("get")
+                                        .executes(ctx -> showGlobalOption(ctx, GlobalOptions.JIS_KANA_CONVERT, false)))
+                                .then(Commands.literal("set")
+                                        .then(Commands.argument("有効", BoolArgumentType.bool())
+                                                .executes(ctx -> setGlobalOption(ctx, GlobalOptions.JIS_KANA_CONVERT)))))
                         .then(Commands.literal("useMiniMessage")
                                 .then(Commands.literal("get")
                                         .executes(ctx -> showGlobalOption(ctx, GlobalOptions.USE_MINI_MESSAGE, false)))
@@ -790,6 +796,24 @@ public class ChannelCommand {
                 if (!(newValue instanceof Boolean))
                     throw new IllegalArgumentException("Requires \"Boolean\" but found \"" + newValue.getClass().getName() + "\"");
                 PlayerData.of(uniqueId).getChatData().setUseKanaConvert((boolean) newValue);
+            }
+        },
+        JIS_KANA_CONVERT("Rawかな入力変換") {
+            @Override
+            public Object getArgument(CommandContext<CommandSourceStack> ctx) {
+                return BoolArgumentType.getBool(ctx, "有効");
+            }
+
+            @Override
+            public Object getValue(UUID uniqueId) {
+                return PlayerData.of(uniqueId).getChatData().isUseKanaConvert();
+            }
+
+            @Override
+            public void setValue(UUID uniqueId, Object newValue) {
+                if (!(newValue instanceof Boolean))
+                    throw new IllegalArgumentException("Requires \"Boolean\" but found \"" + newValue.getClass().getName() + "\"");
+                PlayerData.of(uniqueId).getChatData().setUseJisKanaConvert((boolean) newValue);
             }
         },
         USE_MINI_MESSAGE("MiniMessageの使用") {

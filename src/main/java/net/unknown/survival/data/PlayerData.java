@@ -550,14 +550,16 @@ public class PlayerData extends ConfigurationBase {
         private UUID replyTarget;
         private String forceGlobalChatPrefix = "g.";
         private boolean useKanaConvert = false;
+        private boolean useJisKanaConvert = false;
         private boolean useMiniMessage = false;
         private boolean showHeadPrefix = false;
 
-        public ChatData(PlayerData parent, String replyTargetStr, String forceGlobalChatPrefix, boolean useKanaConvert, boolean useMiniMessage, boolean showHeadPrefix) {
+        public ChatData(PlayerData parent, String replyTargetStr, String forceGlobalChatPrefix, boolean useKanaConvert, boolean useJisKanaConvert, boolean useMiniMessage, boolean showHeadPrefix) {
             this.parent = parent;
             this.replyTarget = replyTargetStr != null ? UUID.fromString(replyTargetStr) : null;
             this.forceGlobalChatPrefix = forceGlobalChatPrefix;
             this.useKanaConvert = useKanaConvert;
+            this.useJisKanaConvert = useJisKanaConvert;
             this.useMiniMessage = useMiniMessage;
             this.showHeadPrefix = showHeadPrefix;
         }
@@ -593,6 +595,15 @@ public class PlayerData extends ConfigurationBase {
             RunnableManager.runAsync(this.parent::save);
         }
 
+        public boolean isUseJisKanaConvert() {
+            return this.useJisKanaConvert;
+        }
+
+        public void setUseJisKanaConvert(boolean useJisKanaConvert) {
+            this.useJisKanaConvert = useJisKanaConvert;
+            RunnableManager.runAsync(this.parent::save);
+        }
+
         public boolean isUseMiniMessage() {
             return this.useMiniMessage;
         }
@@ -616,6 +627,7 @@ public class PlayerData extends ConfigurationBase {
                     parent.getConfig().getString("reply-target", null),
                     parent.getConfig().getString("force-global-chat-prefix", "g."),
                     parent.getConfig().getBoolean("use-kana-convert", false),
+                    parent.getConfig().getBoolean("use-jis-kana-convert", false),
                     parent.getConfig().getBoolean("use-minimessage", false),
                     parent.getConfig().getBoolean("show-head-prefix", false));
         }
@@ -624,6 +636,7 @@ public class PlayerData extends ConfigurationBase {
             if (this.replyTarget != null) config.set("reply-target", this.replyTarget.toString());
             config.set("force-global-chat-prefix", this.forceGlobalChatPrefix);
             config.set("use-kana-convert", this.useKanaConvert);
+            config.set("use-jis-kana-convert", this.useJisKanaConvert);
             config.set("use-minimessage", this.useMiniMessage);
             config.set("show-head-prefix", this.showHeadPrefix);
         }

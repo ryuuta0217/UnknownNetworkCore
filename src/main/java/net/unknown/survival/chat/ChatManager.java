@@ -45,6 +45,7 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.enums.Permissions;
 import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.prefix.Prefix;
+import net.unknown.core.util.JisKanaConverter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.core.util.YukiKanaConverter;
 import net.unknown.survival.UnknownNetworkSurvival;
@@ -146,12 +147,12 @@ public class ChatManager implements Listener {
             b.match(Pattern.compile("https?://\\S+")).replacement((r, b2) -> Component.text(b2.content(), Style.style(DefinedTextColor.AQUA, TextDecoration.UNDERLINED)).clickEvent(ClickEvent.openUrl(b2.content())));
         }));
 
-        if (chatConfig.isUseKanaConvert()) {
+        if (chatConfig.isUseKanaConvert() || chatConfig.isUseJisKanaConvert()) {
             ChatRenderer baseRenderer = event.renderer();
             event.renderer((source, displayName, message, viewer) -> {
                 String msgStr = PlainTextComponentSerializer.plainText().serialize(message);
                 if (YukiKanaConverter.isNeedToJapanize(msgStr)) {
-                    String kanaMsgStr = YukiKanaConverter.conv(msgStr);
+                    String kanaMsgStr = chatConfig.isUseKanaConvert() ? YukiKanaConverter.conv(msgStr) : JisKanaConverter.conv(msgStr);
                     Component msg = PlainTextComponentSerializer.plainText().deserialize(kanaMsgStr);
                     return baseRenderer.render(source, displayName, Component.empty()
                             .append(msg)
