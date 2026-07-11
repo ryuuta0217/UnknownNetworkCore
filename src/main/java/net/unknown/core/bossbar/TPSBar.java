@@ -48,6 +48,7 @@ import net.unknown.core.managers.BossBarManager;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.core.util.MinecraftAdapter;
+import net.unknown.core.util.FormatUtil;
 import net.unknown.survival.observers.PerformanceObserver;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -94,9 +95,9 @@ public class TPSBar {
         return Component.literal("")
                 .append(Component.literal("[" + time + "]").withStyle(ChatFormatting.GRAY))
                 .append(" ")
-                .append(Component.literal("TPS: " + PerformanceObserver.getScaledString(1, tps)).withStyle(ChatFormatting.GOLD))
+                .append(Component.literal("TPS: " + FormatUtil.getScaledString(1, tps)).withStyle(ChatFormatting.GOLD))
                 .append(" | ")
-                .append(Component.literal("MSPT: " + PerformanceObserver.getScaledString(3, millisecondsPerTick) + "ms").withStyle(ChatFormatting.AQUA));
+                .append(Component.literal("MSPT: " + FormatUtil.getScaledString(3, millisecondsPerTick) + "ms").withStyle(ChatFormatting.AQUA));
     }
 
     public static class Folia implements Listener {
