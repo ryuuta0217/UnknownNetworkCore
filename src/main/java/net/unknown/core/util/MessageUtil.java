@@ -149,13 +149,13 @@ public class MessageUtil {
         }
     }
 
-    public static void broadcast(Component message, UUID broadcaster) {
-        broadcast(message, broadcaster, true);
+    public static void broadcast(Component message) {
+        broadcast(message, true);
     }
 
-    public static void broadcast(Component message, UUID broadcaster, boolean prefix) {
+    public static void broadcast(Component message, boolean prefix) {
         Bukkit.getOnlinePlayers().forEach(p -> {
-            p.sendMessage(broadcaster == null ? Identity.nil() : Identity.identity(broadcaster), prefix ? Component.text(PREFIX).append(message) : message);
+            p.sendMessage(prefix ? Component.text(PREFIX).append(message) : message);
         });
     }
 

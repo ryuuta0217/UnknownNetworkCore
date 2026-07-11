@@ -33,7 +33,6 @@ package net.unknown.survival.chat.channels.ranged;
 
 import io.papermc.paper.chat.ChatRenderer;
 import io.papermc.paper.event.player.AsyncChatEvent;
-import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
 import net.unknown.survival.chat.channels.ChannelType;
 import org.bukkit.command.ConsoleCommandSender;
@@ -55,7 +54,7 @@ public class MeChatChannel extends RangedChatChannel {
 
         event.renderer(((source, displayName, message, viewer) -> {
             displayName = Component.empty().append(displayName).append(Component.text("[" + this.getRange() + "]"));
-            return Component.translatable("chat.type.emote").args(displayName, originalMessage);
+            return Component.translatable("chat.type.emote").arguments(displayName, originalMessage);
         }));
     }
 }

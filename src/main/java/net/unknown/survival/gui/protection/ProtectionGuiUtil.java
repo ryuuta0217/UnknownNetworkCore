@@ -322,7 +322,7 @@ public class ProtectionGuiUtil {
 
     public static Component coordinates2Str(BlockVector3 vec3) {
         return Component.translatable("chat.coordinates", TextColor.color(0xFFFF))
-                .args(Component.text(vec3.getX()), Component.text(vec3.getY()), Component.text(vec3.getZ()));
+                .arguments(Component.text(vec3.getX()), Component.text(vec3.getY()), Component.text(vec3.getZ()));
     }
 
     public static Component getStateFlagValueDisplayName(@Nonnull StateFlag stateFlag, @Nullable StateFlag.State state) {

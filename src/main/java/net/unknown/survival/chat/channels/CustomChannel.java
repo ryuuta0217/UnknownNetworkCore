@@ -255,7 +255,7 @@ public class CustomChannel extends ChatChannel {
                 .collect(Collectors.toSet()), this);
         Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) return;
-        Bukkit.getServer().getConsoleSender().sendMessage(player == null ? Identity.nil() : player.identity(), message);
-        event.getReceivers().forEach(receiver -> receiver.sendMessage((event.getSender() == null ? Identity.nil() : event.getSender().identity()), event.getMessage()));
+        Bukkit.getServer().getConsoleSender().sendMessage(message);
+        event.getReceivers().forEach(receiver -> receiver.sendMessage(event.getMessage()));
     }
 }
