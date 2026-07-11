@@ -49,6 +49,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.unknown.core.define.DefinedComponents;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.BrigadierUtil;
+import net.unknown.core.util.FormatUtil;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.data.model.Home;
@@ -119,15 +120,15 @@ public class HomesCommand {
                     .append(DefinedComponents.SPACE)
                     .append(Component.text(MessageUtil.getWorldName(home.worldName())))
                     .append(DELIMITER)
-                    .append(Component.text(home.x(), DefinedTextColor.GREEN))
+                    .append(Component.text(FormatUtil.getScaledString(2, home.x()), DefinedTextColor.GREEN))
                     .append(DELIMITER)
-                    .append(Component.text(home.y(), DefinedTextColor.GREEN))
+                    .append(Component.text(FormatUtil.getScaledString(2, home.y()), DefinedTextColor.GREEN))
                     .append(DELIMITER)
-                    .append(Component.text(home.z(), DefinedTextColor.GREEN))
+                    .append(Component.text(FormatUtil.getScaledString(2, home.z()), DefinedTextColor.GREEN))
                     .append(DELIMITER)
-                    .append(Component.text(home.yaw(), DefinedTextColor.LIGHT_PURPLE))
+                    .append(Component.text(FormatUtil.getScaledString(1, home.yaw()), DefinedTextColor.LIGHT_PURPLE))
                     .append(DELIMITER)
-                    .append(Component.text(home.pitch(), DefinedTextColor.LIGHT_PURPLE));
+                    .append(Component.text(FormatUtil.getScaledString(1,home.pitch()), DefinedTextColor.LIGHT_PURPLE));
             contents.add(element);
         });
 
