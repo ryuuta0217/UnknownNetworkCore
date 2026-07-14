@@ -111,6 +111,7 @@ public class UnknownNetworkSurvival {
         //AutomaticWorldRegeneration.getInstance();
         AutomatedRegenWorldManager.getInstance();
         Villages.getInstance();
+        AdminStorage.getInstance().load();
 
         CustomEnchantments.initialize();
         GNArms.initialize();
@@ -209,6 +210,7 @@ public class UnknownNetworkSurvival {
 
     public static void onDisable() {
         Villages.save(true, false);
+        AdminStorage.getInstance().save();
     }
 
     public static Logger getLogger() {

@@ -88,5 +88,7 @@ public class Commands {
 
         AFKCommand.register(dispatcher);
         SidebarCommand.register(dispatcher);
+
+        AdminStorageCommand.register(dispatcher, buildContext);
     }
 }
