@@ -149,6 +149,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new GSitListener());
         ListenerManager.registerListener(new BabyCreature());
         ListenerManager.registerListener(new AFKListener());
+        ListenerManager.registerListener(new FishingAutomation());
         SuppressRaids.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
         if (UnknownNetworkCorePlugin.isBootstrapped()) {
