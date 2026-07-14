@@ -239,7 +239,7 @@ public class AdminStorage implements InventoryHolder {
             Inventory oldInventory = entry.getValue();
             List<HumanEntity> oldInventoryViewers = List.copyOf(oldInventory.getViewers());
 
-            Inventory newInventory = Bukkit.createInventory(this, 54, newTitle);
+            Inventory newInventory = Bukkit.createInventory(this, oldInventory.getSize(), newTitle);
 
             oldInventoryViewers.forEach(HumanEntity::closeInventory); // 変更を防ぐため、強制的に閉じさせておく
             newInventory.setContents(oldInventory.getContents()); // 内容を新しいインベントリにコピーする
