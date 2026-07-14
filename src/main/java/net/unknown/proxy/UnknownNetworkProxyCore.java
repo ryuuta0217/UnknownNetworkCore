@@ -59,7 +59,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @ChannelHandler.Sharable
-@Plugin(id = "unknown-network-core", name = "UnknownNetworkCore", version = SharedConstants.VERSION)
+@Plugin(id = "unknown-network-core", name = "UnknownNetworkCore", version = SharedConstants.VERSION, authors = { "ryuuta0217"} )
 public class UnknownNetworkProxyCore {
     private static final String PACKET_HANDLER_NAME = "unc-proxy-handler";
 
