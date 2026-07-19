@@ -39,10 +39,11 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class Suggestions {
     public static final SuggestionProvider<CommandSourceStack> ALL_PLAYER_SUGGEST = (ctx, builder) -> {
-        return SharedSuggestionProvider.suggest(Arrays.stream(Bukkit.getOfflinePlayers()).parallel().map(OfflinePlayer::getName), builder);
+        return SharedSuggestionProvider.suggest(Arrays.stream(Bukkit.getOfflinePlayers()).parallel().map(OfflinePlayer::getName).filter(Objects::nonNull), builder);
     };
     public static final SuggestionProvider<CommandSourceStack> WORLD_SUGGEST = (ctx, builder) -> {
         return SharedSuggestionProvider.suggest(Bukkit.getWorlds().stream().parallel().map(World::getName), builder);
