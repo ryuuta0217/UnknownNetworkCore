@@ -50,7 +50,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -170,12 +169,6 @@ public class PacketManager implements Listener {
         } catch (NoSuchFieldException e) {
             LOGGER.warn("Failed to inject TextFilter into player {}. PacketListener will not work for this player.", player.getName());
         }
-    }
-
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        Channel c = ((CraftPlayer) event.getPlayer()).getHandle().connection.connection.channel;
-        c.eventLoop().submit(() -> c.pipeline().remove(PacketManager.getPacketHandlerName(event.getPlayer().getName())));
     }
 
     private static String getPacketHandlerName(String playerName) {
