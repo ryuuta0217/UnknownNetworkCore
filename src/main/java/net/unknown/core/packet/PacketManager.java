@@ -157,6 +157,17 @@ public class PacketManager implements Listener {
 
                         super.channelRead(ctx, msg);
                     }
+
+                    @Override
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                        LOGGER.error("Exception in packet handler for player {}", player.getName(), cause);
+                        super.exceptionCaught(ctx, cause);
+                    }
+
+                    @Override
+                    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+                        super.channelInactive(ctx);
+                    }
                 };
                 ChannelPipeline pipeline = player.connection.connection.channel.pipeline();
                 pipeline.addBefore("packet_handler", PacketManager.getPacketHandlerName(event.getPlayer().getName()), packetHandler);
