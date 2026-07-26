@@ -41,14 +41,17 @@ import net.unknown.survival.feature.gnarms.module.GNModules;
 import org.bukkit.GameMode;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 public class FlyModule implements GNModule {
     public static final FlyModule INSTANCE = new FlyModule();
     private static final long USE_PARTICLE_IN_IDLE = 20;
     private static final long USE_PARTICLE_IN_USE = 105;
 
-    private long overheatTicks = 0;
+    private final Map<UUID, Long> overheatTicks = new HashMap<>();
 
     FlyModule() {
         GNModules.registerMapping(this.getId(), this);
@@ -72,8 +75,10 @@ public class FlyModule implements GNModule {
 
     @Override
     public void tick(GNContext ctx) {
-        if (overheatTicks > 0) {
-            overheatTicks--;
+        UUID playerId = ctx.getPlayer().getUniqueId();
+        long playerOverheatTicks = overheatTicks.getOrDefault(playerId, 0L);
+        if (playerOverheatTicks > 0) {
+            overheatTicks.put(playerId, playerOverheatTicks - 1);
             return;
         }
 
@@ -89,7 +94,7 @@ public class FlyModule implements GNModule {
                     }
                 } else {
                     this.onParticlesEmpty(ctx);
-                    this.overheatTicks = 20 * 5; // 5 seconds
+                    this.overheatTicks.put(playerId, 20L * 5); // 5 seconds
                 }
             } else {
                 if (isParticlesAvailable(ctx, USE_PARTICLE_IN_IDLE)) {
