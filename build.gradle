@@ -9,7 +9,7 @@ plugins {
     id 'application'
     id 'maven-publish'
     id 'io.papermc.paperweight.userdev' version '2.0.0-beta.21' // Enable Development of using Mojang Mapping.
-    id 'xyz.jpenilla.run-paper' version '2.3.0' // Run Mojang Mapped or Spigot Mapped Server
+    id 'xyz.jpenilla.run-paper' version '+' // Run Mojang Mapped or Spigot Mapped Server
     id 'com.gradleup.shadow' version '9.4.1' // fatJar
     id "com.diffplug.spotless" version "8.4.0" // Add License Header to source code headers.
     id "de.undercouch.download" version "+" // File Downloader
@@ -129,17 +129,6 @@ jar {
 
 shadowJar {
     archiveFileName = archiveBaseName.get() + "." + archiveExtension.get()
-}
-
-runMojangMappedServer {
-    runDirectory(project.file("testServer"))
-    systemProperty "net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false"
-    systemProperty "Paper.ignoreWorldDataVersion", "true"
-    systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
-    systemProperty "file.encoding", System.getProperty("file.encoding", "UTF-8")
-    systemProperty "sun.stdout.encoding", System.getProperty("sun.stdout.encoding", "UTF-8")
-    systemProperty "sun.stderr.encoding", System.getProperty("sun.stderr.encoding", "UTF-8")
-    args("-P pluginsMapped")
 }
 
 runServer {
