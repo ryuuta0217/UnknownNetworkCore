@@ -213,6 +213,7 @@ homes:
   test: {}
   helloworld: {}
   testw: {}
+use-jis-kana-convert: false
 registries:
   unknown-network:sidebar/channel_chat_active_channel:
     enabled: 'true'
