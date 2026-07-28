@@ -58,7 +58,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("26.1.1.build.+")
+    paperweight.paperDevBundle("26.2.build.+")
     compileOnly fileTree(dir: "libs", include: "*.jar")
     compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '7.0.16', {
         exclude group: 'com.google.code.gson', module: 'gson'
