@@ -54,7 +54,7 @@ import net.unknown.core.packet.event.PacketSendingEvent;
 import net.unknown.core.packet.listener.OutgoingPacketListener;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.ReflectionUtil;
-import net.unknown.launchwrapper.mixininterfaces.IMixinCriterionTrigger;
+import net.unknown.launchwrapper.mixininterfaces.IMixinPlayerAdvancements;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -504,6 +504,15 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param player ServerPlayer
      */
     public static void registerListeners(ServerPlayer player) {
+        if (((Object) player.getAdvancements()) instanceof IMixinPlayerAdvancements mixin) {
+            mixin.setAwardHandler((playerAdvancements, holder, criterion) -> {
+                if (ADVANCEMENTS.containsKey(holder.id())) {
+                    grantProgress(player, holder, criterion);
+                    return true;
+                }
+                return null;
+            });
+        }
         ADVANCEMENTS.forEach((id, adv) -> registerListener(player, adv));
     }
 
@@ -563,6 +572,15 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      */
     @SuppressWarnings("unchecked")
     private static <T extends CriterionTriggerInstance> void registerListener(ServerPlayer player, AdvancementHolder advancement, String criterionKey, Criterion<T> criterion) {
+        if (((Object) player.getAdvancements()) instanceof IMixinPlayerAdvancements mixin && mixin.getAwardHandler() == null) {
+            mixin.setAwardHandler((playerAdvancements, holder, crit) -> {
+                if (ADVANCEMENTS.containsKey(holder.id())) {
+                    grantProgress(player, holder, crit);
+                    return true;
+                }
+                return null;
+            });
+        }
         unregisterListener(player, advancement, criterion, criterionKey);
         PlayerAdvancements.TriggerInstanceKey key = new PlayerAdvancements.TriggerInstanceKey(advancement, criterionKey);
         java.util.Map<CriterionTrigger<?>, java.util.Map<PlayerAdvancements.TriggerInstanceKey, ?>> activeTriggers = (java.util.Map) getActiveTriggers(player.getAdvancements());
