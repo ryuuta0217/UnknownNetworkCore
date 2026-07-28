@@ -84,7 +84,7 @@ public class UnknownNetworkAnarchyHardcore {
             public void onSendingPacket(PacketSendingEvent<ClientboundLoginPacket> event) {
                 if (event.getPacket().hardcore()) return;
                 ClientboundLoginPacket original = event.getPacket();
-                ClientboundLoginPacket clone = new ClientboundLoginPacket(original.playerId(), true, original.levels(), original.maxPlayers(), original.chunkRadius(), original.simulationDistance(), original.reducedDebugInfo(), original.showDeathScreen(), original.doLimitedCrafting(), original.commonPlayerSpawnInfo(), original.enforcesSecureChat());
+                ClientboundLoginPacket clone = new ClientboundLoginPacket(original.playerId(), true, original.levels(), original.maxPlayers(), original.chunkRadius(), original.simulationDistance(), original.reducedDebugInfo(), original.showDeathScreen(), original.doLimitedCrafting(), original.commonPlayerSpawnInfo(), original.onlineMode(), original.enforcesSecureChat());
                 event.setPacket(clone);
             }
         });

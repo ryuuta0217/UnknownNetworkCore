@@ -37,6 +37,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.util.MessageUtil;
 import net.unknown.core.util.MinecraftAdapter;
@@ -125,7 +126,7 @@ public class ChestLink implements Listener {
         if (!(sourceBlockEntity instanceof IMixinChestBlockEntity sourceChestBlockEntity)) return; // BlockEntity is not a chest or not bootstrapped
         if (sourceChestBlockEntity.getChestTransportMode() != LinkChestMode.SOURCE) return; // Specified chest is not a source chest
 
-        Location linkSourceBukkit = MinecraftAdapter.location(linkSource.serverLevel(), linkSource.blockPos().getCenter(), Vec2.ZERO);
+        Location linkSourceBukkit = MinecraftAdapter.location(linkSource.serverLevel(), Vec3.atCenterOf(linkSource.blockPos()), Vec2.ZERO);
         if (!linkSourceBukkit.isChunkLoaded()) linkSourceBukkit.getWorld().loadChunk(linkSourceBukkit.getChunk()); // Some plugins may not work unless the chunk is loaded
 
         PlayerInteractEvent newEvent = new PlayerInteractEvent(event.getPlayer(), Action.RIGHT_CLICK_BLOCK, event.getItem(), linkSourceBukkit.getBlock(), event.getBlockFace());
@@ -225,7 +226,7 @@ public class ChestLink implements Listener {
             BlockEntity sourceBlockEntity = chestBlockEntity.getLinkSource().getBlockEntity(true, 3);
             if (sourceBlockEntity instanceof IMixinChestBlockEntity sourceChestBlockEntity) {
                 if (sourceChestBlockEntity.getChestTransportMode() == LinkChestMode.SOURCE) {
-                    Location sourcePos = MinecraftAdapter.location(chestBlockEntity.getLinkSource().serverLevel(), chestBlockEntity.getLinkSource().blockPos().getCenter(), Vec2.ZERO);
+                    Location sourcePos = MinecraftAdapter.location(chestBlockEntity.getLinkSource().serverLevel(), Vec3.atCenterOf(chestBlockEntity.getLinkSource().blockPos()), Vec2.ZERO);
                     NewMessageUtil.sendMessage(player, Component.text("このチェストは " + getLocationStrForDisplay(sourcePos) + " のクライアントとして設定されています"));
                 } else {
                     NewMessageUtil.sendMessage(player, Component.text("このチェストはクライアントとして設定されていますが、宛先のチェストはクライアントでした"));

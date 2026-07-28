@@ -83,6 +83,16 @@ public class PlayerDataUtil {
 
     @Nullable
     public static CompoundTag getData(OfflinePlayer offlinePlayer) {
-        return offlinePlayer.hasPlayedBefore() ? DedicatedServer.getServer().playerDataStorage.load(new NameAndId(offlinePlayer.getUniqueId(), offlinePlayer.getName())).orElse(null) : null;
+        return offlinePlayer.hasPlayedBefore() ? getPlayerDataStorage().load(new NameAndId(offlinePlayer.getUniqueId(), offlinePlayer.getName())).orElse(null) : null;
+    }
+
+    private static net.minecraft.world.level.storage.PlayerDataStorage getPlayerDataStorage() {
+        try {
+            java.lang.reflect.Field field = net.minecraft.server.MinecraftServer.class.getDeclaredField("playerDataStorage");
+            field.setAccessible(true);
+            return (net.minecraft.world.level.storage.PlayerDataStorage) field.get(DedicatedServer.getServer());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to access playerDataStorage", e);
+        }
     }
 }

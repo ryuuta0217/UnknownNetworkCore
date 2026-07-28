@@ -93,7 +93,7 @@ public class OtherPlayerEnderChest extends PlayerEnderChestContainer implements 
         this.online = minecraft.isRealPlayer;
         this.player = minecraft;
 
-        NonNullList<ItemStack> items = this.player.getEnderChestInventory().items;
+        NonNullList<ItemStack> items = this.player.getEnderChestInventory().getItems();
 
 //        try {
 //            ObfuscationUtil.Class obfuscatedSimpleContainerClass = ObfuscationUtil.getClassByName(SimpleContainer.class.getName());

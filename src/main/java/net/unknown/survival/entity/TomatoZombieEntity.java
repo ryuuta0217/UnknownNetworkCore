@@ -34,6 +34,7 @@ package net.unknown.survival.entity;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.*;
@@ -63,7 +64,7 @@ public class TomatoZombieEntity extends Zombie {
     private final FireBallAttackGoal fireBallGoal = new FireBallAttackGoal(this);
 
     public TomatoZombieEntity(Level world) {
-        super(EntityType.ZOMBIE, world);
+        super(EntityTypes.ZOMBIE, world);
     }
 
     public static void spawn(Location loc) {
@@ -135,8 +136,8 @@ public class TomatoZombieEntity extends Zombie {
             if (this.mob.getTarget() != null) {
                 double distance = this.mob.distanceToSqr(this.mob.getTarget());
                 if (distance >= 4) {
-                    this.mob.goalSelector.removeGoal(this);
-                    this.mob.goalSelector.addGoal(1, ((TomatoZombieEntity) this.mob).fireBallGoal);
+                    this.mob.getGoalSelector().removeGoal(this);
+                    this.mob.getGoalSelector().addGoal(1, ((TomatoZombieEntity) this.mob).fireBallGoal);
                 }
             }
             super.tick();

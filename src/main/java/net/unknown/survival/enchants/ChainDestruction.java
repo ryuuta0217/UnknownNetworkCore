@@ -38,6 +38,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.BlockItemTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
@@ -66,16 +67,16 @@ public class ChainDestruction implements Listener {
     }};
 
     public static final Set<TagKey<Block>> CHAIN_DESTRUCT_TARGET_TAGS = new HashSet<>() {{
-        add(BlockTags.COAL_ORES);
-        add(BlockTags.COPPER_ORES);
-        add(BlockTags.IRON_ORES);
-        add(BlockTags.REDSTONE_ORES);
-        add(BlockTags.LAPIS_ORES);
-        add(BlockTags.GOLD_ORES);
-        add(BlockTags.DIAMOND_ORES);
-        add(BlockTags.EMERALD_ORES);
+        add(BlockItemTags.COAL_ORES.block());
+        add(BlockItemTags.COPPER_ORES.block());
+        add(BlockItemTags.IRON_ORES.block());
+        add(BlockItemTags.REDSTONE_ORES.block());
+        add(BlockItemTags.LAPIS_ORES.block());
+        add(BlockItemTags.GOLD_ORES.block());
+        add(BlockItemTags.DIAMOND_ORES.block());
+        add(BlockItemTags.EMERALD_ORES.block());
 
-        add(BlockTags.LOGS);
+        add(BlockItemTags.LOGS.block());
         add(BlockTags.OVERWORLD_NATURAL_LOGS);
     }};
 

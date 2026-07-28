@@ -65,7 +65,7 @@ public class CustomZombieEntity extends Zombie implements RangedAttackMob {
     private final ZombieAttackGoal meleeGoal = new ZombieAttackGoal(this, 1.0, false);
 
     public CustomZombieEntity(Level world) {
-        super(EntityType.ZOMBIE, world);
+        super(EntityTypes.ZOMBIE, world);
         this.reassessWeaponGoal();
     }
 
