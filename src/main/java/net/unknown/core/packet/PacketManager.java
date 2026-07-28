@@ -160,7 +160,7 @@ public class PacketManager implements Listener {
 
                     @Override
                     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-                        LOGGER.error("Exception in packet handler for player {}", player.getName(), cause);
+                        // LOGGER.error("Exception in packet handler for player {}", player.getName(), cause);
                         super.exceptionCaught(ctx, cause);
                     }
 
