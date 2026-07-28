@@ -80,7 +80,7 @@ dependencies {
     implementation group: 'com.github.luben', name: 'zstd-jni', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
-    compileOnly group: 'com.velocitypowered', name: 'velocity-api', version: '3.+'
+    compileOnly group: 'com.velocitypowered', name: 'velocity-api', version: '4.+'
     annotationProcessor group: 'com.velocitypowered', name: 'velocity-api', version: '+'
     implementation group: 'io.ipinfo', name: 'ipinfo-api', version: '+'
     compileOnly group: "com.viaversion", name: "viaversion-api", version: "+"
