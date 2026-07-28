@@ -53,7 +53,7 @@ public class DataProviderServer {
     public static void start(int port) {
         if (server != null) return;
         try {
-            server = HttpServer.create(new InetSocketAddress("127.0.0.1", port), 0);
+            server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
             server.createContext("/providers", exchange -> {
                 if (!checkAuth(exchange)) return;
