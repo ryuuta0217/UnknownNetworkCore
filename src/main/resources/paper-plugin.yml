@@ -124,6 +124,8 @@ permissions:
       unknown.survival.command.arw: true
       unknown.survival.open_gui: true
       unknown.survival.feature.edit_flags: true
+      unknown.survival.feature.shulker_box_redirector: true
+      unknown.survival.feature.shulker_box_redirector.add_marker_via_crafting: true
   unknown.survival.admin:
     default: op
     children:

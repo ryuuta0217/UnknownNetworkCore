@@ -29,55 +29,29 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.core.util;
+package net.unknown.survival.feature.redirector;
 
-import org.bukkit.persistence.PersistentDataAdapterContext;
-import org.bukkit.persistence.PersistentDataType;
-import org.jetbrains.annotations.NotNull;
+import net.kyori.adventure.text.Component;
+import net.unknown.core.define.DefinedTextColor;
 
-public interface CustomPersistentDataTypes {
-    PersistentDataType<String[], String[]> STRING_ARRAY = new PrimitivePersistentDataType<>(String[].class);
+public enum ShulkerBoxSearchOrder {
+    FIRST_TO_LAST(Component.text("インベントリを").append(Component.text("先頭の枠から順番", DefinedTextColor.GREEN)).append(Component.text("に検索します")), Component.text("シュルカーボックスの検索順序を ").append(Component.text("先頭の枠から順番", DefinedTextColor.GREEN)).append(Component.text(" に設定しました"))),
+    LAST_TO_FIRST(Component.text("インベントリを").append(Component.text("最後の枠から逆順", DefinedTextColor.YELLOW)).append(Component.text("に検索します")), Component.text("シュルカーボックスの検索順序を ").append(Component.text("最後の枠から逆順", DefinedTextColor.YELLOW)).append(Component.text(" に設定しました"))),
+    RANDOM(Component.text("インベントリを").append(Component.text("ランダムな順番", DefinedTextColor.AQUA)).append(Component.text("で検索します")), Component.text("シュルカーボックスの検索順序を ").append(Component.text("ランダムな順番", DefinedTextColor.AQUA)).append(Component.text(" に設定しました")));
 
-    /**
-     * A default implementation that simply exists to pass on the retrieved or
-     * inserted value to the next layer.
-     * <p>
-     * This implementation does not add any kind of logic, but is used to
-     * provide default implementations for the primitive types.
-     *
-     * @param <P> the generic type of the primitive objects
-     */
-    // Obtained from bukkit org.bukkit.persistence.PersistentDataType 2026/03/25, version = 1.21.11
-    class PrimitivePersistentDataType<P> implements PersistentDataType<P, P> {
+    private final Component description;
+    private final Component modeChangedMessage;
 
-        private final Class<P> primitiveType;
+    ShulkerBoxSearchOrder(Component description, Component modeChangedMessage) {
+        this.description = description;
+        this.modeChangedMessage = modeChangedMessage;
+    }
 
-        PrimitivePersistentDataType(@NotNull Class<P> primitiveType) {
-            this.primitiveType = primitiveType;
-        }
+    public Component getDescription() {
+        return this.description;
+    }
 
-        @NotNull
-        @Override
-        public Class<P> getPrimitiveType() {
-            return primitiveType;
-        }
-
-        @NotNull
-        @Override
-        public Class<P> getComplexType() {
-            return primitiveType;
-        }
-
-        @NotNull
-        @Override
-        public P toPrimitive(@NotNull P complex, @NotNull PersistentDataAdapterContext context) {
-            return complex;
-        }
-
-        @NotNull
-        @Override
-        public P fromPrimitive(@NotNull P primitive, @NotNull PersistentDataAdapterContext context) {
-            return primitive;
-        }
+    public Component getModeChangedMessage() {
+        return this.modeChangedMessage;
     }
 }

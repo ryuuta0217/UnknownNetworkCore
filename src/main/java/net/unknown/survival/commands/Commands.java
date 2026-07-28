@@ -76,7 +76,7 @@ public class Commands {
 
         VoteCommand.register(dispatcher, buildContext);
 
-        ShulkerBoxCommand.register(dispatcher);
+        ShulkerBoxCommand.register(dispatcher, buildContext);
 
         AutomatedRegenWorldCommand.register(dispatcher);
 

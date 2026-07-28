@@ -45,6 +45,7 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
+import net.unknown.survival.feature.redirector.ShulkerBoxRedirector;
 import net.unknown.survival.feature.sidebar.Sidebar;
 import net.unknown.survival.feature.sidebar.modules.*;
 import net.unknown.survival.observers.AFKObserver;
@@ -148,6 +149,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new FastLeafDecay());
         ListenerManager.registerListener(new GSitListener());
         ListenerManager.registerListener(new BabyCreature());
+        ListenerManager.registerListener(new ShulkerBoxRedirector());
         ListenerManager.registerListener(new AFKListener());
         ListenerManager.registerListener(new FishingAutomation());
         SuppressRaids.registerListener();
