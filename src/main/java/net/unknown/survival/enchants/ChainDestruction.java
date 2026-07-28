@@ -81,7 +81,7 @@ public class ChainDestruction implements Listener {
 
     public static final Map<UUID, Set<BlockPos>> IGNORE_EVENT = new HashMap<>();
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         BlockPos breakBlockPos = MinecraftAdapter.blockPos(event.getBlock().getLocation());
 
