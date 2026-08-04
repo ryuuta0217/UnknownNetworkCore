@@ -39,6 +39,10 @@ dependencies:
       load: BEFORE
       required: false
       join-classpath: true
+    QuickShop-Hikari:
+      load: BEFORE
+      required: false
+      join-classpath: true
 softdepend: ["Jecon"]
 permissions:
   unknown.core.default:
