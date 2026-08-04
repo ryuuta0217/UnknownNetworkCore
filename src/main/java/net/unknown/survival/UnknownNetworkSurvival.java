@@ -45,6 +45,7 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
+import net.unknown.survival.feature.qsaddon_shulker.QSAddon_Shulker;
 import net.unknown.survival.feature.redirector.ShulkerBoxRedirector;
 import net.unknown.survival.feature.redirector.trash.TrashRedirector;
 import net.unknown.survival.feature.sidebar.Sidebar;
@@ -123,6 +124,8 @@ public class UnknownNetworkSurvival {
 
         AFKObserver.initialize();
         PerformanceObserver.initialize();
+
+        QSAddon_Shulker.inject();
 
         BossBarManager.getInstance().setVisibilityHandler(new SurvivalVisibilityHandler());
 
