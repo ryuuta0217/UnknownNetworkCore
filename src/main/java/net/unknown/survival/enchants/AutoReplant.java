@@ -50,10 +50,13 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -73,11 +76,25 @@ public class AutoReplant implements Listener {
         ServerPlayer player = MinecraftAdapter.player(event.getOriginal().getPlayer());
         if (player == null) return;
 
-        org.bukkit.inventory.ItemStack selectedBukkitStack = event.getOriginal().getPlayer().getInventory().getItemInMainHand();
-        ItemStack selectedStack = MinecraftAdapter.ItemStack.itemStack(selectedBukkitStack);
+        org.bukkit.inventory.ItemStack selectedBukkitStack = null;
+
+        Map<EquipmentSlot, org.bukkit.inventory.ItemStack> items = Map.of(
+                EquipmentSlot.HEAD, event.getOriginal().getPlayer().getInventory().getHelmet(),
+                EquipmentSlot.CHEST, event.getOriginal().getPlayer().getInventory().getChestplate(),
+                EquipmentSlot.LEGS, event.getOriginal().getPlayer().getInventory().getLeggings(),
+                EquipmentSlot.FEET, event.getOriginal().getPlayer().getInventory().getBoots(),
+                EquipmentSlot.HAND, event.getOriginal().getPlayer().getInventory().getItemInMainHand()
+        );
+
+        for (Map.Entry<EquipmentSlot, org.bukkit.inventory.ItemStack> itemEntry : items.entrySet()) {
+            if (!CustomEnchantUtil.hasEnchantment(ENCHANTMENT_NAME, itemEntry.getValue())) continue;
+            selectedBukkitStack = itemEntry.getValue();
+            break;
+        }
+
+        if (selectedBukkitStack == null) return;
+
         boolean onlyMaxAge = isOnlyMaxAge(selectedBukkitStack);
-        if (!(selectedStack.getItem() instanceof HoeItem)) return;
-        if (!CustomEnchantUtil.hasEnchantment(ENCHANTMENT_NAME, selectedBukkitStack)) return;
         Block block = event.getOriginal().getBlock();
         if (!(block.getBlockData() instanceof Ageable ageable)) return;
 
@@ -123,7 +140,6 @@ public class AutoReplant implements Listener {
         org.bukkit.inventory.ItemStack selectedBukkitStack = event.getPlayer().getInventory().getItem(event.getPreviousSlot());
         ItemStack selectedStack = MinecraftAdapter.ItemStack.itemStack(selectedBukkitStack);
 
-        if (!(selectedStack.getItem() instanceof HoeItem hoe)) return;
         if (!CustomEnchantUtil.hasEnchantment(ENCHANTMENT_NAME, selectedBukkitStack)) return;
         ItemMeta meta = selectedBukkitStack.getItemMeta();
         if (!meta.hasLore()) return;
