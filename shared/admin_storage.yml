@@ -4,21 +4,21 @@ test:
   created-at: 1783994322898
   priority: 50
   contents:
-    '0': '{"id":"minecraft:fishing_rod","count":1,"components":{"minecraft:damage":8},"DataVersion":4788}'
-    '1': '{"id":"minecraft:name_tag","count":2,"DataVersion":4788}'
-    '2': '{"id":"minecraft:bowl","count":2,"DataVersion":4788}'
-    '3': '{"id":"minecraft:salmon","count":7,"DataVersion":4788}'
-    '4': '{"id":"minecraft:cod","count":21,"DataVersion":4788}'
+    '0': '{"id":"minecraft:fishing_rod","count":1,"components":{"minecraft:damage":8},"DataVersion":4903}'
+    '1': '{"id":"minecraft:name_tag","count":2,"DataVersion":4903}'
+    '2': '{"id":"minecraft:bowl","count":2,"DataVersion":4903}'
+    '3': '{"id":"minecraft:salmon","count":7,"DataVersion":4903}'
+    '4': '{"id":"minecraft:cod","count":21,"DataVersion":4903}'
 example:
   identifier: example
   display-name: '{"color":"dark_red","text":"サンプル倉庫"}'
   created-at: 1783994324929
   priority: 1
   contents:
-    '0': '{"id":"minecraft:tropical_fish","count":1,"DataVersion":4788}'
-    '1': '{"id":"minecraft:lily_pad","count":3,"DataVersion":4788}'
-    '2': '{"id":"minecraft:wooden_axe","count":1,"DataVersion":4788}'
-    '3': '{"id":"minecraft:pufferfish","count":5,"DataVersion":4788}'
+    '0': '{"id":"minecraft:tropical_fish","count":1,"DataVersion":4903}'
+    '1': '{"id":"minecraft:lily_pad","count":3,"DataVersion":4903}'
+    '2': '{"id":"minecraft:wooden_axe","count":1,"DataVersion":4903}'
+    '3': '{"id":"minecraft:pufferfish","count":5,"DataVersion":4903}'
 example2:
   identifier: example2
   display-name: '{"color":"dark_purple","text":"サンプル倉庫"}'

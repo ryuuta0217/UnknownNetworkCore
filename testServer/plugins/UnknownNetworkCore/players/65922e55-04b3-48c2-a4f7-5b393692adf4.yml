@@ -7,6 +7,7 @@ home-default-group: default
 reply-target: 65922e55-04b3-48c2-a4f7-5b393692adf4
 use-minimessage: true
 show-head-prefix: false
+use-jis-kana-convert: false
 homeGroupItems:
   default: WHITE_WOOL
   test: WHITE_WOOL
@@ -213,9 +214,8 @@ homes:
   test: {}
   helloworld: {}
   testw: {}
-use-jis-kana-convert: false
 registries:
-  unknown-network:sidebar/channel_chat_active_channel:
+  unknown-network:sidebar/spacer_6:
     enabled: 'true'
   unknown-network:sidebar:
     enabled: 'true'
@@ -223,7 +223,11 @@ registries:
     use_two_lines: 'true'
     label: ゲーム内時間
     use_number_format: 'false'
+  unknown-network:sidebar/spacer_5:
+    enabled: 'false'
   unknown-network:sidebar/tps:
+    enabled: 'true'
+  unknown-network:sidebar/channel_chat_active_channel:
     enabled: 'true'
   unknown-network:sidebar/spacer_2:
     priority: '6'
