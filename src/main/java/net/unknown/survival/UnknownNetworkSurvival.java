@@ -45,6 +45,8 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
+import net.unknown.survival.feature.entityeditor.EntityEditorListener;
+import net.unknown.survival.feature.entityeditor.EntityEditorRegistry;
 import net.unknown.survival.feature.qsaddon_shulker.QSAddon_Shulker;
 import net.unknown.survival.feature.redirector.ShulkerBoxRedirector;
 import net.unknown.survival.feature.redirector.trash.TrashRedirector;
@@ -120,7 +122,8 @@ public class UnknownNetworkSurvival {
         GNArms.initialize();
         BlueMapBar.initialize();
         UNCUpdateCheckTask.start();
-        DebugStickEntityEditor.Listener.register();
+        EntityEditorListener.register();
+        EntityEditorRegistry.init();
 
         AFKObserver.initialize();
         PerformanceObserver.initialize();

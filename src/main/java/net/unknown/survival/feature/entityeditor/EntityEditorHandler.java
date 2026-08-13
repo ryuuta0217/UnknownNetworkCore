@@ -33,7 +33,8 @@ package net.unknown.survival.feature.entityeditor;
 
 import org.bukkit.entity.Entity;
 
-public interface EntityEditorHandler<T extends Entity> {
-    void placeElements(EntityEditor gui, T entity);
-    void handleElements(EntityEditor gui, T entity);
+import java.util.List;
+
+public interface EntityEditorHandler<T> {
+    List<EntityEditor.Element<T>> getElements(T entity);
 }

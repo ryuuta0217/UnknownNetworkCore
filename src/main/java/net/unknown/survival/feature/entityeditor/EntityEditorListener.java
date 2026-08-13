@@ -31,50 +31,34 @@
 
 package net.unknown.survival.feature.entityeditor;
 
-import net.unknown.survival.feature.entityeditor.handlers.*;
-import org.bukkit.entity.*;
-import org.bukkit.material.Colorable;
+import net.unknown.core.managers.ListenerManager;
+import net.unknown.survival.enums.Permissions;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
+import org.bukkit.inventory.EquipmentSlot;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+public class EntityEditorListener implements Listener {
+    public static final EntityEditorListener INSTANCE = new EntityEditorListener();
 
-public class EntityEditorRegistry {
-    private static final Map<Class<?>, EntityEditorHandler<?>> HANDLERS = new LinkedHashMap<>();
-
-    public static void init() {
-        registerHandler(Entity.class, new EntityHandler());
-        registerHandler(LivingEntity.class, new LivingEntityHandler());
-        registerHandler(Mob.class, new MobHandler());
-        registerHandler(Ageable.class, new AgeableHandler());
-        registerHandler(Breedable.class, new BreedableHandler());
-        registerHandler(Steerable.class, new SteerableHandler());
-        registerHandler(Colorable.class, new ColorableHandler());
-
-        registerHandler(Sheep.class, new SheepHandler());
+    public static void register() {
+        ListenerManager.registerListener(INSTANCE);
     }
 
-    public static boolean hasHandler(Class<?> entityClass) {
-        return HANDLERS.containsKey(entityClass);
+    public static void unregister() {
+        ListenerManager.unregisterListener(INSTANCE);
     }
 
-    public static <T> void registerHandler(Class<T> entityClass, EntityEditorHandler<T> handler) {
-        HANDLERS.put(entityClass, handler);
-    }
+    @EventHandler
+    public void onInteractEntity(PlayerInteractEntityEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) return;
+        if (event.getPlayer().getInventory().getItemInMainHand().getType() != Material.DEBUG_STICK) return;
+        if (!event.getPlayer().hasPermission(Permissions.ENTITY_EDITOR.getPermissionNode())) return;
 
-    public static <T> void unregisterHandler(Class<T> entityClass) {
-        HANDLERS.remove(entityClass);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> List<EntityEditorHandler<? super T>> getHandlers(Class<T> entityClass) {
-        List<EntityEditorHandler<? super T>> result = new ArrayList<>();
-        HANDLERS.forEach((targetClass, handler) -> {
-            if (targetClass.isAssignableFrom(entityClass)) {
-                result.add((EntityEditorHandler<? super T>) handler);
-            }
-        });
-        return result;
+        Player player = event.getPlayer();
+        new EntityEditor(player, event.getRightClicked()).open(player);
+        event.setCancelled(true);
     }
 }

@@ -29,52 +29,28 @@
  *     arising in any way out of the use of this source code, event if advised of the possibility of such damage.
  */
 
-package net.unknown.survival.feature.entityeditor;
+package net.unknown.survival.feature.entityeditor.handlers;
 
-import net.unknown.survival.feature.entityeditor.handlers.*;
-import org.bukkit.entity.*;
-import org.bukkit.material.Colorable;
+import net.kyori.adventure.text.Component;
+import net.unknown.core.builder.ItemStackBuilder;
+import net.unknown.core.define.DefinedTextColor;
+import net.unknown.survival.feature.entityeditor.EntityEditor;
+import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
+import org.bukkit.Material;
+import org.bukkit.entity.Steerable;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
-public class EntityEditorRegistry {
-    private static final Map<Class<?>, EntityEditorHandler<?>> HANDLERS = new LinkedHashMap<>();
+public class SteerableHandler implements EntityEditorHandler<Steerable> {
 
-    public static void init() {
-        registerHandler(Entity.class, new EntityHandler());
-        registerHandler(LivingEntity.class, new LivingEntityHandler());
-        registerHandler(Mob.class, new MobHandler());
-        registerHandler(Ageable.class, new AgeableHandler());
-        registerHandler(Breedable.class, new BreedableHandler());
-        registerHandler(Steerable.class, new SteerableHandler());
-        registerHandler(Colorable.class, new ColorableHandler());
-
-        registerHandler(Sheep.class, new SheepHandler());
-    }
-
-    public static boolean hasHandler(Class<?> entityClass) {
-        return HANDLERS.containsKey(entityClass);
-    }
-
-    public static <T> void registerHandler(Class<T> entityClass, EntityEditorHandler<T> handler) {
-        HANDLERS.put(entityClass, handler);
-    }
-
-    public static <T> void unregisterHandler(Class<T> entityClass) {
-        HANDLERS.remove(entityClass);
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> List<EntityEditorHandler<? super T>> getHandlers(Class<T> entityClass) {
-        List<EntityEditorHandler<? super T>> result = new ArrayList<>();
-        HANDLERS.forEach((targetClass, handler) -> {
-            if (targetClass.isAssignableFrom(entityClass)) {
-                result.add((EntityEditorHandler<? super T>) handler);
-            }
-        });
-        return result;
+    @Override
+    public List<EntityEditor.Element<Steerable>> getElements(Steerable entity) {
+        return List.of(
+                EntityEditor.Element.of(
+                        targetEntity -> new ItemStackBuilder(Material.SADDLE)
+                                .displayName(targetEntity.hasSaddle() ? Component.text("サドル: 装備中", DefinedTextColor.GREEN) : Component.text("サドル: 未装備", DefinedTextColor.RED))
+                                .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW)).build(),
+                        (targetEntity, event) -> targetEntity.setSaddle(!targetEntity.hasSaddle()))
+        );
     }
 }
