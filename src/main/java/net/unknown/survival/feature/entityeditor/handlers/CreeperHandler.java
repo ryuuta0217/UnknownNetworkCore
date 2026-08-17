@@ -39,74 +39,50 @@ import net.unknown.core.gui.SignGui;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Creeper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LivingEntityHandler implements EntityEditorHandler<LivingEntity> {
+public class CreeperHandler implements EntityEditorHandler<Creeper> {
 
     @Override
-    public List<EntityEditor.Element<LivingEntity>> getElements(LivingEntity entity) {
-        List<EntityEditor.Element<LivingEntity>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<Creeper>> getElements(Creeper entity) {
+        List<EntityEditor.Element<Creeper>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.BRAIN_CORAL)
-                        .displayName(Component.text("AI: " + (targetEntity.hasAI() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.hasAI() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                targetEntity -> new ItemStackBuilder(Material.CREEPER_HEAD)
+                        .displayName(Component.text("Powered: " + (targetEntity.isPowered() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isPowered() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
                         .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setAI(!targetEntity.hasAI())
+                (editor, targetEntity, event) -> targetEntity.setPowered(!targetEntity.isPowered())
         ));
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SLIME_BALL)
-                        .displayName(Component.text("当たり判定: " + (targetEntity.isCollidable() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isCollidable() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setCollidable(!targetEntity.isCollidable())
-        ));
-
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.ELYTRA)
-                        .displayName(Component.text("Gliding: " + (targetEntity.isGliding() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isGliding() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setGliding(!targetEntity.isGliding())
-        ));
-
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.WATER_BUCKET)
-                        .displayName(Component.text("Swimming: " + (targetEntity.isSwimming() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSwimming() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setSwimming(!targetEntity.isSwimming())
-        ));
-
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.GLASS_BOTTLE)
-                        .displayName(Component.text("残空気量: " + targetEntity.getRemainingAir(), DefinedTextColor.GREEN))
+                targetEntity -> new ItemStackBuilder(Material.GUNPOWDER)
+                        .displayName(Component.text("ExplosionRadius: " + targetEntity.getExplosionRadius(), DefinedTextColor.GREEN))
                         .lore(
-                                Component.text("左クリック: -10 | 右クリック: +10", DefinedTextColor.YELLOW),
+                                Component.text("左クリック: -1 | 右クリック: +1", DefinedTextColor.YELLOW),
                                 Component.text("中クリック: 直接入力", DefinedTextColor.YELLOW)
                         )
                         .build(),
                 (editor, targetEntity, event) -> {
                     if (event.getClick().isLeftClick()) {
-                        targetEntity.setRemainingAir(Math.max(0, targetEntity.getRemainingAir() - 10));
+                        targetEntity.setExplosionRadius(Math.max(0, targetEntity.getExplosionRadius() - 1));
                     } else if (event.getClick().isRightClick()) {
-                        targetEntity.setRemainingAir(Math.min(targetEntity.getMaximumAir(), targetEntity.getRemainingAir() + 10));
+                        targetEntity.setExplosionRadius(Math.min(100, targetEntity.getExplosionRadius() + 1));
                     } else if (event.getClick() == ClickType.MIDDLE) {
                         Player player = (Player) event.getWhoClicked();
                         editor.onceDeferUnregisterOnClose();
                         new SignGui()
                                 .withTarget(player)
-                                .withLines(Component.empty(), Component.text("^^^"), Component.text("空気量を入力"), Component.empty())
+                                .withLines(Component.empty(), Component.text("^^^"), Component.text("爆発半径を入力"), Component.empty())
                                 .onComplete(lines -> {
                                     try {
                                         int val = Integer.parseInt(((TextComponent) lines.get(0)).content());
-                                        targetEntity.setRemainingAir(Math.max(0, Math.min(targetEntity.getMaximumAir(), val)));
+                                        targetEntity.setExplosionRadius(Math.max(0, val));
                                     } catch (Exception ignored) {
                                     }
                                     editor.open(player);
@@ -117,8 +93,8 @@ public class LivingEntityHandler implements EntityEditorHandler<LivingEntity> {
         ));
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.POTION)
-                        .displayName(Component.text("最大空気量: " + targetEntity.getMaximumAir(), DefinedTextColor.GREEN))
+                targetEntity -> new ItemStackBuilder(Material.STRING)
+                        .displayName(Component.text("MaxFuseTicks: " + targetEntity.getMaxFuseTicks() + "ﾃｨｯｸ", DefinedTextColor.GREEN))
                         .lore(
                                 Component.text("左クリック: -10 | 右クリック: +10", DefinedTextColor.YELLOW),
                                 Component.text("中クリック: 直接入力", DefinedTextColor.YELLOW)
@@ -126,19 +102,19 @@ public class LivingEntityHandler implements EntityEditorHandler<LivingEntity> {
                         .build(),
                 (editor, targetEntity, event) -> {
                     if (event.getClick().isLeftClick()) {
-                        targetEntity.setMaximumAir(Math.max(0, targetEntity.getMaximumAir() - 10));
+                        targetEntity.setMaxFuseTicks(Math.max(0, targetEntity.getMaxFuseTicks() - 10));
                     } else if (event.getClick().isRightClick()) {
-                        targetEntity.setMaximumAir(Math.min(1000000, targetEntity.getMaximumAir() + 10));
+                        targetEntity.setMaxFuseTicks(Math.min(10000, targetEntity.getMaxFuseTicks() + 10));
                     } else if (event.getClick() == ClickType.MIDDLE) {
                         Player player = (Player) event.getWhoClicked();
                         editor.onceDeferUnregisterOnClose();
                         new SignGui()
                                 .withTarget(player)
-                                .withLines(Component.empty(), Component.text("^^^"), Component.text("最大空気量を入力"), Component.empty())
+                                .withLines(Component.empty(), Component.text("^^^"), Component.text("起爆時間を入力"), Component.empty())
                                 .onComplete(lines -> {
                                     try {
                                         int val = Integer.parseInt(((TextComponent) lines.get(0)).content());
-                                        targetEntity.setMaximumAir(Math.max(0, val));
+                                        targetEntity.setMaxFuseTicks(Math.max(0, val));
                                     } catch (Exception ignored) {
                                     }
                                     editor.open(player);
@@ -146,6 +122,22 @@ public class LivingEntityHandler implements EntityEditorHandler<LivingEntity> {
                                 .open();
                     }
                 }
+        ));
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.FLINT_AND_STEEL)
+                        .displayName(Component.text("Ignite", DefinedTextColor.LIGHT_PURPLE))
+                        .lore(Component.text("クリックで起爆プロセスを開始", DefinedTextColor.YELLOW))
+                        .build(),
+                (editor, targetEntity, event) -> targetEntity.ignite()
+        ));
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.TNT)
+                        .displayName(Component.text("Explode", DefinedTextColor.LIGHT_PURPLE))
+                        .lore(Component.text("クリックで即座に爆発", DefinedTextColor.YELLOW))
+                        .build(),
+                (editor, targetEntity, event) -> targetEntity.explode()
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

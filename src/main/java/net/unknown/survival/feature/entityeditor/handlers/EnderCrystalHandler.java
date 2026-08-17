@@ -37,23 +37,23 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.EnderCrystal;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class EnderCrystalHandler implements EntityEditorHandler<EnderCrystal> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<EnderCrystal>> getElements(EnderCrystal entity) {
+        List<EntityEditor.Element<EnderCrystal>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                targetEntity -> new ItemStackBuilder(Material.END_CRYSTAL)
+                        .displayName(Component.text("ShowBottom: " + (targetEntity.isShowingBottom() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isShowingBottom() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
                         .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                (editor, targetEntity, event) -> targetEntity.setShowingBottom(!targetEntity.isShowingBottom())
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

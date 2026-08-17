@@ -37,23 +37,32 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.BlockDisplay;
+import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class BlockDisplayHandler implements EntityEditorHandler<BlockDisplay> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<BlockDisplay>> getElements(BlockDisplay entity) {
+        List<EntityEditor.Element<BlockDisplay>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                targetEntity -> new ItemStackBuilder(targetEntity.getBlock() != null ? targetEntity.getBlock().getMaterial() : Material.BARRIER)
+                        .displayName(Component.text("表示ブロックの変更", DefinedTextColor.GREEN))
+                        .lore(Component.text("マウスカーソルで掴んでいるブロックを適用します", DefinedTextColor.YELLOW))
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                (editor, targetEntity, event) -> {
+                    ItemStack cursor = event.getCursor();
+                    if (cursor != null && cursor.getType() != Material.AIR && cursor.getType() != Material.DEBUG_STICK) {
+                        Material mat = cursor.getType();
+                        if (mat.isBlock()) {
+                            targetEntity.setBlock(mat.createBlockData());
+                        }
+                    }
+                }
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

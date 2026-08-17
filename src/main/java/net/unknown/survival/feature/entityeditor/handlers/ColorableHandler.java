@@ -46,7 +46,7 @@ import java.util.List;
 
 public class ColorableHandler implements EntityEditorHandler<Colorable> {
 
-    private static Material woolMaterial(DyeColor c) {
+    public static Material woolMaterial(DyeColor c) {
         return switch (c) {
             case WHITE -> Material.WHITE_WOOL;
             case ORANGE -> Material.ORANGE_WOOL;
@@ -67,11 +67,32 @@ public class ColorableHandler implements EntityEditorHandler<Colorable> {
         };
     }
 
-    private static Component colorName(DyeColor c) {
-        return Component.translatable("color.minecraft." + c.name().toLowerCase(), woolTextColor(c));
+    public static Material dyeMaterial(DyeColor c) {
+        return switch (c) {
+            case WHITE -> Material.WHITE_DYE;
+            case ORANGE -> Material.ORANGE_DYE;
+            case MAGENTA -> Material.MAGENTA_DYE;
+            case LIGHT_BLUE -> Material.LIGHT_BLUE_DYE;
+            case YELLOW -> Material.YELLOW_DYE;
+            case LIME -> Material.LIME_DYE;
+            case PINK -> Material.PINK_DYE;
+            case GRAY -> Material.GRAY_DYE;
+            case LIGHT_GRAY -> Material.LIGHT_GRAY_DYE;
+            case CYAN -> Material.CYAN_DYE;
+            case PURPLE -> Material.PURPLE_DYE;
+            case BLUE -> Material.BLUE_DYE;
+            case BROWN -> Material.BROWN_DYE;
+            case GREEN -> Material.GREEN_DYE;
+            case RED -> Material.RED_DYE;
+            case BLACK -> Material.BLACK_DYE;
+        };
     }
 
-    private static TextColor woolTextColor(DyeColor c) {
+    public static Component colorName(DyeColor c) {
+        return Component.translatable("color.minecraft." + c.name().toLowerCase(), textColor(c));
+    }
+
+    public static TextColor textColor(DyeColor c) {
         return TextColor.color(c.getColor().asRGB());
     }
 
@@ -91,10 +112,10 @@ public class ColorableHandler implements EntityEditorHandler<Colorable> {
                             colorLore.add(Component.text("左クリック: 前の色 | 右クリック: 次の色", DefinedTextColor.YELLOW));
 
                             return new ItemStackBuilder(woolMaterial(current))
-                                    .displayName(Component.text("色:", woolTextColor(current)).appendSpace().append(colorName(current)))
+                                    .displayName(Component.text("Color:", textColor(current)).appendSpace().append(colorName(current)))
                                     .lore(colorLore.toArray(Component[]::new)).build();
                         },
-                        (targetEntity, event) -> {
+                        (editor, targetEntity, event) -> {
                             DyeColor c = targetEntity.getColor() != null ? targetEntity.getColor() : DyeColor.WHITE;
                             if (event.isRightClick()) {
                                 targetEntity.setColor(all[(c.ordinal() + 1) % all.length]);

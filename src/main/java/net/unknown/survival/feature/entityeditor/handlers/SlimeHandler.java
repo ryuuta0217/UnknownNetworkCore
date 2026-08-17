@@ -32,28 +32,56 @@
 package net.unknown.survival.feature.entityeditor.handlers;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.gui.SignGui;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Slime;
+import org.bukkit.event.inventory.ClickType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class SlimeHandler implements EntityEditorHandler<Slime> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<Slime>> getElements(Slime entity) {
+        List<EntityEditor.Element<Slime>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                targetEntity -> new ItemStackBuilder(Material.SLIME_BALL)
+                        .displayName(Component.text("Size: " + targetEntity.getSize(), DefinedTextColor.GREEN))
+                        .lore(
+                                Component.text("Left click: -1 | Right click: +1", DefinedTextColor.YELLOW),
+                                Component.text("Middle click: Input (1-127)", DefinedTextColor.YELLOW)
+                        )
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                (editor, targetEntity, event) -> {
+                    if (event.getClick().isLeftClick()) {
+                        targetEntity.setSize(Math.max(1, targetEntity.getSize() - 1));
+                    } else if (event.getClick().isRightClick()) {
+                        targetEntity.setSize(Math.min(127, targetEntity.getSize() + 1));
+                    } else if (event.getClick() == ClickType.MIDDLE) {
+                        Player player = (Player) event.getWhoClicked();
+                        editor.onceDeferUnregisterOnClose();
+                        new SignGui()
+                                .withTarget(player)
+                                .withLines(Component.empty(), Component.text("^^^"), Component.text("サイズを入力 (1-127)"), Component.empty())
+                                .onComplete(lines -> {
+                                    try {
+                                        int val = Integer.parseInt(((TextComponent) lines.get(0)).content());
+                                        targetEntity.setSize(Math.max(1, Math.min(127, val)));
+                                    } catch (Exception ignored) {
+                                    }
+                                    editor.open(player);
+                                })
+                                .open();
+                    }
+                }
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

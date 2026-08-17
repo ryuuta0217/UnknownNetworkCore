@@ -39,43 +39,42 @@ import net.unknown.core.gui.SignGui;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Ageable;
+import org.bukkit.entity.Minecart;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AgeableHandler implements EntityEditorHandler<Ageable> {
+public class MinecartHandler implements EntityEditorHandler<Minecart> {
 
     @Override
-    public List<EntityEditor.Element<Ageable>> getElements(Ageable entity) {
-        List<EntityEditor.Element<Ageable>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<Minecart>> getElements(Minecart entity) {
+        List<EntityEditor.Element<Minecart>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.CLOCK)
-                        .displayName(Component.text("年齢: " + targetEntity.getAge() + "(ﾃｨｯｸ)", DefinedTextColor.GREEN))
+                targetEntity -> new ItemStackBuilder(Material.MINECART)
+                        .displayName(Component.text("MaxSpeed: " + String.format("%.2f", targetEntity.getMaxSpeed()), DefinedTextColor.GREEN))
                         .lore(
-                                Component.text("※0以上で大人、0未満で子供", DefinedTextColor.GRAY),
-                                Component.text("左クリック: -1200 | 右クリック: +1200", DefinedTextColor.YELLOW),
+                                Component.text("左クリック: -0.1 | 右クリック: +0.1", DefinedTextColor.YELLOW),
                                 Component.text("中クリック: 直接入力", DefinedTextColor.YELLOW)
                         )
                         .build(),
                 (editor, targetEntity, event) -> {
                     if (event.getClick().isLeftClick()) {
-                        targetEntity.setAge(Math.max(-24000, targetEntity.getAge() - 1200));
+                        targetEntity.setMaxSpeed(Math.max(0.0, targetEntity.getMaxSpeed() - 0.1));
                     } else if (event.getClick().isRightClick()) {
-                        targetEntity.setAge(Math.min(24000, targetEntity.getAge() + 1200));
+                        targetEntity.setMaxSpeed(Math.min(100.0, targetEntity.getMaxSpeed() + 0.1));
                     } else if (event.getClick() == ClickType.MIDDLE) {
                         Player player = (Player) event.getWhoClicked();
                         editor.onceDeferUnregisterOnClose();
                         new SignGui()
                                 .withTarget(player)
-                                .withLines(Component.empty(), Component.text("^^^"), Component.text("年齢を入力"), Component.empty())
+                                .withLines(Component.empty(), Component.text("^^^"), Component.text("最高速度を入力"), Component.empty())
                                 .onComplete(lines -> {
                                     try {
-                                        int val = Integer.parseInt(((TextComponent) lines.get(0)).content());
-                                        targetEntity.setAge(Math.max(-24000, Math.min(24000, val)));
+                                        double val = Double.parseDouble(((TextComponent) lines.get(0)).content());
+                                        targetEntity.setMaxSpeed(Math.max(0.0, val));
                                     } catch (Exception ignored) {
                                     }
                                     editor.open(player);
@@ -86,27 +85,35 @@ public class AgeableHandler implements EntityEditorHandler<Ageable> {
         ));
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.LEAD)
-                        .displayName(Component.text("年齢固定: " + (targetEntity.getAgeLock() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.getAgeLock() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                targetEntity -> new ItemStackBuilder(Material.REDSTONE)
+                        .displayName(Component.text("Damage: " + String.format("%.2f", targetEntity.getDamage()), DefinedTextColor.GREEN))
+                        .lore(
+                                Component.text("左クリック: -1.0 | 右クリック: +1.0", DefinedTextColor.YELLOW),
+                                Component.text("中クリック: 直接入力", DefinedTextColor.YELLOW)
+                        )
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setAgeLock(!targetEntity.getAgeLock())
-        ));
-
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.WHEAT_SEEDS)
-                        .displayName(Component.text("Baby", DefinedTextColor.LIGHT_PURPLE))
-                        .lore(Component.text("クリックで実行", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setBaby()
-        ));
-
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.WHEAT)
-                        .displayName(Component.text("Adult", DefinedTextColor.LIGHT_PURPLE))
-                        .lore(Component.text("クリックで実行", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setAdult()
+                (editor, targetEntity, event) -> {
+                    if (event.getClick().isLeftClick()) {
+                        targetEntity.setDamage(Math.max(0.0, targetEntity.getDamage() - 1.0));
+                    } else if (event.getClick().isRightClick()) {
+                        targetEntity.setDamage(Math.min(1000.0, targetEntity.getDamage() + 1.0));
+                    } else if (event.getClick() == ClickType.MIDDLE) {
+                        Player player = (Player) event.getWhoClicked();
+                        editor.onceDeferUnregisterOnClose();
+                        new SignGui()
+                                .withTarget(player)
+                                .withLines(Component.empty(), Component.text("^^^"), Component.text("ダメージを入力"), Component.empty())
+                                .onComplete(lines -> {
+                                    try {
+                                        double val = Double.parseDouble(((TextComponent) lines.get(0)).content());
+                                        targetEntity.setDamage(Math.max(0.0, val));
+                                    } catch (Exception ignored) {
+                                    }
+                                    editor.open(player);
+                                })
+                                .open();
+                    }
+                }
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

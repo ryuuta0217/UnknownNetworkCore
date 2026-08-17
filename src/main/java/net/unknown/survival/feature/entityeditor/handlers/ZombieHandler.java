@@ -39,43 +39,46 @@ import net.unknown.core.gui.SignGui;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Ageable;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Zombie;
 import org.bukkit.event.inventory.ClickType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class AgeableHandler implements EntityEditorHandler<Ageable> {
+public class ZombieHandler implements EntityEditorHandler<Zombie> {
 
     @Override
-    public List<EntityEditor.Element<Ageable>> getElements(Ageable entity) {
-        List<EntityEditor.Element<Ageable>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<Zombie>> getElements(Zombie entity) {
+        List<EntityEditor.Element<Zombie>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.CLOCK)
-                        .displayName(Component.text("年齢: " + targetEntity.getAge() + "(ﾃｨｯｸ)", DefinedTextColor.GREEN))
+                targetEntity -> new ItemStackBuilder(Material.WATER_BUCKET)
+                        .displayName(Component.text("溺死までの時間: " + (targetEntity.isConverting() ? targetEntity.getConversionTime() + "ﾃｨｯｸ" : "非変換中"), DefinedTextColor.GREEN))
                         .lore(
-                                Component.text("※0以上で大人、0未満で子供", DefinedTextColor.GRAY),
-                                Component.text("左クリック: -1200 | 右クリック: +1200", DefinedTextColor.YELLOW),
+                                Component.text("※ DrownedになるまでのTicks", DefinedTextColor.GRAY),
+                                Component.empty(),
+                                Component.text("左クリック: -100 | 右クリック: +100", DefinedTextColor.YELLOW),
                                 Component.text("中クリック: 直接入力", DefinedTextColor.YELLOW)
                         )
                         .build(),
                 (editor, targetEntity, event) -> {
                     if (event.getClick().isLeftClick()) {
-                        targetEntity.setAge(Math.max(-24000, targetEntity.getAge() - 1200));
+                        int current = targetEntity.isConverting() ? targetEntity.getConversionTime() : 0;
+                        if (current > 0) targetEntity.setConversionTime(Math.max(0, current - 100));
                     } else if (event.getClick().isRightClick()) {
-                        targetEntity.setAge(Math.min(24000, targetEntity.getAge() + 1200));
+                        int current = targetEntity.isConverting() ? targetEntity.getConversionTime() : 0;
+                        targetEntity.setConversionTime(Math.min(100000, current + 100));
                     } else if (event.getClick() == ClickType.MIDDLE) {
                         Player player = (Player) event.getWhoClicked();
                         editor.onceDeferUnregisterOnClose();
                         new SignGui()
                                 .withTarget(player)
-                                .withLines(Component.empty(), Component.text("^^^"), Component.text("年齢を入力"), Component.empty())
+                                .withLines(Component.empty(), Component.text("^^^"), Component.text("溺死変換時間を入力"), Component.empty())
                                 .onComplete(lines -> {
                                     try {
                                         int val = Integer.parseInt(((TextComponent) lines.get(0)).content());
-                                        targetEntity.setAge(Math.max(-24000, Math.min(24000, val)));
+                                        targetEntity.setConversionTime(Math.max(0, val));
                                     } catch (Exception ignored) {
                                     }
                                     editor.open(player);
@@ -86,30 +89,13 @@ public class AgeableHandler implements EntityEditorHandler<Ageable> {
         ));
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.LEAD)
-                        .displayName(Component.text("年齢固定: " + (targetEntity.getAgeLock() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.getAgeLock() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setAgeLock(!targetEntity.getAgeLock())
-        ));
-
-        elements.add(EntityEditor.Element.of(
                 targetEntity -> new ItemStackBuilder(Material.WHEAT_SEEDS)
                         .displayName(Component.text("Baby", DefinedTextColor.LIGHT_PURPLE))
                         .lore(Component.text("クリックで実行", DefinedTextColor.YELLOW))
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setBaby()
+                (editor, targetEntity, event) -> targetEntity.setBaby(!targetEntity.isBaby())
         ));
 
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.WHEAT)
-                        .displayName(Component.text("Adult", DefinedTextColor.LIGHT_PURPLE))
-                        .lore(Component.text("クリックで実行", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setAdult()
-        ));
-
-        elements.add(EntityEditor.Element.lineBreak());
         return elements;
     }
 }

@@ -37,23 +37,48 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Parrot;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class ParrotHandler implements EntityEditorHandler<Parrot> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<Parrot>> getElements(Parrot entity) {
+        List<EntityEditor.Element<Parrot>> elements = new ArrayList<>();
 
+        Parrot.Variant[] variants = Parrot.Variant.values();
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                targetEntity -> {
+                    Parrot.Variant current = targetEntity.getVariant();
+                    List<Component> lore = new ArrayList<>();
+                    for (Parrot.Variant v : variants) {
+                        lore.add(Component.text((v == current ? "▶ " : "■ ") + v.name(), v == current ? DefinedTextColor.GREEN : DefinedTextColor.GRAY));
+                    }
+                    lore.add(Component.empty());
+                    lore.add(Component.text("左クリック: 前 | 右クリック: 次", DefinedTextColor.YELLOW));
+
+                    return new ItemStackBuilder(Material.PARROT_SPAWN_EGG)
+                            .displayName(Component.text("種類: ", DefinedTextColor.GREEN).append(Component.text(current.name(), DefinedTextColor.GREEN)))
+                            .lore(lore.toArray(Component[]::new))
+                            .build();
+                },
+                (editor, targetEntity, event) -> {
+                    Parrot.Variant current = targetEntity.getVariant();
+                    int idx = -1;
+                    for (int i = 0; i < variants.length; i++) {
+                        if (variants[i] == current) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                    if (idx != -1) {
+                        if (event.isRightClick()) targetEntity.setVariant(variants[(idx + 1) % variants.length]);
+                        else if (event.isLeftClick())
+                            targetEntity.setVariant(variants[(idx - 1 + variants.length) % variants.length]);
+                    }
+                }
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

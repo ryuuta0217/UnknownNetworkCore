@@ -37,23 +37,35 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.Warden;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class WardenHandler implements EntityEditorHandler<Warden> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<Warden>> getElements(Warden entity) {
+        List<EntityEditor.Element<Warden>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                targetEntity -> new ItemStackBuilder(Material.SCULK_SENSOR)
+                        .displayName(Component.text("プレイヤーへの怒りを追加 (+10)", DefinedTextColor.GREEN))
+                        .lore(Component.text("クリックで実行", DefinedTextColor.YELLOW))
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                (editor, targetEntity, event) -> {
+                    Player player = (Player) event.getWhoClicked();
+                    targetEntity.setAnger(player, Math.min(150, targetEntity.getAnger(player) + 10));
+                }
+        ));
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.SCULK_SHRIEKER)
+                        .displayName(Component.text("clearAnger", DefinedTextColor.LIGHT_PURPLE))
+                        .lore(Component.text("クリックで実行", DefinedTextColor.YELLOW))
+                        .build(),
+                (editor, targetEntity, event) -> targetEntity.clearAnger(targetEntity.getEntityAngryAt())
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

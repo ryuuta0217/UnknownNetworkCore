@@ -37,26 +37,31 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Fireball;
+import org.bukkit.entity.Player;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class FireballHandler implements EntityEditorHandler<Fireball> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
-
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
-        ));
-
-        elements.add(EntityEditor.Element.lineBreak());
-        return elements;
+    public List<EntityEditor.Element<Fireball>> getElements(Fireball entity) {
+        return List.of(
+                EntityEditor.Element.of(
+                        targetEntity -> new ItemStackBuilder(Material.BLAZE_POWDER)
+                                .displayName(Component.text("Direction", DefinedTextColor.GREEN))
+                                .lore(
+                                        Component.text("クリックであなたの向いている方向にセット", DefinedTextColor.YELLOW)
+                                )
+                                .build(),
+                        (editor, targetEntity, event) -> {
+                            Player p = (Player) event.getWhoClicked();
+                            targetEntity.setDirection(p.getLocation().getDirection());
+                            p.sendMessage(Component.text("ファイヤーボールの進行方向を更新しました", DefinedTextColor.GREEN));
+                            editor.update();
+                        }
+                ),
+                EntityEditor.Element.lineBreak()
+        );
     }
 }

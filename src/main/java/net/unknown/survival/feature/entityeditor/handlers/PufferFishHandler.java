@@ -32,28 +32,56 @@
 package net.unknown.survival.feature.entityeditor.handlers;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.gui.SignGui;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.PufferFish;
+import org.bukkit.event.inventory.ClickType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class PufferFishHandler implements EntityEditorHandler<PufferFish> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<PufferFish>> getElements(PufferFish entity) {
+        List<EntityEditor.Element<PufferFish>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                targetEntity -> new ItemStackBuilder(Material.PUFFERFISH)
+                        .displayName(Component.text("PuffState: " + targetEntity.getPuffState(), DefinedTextColor.GREEN))
+                        .lore(
+                                Component.text("左クリック: -1 | 右クリック: +1", DefinedTextColor.YELLOW),
+                                Component.text("中クリック: 直接入力 (0-2)", DefinedTextColor.YELLOW)
+                        )
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                (editor, targetEntity, event) -> {
+                    if (event.getClick().isLeftClick()) {
+                        targetEntity.setPuffState(Math.max(0, targetEntity.getPuffState() - 1));
+                    } else if (event.getClick().isRightClick()) {
+                        targetEntity.setPuffState(Math.min(2, targetEntity.getPuffState() + 1));
+                    } else if (event.getClick() == ClickType.MIDDLE) {
+                        Player player = (Player) event.getWhoClicked();
+                        editor.onceDeferUnregisterOnClose();
+                        new SignGui()
+                                .withTarget(player)
+                                .withLines(Component.empty(), Component.text("^^^"), Component.text("膨らみ状態を入力 (0-2)"), Component.empty())
+                                .onComplete(lines -> {
+                                    try {
+                                        int val = Integer.parseInt(((TextComponent) lines.get(0)).content());
+                                        targetEntity.setPuffState(Math.max(0, Math.min(2, val)));
+                                    } catch (Exception ignored) {
+                                    }
+                                    editor.open(player);
+                                })
+                                .open();
+                    }
+                }
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

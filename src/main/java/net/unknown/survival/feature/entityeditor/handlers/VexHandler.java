@@ -37,23 +37,23 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Vex;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class VexHandler implements EntityEditorHandler<Vex> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<Vex>> getElements(Vex entity) {
+        List<EntityEditor.Element<Vex>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                targetEntity -> new ItemStackBuilder(Material.IRON_SWORD)
+                        .displayName(Component.text("Charging: " + (targetEntity.isCharging() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isCharging() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
                         .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                (editor, targetEntity, event) -> targetEntity.setCharging(!targetEntity.isCharging())
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

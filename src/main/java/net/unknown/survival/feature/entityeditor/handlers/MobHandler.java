@@ -50,7 +50,7 @@ public class MobHandler implements EntityEditorHandler<Mob> {
                         targetEntity -> new ItemStackBuilder(Material.ENDER_EYE)
                                 .displayName(targetEntity.isAware() ? Component.text("周囲認識: 有効", DefinedTextColor.GREEN) : Component.text("周囲認識: 無効", DefinedTextColor.RED))
                                 .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW)).build(),
-                        (targetEntity, event) -> targetEntity.setAware(!targetEntity.isAware()))
+                        (editor, targetEntity, event) -> targetEntity.setAware(!targetEntity.isAware()))
         );
     }
 }

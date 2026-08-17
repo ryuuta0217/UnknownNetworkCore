@@ -32,28 +32,56 @@
 package net.unknown.survival.feature.entityeditor.handlers;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.gui.SignGui;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Player;
+import org.bukkit.entity.TNTPrimed;
+import org.bukkit.event.inventory.ClickType;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class TNTPrimedHandler implements EntityEditorHandler<TNTPrimed> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<TNTPrimed>> getElements(TNTPrimed entity) {
+        List<EntityEditor.Element<TNTPrimed>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                targetEntity -> new ItemStackBuilder(Material.STRING)
+                        .displayName(Component.text("起爆時間: " + targetEntity.getFuseTicks() + "ﾃｨｯｸ", DefinedTextColor.GREEN))
+                        .lore(
+                                Component.text("左クリック: -10 | 右クリック: +10", DefinedTextColor.YELLOW),
+                                Component.text("中クリック: 直接入力", DefinedTextColor.YELLOW)
+                        )
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                (editor, targetEntity, event) -> {
+                    if (event.getClick().isLeftClick()) {
+                        targetEntity.setFuseTicks(Math.max(0, targetEntity.getFuseTicks() - 10));
+                    } else if (event.getClick().isRightClick()) {
+                        targetEntity.setFuseTicks(Math.min(10000, targetEntity.getFuseTicks() + 10));
+                    } else if (event.getClick() == ClickType.MIDDLE) {
+                        Player player = (Player) event.getWhoClicked();
+                        editor.onceDeferUnregisterOnClose();
+                        new SignGui()
+                                .withTarget(player)
+                                .withLines(Component.empty(), Component.text("^^^"), Component.text("起爆時間を入力"), Component.empty())
+                                .onComplete(lines -> {
+                                    try {
+                                        int val = Integer.parseInt(((TextComponent) lines.get(0)).content());
+                                        targetEntity.setFuseTicks(Math.max(0, val));
+                                    } catch (Exception ignored) {
+                                    }
+                                    editor.open(player);
+                                })
+                                .open();
+                    }
+                }
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

@@ -37,26 +37,31 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Armadillo;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class ArmadilloHandler implements EntityEditorHandler<Armadillo> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
-
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
-        ));
-
-        elements.add(EntityEditor.Element.lineBreak());
-        return elements;
+    public List<EntityEditor.Element<Armadillo>> getElements(Armadillo entity) {
+        return List.of(
+                EntityEditor.Element.of(
+                        targetEntity -> new ItemStackBuilder(Material.ARMADILLO_SCUTE)
+                                .displayName(Component.text("RollUp/RollOut: " + targetEntity.getState().name(), DefinedTextColor.GREEN))
+                                .lore(
+                                        Component.text("クリックで状態を切り替え", DefinedTextColor.YELLOW)
+                                )
+                                .build(),
+                        (editor, targetEntity, event) -> {
+                            if (targetEntity.getState() == Armadillo.State.IDLE) {
+                                targetEntity.rollUp();
+                            } else {
+                                targetEntity.rollOut();
+                            }
+                        }
+                ),
+                EntityEditor.Element.lineBreak()
+        );
     }
 }

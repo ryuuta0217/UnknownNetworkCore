@@ -32,8 +32,10 @@
 package net.unknown.survival.feature.entityeditor.handlers;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.gui.SignGui;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
@@ -41,7 +43,7 @@ import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 
 import java.util.List;
@@ -62,25 +64,25 @@ public class EntityHandler implements EntityEditorHandler<Entity> {
                                 .displayName(targetEntity.isInvulnerable() ? Component.text("無敵: 有効", DefinedTextColor.GREEN) : Component.text("無敵: 無効", DefinedTextColor.RED))
                                 .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
-                        (targetEntity, event) -> targetEntity.setInvulnerable(!targetEntity.isInvulnerable())),
+                        (editor, targetEntity, event) -> targetEntity.setInvulnerable(!targetEntity.isInvulnerable())),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(Material.NOTE_BLOCK)
                                 .displayName(targetEntity.isSilent() ? Component.text("消音: 有効", DefinedTextColor.GREEN) : Component.text("消音: 無効", DefinedTextColor.RED))
                                 .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
-                        (targetEntity, event) -> targetEntity.setSilent(!targetEntity.isSilent())),
+                        (editor, targetEntity, event) -> targetEntity.setSilent(!targetEntity.isSilent())),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(Material.END_PORTAL_FRAME)
                                 .displayName(targetEntity.hasGravity() ? Component.text("重力: 有効", DefinedTextColor.GREEN) : Component.text("重力: 無効", DefinedTextColor.RED))
                                 .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
-                        (targetEntity, event) -> targetEntity.setGravity(!targetEntity.hasGravity())),
+                        (editor, targetEntity, event) -> targetEntity.setGravity(!targetEntity.hasGravity())),
                 EntityEditor.Element.of(
                         (targetEntity) -> new ItemStackBuilder(targetEntity.hasNoPhysics() ? Material.STRUCTURE_VOID : Material.SCAFFOLDING)
                                 .displayName(targetEntity.hasNoPhysics() ? Component.text("物理演算: 無効", DefinedTextColor.RED) : Component.text("物理演算: 有効", DefinedTextColor.GREEN))
                                 .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
-                        (targetEntity, event) -> {
+                        (editor, targetEntity, event) -> {
                             if (!targetEntity.hasNoPhysics() && targetEntity.hasGravity()) {
                                 targetEntity.setGravity(false);
                                 NewMessageUtil.sendMessage(event.getWhoClicked(), Component.text("自動的に [重力] が無効になりました。[重力] は有効にすることもできますが、NoClipが発生します。", DefinedTextColor.YELLOW));
@@ -90,50 +92,82 @@ public class EntityHandler implements EntityEditorHandler<Entity> {
                 ),
                 EntityEditor.Element.of(
                         (targetEntity) -> new ItemStackBuilder(targetEntity.isFrozen() ? Material.ICE : Material.GLASS)
-                                .displayName(targetEntity.isFrozen() ? Component.text("凍結: 有効", DefinedTextColor.GREEN) : Component.text("凍結: 無効", DefinedTextColor.RED))
-                                .lore(Component.text(targetEntity.isFrozen() ? "クリックで凍結解除 (残り" + targetEntity.getFreezeTicks() + "ﾃｨｯｸ)" : "クリックで30秒凍結", DefinedTextColor.YELLOW))
+                                .displayName(targetEntity.isFrozen() ? Component.text("凍結: 有効 (残り" + targetEntity.getFreezeTicks() + "ﾃｨｯｸ)", DefinedTextColor.GREEN) : Component.text("凍結: 無効", DefinedTextColor.RED))
+                                .lore(
+                                        Component.text("左クリック: 解除 | 右クリック: 30秒追加", DefinedTextColor.YELLOW),
+                                        Component.text("中クリック: 直接入力 (Ticks)", DefinedTextColor.YELLOW)
+                                )
                                 .build(),
-                        (targetEntity, event) -> targetEntity.setFreezeTicks(targetEntity.isFrozen() ? 0 : 20 * 30)
+                        (editor, targetEntity, event) -> {
+                            if (event.getClick().isLeftClick()) {
+                                targetEntity.setFreezeTicks(0);
+                            } else if (event.getClick().isRightClick()) {
+                                targetEntity.setFreezeTicks(targetEntity.getFreezeTicks() + 600);
+                            } else if (event.getClick() == ClickType.MIDDLE) {
+                                Player player = (Player) event.getWhoClicked();
+                                editor.onceDeferUnregisterOnClose();
+                                new SignGui()
+                                        .withTarget(player)
+                                        .withLines(Component.empty(), Component.text("^^^"), Component.text("凍結Tick数を入力"), Component.empty())
+                                        .onComplete(lines -> {
+                                            try {
+                                                int val = Integer.parseInt(((TextComponent) lines.get(0)).content());
+                                                targetEntity.setFreezeTicks(Math.max(0, val));
+                                            } catch (Exception ignored) {
+                                            }
+                                            editor.open(player);
+                                        })
+                                        .open();
+                            }
+                        }
                 ),
                 EntityEditor.Element.of(
                         (targetEntity) -> new ItemStackBuilder(targetEntity.isFreezeTickingLocked() ? Material.PACKED_ICE : Material.BARRIER)
                                 .displayName(targetEntity.isFreezeTickingLocked() ? Component.text("凍結固定: 有効", DefinedTextColor.GREEN) : Component.text("凍結固定: 無効", DefinedTextColor.RED))
                                 .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
-                        (targetEntity, event) -> targetEntity.lockFreezeTicks(!targetEntity.isFreezeTickingLocked())
+                        (editor, targetEntity, event) -> targetEntity.lockFreezeTicks(!targetEntity.isFreezeTickingLocked())
+                ),
+                EntityEditor.Element.of(
+                        (targetEntity) -> new ItemStackBuilder(targetEntity.getFireTicks() > 0 ? Material.CAMPFIRE : Material.FLINT_AND_STEEL)
+                                .displayName(targetEntity.getFireTicks() > 0 ? Component.text("炎上: 有効 (残り" + targetEntity.getFireTicks() + "ﾃｨｯｸ)", DefinedTextColor.GREEN) : Component.text("炎上: 無効", DefinedTextColor.RED))
+                                .lore(
+                                        Component.text("左クリック: 鎮火 | 右クリック: 10秒追加", DefinedTextColor.YELLOW),
+                                        Component.text("中クリック: 直接入力 (Ticks)", DefinedTextColor.YELLOW)
+                                )
+                                .build(),
+                        (editor, targetEntity, event) -> {
+                            if (event.getClick().isLeftClick()) {
+                                targetEntity.setFireTicks(0);
+                            } else if (event.getClick().isRightClick()) {
+                                targetEntity.setFireTicks(targetEntity.getFireTicks() + 200);
+                            } else if (event.getClick() == ClickType.MIDDLE) {
+                                Player player = (Player) event.getWhoClicked();
+                                editor.onceDeferUnregisterOnClose();
+                                new SignGui()
+                                        .withTarget(player)
+                                        .withLines(Component.empty(), Component.text("^^^"), Component.text("炎上Tick数を入力"), Component.empty())
+                                        .onComplete(lines -> {
+                                            try {
+                                                int val = Integer.parseInt(((TextComponent) lines.get(0)).content());
+                                                targetEntity.setFireTicks(Math.max(0, val));
+                                            } catch (Exception ignored) {
+                                            }
+                                            editor.open(player);
+                                        })
+                                        .open();
+                            }
+                        }
                 ),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(Material.LIGHT)
                                 .displayName(targetEntity.isGlowing() ? Component.text("発光: 有効", DefinedTextColor.GREEN) : Component.text("発光: 無効", DefinedTextColor.RED))
                                 .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
-                        (targetEntity, event) -> targetEntity.setGlowing(!targetEntity.isGlowing())),
-                EntityEditor.Element.of(
-                        targetEntity -> {
-                            net.minecraft.world.entity.Entity nms = MinecraftAdapter.entity(targetEntity);
-                            return new ItemStackBuilder(Material.COMPASS)
-                                    .displayName(Component.text("向きを変更", DefinedTextColor.YELLOW))
-                                    .lore(Component.text("X: " + nms.getXRot() + " | Y: " + nms.getYRot(), DefinedTextColor.GREEN),
-                                            Component.empty(),
-                                            Component.text("左クリック: X+  右クリック: Y+", DefinedTextColor.YELLOW),
-                                            Component.text("Shift: デクリメント  中クリック: リセット", DefinedTextColor.YELLOW)).build();
-                        },
-                        (targetEntity, event) -> {
-                            net.minecraft.world.entity.Entity h = ((CraftEntity) targetEntity).getHandle();
-                            if (event.isLeftClick()) {
-                                h.setXRot(loop(h.getXRot() + (event.isShiftClick() ? -10f : 10f), -180f, 180f));
-                            } else if (event.isRightClick()) {
-                                h.setYRot(loop(h.getYRot() + (event.isShiftClick() ? -10f : 10f), -180f, 180f));
-                                h.setYHeadRot(h.getYRot());
-                                h.setYBodyRot(h.getYRot());
-                            } else if (event.getClick() == ClickType.MIDDLE) {
-                                h.setXRot(0f);
-                                h.setYRot(0f);
-                                h.setYHeadRot(0f);
-                                h.setYBodyRot(0f);
-                            }
-                        }),
-                EntityEditor.Element.lineBreak()
+                        (editor, targetEntity, event) -> targetEntity.setGlowing(!targetEntity.isGlowing())),
+                EntityEditor.Element.lineBreak(),
+                EntityEditor.Element.numberEditor("entity_xrot", Material.COMPASS, 1.0f, 0.1f, "%.1f"),
+                EntityEditor.Element.numberEditor("entity_yrot", Material.RECOVERY_COMPASS, 1.0f, 0.1f, "%.1f")
         );
     }
 }

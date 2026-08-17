@@ -37,23 +37,39 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Piglin;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class PiglinHandler implements EntityEditorHandler<Piglin> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<Piglin>> getElements(Piglin entity) {
+        List<EntityEditor.Element<Piglin>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                targetEntity -> new ItemStackBuilder(Material.GOLDEN_HELMET)
+                        .displayName(Component.text("ゾンビ化免除: " + (targetEntity.isImmuneToZombification() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isImmuneToZombification() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
                         .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                (editor, targetEntity, event) -> targetEntity.setImmuneToZombification(!targetEntity.isImmuneToZombification())
+        ));
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.CROSSBOW)
+                        .displayName(Component.text("IsAbleToHunt: " + (targetEntity.isAbleToHunt() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isAbleToHunt() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                        .build(),
+                (editor, targetEntity, event) -> targetEntity.setIsAbleToHunt(!targetEntity.isAbleToHunt())
+        ));
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.WHEAT_SEEDS)
+                        .displayName(Component.text("Baby", DefinedTextColor.LIGHT_PURPLE))
+                        .lore(Component.text("クリックで実行", DefinedTextColor.YELLOW))
+                        .build(),
+                (editor, targetEntity, event) -> targetEntity.setBaby(!targetEntity.isBaby())
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

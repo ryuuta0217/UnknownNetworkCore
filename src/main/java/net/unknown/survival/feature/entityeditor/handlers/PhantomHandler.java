@@ -37,26 +37,43 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Phantom;
 
-import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class PhantomHandler implements EntityEditorHandler<Phantom> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
-
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
-        ));
-
-        elements.add(EntityEditor.Element.lineBreak());
-        return elements;
+    public List<EntityEditor.Element<Phantom>> getElements(Phantom entity) {
+        return List.of(
+                EntityEditor.Element.of(
+                        targetEntity -> new ItemStackBuilder(Material.PHANTOM_MEMBRANE)
+                                .displayName(Component.text("Size", DefinedTextColor.GREEN))
+                                .lore(
+                                        Component.text("現在: " + targetEntity.getSize(), DefinedTextColor.GRAY),
+                                        Component.text("左/右クリックで増減(0〜64)", DefinedTextColor.YELLOW)
+                                )
+                                .build(),
+                        (editor, targetEntity, event) -> {
+                            int size = targetEntity.getSize();
+                            if (event.isLeftClick()) {
+                                targetEntity.setSize(Math.max(0, size - 1));
+                            } else if (event.isRightClick()) {
+                                targetEntity.setSize(Math.min(64, size + 1));
+                            }
+                        }
+                ),
+                EntityEditor.Element.of(
+                        targetEntity -> new ItemStackBuilder(targetEntity.shouldBurnInDay() ? Material.CAMPFIRE : Material.SOUL_CAMPFIRE)
+                                .displayName(Component.text("ShouldBurnInDay", DefinedTextColor.GREEN))
+                                .lore(
+                                        Component.text("現在: " + (targetEntity.shouldBurnInDay() ? "はい" : "いいえ"), DefinedTextColor.GRAY),
+                                        Component.text("クリックで切り替え", DefinedTextColor.YELLOW)
+                                )
+                                .build(),
+                        (editor, targetEntity, event) -> targetEntity.setShouldBurnInDay(!targetEntity.shouldBurnInDay())
+                ),
+                EntityEditor.Element.lineBreak()
+        );
     }
 }

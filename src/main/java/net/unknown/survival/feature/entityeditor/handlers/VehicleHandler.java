@@ -31,32 +31,18 @@
 
 package net.unknown.survival.feature.entityeditor.handlers;
 
-import net.kyori.adventure.text.Component;
-import net.unknown.core.builder.ItemStackBuilder;
-import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
-import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Vehicle;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class VehicleHandler implements EntityEditorHandler<Vehicle> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
-
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
-        ));
-
-        elements.add(EntityEditor.Element.lineBreak());
+    public List<EntityEditor.Element<Vehicle>> getElements(Vehicle entity) {
+        List<EntityEditor.Element<Vehicle>> elements = new ArrayList<>();
         return elements;
     }
 }

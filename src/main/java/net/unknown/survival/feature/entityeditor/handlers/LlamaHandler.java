@@ -37,23 +37,48 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Llama;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class LlamaHandler implements EntityEditorHandler<Llama> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<Llama>> getElements(Llama entity) {
+        List<EntityEditor.Element<Llama>> elements = new ArrayList<>();
 
+        Llama.Color[] colors = Llama.Color.values();
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                targetEntity -> {
+                    Llama.Color current = targetEntity.getColor();
+                    List<Component> lore = new ArrayList<>();
+                    for (Llama.Color c : colors) {
+                        lore.add(Component.text((c == current ? "▶ " : "■ ") + c.name(), c == current ? DefinedTextColor.GREEN : DefinedTextColor.GRAY));
+                    }
+                    lore.add(Component.empty());
+                    lore.add(Component.text("左クリック: 前 | 右クリック: 次", DefinedTextColor.YELLOW));
+
+                    return new ItemStackBuilder(Material.LLAMA_SPAWN_EGG)
+                            .displayName(Component.text("毛色: ", DefinedTextColor.GREEN).append(Component.text(current.name(), DefinedTextColor.GREEN)))
+                            .lore(lore.toArray(Component[]::new))
+                            .build();
+                },
+                (editor, targetEntity, event) -> {
+                    Llama.Color current = targetEntity.getColor();
+                    int idx = -1;
+                    for (int i = 0; i < colors.length; i++) {
+                        if (colors[i] == current) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                    if (idx != -1) {
+                        if (event.isRightClick()) targetEntity.setColor(colors[(idx + 1) % colors.length]);
+                        else if (event.isLeftClick())
+                            targetEntity.setColor(colors[(idx - 1 + colors.length) % colors.length]);
+                    }
+                }
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

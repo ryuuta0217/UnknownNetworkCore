@@ -37,10 +37,13 @@ import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.persistence.PersistentDataType;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -48,6 +51,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class EntityEditor<T extends Entity> extends GuiBase {
+    public static final NamespacedKey TOOL_KEY = new NamespacedKey("unknown-network", "entity_editor_tool");
     private static final int CONTENT_ROWS = 5;
     private static final int CONTENT_SLOTS = CONTENT_ROWS * 9;
     private static final int NAV_ROW_START = CONTENT_SLOTS;
@@ -55,7 +59,7 @@ public class EntityEditor<T extends Entity> extends GuiBase {
     private final T target;
     private final List<EntityEditorHandler<? super T>> handlers;
     private final List<List<EntityEditor.Element<? super T>>> allRows = new ArrayList<>();
-    private final Map<Integer, BiConsumer<T, InventoryClickEvent>> slotActions = new HashMap<>();
+    private final Map<Integer, EntityEditor.ClickAction<T>> slotActions = new HashMap<>();
     private int currentPage = 0;
 
     public EntityEditor(Player opener, T target) {
@@ -85,7 +89,7 @@ public class EntityEditor<T extends Entity> extends GuiBase {
             if (elements == null || elements.isEmpty()) continue;
 
             for (EntityEditor.Element<? super T> element : elements) {
-                if (!element.isEmpty() && !element.isLineBreak()) {
+                if (!element.isEmpty() && !element.isLineBreak() && !element.isNewPage()) {
                     element = element.withHandlerName(handler.getClass().getSimpleName());
                 }
 
@@ -93,6 +97,14 @@ public class EntityEditor<T extends Entity> extends GuiBase {
                     if (!currentRow.isEmpty()) {
                         this.allRows.add(new ArrayList<>(currentRow));
                         currentRow.clear();
+                    }
+                } else if (element.isNewPage()) {
+                    if (!currentRow.isEmpty()) {
+                        this.allRows.add(new ArrayList<>(currentRow));
+                        currentRow.clear();
+                    }
+                    while (this.allRows.size() % CONTENT_ROWS != 0) {
+                        this.allRows.add(Collections.emptyList());
                     }
                 } else {
                     currentRow.add(element);
@@ -136,8 +148,8 @@ public class EntityEditor<T extends Entity> extends GuiBase {
                     this.inventory.setItem(baseSlot + col, icon);
                 }
 
-                if (element.clickHandler() != null) {
-                    this.slotActions.put(baseSlot + col, (BiConsumer<T, InventoryClickEvent>) element.clickHandler());
+                if (element.clickAction() != null) {
+                    this.slotActions.put(baseSlot + col, (EntityEditor.ClickAction<T>) element.clickAction());
                 }
             }
         }
@@ -179,24 +191,30 @@ public class EntityEditor<T extends Entity> extends GuiBase {
             }
         }
 
-        BiConsumer<T, InventoryClickEvent> action = this.slotActions.get(slot);
+        EntityEditor.ClickAction<T> action = this.slotActions.get(slot);
         if (action != null) {
-            action.accept(this.target, event);
+            action.execute(this, this.target, event);
             this.update();
         }
     }
 
+    @FunctionalInterface
+    public interface ClickAction<T> {
+        void execute(EntityEditor<?> editor, T entity, InventoryClickEvent event);
+    }
+
     public record Element<T>(@Nullable String handlerName,
                                             @Nullable Function<T, ItemStack> iconProvider,
-                                            @Nullable BiConsumer<T, InventoryClickEvent> clickHandler) {
+                                            @Nullable ClickAction<T> clickAction) {
         private static final Element<?> EMPTY = new Element<>(null, null, null);
         private static final Element<?> LINE_BREAK = new Element<>(null, null, null);
-        private static final Element<?> NO_ACTION_BLACK_GLASS_PANE = new Element<>(null, targetEntity -> new ItemStack(Material.BLACK_STAINED_GLASS_PANE), (targetEntity, event) -> {
+        private static final Element<?> NEW_PAGE = new Element<>(null, null, null);
+        private static final Element<?> NO_ACTION_BLACK_GLASS_PANE = new Element<>(null, targetEntity -> new ItemStack(Material.BLACK_STAINED_GLASS_PANE), (editor, targetEntity, event) -> {
         });
 
         public static <T> Element<T> of(@Nullable Function<T, ItemStack> iconProvider,
-                                                       @Nullable BiConsumer<T, InventoryClickEvent> clickHandler) {
-            return new Element<>(null, iconProvider, clickHandler);
+                                                       @Nullable ClickAction<T> clickAction) {
+            return new Element<>(null, iconProvider, clickAction);
         }
 
         @SuppressWarnings("unchecked")
@@ -210,20 +228,75 @@ public class EntityEditor<T extends Entity> extends GuiBase {
         }
 
         @SuppressWarnings("unchecked")
+        public static <E> Element<E> newPage() {
+            return (Element<E>) NEW_PAGE;
+        }
+
+        @SuppressWarnings("unchecked")
         public static <E> Element<E> noActionGlassPane() {
             return (Element<E>) NO_ACTION_BLACK_GLASS_PANE;
         }
 
         public boolean isEmpty() {
-            return this.iconProvider == null && this != LINE_BREAK;
+            return this.iconProvider == null && this != LINE_BREAK && this != NEW_PAGE;
         }
 
         public boolean isLineBreak() {
             return this == LINE_BREAK;
         }
 
-        public Element<T> withHandlerName(String name) {
-            return new Element<>(name, this.iconProvider, this.clickHandler);
+        public boolean isNewPage() {
+            return this == NEW_PAGE;
+        }
+
+        public EntityEditor.Element<T> withHandlerName(String newHandlerName) {
+            return new EntityEditor.Element<>(newHandlerName, iconProvider, clickAction);
+        }
+
+        public static <E> Element<E> numberEditor(String actionKey, Material icon, float coarseStep, float fineStep, String formatPattern) {
+            EntityEditorRegistry.ToolAction<E> toolAction = EntityEditorRegistry.getToolAction(actionKey);
+            if (toolAction == null) throw new IllegalArgumentException("Unknown tool action: " + actionKey);
+
+            return Element.of(
+                    targetEntity -> {
+                        float current = toolAction.currentValueGetter().apply(targetEntity);
+                        return new ItemStackBuilder(icon)
+                                .displayName(Component.text(toolAction.displayName() + ": " + String.format(formatPattern, current), DefinedTextColor.GREEN))
+                                .lore(
+                                        Component.text("左クリック: -" + coarseStep + " | 右クリック: +" + coarseStep, DefinedTextColor.YELLOW),
+                                        Component.text("中クリック: リセット", DefinedTextColor.YELLOW),
+                                        Component.text("Shift+左: ツール取得 | Shift+右: 微調整ツール取得", DefinedTextColor.AQUA)
+                                )
+                                .build();
+                    },
+                    (editor, targetEntity, event) -> {
+                        if (event.isShiftClick()) {
+                            if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
+                            String suffix = event.isLeftClick() ? "_coarse" : "_fine";
+                            String toolDisplaySuffix = event.isRightClick() ? " (微調整)" : "";
+                            float step = event.isRightClick() ? fineStep : coarseStep;
+
+                            ItemStack tool = new ItemStackBuilder(Material.DEBUG_STICK)
+                                    .displayName(Component.text("エンティティエディタ: " + toolAction.displayName() + toolDisplaySuffix, DefinedTextColor.LIGHT_PURPLE))
+                                    .lore(
+                                            Component.text("左クリック: -" + String.format(formatPattern, step), DefinedTextColor.YELLOW),
+                                            Component.text("右クリック: +" + String.format(formatPattern, step), DefinedTextColor.YELLOW)
+                                    )
+                                    .custom(is -> is.editMeta(meta ->
+                                            meta.getPersistentDataContainer().set(TOOL_KEY, PersistentDataType.STRING, actionKey + suffix)))
+                                    .build();
+                            event.setCurrentItem(tool);
+                        } else if (event.getClick() == ClickType.MIDDLE) {
+                            toolAction.resetAction().accept(targetEntity);
+                        } else if (event.getClick().isLeftClick()) {
+                            float current = toolAction.currentValueGetter().apply(targetEntity);
+                            toolAction.applyAction().accept(targetEntity, current - coarseStep);
+                        } else if (event.getClick().isRightClick()) {
+                            float current = toolAction.currentValueGetter().apply(targetEntity);
+                            toolAction.applyAction().accept(targetEntity, current + coarseStep);
+                        }
+                    }
+            );
         }
     }
 }

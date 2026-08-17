@@ -37,23 +37,48 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Rabbit;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class RabbitHandler implements EntityEditorHandler<Rabbit> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<Rabbit>> getElements(Rabbit entity) {
+        List<EntityEditor.Element<Rabbit>> elements = new ArrayList<>();
 
+        Rabbit.Type[] types = Rabbit.Type.values();
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                targetEntity -> {
+                    Rabbit.Type current = targetEntity.getRabbitType();
+                    List<Component> lore = new ArrayList<>();
+                    for (Rabbit.Type t : types) {
+                        lore.add(Component.text((t == current ? "▶ " : "■ ") + t.name(), t == current ? DefinedTextColor.GREEN : DefinedTextColor.GRAY));
+                    }
+                    lore.add(Component.empty());
+                    lore.add(Component.text("左クリック: 前 | 右クリック: 次", DefinedTextColor.YELLOW));
+
+                    return new ItemStackBuilder(Material.RABBIT_SPAWN_EGG)
+                            .displayName(Component.text("種類: ", DefinedTextColor.GREEN).append(Component.text(current.name(), DefinedTextColor.GREEN)))
+                            .lore(lore.toArray(Component[]::new))
+                            .build();
+                },
+                (editor, targetEntity, event) -> {
+                    Rabbit.Type current = targetEntity.getRabbitType();
+                    int idx = -1;
+                    for (int i = 0; i < types.length; i++) {
+                        if (types[i] == current) {
+                            idx = i;
+                            break;
+                        }
+                    }
+                    if (idx != -1) {
+                        if (event.isRightClick()) targetEntity.setRabbitType(types[(idx + 1) % types.length]);
+                        else if (event.isLeftClick())
+                            targetEntity.setRabbitType(types[(idx - 1 + types.length) % types.length]);
+                    }
+                }
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

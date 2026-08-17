@@ -39,18 +39,24 @@ import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
 import org.bukkit.entity.Steerable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SteerableHandler implements EntityEditorHandler<Steerable> {
 
     @Override
     public List<EntityEditor.Element<Steerable>> getElements(Steerable entity) {
-        return List.of(
-                EntityEditor.Element.of(
-                        targetEntity -> new ItemStackBuilder(Material.SADDLE)
-                                .displayName(targetEntity.hasSaddle() ? Component.text("サドル: 装備中", DefinedTextColor.GREEN) : Component.text("サドル: 未装備", DefinedTextColor.RED))
-                                .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW)).build(),
-                        (targetEntity, event) -> targetEntity.setSaddle(!targetEntity.hasSaddle()))
-        );
+        List<EntityEditor.Element<Steerable>> elements = new ArrayList<>();
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.SADDLE)
+                        .displayName(Component.text("サドル: " + (targetEntity.hasSaddle() ? "装着 (ON)" : "未装着 (OFF)"), targetEntity.hasSaddle() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                        .build(),
+                (editor, targetEntity, event) -> targetEntity.setSaddle(!targetEntity.hasSaddle())
+        ));
+
+        elements.add(EntityEditor.Element.lineBreak());
+        return elements;
     }
 }

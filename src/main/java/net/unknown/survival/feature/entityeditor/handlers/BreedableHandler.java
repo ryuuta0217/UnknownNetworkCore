@@ -39,20 +39,22 @@ import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
 import org.bukkit.entity.Breedable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BreedableHandler implements EntityEditorHandler<Breedable> {
+
     @Override
     public List<EntityEditor.Element<Breedable>> getElements(Breedable entity) {
-        return List.of(
-                EntityEditor.Element.of(
-                        (breedable) -> new ItemStackBuilder(breedable.canBreed() ? Material.DRAGON_EGG : Material.BARRIER)
-                                .displayName(Component.text("繁殖: " + (breedable.canBreed() ? "有効" : "無効"), breedable.canBreed() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                                .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                                .build(),
-                        (breedable, event) -> {
-                            breedable.setBreed(!breedable.canBreed());
-                        })
-        );
+        List<EntityEditor.Element<Breedable>> elements = new ArrayList<>();
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.WHEAT)
+                        .displayName(Component.text("CanBreed: " + (targetEntity.canBreed() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.canBreed() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                        .build(),
+                (editor, targetEntity, event) -> targetEntity.setBreed(!targetEntity.canBreed())
+        ));
+        return elements;
     }
 }

@@ -37,23 +37,27 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Creaking;
+import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class CreakingHandler implements EntityEditorHandler<Creaking> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<Creaking>> getElements(Creaking entity) {
+        List<EntityEditor.Element<Creaking>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                targetEntity -> new ItemStackBuilder(Material.CREAKING_HEART)
+                        .displayName(Component.text("Active: " + (targetEntity.isActive() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isActive() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
                         .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                (editor, targetEntity, event) -> {
+                    if (targetEntity.isActive()) targetEntity.deactivate();
+                    else targetEntity.activate((Player) event.getWhoClicked());
+                }
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

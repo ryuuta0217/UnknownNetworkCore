@@ -37,23 +37,47 @@ import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
-import org.bukkit.entity.Sheep;
+import org.bukkit.entity.ArmorStand;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SheepHandler implements EntityEditorHandler<Sheep> {
+public class ArmorStandHandler implements EntityEditorHandler<ArmorStand> {
 
     @Override
-    public List<EntityEditor.Element<Sheep>> getElements(Sheep entity) {
-        List<EntityEditor.Element<Sheep>> elements = new ArrayList<>();
+    public List<EntityEditor.Element<ArmorStand>> getElements(ArmorStand entity) {
+        List<EntityEditor.Element<ArmorStand>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                targetEntity -> new ItemStackBuilder(Material.STICK)
+                        .displayName(Component.text("Arms: " + (targetEntity.hasArms() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.hasArms() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
                         .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())
+                (editor, targetEntity, event) -> targetEntity.setArms(!targetEntity.hasArms())
+        ));
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.SMOOTH_STONE_SLAB)
+                        .displayName(Component.text("BasePlate: " + (targetEntity.hasBasePlate() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.hasBasePlate() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                        .build(),
+                (editor, targetEntity, event) -> targetEntity.setBasePlate(!targetEntity.hasBasePlate())
+        ));
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.BARRIER)
+                        .displayName(Component.text("Marker: " + (targetEntity.isMarker() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isMarker() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                        .build(),
+                (editor, targetEntity, event) -> targetEntity.setMarker(!targetEntity.isMarker())
+        ));
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.ARMOR_STAND)
+                        .displayName(Component.text("Small: " + (targetEntity.isSmall() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSmall() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                        .build(),
+                (editor, targetEntity, event) -> targetEntity.setSmall(!targetEntity.isSmall())
         ));
 
         elements.add(EntityEditor.Element.lineBreak());
