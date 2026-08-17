@@ -36,6 +36,7 @@ import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.GuiBase;
+import net.unknown.survival.queue.ItemGiveQueue;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
@@ -285,7 +286,7 @@ public class EntityEditor<T extends Entity> extends GuiBase {
                                     .custom(is -> is.editMeta(meta ->
                                             meta.getPersistentDataContainer().set(TOOL_KEY, PersistentDataType.STRING, actionKey + suffix)))
                                     .build();
-                            event.setCurrentItem(tool);
+                            ItemGiveQueue.queue(event.getWhoClicked().getUniqueId(), tool);
                         } else if (event.getClick() == ClickType.MIDDLE) {
                             toolAction.resetAction().accept(targetEntity);
                         } else if (event.getClick().isLeftClick()) {
