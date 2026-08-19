@@ -50,7 +50,7 @@ public class BlockDisplayHandler implements EntityEditorHandler<BlockDisplay> {
         List<EntityEditor.Element<BlockDisplay>> elements = new ArrayList<>();
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(targetEntity.getBlock() != null ? targetEntity.getBlock().getMaterial() : Material.BARRIER)
+                targetEntity -> new ItemStackBuilder(targetEntity.getBlock() != null && targetEntity.getBlock().getMaterial().isItem() ? targetEntity.getBlock().getMaterial() : Material.BARRIER)
                         .displayName(Component.text("表示ブロックの変更", DefinedTextColor.GREEN))
                         .lore(Component.text("マウスカーソルで掴んでいるブロックを適用します", DefinedTextColor.YELLOW))
                         .build(),
