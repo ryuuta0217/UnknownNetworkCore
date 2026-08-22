@@ -31,13 +31,21 @@
 
 package net.unknown.survival.feature.entityeditor.handlers;
 
+import io.papermc.paper.dialog.Dialog;
+import io.papermc.paper.registry.data.dialog.ActionButton;
+import io.papermc.paper.registry.data.dialog.DialogBase;
+import io.papermc.paper.registry.data.dialog.body.DialogBody;
+import io.papermc.paper.registry.data.dialog.input.DialogInput;
+import io.papermc.paper.registry.data.dialog.type.DialogType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.event.ClickCallback;
 import net.unknown.core.builder.ItemStackBuilder;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.SignGui;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
+import net.unknown.survival.feature.entityeditor.EntityEditorRegistry;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.entity.Display;
@@ -46,6 +54,7 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.util.Transformation;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DisplayHandler implements EntityEditorHandler<Display> {
@@ -338,19 +347,19 @@ public class DisplayHandler implements EntityEditorHandler<Display> {
                 }
         ));
 
-        elements.add(EntityEditor.Element.numberEditor("display_translation_x", Material.RED_DYE, 0.1f, 0.01f, "%.2f"));
-        elements.add(EntityEditor.Element.numberEditor("display_translation_y", Material.GREEN_DYE, 0.1f, 0.01f, "%.2f"));
-        elements.add(EntityEditor.Element.numberEditor("display_translation_z", Material.BLUE_DYE, 0.1f, 0.01f, "%.2f"));
+        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_TRANSLATION_X, Material.RED_DYE, 0.1f, 0.01f));
+        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_TRANSLATION_Y, Material.GREEN_DYE, 0.1f, 0.01f));
+        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_TRANSLATION_Z, Material.BLUE_DYE, 0.1f, 0.01f));
         elements.add(EntityEditor.Element.empty());
 
-        elements.add(EntityEditor.Element.numberEditor("display_scale_x", Material.RED_TERRACOTTA, 0.1f, 0.01f, "%.2f"));
-        elements.add(EntityEditor.Element.numberEditor("display_scale_y", Material.GREEN_TERRACOTTA, 0.1f, 0.01f, "%.2f"));
-        elements.add(EntityEditor.Element.numberEditor("display_scale_z", Material.BLUE_TERRACOTTA, 0.1f, 0.01f, "%.2f"));
+        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_SCALE_X, Material.RED_TERRACOTTA, 0.1f, 0.01f));
+        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_SCALE_Y, Material.GREEN_TERRACOTTA, 0.1f, 0.01f));
+        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_SCALE_Z, Material.BLUE_TERRACOTTA, 0.1f, 0.01f));
         elements.add(EntityEditor.Element.lineBreak());
 
-        elements.add(EntityEditor.Element.numberEditor("display_left_rotation_x", Material.RED_GLAZED_TERRACOTTA, 1.0f, 0.1f, "%.1f°"));
-        elements.add(EntityEditor.Element.numberEditor("display_left_rotation_y", Material.GREEN_GLAZED_TERRACOTTA, 1.0f, 0.1f, "%.1f°"));
-        elements.add(EntityEditor.Element.numberEditor("display_left_rotation_z", Material.BLUE_GLAZED_TERRACOTTA, 1.0f, 0.1f, "%.1f°"));
+        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_LEFT_ROTATION_X, Material.RED_GLAZED_TERRACOTTA, 1.0f, 0.1f));
+        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_LEFT_ROTATION_Y, Material.GREEN_GLAZED_TERRACOTTA, 1.0f, 0.1f));
+        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_LEFT_ROTATION_Z, Material.BLUE_GLAZED_TERRACOTTA, 1.0f, 0.1f));
         elements.add(EntityEditor.Element.empty());
 
         elements.add(EntityEditor.Element.of(
@@ -372,28 +381,28 @@ public class DisplayHandler implements EntityEditorHandler<Display> {
                     int initBlock = targetEntity.getBrightness() != null ? targetEntity.getBrightness().getBlockLight() : 0;
                     int initSky = targetEntity.getBrightness() != null ? targetEntity.getBrightness().getSkyLight() : 0;
 
-                    io.papermc.paper.dialog.Dialog dialog = io.papermc.paper.dialog.Dialog.create(builder -> builder.empty()
-                            .base(io.papermc.paper.registry.data.dialog.DialogBase.builder(Component.text("明るさの設定"))
-                                    .afterAction(io.papermc.paper.registry.data.dialog.DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
-                                    .body(java.util.Collections.singletonList(io.papermc.paper.registry.data.dialog.body.DialogBody.plainMessage(Component.text("ブロック光と空の光を入力 (0~15)"), 200)))
-                                    .inputs(java.util.List.of(
-                                            io.papermc.paper.registry.data.dialog.input.DialogInput.numberRange("block", Component.text("ブロック光"), 0f, 15f).initial((float) initBlock).step(1f).build(),
-                                            io.papermc.paper.registry.data.dialog.input.DialogInput.numberRange("sky", Component.text("空の光"), 0f, 15f).initial((float) initSky).step(1f).build()
+                    Dialog dialog = Dialog.create(builder -> builder.empty()
+                            .base(DialogBase.builder(Component.text("明るさの設定"))
+                                    .afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
+                                    .body(Collections.singletonList(DialogBody.plainMessage(Component.text("ブロック光と空の光を入力 (0~15)"), 200)))
+                                    .inputs(List.of(
+                                            DialogInput.numberRange("block", Component.text("ブロック光"), 0f, 15f).initial((float) initBlock).step(1f).build(),
+                                            DialogInput.numberRange("sky", Component.text("空の光"), 0f, 15f).initial((float) initSky).step(1f).build()
                                     ))
                                     .canCloseWithEscape(true)
                                     .build())
-                            .type(io.papermc.paper.registry.data.dialog.type.DialogType.confirmation(
-                                    io.papermc.paper.registry.data.dialog.ActionButton.create(Component.text("保存", DefinedTextColor.GREEN), Component.empty(), 128, io.papermc.paper.registry.data.dialog.action.DialogAction.customClick((response, audience) -> {
+                            .type(DialogType.confirmation(
+                                    ActionButton.create(Component.text("保存", DefinedTextColor.GREEN), Component.empty(), 128, io.papermc.paper.registry.data.dialog.action.DialogAction.customClick((response, audience) -> {
                                         Float bf = response.getFloat("block");
                                         Float sf = response.getFloat("sky");
                                         if (bf != null && sf != null) {
                                             targetEntity.setBrightness(new Display.Brightness(bf.intValue(), sf.intValue()));
                                         }
                                         editor.open(player);
-                                    }, net.kyori.adventure.text.event.ClickCallback.Options.builder().uses(1).build())),
-                                    io.papermc.paper.registry.data.dialog.ActionButton.create(Component.text("キャンセル", DefinedTextColor.YELLOW), Component.empty(), 128, io.papermc.paper.registry.data.dialog.action.DialogAction.customClick((response, audience) -> {
+                                    }, ClickCallback.Options.builder().uses(1).build())),
+                                    ActionButton.create(Component.text("キャンセル", DefinedTextColor.YELLOW), Component.empty(), 128, io.papermc.paper.registry.data.dialog.action.DialogAction.customClick((response, audience) -> {
                                         editor.open(player);
-                                    }, net.kyori.adventure.text.event.ClickCallback.Options.builder().uses(1).build()))
+                                    }, ClickCallback.Options.builder().uses(1).build()))
                             ))
                     );
                     player.showDialog(dialog);
@@ -420,19 +429,19 @@ public class DisplayHandler implements EntityEditorHandler<Display> {
                     int initG = targetEntity.getGlowColorOverride() != null ? targetEntity.getGlowColorOverride().getGreen() : 255;
                     int initB = targetEntity.getGlowColorOverride() != null ? targetEntity.getGlowColorOverride().getBlue() : 255;
 
-                    io.papermc.paper.dialog.Dialog dialog = io.papermc.paper.dialog.Dialog.create(builder -> builder.empty()
-                            .base(io.papermc.paper.registry.data.dialog.DialogBase.builder(Component.text("発光色の設定"))
-                                    .afterAction(io.papermc.paper.registry.data.dialog.DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
-                                    .body(java.util.Collections.singletonList(io.papermc.paper.registry.data.dialog.body.DialogBody.plainMessage(Component.text("RGB(0~255)を入力してください"), 200)))
-                                    .inputs(java.util.List.of(
-                                            io.papermc.paper.registry.data.dialog.input.DialogInput.numberRange("r", Component.text("R(赤)"), 0f, 255f).initial((float) initR).step(1f).build(),
-                                            io.papermc.paper.registry.data.dialog.input.DialogInput.numberRange("g", Component.text("G(緑)"), 0f, 255f).initial((float) initG).step(1f).build(),
-                                            io.papermc.paper.registry.data.dialog.input.DialogInput.numberRange("b", Component.text("B(青)"), 0f, 255f).initial((float) initB).step(1f).build()
+                    Dialog dialog = Dialog.create(builder -> builder.empty()
+                            .base(DialogBase.builder(Component.text("発光色の設定"))
+                                    .afterAction(DialogBase.DialogAfterAction.WAIT_FOR_RESPONSE)
+                                    .body(Collections.singletonList(DialogBody.plainMessage(Component.text("RGB(0~255)を入力してください"), 200)))
+                                    .inputs(List.of(
+                                            DialogInput.numberRange("r", Component.text("R(赤)"), 0f, 255f).initial((float) initR).step(1f).build(),
+                                            DialogInput.numberRange("g", Component.text("G(緑)"), 0f, 255f).initial((float) initG).step(1f).build(),
+                                            DialogInput.numberRange("b", Component.text("B(青)"), 0f, 255f).initial((float) initB).step(1f).build()
                                     ))
                                     .canCloseWithEscape(true)
                                     .build())
-                            .type(io.papermc.paper.registry.data.dialog.type.DialogType.confirmation(
-                                    io.papermc.paper.registry.data.dialog.ActionButton.create(Component.text("保存", DefinedTextColor.GREEN), Component.empty(), 128, io.papermc.paper.registry.data.dialog.action.DialogAction.customClick((response, audience) -> {
+                            .type(DialogType.confirmation(
+                                    ActionButton.create(Component.text("保存", DefinedTextColor.GREEN), Component.empty(), 128, io.papermc.paper.registry.data.dialog.action.DialogAction.customClick((response, audience) -> {
                                         Float rf = response.getFloat("r");
                                         Float gf = response.getFloat("g");
                                         Float bf = response.getFloat("b");
@@ -440,10 +449,10 @@ public class DisplayHandler implements EntityEditorHandler<Display> {
                                             targetEntity.setGlowColorOverride(Color.fromRGB(rf.intValue(), gf.intValue(), bf.intValue()));
                                         }
                                         editor.open(player);
-                                    }, net.kyori.adventure.text.event.ClickCallback.Options.builder().uses(1).build())),
-                                    io.papermc.paper.registry.data.dialog.ActionButton.create(Component.text("キャンセル", DefinedTextColor.YELLOW), Component.empty(), 128, io.papermc.paper.registry.data.dialog.action.DialogAction.customClick((response, audience) -> {
+                                    }, ClickCallback.Options.builder().uses(1).build())),
+                                    ActionButton.create(Component.text("キャンセル", DefinedTextColor.YELLOW), Component.empty(), 128, io.papermc.paper.registry.data.dialog.action.DialogAction.customClick((response, audience) -> {
                                         editor.open(player);
-                                    }, net.kyori.adventure.text.event.ClickCallback.Options.builder().uses(1).build()))
+                                    }, ClickCallback.Options.builder().uses(1).build()))
                             ))
                     );
                     player.showDialog(dialog);

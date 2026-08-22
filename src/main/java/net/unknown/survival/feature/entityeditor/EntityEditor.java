@@ -48,7 +48,6 @@ import org.bukkit.persistence.PersistentDataType;
 
 import javax.annotation.Nullable;
 import java.util.*;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 public class EntityEditor<T extends Entity> extends GuiBase {
@@ -255,17 +254,14 @@ public class EntityEditor<T extends Entity> extends GuiBase {
             return new EntityEditor.Element<>(newHandlerName, iconProvider, clickAction);
         }
 
-        public static <E> Element<E> numberEditor(String actionKey, Material icon, float coarseStep, float fineStep, String formatPattern) {
-            EntityEditorRegistry.ToolAction<E> toolAction = EntityEditorRegistry.getToolAction(actionKey);
-            if (toolAction == null) throw new IllegalArgumentException("Unknown tool action: " + actionKey);
-
+        public static <E, V> Element<E> numberEditor(EntityEditorRegistry.ToolAction<E, V> toolAction, Material icon, V defaultCoarseStep, V defaultFineStep) {
             return Element.of(
                     targetEntity -> {
-                        float current = toolAction.currentValueGetter().apply(targetEntity);
+                        V current = toolAction.currentValueGetter().apply(targetEntity);
                         return new ItemStackBuilder(icon)
-                                .displayName(Component.text(toolAction.displayName() + ": " + String.format(formatPattern, current), DefinedTextColor.GREEN))
+                                .displayName(Component.text(toolAction.displayName() + ": " + toolAction.formatter().apply(current), DefinedTextColor.GREEN))
                                 .lore(
-                                        Component.text("左クリック: -" + coarseStep + " | 右クリック: +" + coarseStep, DefinedTextColor.YELLOW),
+                                        Component.text("左クリック: -" + defaultCoarseStep + " | 右クリック: +" + defaultCoarseStep, DefinedTextColor.YELLOW),
                                         Component.text("中クリック: リセット", DefinedTextColor.YELLOW),
                                         Component.text("Shift+左: ツール取得 | Shift+右: 微調整ツール取得", DefinedTextColor.AQUA)
                                 )
@@ -275,28 +271,26 @@ public class EntityEditor<T extends Entity> extends GuiBase {
                         if (event.isShiftClick()) {
                             if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
                             String toolDisplaySuffix = event.isRightClick() ? " (微調整)" : "";
-                            float step = event.isRightClick() ? fineStep : coarseStep;
+                            V step = event.isRightClick() ? defaultFineStep : defaultCoarseStep;
 
                             ItemStack tool = new ItemStackBuilder(Material.DEBUG_STICK)
                                     .displayName(Component.text("エンティティエディタ: " + toolAction.displayName() + toolDisplaySuffix, DefinedTextColor.LIGHT_PURPLE))
                                     .lore(
-                                            Component.text("左クリック: -" + String.format(formatPattern, step), DefinedTextColor.YELLOW),
-                                            Component.text("右クリック: +" + String.format(formatPattern, step), DefinedTextColor.YELLOW)
+                                            Component.text("左クリック: -" + toolAction.formatter().apply(step), DefinedTextColor.YELLOW),
+                                            Component.text("右クリック: +" + toolAction.formatter().apply(step), DefinedTextColor.YELLOW)
                                     )
                                     .custom(is -> is.editMeta(meta -> {
-                                            meta.getPersistentDataContainer().set(TOOL_KEY, PersistentDataType.STRING, actionKey);
-                                            meta.getPersistentDataContainer().set(TOOL_STEP_KEY, PersistentDataType.FLOAT, step);
+                                            meta.getPersistentDataContainer().set(TOOL_KEY, PersistentDataType.STRING, toolAction.key());
+                                            meta.getPersistentDataContainer().set(TOOL_STEP_KEY, PersistentDataType.STRING, toolAction.encoder().apply(step));
                                     }))
                                     .build();
                             ItemGiveQueue.queue(event.getWhoClicked().getUniqueId(), tool);
                         } else if (event.getClick() == ClickType.MIDDLE) {
                             toolAction.resetAction().accept(targetEntity);
                         } else if (event.getClick().isLeftClick()) {
-                            float current = toolAction.currentValueGetter().apply(targetEntity);
-                            toolAction.applyAction().accept(targetEntity, current - coarseStep);
+                            toolAction.decrementAction().accept(targetEntity, defaultCoarseStep);
                         } else if (event.getClick().isRightClick()) {
-                            float current = toolAction.currentValueGetter().apply(targetEntity);
-                            toolAction.applyAction().accept(targetEntity, current + coarseStep);
+                            toolAction.incrementAction().accept(targetEntity, defaultCoarseStep);
                         }
                     }
             );

@@ -32,6 +32,7 @@
 package net.unknown.survival.feature.entityeditor;
 
 import net.unknown.survival.feature.entityeditor.handlers.*;
+import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.*;
 import org.bukkit.entity.minecart.ExplosiveMinecart;
 import org.bukkit.material.Colorable;
@@ -42,12 +43,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import org.bukkit.util.Transformation;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 public class EntityEditorRegistry {
     private static final Map<Class<?>, EntityEditorHandler<?>> HANDLERS = new LinkedHashMap<>();
-    private static final Map<String, ToolAction<?>> TOOL_ACTIONS = new HashMap<>();
+    private static final Map<String, ToolAction<?, ?>> TOOL_ACTIONS = new HashMap<>();
+
+    private static final Function<String, Float> FLOAT_DECODER = Float::parseFloat;
+    private static final Function<Float, String> FLOAT_ENCODER = String::valueOf;
+    private static final Function<Float, String> FLOAT_FORMATTER = value -> String.format("%.2f", value);
+
+    private static final Function<String, Double> DOUBLE_DECODER = Double::parseDouble;
+    private static final Function<Double, String> DOUBLE_ENCODER = String::valueOf;
+    private static final Function<Double, String> DOUBLE_FORMATTER = value -> String.format("%.2f", value);
 
     public static void init() {
         registerHandler(Entity.class, new EntityHandler());
@@ -135,247 +147,607 @@ public class EntityEditorRegistry {
         registerHandler(Slime.class, new SlimeHandler());
         registerHandler(ZombieVillager.class, new ZombieVillagerHandler());
 
-        // --- ToolAction の登録 ---
-        registerDisplayScaleActions();
-        registerDisplayTranslationActions();
-        registerDisplayLeftRotationActions();
-        registerDisplayRightRotationActions();
-        registerEntityRotationActions();
+        ToolAction.nothing();
     }
 
-    public record ToolAction<T>(
-            Class<T> entityType,
-            String displayName,
-            BiConsumer<T, Float> applyAction,
-            java.util.function.Consumer<T> resetAction,
-            Function<T, Float> currentValueGetter
-    ) {}
-
-    public static <T> void registerToolAction(Class<T> entityType, String actionKey, String displayName,
-                                              BiConsumer<T, Float> applyAction,
-                                              java.util.function.Consumer<T> resetAction,
-                                              Function<T, Float> currentValueGetter) {
-        TOOL_ACTIONS.put(actionKey, new ToolAction<>(entityType, displayName, applyAction, resetAction, currentValueGetter));
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> ToolAction<T> getToolAction(String actionKey) {
-        return (ToolAction<T>) TOOL_ACTIONS.get(actionKey);
-    }
-
-    private static void registerDisplayScaleActions() {
-        registerToolAction(Display.class, "display_scale_x", "大きさ (X)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            new org.joml.Vector3f(val, t.getScale().y, t.getScale().z), t.getRightRotation()));
+    public record ToolAction<T,V>(Class<T> entityType, String key, String displayName,
+            Function<String, V> decoder, Function<V, String> encoder,
+            Function<V, String> formatter,
+            BiConsumer<T, V> applyAction, BiConsumer<T, V> incrementAction, BiConsumer<T, V> decrementAction,
+            Consumer<T> resetAction,
+            Function<T, V> currentValueGetter
+    ) {
+        public static final ToolAction<Display, Float> DISPLAY_SCALE_X = registerToolAction(Display.class, "display_scale_x", "大きさ (X)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            new Vector3f(value, current.getScale().y, current.getScale().z),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale().add(incrementValue, 0.0f, 0.0f),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale().add(-decrementValue, 0.0f, 0.0f),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            new org.joml.Vector3f(1.0f, t.getScale().y, t.getScale().z), t.getRightRotation()));
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            new Vector3f(1.0f, current.getScale().y, current.getScale().z),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> entity.getTransformation().getScale().x
         );
-        registerToolAction(Display.class, "display_scale_y", "大きさ (Y)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            new org.joml.Vector3f(t.getScale().x, val, t.getScale().z), t.getRightRotation()));
+
+        public static final ToolAction<Display, Float> DISPLAY_SCALE_Y = registerToolAction(Display.class, "display_scale_y", "大きさ (Y)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            new Vector3f(current.getScale().x, value, current.getScale().z),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale().add(0.0f, incrementValue, 0.0f),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale().add(0.0f, -decrementValue, 0.0f),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            new org.joml.Vector3f(t.getScale().x, 1.0f, t.getScale().z), t.getRightRotation()));
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            new Vector3f(current.getScale().x, 1.0f, current.getScale().z),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> entity.getTransformation().getScale().y
         );
-        registerToolAction(Display.class, "display_scale_z", "大きさ (Z)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            new org.joml.Vector3f(t.getScale().x, t.getScale().y, val), t.getRightRotation()));
+
+        public static final ToolAction<Display, Float> DISPLAY_SCALE_Z = registerToolAction(Display.class, "display_scale_z", "大きさ (Z)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            new Vector3f(current.getScale().x, current.getScale().y, value),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale().add(0.0f, 0.0f, incrementValue),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale().add(0.0f, 0.0f, -decrementValue),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            new org.joml.Vector3f(t.getScale().x, t.getScale().y, 1.0f), t.getRightRotation()));
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            new Vector3f(current.getScale().x, current.getScale().y, 1.0f),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> entity.getTransformation().getScale().z
         );
-    }
 
-    private static void registerDisplayTranslationActions() {
-        registerToolAction(Display.class, "display_translation_x", "移動 (X)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(new org.joml.Vector3f(val, t.getTranslation().y, t.getTranslation().z), t.getLeftRotation(), t.getScale(), t.getRightRotation()));
+        public static final ToolAction<Display, Float> DISPLAY_TRANSLATION_X = registerToolAction(Display.class, "display_translation_x", "移動 (X)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            new Vector3f(value, current.getTranslation().y, current.getTranslation().z),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation().add(incrementValue, 0.0f, 0.0f),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation().add(-decrementValue, 0.0f, 0.0f),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(new org.joml.Vector3f(0.0f, t.getTranslation().y, t.getTranslation().z), t.getLeftRotation(), t.getScale(), t.getRightRotation()));
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            new Vector3f(0.0f, current.getTranslation().y, current.getTranslation().z),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> entity.getTransformation().getTranslation().x
         );
-        registerToolAction(Display.class, "display_translation_y", "移動 (Y)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(new org.joml.Vector3f(t.getTranslation().x, val, t.getTranslation().z), t.getLeftRotation(), t.getScale(), t.getRightRotation()));
+
+        public static final ToolAction<Display, Float> DISPLAY_TRANSLATION_Y = registerToolAction(Display.class, "display_translation_y", "移動 (Y)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            new Vector3f(current.getTranslation().x, value, current.getTranslation().z),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation().add(0.0f, incrementValue, 0.0f),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation().add(0.0f, -decrementValue, 0.0f),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(new org.joml.Vector3f(t.getTranslation().x, 0.0f, t.getTranslation().z), t.getLeftRotation(), t.getScale(), t.getRightRotation()));
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            new Vector3f(current.getTranslation().x, 0.0f, current.getTranslation().z),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> entity.getTransformation().getTranslation().y
         );
-        registerToolAction(Display.class, "display_translation_z", "移動 (Z)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(new org.joml.Vector3f(t.getTranslation().x, t.getTranslation().y, val), t.getLeftRotation(), t.getScale(), t.getRightRotation()));
+
+        public static final ToolAction<Display, Float> DISPLAY_TRANSLATION_Z = registerToolAction(Display.class, "display_translation_z", "移動 (Z)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            new Vector3f(current.getTranslation().x, current.getTranslation().y, value),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation().add(0.0f, 0.0f, incrementValue),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation().add(0.0f, 0.0f, -decrementValue),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> {
-                    Transformation t = entity.getTransformation();
-                    entity.setTransformation(new Transformation(new org.joml.Vector3f(t.getTranslation().x, t.getTranslation().y, 0.0f), t.getLeftRotation(), t.getScale(), t.getRightRotation()));
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            new Vector3f(current.getTranslation().x, current.getTranslation().y, 0.0f),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
                 },
                 entity -> entity.getTransformation().getTranslation().z
         );
+
+        public static final ToolAction<Display, Float> DISPLAY_LEFT_ROTATION_X = registerToolAction(Display.class, "display_left_rotation_x", "左回転 (Pitch)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            new Quaternionf(value, current.getLeftRotation().y, current.getLeftRotation().z, current.getLeftRotation().w),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation().rotateX(incrementValue),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation().rotateX(-decrementValue),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                entity -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            new Quaternionf(0.0f, current.getLeftRotation().y, current.getLeftRotation().z, current.getLeftRotation().w),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                entity -> entity.getTransformation().getLeftRotation().x
+        );
+
+        public static final ToolAction<Display, Float> DISPLAY_LEFT_ROTATION_Y = registerToolAction(Display.class, "display_left_rotation_y", "左回転 (Yaw)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            new Quaternionf(current.getLeftRotation().x, value, current.getLeftRotation().z, current.getLeftRotation().w),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation().rotateY(incrementValue),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation().rotateY(-decrementValue),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                entity -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            new Quaternionf(current.getLeftRotation().x, 0.0f, current.getLeftRotation().z, current.getLeftRotation().w),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                entity -> entity.getTransformation().getLeftRotation().y
+        );
+
+        public static final ToolAction<Display, Float> DISPLAY_LEFT_ROTATION_Z = registerToolAction(Display.class, "display_left_rotation_z", "左回転 (Roll)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            new Quaternionf(current.getLeftRotation().x, current.getLeftRotation().y, value, current.getLeftRotation().w),
+                            current.getScale(),
+                            current.getRightRotation()
+                    ));
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation().rotateZ(incrementValue),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation().rotateZ(-decrementValue),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                entity -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            new Quaternionf(current.getLeftRotation().x, current.getLeftRotation().y, 0.0f, current.getLeftRotation().w),
+                            current.getScale(),
+                            current.getRightRotation())
+                    );
+                },
+                entity -> entity.getTransformation().getLeftRotation().z
+        );
+
+        public static final ToolAction<Display, Float> DISPLAY_RIGHT_ROTATION_X = registerToolAction(Display.class, "display_right_rotation_x", "右回転 (Pitch)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            new Quaternionf(value, current.getRightRotation().y, current.getRightRotation().z, current.getRightRotation().w)
+                    ));
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation().rotateX(incrementValue)
+                    ));
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation().rotateX(-decrementValue)
+                    ));
+                },
+                entity -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            new Quaternionf(0, current.getRightRotation().y, current.getRightRotation().z, current.getRightRotation().w)
+                    ));
+                },
+                entity -> entity.getTransformation().getRightRotation().x
+        );
+
+        public static final ToolAction<Display, Float> DISPLAY_RIGHT_ROTATION_Y = registerToolAction(Display.class, "display_right_rotation_y", "右回転 (Yaw)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            new Quaternionf(current.getRightRotation().x, value, current.getRightRotation().z, current.getRightRotation().w)
+                    ));
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation().rotateY(incrementValue))
+                    );
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation().rotateY(-decrementValue))
+                    );
+                },
+                entity -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            new Quaternionf(current.getRightRotation().x, 0, current.getRightRotation().z, current.getRightRotation().w)
+                    ));
+                },
+                entity -> entity.getTransformation().getRightRotation().y
+        );
+
+        public static final ToolAction<Display, Float> DISPLAY_RIGHT_ROTATION_Z = registerToolAction(Display.class, "display_right_rotation_z", "右回転 (Roll)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            new Quaternionf(current.getRightRotation().x, current.getRightRotation().y, value, current.getRightRotation().w)
+                    ));
+                },
+                (entity, incrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation().rotateZ(incrementValue))
+                    );
+                },
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            current.getRightRotation().rotateZ(-decrementValue))
+                    );
+                },
+                entity -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            new Quaternionf(current.getRightRotation().x, current.getRightRotation().y, 0, current.getRightRotation().w)
+                    ));
+                },
+                entity -> entity.getTransformation().getRightRotation().z
+        );
+
+        public static final ToolAction<Entity, Double> ENTITY_POSITION_X = registerToolAction(Entity.class, "entity_position_x", "位置 (X)",
+                DOUBLE_DECODER,
+                DOUBLE_ENCODER,
+                DOUBLE_FORMATTER,
+                (entity, value) -> ((CraftEntity) entity).getHandle().teleportTo(value, entity.getY(), entity.getZ()),
+                (entity, incrementValue) -> ((CraftEntity) entity).getHandle().teleportRelative(incrementValue, 0.0, 0.0),
+                (entity, decrementValue) -> ((CraftEntity) entity).getHandle().teleportRelative(-decrementValue, 0.0, 0.0),
+                entity -> { /* nothing to do. position is can't reset. */ },
+                entity -> entity.getX()
+        );
+
+        public static final ToolAction<Entity, Double> ENTITY_POSITION_Y = registerToolAction(Entity.class, "entity_position_y", "位置 (Y)",
+                DOUBLE_DECODER,
+                DOUBLE_ENCODER,
+                DOUBLE_FORMATTER,
+                (entity, value) -> ((CraftEntity) entity).getHandle().teleportTo(entity.getX(), value, entity.getZ()),
+                (entity, incrementValue) -> ((CraftEntity) entity).getHandle().teleportRelative(0.0, incrementValue, 0.0),
+                (entity, decrementValue) -> ((CraftEntity) entity).getHandle().teleportRelative(0.0, -decrementValue, 0.0),
+                entity -> { /* nothing to do. position is can't reset. */ },
+                entity -> entity.getY()
+        );
+
+        public static final ToolAction<Entity, Double> ENTITY_POSITION_Z = registerToolAction(Entity.class, "entity_position_z", "位置 (Z)",
+                DOUBLE_DECODER,
+                DOUBLE_ENCODER,
+                DOUBLE_FORMATTER,
+                (entity, value) -> ((CraftEntity) entity).getHandle().teleportTo(entity.getX(), entity.getY(), value),
+                (entity, incrementValue) -> ((CraftEntity) entity).getHandle().teleportRelative(0.0, 0.0, incrementValue),
+                (entity, decrementValue) -> ((CraftEntity) entity).getHandle().teleportRelative(0.0, 0.0, -decrementValue),
+                entity -> { /* nothing to do. position is can't reset. */ },
+                entity -> entity.getZ()
+        );
+
+        public static final ToolAction<Entity, Float> ENTITY_ROTATION_PITCH = registerToolAction(Entity.class, "entity_rotation_pitch", "向き (XRot / Pitch)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> entity.setRotation(entity.getYaw(), value),
+                (entity, incrementValue) -> entity.setRotation(entity.getYaw(), entity.getPitch() + incrementValue),
+                (entity, decrementValue) -> entity.setRotation(entity.getYaw(), entity.getPitch() - decrementValue),
+                entity -> entity.setRotation(entity.getYaw(), 0f),
+                entity -> entity.getPitch()
+        );
+
+        public static final ToolAction<Entity, Float> ENTITY_ROTATION_YAW = registerToolAction(Entity.class, "entity_rotation_yaw", "向き (YRot / Yaw)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> entity.setRotation(value, entity.getPitch()),
+                (entity, incrementValue) -> entity.setRotation(entity.getYaw() + incrementValue, entity.getPitch()),
+                (entity, decrementValue) -> entity.setRotation(entity.getYaw() - decrementValue, entity.getPitch()),
+                entity -> entity.setRotation(0f, entity.getPitch()),
+                entity -> entity.getYaw()
+        );
+
+        public static void nothing() {}
     }
 
-    private static org.joml.Vector3f getEulerAngles(org.joml.Quaternionf q) {
-        org.joml.Vector3f euler = new org.joml.Vector3f();
-        q.getEulerAnglesXYZ(euler);
-        return new org.joml.Vector3f((float) Math.toDegrees(euler.x), (float) Math.toDegrees(euler.y), (float) Math.toDegrees(euler.z));
+    public static <T,V> ToolAction<T, V> registerToolAction(Class<T> entityType, String actionKey, String displayName,
+                                              Function<String, V> decoder,
+                                              Function<V, String> encoder,
+                                              Function<V, String> formatter,
+                                              BiConsumer<T, V> applyAction,
+                                              BiConsumer<T, V> incrementAction,
+                                              BiConsumer<T, V> decrementAction,
+                                              Consumer<T> resetAction,
+                                              Function<T, V> currentValueGetter) {
+        ToolAction<T, V> toolAction = new ToolAction<>(entityType, actionKey, displayName, decoder, encoder, formatter, applyAction, incrementAction, decrementAction, resetAction, currentValueGetter);
+        TOOL_ACTIONS.put(actionKey, toolAction);
+        return toolAction;
     }
 
-    private static void registerDisplayLeftRotationActions() {
-        registerToolAction(Display.class, "display_left_rotation_x", "左回転 (Pitch)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getLeftRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(),
-                            new org.joml.Quaternionf().rotationXYZ((float) Math.toRadians(val), (float) Math.toRadians(euler.y), (float) Math.toRadians(euler.z)),
-                            t.getScale(), t.getRightRotation()));
-                },
-                entity -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getLeftRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(),
-                            new org.joml.Quaternionf().rotationXYZ(0, (float) Math.toRadians(euler.y), (float) Math.toRadians(euler.z)),
-                            t.getScale(), t.getRightRotation()));
-                },
-                entity -> getEulerAngles(entity.getTransformation().getLeftRotation()).x
-        );
-        registerToolAction(Display.class, "display_left_rotation_y", "左回転 (Yaw)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getLeftRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(),
-                            new org.joml.Quaternionf().rotationXYZ((float) Math.toRadians(euler.x), (float) Math.toRadians(val), (float) Math.toRadians(euler.z)),
-                            t.getScale(), t.getRightRotation()));
-                },
-                entity -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getLeftRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(),
-                            new org.joml.Quaternionf().rotationXYZ((float) Math.toRadians(euler.x), 0, (float) Math.toRadians(euler.z)),
-                            t.getScale(), t.getRightRotation()));
-                },
-                entity -> getEulerAngles(entity.getTransformation().getLeftRotation()).y
-        );
-        registerToolAction(Display.class, "display_left_rotation_z", "左回転 (Roll)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getLeftRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(),
-                            new org.joml.Quaternionf().rotationXYZ((float) Math.toRadians(euler.x), (float) Math.toRadians(euler.y), (float) Math.toRadians(val)),
-                            t.getScale(), t.getRightRotation()));
-                },
-                entity -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getLeftRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(),
-                            new org.joml.Quaternionf().rotationXYZ((float) Math.toRadians(euler.x), (float) Math.toRadians(euler.y), 0),
-                            t.getScale(), t.getRightRotation()));
-                },
-                entity -> getEulerAngles(entity.getTransformation().getLeftRotation()).z
-        );
-    }
-
-    private static void registerDisplayRightRotationActions() {
-        registerToolAction(Display.class, "display_right_rotation_x", "右回転 (Pitch)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getRightRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            t.getScale(), new org.joml.Quaternionf().rotationXYZ((float) Math.toRadians(val), (float) Math.toRadians(euler.y), (float) Math.toRadians(euler.z))));
-                },
-                entity -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getRightRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            t.getScale(), new org.joml.Quaternionf().rotationXYZ(0, (float) Math.toRadians(euler.y), (float) Math.toRadians(euler.z))));
-                },
-                entity -> getEulerAngles(entity.getTransformation().getRightRotation()).x
-        );
-        registerToolAction(Display.class, "display_right_rotation_y", "右回転 (Yaw)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getRightRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            t.getScale(), new org.joml.Quaternionf().rotationXYZ((float) Math.toRadians(euler.x), (float) Math.toRadians(val), (float) Math.toRadians(euler.z))));
-                },
-                entity -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getRightRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            t.getScale(), new org.joml.Quaternionf().rotationXYZ((float) Math.toRadians(euler.x), 0, (float) Math.toRadians(euler.z))));
-                },
-                entity -> getEulerAngles(entity.getTransformation().getRightRotation()).y
-        );
-        registerToolAction(Display.class, "display_right_rotation_z", "右回転 (Roll)",
-                (entity, val) -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getRightRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            t.getScale(), new org.joml.Quaternionf().rotationXYZ((float) Math.toRadians(euler.x), (float) Math.toRadians(euler.y), (float) Math.toRadians(val))));
-                },
-                entity -> {
-                    Transformation t = entity.getTransformation();
-                    org.joml.Vector3f euler = getEulerAngles(t.getRightRotation());
-                    entity.setTransformation(new Transformation(t.getTranslation(), t.getLeftRotation(),
-                            t.getScale(), new org.joml.Quaternionf().rotationXYZ((float) Math.toRadians(euler.x), (float) Math.toRadians(euler.y), 0)));
-                },
-                entity -> getEulerAngles(entity.getTransformation().getRightRotation()).z
-        );
-    }
-
-    private static void registerEntityRotationActions() {
-        registerToolAction(Entity.class, "entity_xrot", "向き (XRot)",
-                (entity, val) -> {
-                    net.minecraft.world.entity.Entity h = ((org.bukkit.craftbukkit.entity.CraftEntity) entity).getHandle();
-                    h.setXRot(val);
-                },
-                entity -> {
-                    net.minecraft.world.entity.Entity h = ((org.bukkit.craftbukkit.entity.CraftEntity) entity).getHandle();
-                    h.setXRot(0f);
-                },
-                entity -> ((org.bukkit.craftbukkit.entity.CraftEntity) entity).getHandle().getXRot()
-        );
-        registerToolAction(Entity.class, "entity_yrot", "向き (YRot)",
-                (entity, val) -> {
-                    net.minecraft.world.entity.Entity h = ((org.bukkit.craftbukkit.entity.CraftEntity) entity).getHandle();
-                    h.setYRot(val);
-                    h.setYHeadRot(val);
-                    h.setYBodyRot(val);
-                },
-                entity -> {
-                    net.minecraft.world.entity.Entity h = ((org.bukkit.craftbukkit.entity.CraftEntity) entity).getHandle();
-                    h.setYRot(0f);
-                    h.setYHeadRot(0f);
-                    h.setYBodyRot(0f);
-                },
-                entity -> ((org.bukkit.craftbukkit.entity.CraftEntity) entity).getHandle().getYRot()
-        );
+    @SuppressWarnings("unchecked")
+    public static <T,V> ToolAction<T,V> getToolAction(String actionKey) {
+        return (ToolAction<T,V>) TOOL_ACTIONS.get(actionKey);
     }
 
     public static boolean hasHandler(Class<?> entityClass) {

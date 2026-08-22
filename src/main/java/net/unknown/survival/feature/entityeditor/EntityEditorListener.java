@@ -56,6 +56,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.RayTraceResult;
 import org.bukkit.util.Vector;
 
+import javax.annotation.Nullable;
 import java.util.concurrent.ExecutionException;
 
 public class EntityEditorListener implements Listener {
@@ -121,11 +122,11 @@ public class EntityEditorListener implements Listener {
         ItemStack heldItem = player.getInventory().getItemInMainHand();
         if (heldItem.hasItemMeta()) {
             ItemMeta meta = heldItem.getItemMeta();
-            String toolActionKey = meta.getPersistentDataContainer().get(EntityEditor.TOOL_KEY, PersistentDataType.STRING);
-            float toolStep = meta.getPersistentDataContainer().getOrDefault(EntityEditor.TOOL_STEP_KEY, PersistentDataType.FLOAT, Float.MIN_VALUE);
+            String toolActionKey = meta.getPersistentDataContainer().get(EntityEditor.TOOL_KEY, PersistentDataType.STRING);;
 
             if (toolActionKey != null) {
-                handleToolAction(player, event, toolActionKey, toolStep);
+                @Nullable String encodedStep = meta.getPersistentDataContainer().get(EntityEditor.TOOL_STEP_KEY, PersistentDataType.STRING);
+                handleToolAction(player, event, toolActionKey, encodedStep);
                 return;
             }
         }
@@ -145,12 +146,18 @@ public class EntityEditorListener implements Listener {
     }
 
     @SuppressWarnings("unchecked")
-    private void handleToolAction(Player player, PlayerInteractEvent event, String actionKey, float step) {
-        if (step == Float.MIN_VALUE) return; // step が設定されていない
+    private <V> void handleToolAction(Player player, PlayerInteractEvent event, String actionKey, @Nullable String encodedStep) {
+        if (encodedStep == null) return; // step が設定されていない
 
-        EntityEditorRegistry.ToolAction<Entity> toolAction = EntityEditorRegistry.getToolAction(actionKey);
+        EntityEditorRegistry.ToolAction<Entity, V> toolAction = EntityEditorRegistry.getToolAction(actionKey);
         if (toolAction == null) {
             player.sendActionBar(Component.text("不明なツールアクション: " + actionKey, DefinedTextColor.RED));
+            return;
+        }
+
+        V step = toolAction.decoder().apply(encodedStep);
+        if (step == null) {
+            player.sendActionBar(Component.text("「" + encodedStep + "」を解釈できません", DefinedTextColor.RED));
             return;
         }
 
@@ -169,13 +176,16 @@ public class EntityEditorListener implements Listener {
         boolean isDecrease = (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK);
         if (!isIncrease && !isDecrease) return;
 
-        float oldValue = toolAction.currentValueGetter().apply(target);
-        float delta = isIncrease ? step : -step;
-        toolAction.applyAction().accept(target, oldValue + delta);
-        float newValue = toolAction.currentValueGetter().apply(target);
+        V oldValue = toolAction.currentValueGetter().apply(target);
+        if (isIncrease) {
+            toolAction.incrementAction().accept(target, step);
+        } else {
+            toolAction.decrementAction().accept(target, step);
+        }
+        V newValue = toolAction.currentValueGetter().apply(target);
 
         // ActionBar フィードバック
-        player.sendActionBar(Component.text(toolAction.displayName() + ": " + String.format("%.2f", oldValue) + " → " + String.format("%.2f", newValue), DefinedTextColor.GREEN));
+        player.sendActionBar(Component.text(toolAction.displayName() + ": " + toolAction.formatter().apply(oldValue) + " → " + toolAction.formatter().apply(newValue), DefinedTextColor.GREEN));
         event.setCancelled(true);
     }
 

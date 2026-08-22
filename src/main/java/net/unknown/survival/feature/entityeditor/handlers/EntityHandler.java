@@ -33,15 +33,16 @@ package net.unknown.survival.feature.entityeditor.handlers;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.unknown.core.builder.ItemStackBuilder;
+import net.unknown.core.define.DefinedItemStackBuilders;
 import net.unknown.core.define.DefinedTextColor;
 import net.unknown.core.gui.SignGui;
-import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.NewMessageUtil;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
+import net.unknown.survival.feature.entityeditor.EntityEditorRegistry;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.entity.CraftEntity;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -179,8 +180,24 @@ public class EntityHandler implements EntityEditorHandler<Entity> {
                                 .build(),
                         (editor, targetEntity, event) -> targetEntity.setGlowing(!targetEntity.isGlowing())),
                 EntityEditor.Element.lineBreak(),
-                EntityEditor.Element.numberEditor("entity_xrot", Material.COMPASS, 1.0f, 0.1f, "%.1f"),
-                EntityEditor.Element.numberEditor("entity_yrot", Material.RECOVERY_COMPASS, 1.0f, 0.1f, "%.1f")
+                EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.ENTITY_ROTATION_PITCH, Material.COMPASS, 1.0f, 0.1f),
+                EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.ENTITY_ROTATION_YAW, Material.RECOVERY_COMPASS, 1.0f, 0.1f),
+                EntityEditor.Element.empty(),
+                EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.ENTITY_POSITION_X, Material.RED_WOOL, 1.0d, 0.1d),
+                EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.ENTITY_POSITION_Y, Material.GREEN_WOOL, 1.0d, 0.1d),
+                EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.ENTITY_POSITION_Z, Material.BLUE_WOOL, 1.0d, 0.1d),
+                EntityEditor.Element.empty(),
+                EntityEditor.Element.of(
+                        targetEntity -> new ItemStackBuilder(Material.LAVA_BUCKET)
+                                .displayName(Component.text("エンティティを削除", DefinedTextColor.RED, TextDecoration.BOLD))
+                                .lore(Component.text("注意: エンティティが**確認なしで**即消去されます", DefinedTextColor.RED, TextDecoration.BOLD), Component.empty(), Component.text("クリックで削除", DefinedTextColor.YELLOW))
+                                .build(),
+                        (editor, targetEntity, event) -> {
+                            targetEntity.remove();
+                            event.getWhoClicked().closeInventory();
+                        }
+                ),
+                EntityEditor.Element.lineBreak()
         );
     }
 }
