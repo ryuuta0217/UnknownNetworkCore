@@ -53,6 +53,7 @@ import java.util.function.Function;
 
 public class EntityEditor<T extends Entity> extends GuiBase {
     public static final NamespacedKey TOOL_KEY = new NamespacedKey("unknown-network", "entity_editor_tool");
+    public static final NamespacedKey TOOL_STEP_KEY = new NamespacedKey("unknown-network", "entity_editor_tool_step");
     private static final int CONTENT_ROWS = 5;
     private static final int CONTENT_SLOTS = CONTENT_ROWS * 9;
     private static final int NAV_ROW_START = CONTENT_SLOTS;
@@ -273,7 +274,6 @@ public class EntityEditor<T extends Entity> extends GuiBase {
                     (editor, targetEntity, event) -> {
                         if (event.isShiftClick()) {
                             if (event.getCurrentItem() == null || event.getCurrentItem().getType() == Material.AIR) return;
-                            String suffix = event.isLeftClick() ? "_coarse" : "_fine";
                             String toolDisplaySuffix = event.isRightClick() ? " (微調整)" : "";
                             float step = event.isRightClick() ? fineStep : coarseStep;
 
@@ -283,8 +283,10 @@ public class EntityEditor<T extends Entity> extends GuiBase {
                                             Component.text("左クリック: -" + String.format(formatPattern, step), DefinedTextColor.YELLOW),
                                             Component.text("右クリック: +" + String.format(formatPattern, step), DefinedTextColor.YELLOW)
                                     )
-                                    .custom(is -> is.editMeta(meta ->
-                                            meta.getPersistentDataContainer().set(TOOL_KEY, PersistentDataType.STRING, actionKey + suffix)))
+                                    .custom(is -> is.editMeta(meta -> {
+                                            meta.getPersistentDataContainer().set(TOOL_KEY, PersistentDataType.STRING, actionKey);
+                                            meta.getPersistentDataContainer().set(TOOL_STEP_KEY, PersistentDataType.FLOAT, step);
+                                    }))
                                     .build();
                             ItemGiveQueue.queue(event.getWhoClicked().getUniqueId(), tool);
                         } else if (event.getClick() == ClickType.MIDDLE) {

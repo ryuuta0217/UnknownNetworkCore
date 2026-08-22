@@ -119,19 +119,18 @@ public class EntityEditorListener implements Listener {
 
         // ツールアイテムかどうか判定
         ItemStack heldItem = player.getInventory().getItemInMainHand();
-        String toolActionKey = null;
         if (heldItem.hasItemMeta()) {
             ItemMeta meta = heldItem.getItemMeta();
-            toolActionKey = meta.getPersistentDataContainer().get(EntityEditor.TOOL_KEY, PersistentDataType.STRING);
+            String toolActionKey = meta.getPersistentDataContainer().get(EntityEditor.TOOL_KEY, PersistentDataType.STRING);
+            float toolStep = meta.getPersistentDataContainer().getOrDefault(EntityEditor.TOOL_STEP_KEY, PersistentDataType.FLOAT, Float.MIN_VALUE);
+
+            if (toolActionKey != null) {
+                handleToolAction(player, event, toolActionKey, toolStep);
+                return;
+            }
         }
 
-        if (toolActionKey != null) {
-            // --- ツールアイテムモード ---
-            handleToolAction(player, event, toolActionKey);
-            return;
-        }
-
-        // --- 通常モード (既存のGUI起動) ---
+        // EntityEditor (GUI)
         if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
 
         // BoundingBoxを持たないエンティティなどのためのフォールバックRayTrace判定
@@ -146,22 +145,14 @@ public class EntityEditorListener implements Listener {
     }
 
     @SuppressWarnings("unchecked")
-    private void handleToolAction(Player player, PlayerInteractEvent event, String fullActionKey) {
-        // アクションキーから精度サフィックスを分離: "display_scale_x_coarse" -> "display_scale_x" + "_coarse"
-        float step;
-        String baseKey;
-        if (fullActionKey.endsWith("_fine")) {
-            baseKey = fullActionKey.substring(0, fullActionKey.length() - "_fine".length());
-            step = 0.01f;
-        } else if (fullActionKey.endsWith("_coarse")) {
-            baseKey = fullActionKey.substring(0, fullActionKey.length() - "_coarse".length());
-            step = 0.1f;
-        } else {
-            return; // 不明なサフィックス
-        }
+    private void handleToolAction(Player player, PlayerInteractEvent event, String actionKey, float step) {
+        if (step == Float.MIN_VALUE) return; // step が設定されていない
 
-        EntityEditorRegistry.ToolAction<Entity> toolAction = EntityEditorRegistry.getToolAction(baseKey);
-        if (toolAction == null) return;
+        EntityEditorRegistry.ToolAction<Entity> toolAction = EntityEditorRegistry.getToolAction(actionKey);
+        if (toolAction == null) {
+            player.sendActionBar(Component.text("不明なツールアクション: " + actionKey, DefinedTextColor.RED));
+            return;
+        }
 
         // RayTrace でエンティティを特定
         AttributeInstance rangeAttr = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE);
