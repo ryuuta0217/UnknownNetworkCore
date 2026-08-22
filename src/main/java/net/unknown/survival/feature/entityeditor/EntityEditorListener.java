@@ -68,19 +68,15 @@ public class EntityEditorListener implements Listener {
             Bukkit.getOnlinePlayers().forEach(player -> {
                 PlayerInventory inventory = player.getInventory();
                 if (inventory.getItemInMainHand().getType() == Material.DEBUG_STICK) {
-                    ItemStack handItem = inventory.getItemInMainHand();
-
-                    if (!handItem.getPersistentDataContainer().has(EntityEditor.TOOL_KEY, PersistentDataType.STRING)) {
-                        AttributeInstance rangeAttr = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE);
-                        double range = rangeAttr != null ? rangeAttr.getValue() : 3.0;
-                        try {
-                            Entity target = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> rayTraceTarget(player, range)).get();
-                            if (target != null) {
-                                player.spawnParticle(Particle.END_ROD, target.getLocation(), 1, 0, 0, 0, 0, null, true);
-                            }
-                        } catch (InterruptedException | ExecutionException e) {
-                            throw new RuntimeException(e);
+                    AttributeInstance rangeAttr = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE);
+                    double range = rangeAttr != null ? rangeAttr.getValue() : 3.0;
+                    try {
+                        Entity target = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> rayTraceTarget(player, range)).get();
+                        if (target != null) {
+                            player.spawnParticle(Particle.END_ROD, target.getLocation(), 1, 0, 0, 0, 0, null, true);
                         }
+                    } catch (InterruptedException | ExecutionException e) {
+                        throw new RuntimeException(e);
                     }
                 }
             });
