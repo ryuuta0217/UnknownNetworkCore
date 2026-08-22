@@ -160,6 +160,19 @@ public class EntityHandler implements EntityEditorHandler<Entity> {
                         }
                 ),
                 EntityEditor.Element.of(
+                        targetEntity -> new ItemStackBuilder(Material.GLASS)
+                                .displayName(targetEntity.isInvisible() ? Component.text("透明: 有効", DefinedTextColor.GREEN) : Component.text("透明: 無効", DefinedTextColor.RED))
+                                .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                                .build(),
+                        (editor, targetEntity, event) -> {
+                            targetEntity.setInvisible(!targetEntity.isInvisible());
+                            if (targetEntity.isInvisible()) {
+                                targetEntity.setGlowing(true);
+                                NewMessageUtil.sendMessage(event.getWhoClicked(), Component.text("透明化を有効にしたため、発光を自動的に有効にしました。", DefinedTextColor.YELLOW));
+                            }
+                        }
+                ),
+                EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(Material.LIGHT)
                                 .displayName(targetEntity.isGlowing() ? Component.text("発光: 有効", DefinedTextColor.GREEN) : Component.text("発光: 無効", DefinedTextColor.RED))
                                 .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
