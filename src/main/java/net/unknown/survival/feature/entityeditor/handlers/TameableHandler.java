@@ -38,6 +38,7 @@ import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
 import org.bukkit.entity.Tameable;
+import org.bukkit.event.inventory.ClickType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,13 +51,18 @@ public class TameableHandler implements EntityEditorHandler<Tameable> {
 
         elements.add(EntityEditor.Element.of(
                 targetEntity -> new ItemStackBuilder(Material.BONE)
-                        .displayName(Component.text("Tamed: " + (targetEntity.isTamed() ? "Enabled (ON)" : "Disabled (OFF)"), targetEntity.isTamed() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("Click to toggle", DefinedTextColor.YELLOW))
+                        .displayName(Component.text("手懐けられているか: " + (targetEntity.isTamed() ? "はい" : "いいえ"), targetEntity.isTamed() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                        .lore(Component.text("飼い主: " + (targetEntity.isTamed() && targetEntity.getOwner() != null ? targetEntity.getOwner().getName() : "-")), Component.empty(), Component.text("クリックで切り替え", DefinedTextColor.YELLOW), Component.text("中クリックで自分を飼い主にする", DefinedTextColor.YELLOW))
                         .build(),
-                (editor, targetEntity, event) -> targetEntity.setTamed(!targetEntity.isTamed())
+                (editor, targetEntity, event) -> {
+                    if (event.getClick() != ClickType.MIDDLE) {
+                        targetEntity.setTamed(!targetEntity.isTamed());
+                    } else {
+                        targetEntity.setTamed(true);
+                        targetEntity.setOwner(event.getWhoClicked());
+                    }
+                }
         ));
-
-        elements.add(EntityEditor.Element.lineBreak());
         return elements;
     }
 }

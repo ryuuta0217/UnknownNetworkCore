@@ -123,7 +123,7 @@ public class VillagerHandler implements EntityEditorHandler<Villager> {
                             lore.add(Component.text("左クリック: 前 | 右クリック: 次", DefinedTextColor.YELLOW));
 
                             return new ItemStackBuilder(getProfessionMaterial(current))
-                                    .displayName(Component.text("Profession: ", DefinedTextColor.GREEN).append(Component.translatable("entity.minecraft.villager." + current.getKey().value(), DefinedTextColor.GREEN)))
+                                    .displayName(Component.text("職業: ", DefinedTextColor.GREEN).append(Component.translatable("entity.minecraft.villager." + current.getKey().value(), DefinedTextColor.GREEN)))
                                     .lore(lore.toArray(Component[]::new))
                                     .build();
                         },
@@ -147,7 +147,7 @@ public class VillagerHandler implements EntityEditorHandler<Villager> {
                 ),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(Material.ZOMBIE_HEAD)
-                                .displayName(Component.text("Zombify", DefinedTextColor.RED))
+                                .displayName(Component.text("ゾンビ化", DefinedTextColor.RED))
                                 .lore(Component.text("クリックでゾンビ村人に変異", DefinedTextColor.YELLOW))
                                 .build(),
                         (editor, targetEntity, event) -> {
@@ -159,7 +159,7 @@ public class VillagerHandler implements EntityEditorHandler<Villager> {
                 ),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(Material.EXPERIENCE_BOTTLE)
-                                .displayName(Component.text("VillagerLevel: " + targetEntity.getVillagerLevel(), DefinedTextColor.GREEN))
+                                .displayName(Component.text("職業レベル: " + targetEntity.getVillagerLevel(), DefinedTextColor.GREEN))
                                 .lore(
                                         Component.text("左/右クリックで増減 (1〜5)", DefinedTextColor.YELLOW)
                                 )
@@ -175,7 +175,7 @@ public class VillagerHandler implements EntityEditorHandler<Villager> {
                 ),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(Material.EMERALD_ORE)
-                                .displayName(Component.text("VillagerExperience: " + targetEntity.getVillagerExperience(), DefinedTextColor.GREEN))
+                                .displayName(Component.text("職業経験値: " + targetEntity.getVillagerExperience(), DefinedTextColor.GREEN))
                                 .lore(
                                         Component.text("左/右クリックで増減(100)、中クリックでリセット", DefinedTextColor.YELLOW)
                                 )

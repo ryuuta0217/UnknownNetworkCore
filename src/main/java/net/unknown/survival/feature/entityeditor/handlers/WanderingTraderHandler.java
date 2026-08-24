@@ -51,7 +51,7 @@ public class WanderingTraderHandler implements EntityEditorHandler<WanderingTrad
                         targetEntity -> new ItemStackBuilder(Material.CLOCK)
                                 .displayName(Component.text("デスポーンまでの遅延", DefinedTextColor.GREEN))
                                 .lore(
-                                        Component.text("現在: " + targetEntity.getDespawnDelay() + " ticks", DefinedTextColor.GRAY),
+                                        Component.text("現在: " + targetEntity.getDespawnDelay() + "ﾃｨｯｸ (" + (targetEntity.getDespawnDelay() / 20) + "秒)", DefinedTextColor.GRAY),
                                         Component.text("左/右クリックで増減(20) | 中クリックでリセット", DefinedTextColor.YELLOW)
                                 )
                                 .build(),
@@ -68,21 +68,15 @@ public class WanderingTraderHandler implements EntityEditorHandler<WanderingTrad
                 ),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(targetEntity.canDrinkPotion() ? Material.POTION : Material.GLASS_BOTTLE)
-                                .displayName(Component.text("CanDrinkPotion", DefinedTextColor.GREEN))
-                                .lore(
-                                        Component.text("現在: " + (targetEntity.canDrinkPotion() ? "はい" : "いいえ"), DefinedTextColor.GRAY),
-                                        Component.text("クリックで切り替え", DefinedTextColor.YELLOW)
-                                )
+                                .displayName(Component.text("ポーションを飲めるか: " + (targetEntity.canDrinkPotion() ? "はい" : "いいえ"), targetEntity.canDrinkPotion() ? DefinedTextColor.GREEN : DefinedTextColor.YELLOW))
+                                .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
                         (editor, targetEntity, event) -> targetEntity.setCanDrinkPotion(!targetEntity.canDrinkPotion())
                 ),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(targetEntity.canDrinkMilk() ? Material.MILK_BUCKET : Material.BUCKET)
-                                .displayName(Component.text("CanDrinkMilk", DefinedTextColor.GREEN))
-                                .lore(
-                                        Component.text("現在: " + (targetEntity.canDrinkMilk() ? "はい" : "いいえ"), DefinedTextColor.GRAY),
-                                        Component.text("クリックで切り替え", DefinedTextColor.YELLOW)
-                                )
+                                .displayName(Component.text("ミルクを飲めるか: " + (targetEntity.canDrinkMilk() ? "はい" : "いいえ"), targetEntity.canDrinkPotion() ? DefinedTextColor.GREEN : DefinedTextColor.YELLOW))
+                                .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
                         (editor, targetEntity, event) -> targetEntity.setCanDrinkMilk(!targetEntity.canDrinkMilk())
                 ),

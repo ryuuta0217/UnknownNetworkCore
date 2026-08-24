@@ -39,6 +39,8 @@ import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
 import org.bukkit.Material;
 import org.bukkit.entity.BlockDisplay;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BlockDataMeta;
+import org.bukkit.inventory.meta.BlockStateMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +62,14 @@ public class BlockDisplayHandler implements EntityEditorHandler<BlockDisplay> {
                         Material mat = cursor.getType();
                         if (mat.isBlock()) {
                             targetEntity.setBlock(mat.createBlockData());
+
+                            if (cursor.getItemMeta() instanceof BlockDataMeta blockDataMeta) {
+                                targetEntity.setBlock(blockDataMeta.getBlockData(mat));
+                            }
+
+                            if (cursor.getItemMeta() instanceof BlockStateMeta blockStateMeta) {
+                                targetEntity.setBlock(blockStateMeta.getBlockState().getBlockData());
+                            }
                         }
                     }
                 }

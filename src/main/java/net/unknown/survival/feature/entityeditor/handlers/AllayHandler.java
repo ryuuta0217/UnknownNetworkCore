@@ -58,21 +58,15 @@ public class AllayHandler implements EntityEditorHandler<Allay> {
         return List.of(
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(targetEntity.canDuplicate() ? Material.AMETHYST_SHARD : Material.FLINT)
-                                .displayName(Component.text("CanDuplicate", DefinedTextColor.GREEN))
-                                .lore(
-                                        Component.text("現在: " + (targetEntity.canDuplicate() ? "はい" : "いいえ"), DefinedTextColor.GRAY),
-                                        Component.text("クリックで切り替え", DefinedTextColor.YELLOW)
-                                )
+                                .displayName(Component.text("CanDuplicate: " + (targetEntity.canDuplicate() ? "はい" : "いいえ"), targetEntity.canDuplicate() ? DefinedTextColor.GREEN : DefinedTextColor.YELLOW))
+                                .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
                         (editor, targetEntity, event) -> targetEntity.setCanDuplicate(!targetEntity.canDuplicate())
                 ),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(Material.CLOCK)
-                                .displayName(Component.text("DuplicationCooldown", DefinedTextColor.GREEN))
-                                .lore(
-                                        Component.text("現在: " + targetEntity.getDuplicationCooldown() + " ticks", DefinedTextColor.GRAY),
-                                        Component.text("クリックで入力", DefinedTextColor.YELLOW)
-                                )
+                                .displayName(Component.text("DuplicationCooldown: " + targetEntity.getDuplicationCooldown() + " ticks", DefinedTextColor.GREEN))
+                                .lore(Component.text("クリックで入力", DefinedTextColor.YELLOW))
                                 .build(),
                         (editor, targetEntity, event) -> {
                             long initCooldown = targetEntity.getDuplicationCooldown();
@@ -105,11 +99,8 @@ public class AllayHandler implements EntityEditorHandler<Allay> {
                 ),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(targetEntity.isDancing() ? Material.JUKEBOX : Material.NOTE_BLOCK)
-                                .displayName(Component.text("Dancing", DefinedTextColor.GREEN))
-                                .lore(
-                                        Component.text("現在: " + (targetEntity.isDancing() ? "はい" : "いいえ"), DefinedTextColor.GRAY),
-                                        Component.text("クリックで切り替え", DefinedTextColor.YELLOW)
-                                )
+                                .displayName(Component.text("Dancing: " + (targetEntity.isDancing() ? "はい" : "いいえ"), targetEntity.isDancing() ? DefinedTextColor.GREEN : DefinedTextColor.YELLOW))
+                                .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
                         (editor, targetEntity, event) -> {
                             if (targetEntity.isDancing()) {
@@ -122,9 +113,7 @@ public class AllayHandler implements EntityEditorHandler<Allay> {
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(Material.EGG)
                                 .displayName(Component.text("Duplicate", DefinedTextColor.LIGHT_PURPLE))
-                                .lore(
-                                        Component.text("クリックで直ちに増殖させます", DefinedTextColor.YELLOW)
-                                )
+                                .lore(Component.text("クリックで直ちに増殖させます", DefinedTextColor.YELLOW))
                                 .build(),
                         (editor, targetEntity, event) -> {
                             targetEntity.duplicateAllay();

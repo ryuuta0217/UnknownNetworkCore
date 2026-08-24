@@ -65,7 +65,7 @@ public class CatHandler implements EntityEditorHandler<Cat> {
                             lore.add(Component.text("左クリック: 前 | 右クリック: 次", DefinedTextColor.YELLOW));
 
                             return new ItemStackBuilder(Material.COD)
-                                    .displayName(Component.text("Type: " + current.getKey().value(), DefinedTextColor.GREEN))
+                                    .displayName(Component.text("種類: " + current.getKey().value(), DefinedTextColor.GREEN))
                                     .lore(lore.toArray(Component[]::new))
                                     .build();
                         },
@@ -91,6 +91,7 @@ public class CatHandler implements EntityEditorHandler<Cat> {
                         targetEntity -> {
                             DyeColor current = targetEntity.getCollarColor();
                             java.util.List<Component> lore = new java.util.ArrayList<>();
+                            lore.add(Component.text("※手懐けられている状態にする必要があります", DefinedTextColor.YELLOW));
                             for (DyeColor c : colors) {
                                 lore.add(Component.text((c == current ? "▶" : "■"), c == current ? DefinedTextColor.GREEN : DefinedTextColor.GRAY).appendSpace().append(ColorableHandler.colorName(c)));
                             }
@@ -98,7 +99,7 @@ public class CatHandler implements EntityEditorHandler<Cat> {
                             lore.add(Component.text("左クリック: 前 | 右クリック: 次", DefinedTextColor.YELLOW));
 
                             return new ItemStackBuilder(ColorableHandler.dyeMaterial(current))
-                                    .displayName(Component.text("CollarColor:", ColorableHandler.textColor(current)).appendSpace().append(ColorableHandler.colorName(current)))
+                                    .displayName(Component.text("首輪の色:", ColorableHandler.textColor(current)).appendSpace().append(ColorableHandler.colorName(current)))
                                     .lore(lore.toArray(Component[]::new))
                                     .build();
                         },

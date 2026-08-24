@@ -254,7 +254,7 @@ public class EntityEditor<T extends Entity> extends GuiBase {
             return new EntityEditor.Element<>(newHandlerName, iconProvider, clickAction);
         }
 
-        public static <E, V> Element<E> numberEditor(EntityEditorRegistry.ToolAction<E, V> toolAction, Material icon, V defaultCoarseStep, V defaultFineStep) {
+        public static <T, E, V> Element<E> numberEditor(EntityEditorHandler<T> handler, EntityEditorRegistry.ToolAction<E, V> toolAction, Material icon, V defaultCoarseStep, V defaultFineStep) {
             return Element.of(
                     targetEntity -> {
                         V current = toolAction.currentValueGetter().apply(targetEntity);
@@ -277,7 +277,9 @@ public class EntityEditor<T extends Entity> extends GuiBase {
                                     .displayName(Component.text("エンティティエディタ: " + toolAction.displayName() + toolDisplaySuffix, DefinedTextColor.LIGHT_PURPLE))
                                     .lore(
                                             Component.text("左クリック: -" + toolAction.formatter().apply(step), DefinedTextColor.YELLOW),
-                                            Component.text("右クリック: +" + toolAction.formatter().apply(step), DefinedTextColor.YELLOW)
+                                            Component.text("右クリック: +" + toolAction.formatter().apply(step), DefinedTextColor.YELLOW),
+                                            Component.empty(),
+                                            Component.text(handler.getClass().getSimpleName(), DefinedTextColor.DARK_GRAY)
                                     )
                                     .custom(is -> is.editMeta(meta -> {
                                             meta.getPersistentDataContainer().set(TOOL_KEY, PersistentDataType.STRING, toolAction.key());

@@ -50,7 +50,7 @@ public class BreedableHandler implements EntityEditorHandler<Breedable> {
 
         elements.add(EntityEditor.Element.of(
                 targetEntity -> new ItemStackBuilder(Material.WHEAT)
-                        .displayName(Component.text("CanBreed: " + (targetEntity.canBreed() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.canBreed() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                        .displayName(Component.text("繁殖可能: " + (targetEntity.canBreed() ? "はい" : "いいえ"), targetEntity.canBreed() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
                         .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                         .build(),
                 (editor, targetEntity, event) -> targetEntity.setBreed(!targetEntity.canBreed())

@@ -69,22 +69,6 @@ public class LivingEntityHandler implements EntityEditorHandler<LivingEntity> {
         ));
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.ELYTRA)
-                        .displayName(Component.text("Gliding: " + (targetEntity.isGliding() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isGliding() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setGliding(!targetEntity.isGliding())
-        ));
-
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.WATER_BUCKET)
-                        .displayName(Component.text("Swimming: " + (targetEntity.isSwimming() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSwimming() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setSwimming(!targetEntity.isSwimming())
-        ));
-
-        elements.add(EntityEditor.Element.of(
                 targetEntity -> new ItemStackBuilder(Material.GLASS_BOTTLE)
                         .displayName(Component.text("残空気量: " + targetEntity.getRemainingAir(), DefinedTextColor.GREEN))
                         .lore(
@@ -139,6 +123,68 @@ public class LivingEntityHandler implements EntityEditorHandler<LivingEntity> {
                                     try {
                                         int val = Integer.parseInt(((TextComponent) lines.get(0)).content());
                                         targetEntity.setMaximumAir(Math.max(0, val));
+                                    } catch (Exception ignored) {
+                                    }
+                                    editor.open(player);
+                                })
+                                .open();
+                    }
+                }
+        ));
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.ARROW)
+                        .displayName(Component.text("刺さっている矢の数: " + targetEntity.getArrowsInBody(), DefinedTextColor.GREEN))
+                        .lore(Component.text("左クリック: -1 | 右クリック: +1", DefinedTextColor.YELLOW),
+                                Component.text("中クリック: 直接入力", DefinedTextColor.YELLOW)
+                        )
+                        .build(),
+                (editor, targetEntity, event) -> {
+                    if (event.getClick().isLeftClick()) {
+                        targetEntity.setArrowsInBody(Math.max(0, targetEntity.getArrowsInBody() - 1));
+                    } else if (event.getClick().isRightClick()) {
+                        targetEntity.setArrowsInBody(targetEntity.getArrowsInBody() + 1);
+                    } else if (event.getClick() == ClickType.MIDDLE) {
+                        Player player = (Player) event.getWhoClicked();
+                        editor.onceDeferUnregisterOnClose();
+                        new SignGui()
+                                .withTarget(player)
+                                .withLines(Component.text(targetEntity.getArrowsInBody()), Component.text("^^^"), Component.text("刺さっている矢の数を入力"), Component.empty())
+                                .onComplete(lines -> {
+                                    try {
+                                        int val = Integer.parseInt(((TextComponent) lines.getFirst()).content());
+                                        targetEntity.setArrowsInBody(Math.max(0, val));
+                                    } catch (Exception ignored) {
+                                    }
+                                    editor.open(player);
+                                })
+                                .open();
+                    }
+                }
+        ));
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.BREEZE_ROD)
+                        .displayName(Component.text("刺さっている鉢の針の数: " + targetEntity.getBeeStingersInBody(), DefinedTextColor.GREEN))
+                        .lore(Component.text("左クリック: -1 | 右クリック: +1", DefinedTextColor.YELLOW),
+                                Component.text("中クリック: 直接入力", DefinedTextColor.YELLOW)
+                        )
+                        .build(),
+                (editor, targetEntity, event) -> {
+                    if (event.getClick().isLeftClick()) {
+                        targetEntity.setBeeStingersInBody(Math.max(0, targetEntity.getBeeStingersInBody() - 1));
+                    } else if (event.getClick().isRightClick()) {
+                        targetEntity.setBeeStingersInBody(targetEntity.getBeeStingersInBody() + 1);
+                    } else if (event.getClick() == ClickType.MIDDLE) {
+                        Player player = (Player) event.getWhoClicked();
+                        editor.onceDeferUnregisterOnClose();
+                        new SignGui()
+                                .withTarget(player)
+                                .withLines(Component.text(targetEntity.getBeeStingersInBody()), Component.text("^^^"), Component.text("刺さっている鉢の針の数を入力"), Component.empty())
+                                .onComplete(lines -> {
+                                    try {
+                                        int val = Integer.parseInt(((TextComponent) lines.getFirst()).content());
+                                        targetEntity.setBeeStingersInBody(Math.max(0, val));
                                     } catch (Exception ignored) {
                                     }
                                     editor.open(player);

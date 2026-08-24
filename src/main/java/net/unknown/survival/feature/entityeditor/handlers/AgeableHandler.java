@@ -86,27 +86,27 @@ public class AgeableHandler implements EntityEditorHandler<Ageable> {
         ));
 
         elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.LEAD)
-                        .displayName(Component.text("年齢固定: " + (targetEntity.getAgeLock() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.getAgeLock() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
-                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setAgeLock(!targetEntity.getAgeLock())
-        ));
-
-        elements.add(EntityEditor.Element.of(
                 targetEntity -> new ItemStackBuilder(Material.WHEAT_SEEDS)
-                        .displayName(Component.text("Baby", DefinedTextColor.LIGHT_PURPLE))
-                        .lore(Component.text("クリックで実行", DefinedTextColor.YELLOW))
+                        .displayName(Component.text("子供にする", DefinedTextColor.LIGHT_PURPLE))
+                        .lore(Component.text("※子供のまま固定したいときは年齢固定を有効にしてください", DefinedTextColor.YELLOW), Component.empty(), Component.text("クリックで実行", DefinedTextColor.YELLOW))
                         .build(),
                 (editor, targetEntity, event) -> targetEntity.setBaby()
         ));
 
         elements.add(EntityEditor.Element.of(
                 targetEntity -> new ItemStackBuilder(Material.WHEAT)
-                        .displayName(Component.text("Adult", DefinedTextColor.LIGHT_PURPLE))
+                        .displayName(Component.text("大人にする", DefinedTextColor.LIGHT_PURPLE))
                         .lore(Component.text("クリックで実行", DefinedTextColor.YELLOW))
                         .build(),
                 (editor, targetEntity, event) -> targetEntity.setAdult()
+        ));
+
+        elements.add(EntityEditor.Element.of(
+                targetEntity -> new ItemStackBuilder(Material.LEAD)
+                        .displayName(Component.text("年齢固定: " + (targetEntity.getAgeLock() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.getAgeLock() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                        .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
+                        .build(),
+                (editor, targetEntity, event) -> targetEntity.setAgeLock(!targetEntity.getAgeLock())
         ));
 
         elements.add(EntityEditor.Element.lineBreak());

@@ -180,12 +180,12 @@ public class EntityHandler implements EntityEditorHandler<Entity> {
                                 .build(),
                         (editor, targetEntity, event) -> targetEntity.setGlowing(!targetEntity.isGlowing())),
                 EntityEditor.Element.lineBreak(),
-                EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.ENTITY_ROTATION_PITCH, Material.COMPASS, 1.0f, 0.1f),
-                EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.ENTITY_ROTATION_YAW, Material.RECOVERY_COMPASS, 1.0f, 0.1f),
+                EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.ENTITY_ROTATION_PITCH, Material.COMPASS, 1.0f, 0.1f),
+                EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.ENTITY_ROTATION_YAW, Material.RECOVERY_COMPASS, 1.0f, 0.1f),
                 EntityEditor.Element.empty(),
-                EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.ENTITY_POSITION_X, Material.RED_WOOL, 1.0d, 0.1d),
-                EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.ENTITY_POSITION_Y, Material.GREEN_WOOL, 1.0d, 0.1d),
-                EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.ENTITY_POSITION_Z, Material.BLUE_WOOL, 1.0d, 0.1d),
+                EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.ENTITY_POSITION_X, Material.RED_WOOL, 1.0d, 0.1d),
+                EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.ENTITY_POSITION_Y, Material.GREEN_WOOL, 1.0d, 0.1d),
+                EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.ENTITY_POSITION_Z, Material.BLUE_WOOL, 1.0d, 0.1d),
                 EntityEditor.Element.empty(),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(Material.LAVA_BUCKET)

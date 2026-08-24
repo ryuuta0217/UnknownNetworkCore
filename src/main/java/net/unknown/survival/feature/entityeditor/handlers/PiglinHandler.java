@@ -64,14 +64,6 @@ public class PiglinHandler implements EntityEditorHandler<Piglin> {
                 (editor, targetEntity, event) -> targetEntity.setIsAbleToHunt(!targetEntity.isAbleToHunt())
         ));
 
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.WHEAT_SEEDS)
-                        .displayName(Component.text("Baby", DefinedTextColor.LIGHT_PURPLE))
-                        .lore(Component.text("クリックで実行", DefinedTextColor.YELLOW))
-                        .build(),
-                (editor, targetEntity, event) -> targetEntity.setBaby(!targetEntity.isBaby())
-        ));
-
         elements.add(EntityEditor.Element.lineBreak());
         return elements;
     }

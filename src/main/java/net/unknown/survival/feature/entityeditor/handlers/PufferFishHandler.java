@@ -83,8 +83,6 @@ public class PufferFishHandler implements EntityEditorHandler<PufferFish> {
                     }
                 }
         ));
-
-        elements.add(EntityEditor.Element.lineBreak());
         return elements;
     }
 }

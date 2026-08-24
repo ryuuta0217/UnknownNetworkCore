@@ -50,7 +50,7 @@ public class SheepHandler implements EntityEditorHandler<Sheep> {
 
         elements.add(EntityEditor.Element.of(
                 targetEntity -> new ItemStackBuilder(Material.SHEARS)
-                        .displayName(Component.text("毛を刈られた状態: " + (targetEntity.isSheared() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                        .displayName(Component.text("毛: " + (targetEntity.isSheared() ? "禿" : "生"), targetEntity.isSheared() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
                         .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                         .build(),
                 (editor, targetEntity, event) -> targetEntity.setSheared(!targetEntity.isSheared())

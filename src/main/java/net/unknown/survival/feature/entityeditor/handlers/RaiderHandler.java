@@ -69,32 +69,23 @@ public class RaiderHandler implements EntityEditorHandler<Raider> {
                             }
 
                             return builder
-                                    .displayName(Component.text("PatrolLeader", DefinedTextColor.GREEN))
-                                    .lore(
-                                            Component.text("現在: " + (targetEntity.isPatrolLeader() ? "はい" : "いいえ"), DefinedTextColor.GRAY),
-                                            Component.text("クリックで切り替え", DefinedTextColor.YELLOW)
-                                    )
+                                    .displayName(Component.text("PatrolLeader: " + (targetEntity.isPatrolLeader() ? "はい" : "いいえ"), targetEntity.isPatrolLeader() ? DefinedTextColor.GREEN : DefinedTextColor.YELLOW))
+                                    .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                     .build();
                         },
                         (editor, targetEntity, event) -> targetEntity.setPatrolLeader(!targetEntity.isPatrolLeader())
                 ),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(targetEntity.isCanJoinRaid() ? Material.CROSSBOW : Material.STICK)
-                                .displayName(Component.text("CanJoinRaid", DefinedTextColor.GREEN))
-                                .lore(
-                                        Component.text("現在: " + (targetEntity.isCanJoinRaid() ? "はい" : "いいえ"), DefinedTextColor.GRAY),
-                                        Component.text("クリックで切り替え", DefinedTextColor.YELLOW)
-                                )
+                                .displayName(Component.text("CanJoinRaid: " + (targetEntity.isCanJoinRaid() ? "はい" : "いいえ"), targetEntity.isCanJoinRaid() ? DefinedTextColor.GREEN : DefinedTextColor.YELLOW))
+                                .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
                         (editor, targetEntity, event) -> targetEntity.setCanJoinRaid(!targetEntity.isCanJoinRaid())
                 ),
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(targetEntity.isCelebrating() ? Material.FIREWORK_ROCKET : Material.GUNPOWDER)
-                                .displayName(Component.text("Celebrating", DefinedTextColor.GREEN))
-                                .lore(
-                                        Component.text("現在: " + (targetEntity.isCelebrating() ? "はい" : "いいえ"), DefinedTextColor.GRAY),
-                                        Component.text("クリックで切り替え", DefinedTextColor.YELLOW)
-                                )
+                                .displayName(Component.text("Celebrating: " + (targetEntity.isCelebrating() ? "はい" : "いいえ"), targetEntity.isCelebrating() ? DefinedTextColor.GREEN : DefinedTextColor.YELLOW))
+                                .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
                         (editor, targetEntity, event) -> targetEntity.setCelebrating(!targetEntity.isCelebrating())
                 ),

@@ -83,7 +83,7 @@ public class AxolotlHandler implements EntityEditorHandler<Axolotl> {
 
         elements.add(EntityEditor.Element.of(
                 targetEntity -> new ItemStackBuilder(Material.TROPICAL_FISH)
-                        .displayName(Component.text("PlayingDead: " + (targetEntity.isPlayingDead() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isPlayingDead() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
+                        .displayName(Component.text("死んだふり: " + (targetEntity.isPlayingDead() ? "有効 (ON)" : "無効 (OFF)"), targetEntity.isPlayingDead() ? DefinedTextColor.GREEN : DefinedTextColor.RED))
                         .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                         .build(),
                 (editor, targetEntity, event) -> targetEntity.setPlayingDead(!targetEntity.isPlayingDead())

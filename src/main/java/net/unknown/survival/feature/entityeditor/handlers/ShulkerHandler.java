@@ -31,42 +31,18 @@
 
 package net.unknown.survival.feature.entityeditor.handlers;
 
-import net.kyori.adventure.text.Component;
-import net.unknown.core.builder.ItemStackBuilder;
-import net.unknown.core.define.DefinedTextColor;
 import net.unknown.survival.feature.entityeditor.EntityEditor;
 import net.unknown.survival.feature.entityeditor.EntityEditorHandler;
+import net.unknown.survival.feature.entityeditor.EntityEditorRegistry;
 import org.bukkit.Material;
 import org.bukkit.entity.Shulker;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ShulkerHandler implements EntityEditorHandler<Shulker> {
 
     @Override
     public List<EntityEditor.Element<Shulker>> getElements(Shulker entity) {
-        List<EntityEditor.Element<Shulker>> elements = new ArrayList<>();
-
-        elements.add(EntityEditor.Element.of(
-                targetEntity -> new ItemStackBuilder(Material.SHULKER_SHELL)
-                        .displayName(Component.text("Peek", DefinedTextColor.GREEN))
-                        .lore(
-                                Component.text("Current: " + String.format("%.2f", targetEntity.getPeek()), DefinedTextColor.GRAY),
-                                Component.text("Left/Right click to adjust (0.1)", DefinedTextColor.YELLOW)
-                        )
-                        .build(),
-                (editor, targetEntity, event) -> {
-                    float peek = targetEntity.getPeek();
-                    if (event.isLeftClick()) {
-                        targetEntity.setPeek(Math.max(0.0f, peek - 0.1f));
-                    } else if (event.isRightClick()) {
-                        targetEntity.setPeek(Math.min(1.0f, peek + 0.1f));
-                    }
-                }
-        ));
-
-        elements.add(EntityEditor.Element.lineBreak());
-        return elements;
+        return List.of(EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.SHULKER_PEEK, Material.SHULKER_SHELL, 0.1f, 0.01f));
     }
 }

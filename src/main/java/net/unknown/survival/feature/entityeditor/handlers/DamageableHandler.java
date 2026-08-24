@@ -57,7 +57,7 @@ public class DamageableHandler implements EntityEditorHandler<Damageable> {
 
         elements.add(EntityEditor.Element.of(
                 targetEntity -> new ItemStackBuilder(Material.APPLE)
-                        .displayName(Component.text("Health: " + String.format("%.2f", targetEntity.getHealth()), DefinedTextColor.GREEN))
+                        .displayName(Component.text("体力: " + String.format("%.2f", targetEntity.getHealth()), DefinedTextColor.GREEN))
                         .lore(
                                 Component.text("左クリック: -1.0 | 右クリック: +1.0", DefinedTextColor.YELLOW),
                                 Component.text("中クリック: 直接入力", DefinedTextColor.YELLOW)
@@ -94,7 +94,7 @@ public class DamageableHandler implements EntityEditorHandler<Damageable> {
                     AttributeInstance maxHealthAttr = targetEntity instanceof Attributable attr ? attr.getAttribute(Attribute.MAX_HEALTH) : null;
                     double maxHealth = maxHealthAttr != null ? maxHealthAttr.getValue() : 0.0;
                     return new ItemStackBuilder(Material.GOLDEN_APPLE)
-                            .displayName(Component.text("MaxHealth: " + String.format("%.2f", maxHealth), DefinedTextColor.GREEN))
+                            .displayName(Component.text("最大体力: " + String.format("%.2f", maxHealth), DefinedTextColor.GREEN))
                             .lore(
                                     Component.text("左クリック: -1.0 | 右クリック: +1.0", DefinedTextColor.YELLOW),
                                     Component.text("中クリック: 直接入力", DefinedTextColor.YELLOW)
@@ -129,7 +129,7 @@ public class DamageableHandler implements EntityEditorHandler<Damageable> {
 
         elements.add(EntityEditor.Element.of(
                 targetEntity -> new ItemStackBuilder(Material.POTION)
-                        .displayName(Component.text("Heal", DefinedTextColor.LIGHT_PURPLE))
+                        .displayName(Component.text("体力回復", DefinedTextColor.LIGHT_PURPLE))
                         .lore(Component.text("クリックで実行", DefinedTextColor.YELLOW))
                         .build(),
                 (editor, targetEntity, event) -> {
@@ -146,8 +146,6 @@ public class DamageableHandler implements EntityEditorHandler<Damageable> {
                         .build(),
                 (editor, targetEntity, event) -> targetEntity.setHealth(0.0)
         ));
-
-        elements.add(EntityEditor.Element.lineBreak());
         return elements;
     }
 }

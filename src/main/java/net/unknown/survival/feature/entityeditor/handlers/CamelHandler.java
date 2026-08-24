@@ -48,11 +48,8 @@ public class CamelHandler implements EntityEditorHandler<Camel> {
         return List.of(
                 EntityEditor.Element.of(
                         targetEntity -> new ItemStackBuilder(targetEntity.isDashing() ? Material.GOLDEN_BOOTS : Material.LEATHER_BOOTS)
-                                .displayName(Component.text("Dashing", DefinedTextColor.GREEN))
-                                .lore(
-                                        Component.text("現在: " + (targetEntity.isDashing() ? "はい" : "いいえ"), DefinedTextColor.GRAY),
-                                        Component.text("クリックで切り替え", DefinedTextColor.YELLOW)
-                                )
+                                .displayName(Component.text("ダッシュ中: " + (targetEntity.isDashing() ? "はい" : "いいえ"), targetEntity.isDashing() ? DefinedTextColor.GREEN : DefinedTextColor.YELLOW))
+                                .lore(Component.text("クリックで切り替え", DefinedTextColor.YELLOW))
                                 .build(),
                         (editor, targetEntity, event) -> targetEntity.setDashing(!targetEntity.isDashing())
                 ),

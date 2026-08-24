@@ -347,19 +347,19 @@ public class DisplayHandler implements EntityEditorHandler<Display> {
                 }
         ));
 
-        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_TRANSLATION_X, Material.RED_DYE, 0.1f, 0.01f));
-        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_TRANSLATION_Y, Material.GREEN_DYE, 0.1f, 0.01f));
-        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_TRANSLATION_Z, Material.BLUE_DYE, 0.1f, 0.01f));
+        elements.add(EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.DISPLAY_TRANSLATION_X, Material.RED_DYE, 0.1f, 0.01f));
+        elements.add(EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.DISPLAY_TRANSLATION_Y, Material.GREEN_DYE, 0.1f, 0.01f));
+        elements.add(EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.DISPLAY_TRANSLATION_Z, Material.BLUE_DYE, 0.1f, 0.01f));
         elements.add(EntityEditor.Element.empty());
 
-        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_SCALE_X, Material.RED_TERRACOTTA, 0.1f, 0.01f));
-        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_SCALE_Y, Material.GREEN_TERRACOTTA, 0.1f, 0.01f));
-        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_SCALE_Z, Material.BLUE_TERRACOTTA, 0.1f, 0.01f));
+        elements.add(EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.DISPLAY_SCALE_X, Material.RED_TERRACOTTA, 0.1f, 0.01f));
+        elements.add(EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.DISPLAY_SCALE_Y, Material.GREEN_TERRACOTTA, 0.1f, 0.01f));
+        elements.add(EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.DISPLAY_SCALE_Z, Material.BLUE_TERRACOTTA, 0.1f, 0.01f));
         elements.add(EntityEditor.Element.lineBreak());
 
-        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_LEFT_ROTATION_X, Material.RED_GLAZED_TERRACOTTA, 1.0f, 0.1f));
-        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_LEFT_ROTATION_Y, Material.GREEN_GLAZED_TERRACOTTA, 1.0f, 0.1f));
-        elements.add(EntityEditor.Element.numberEditor(EntityEditorRegistry.ToolAction.DISPLAY_LEFT_ROTATION_Z, Material.BLUE_GLAZED_TERRACOTTA, 1.0f, 0.1f));
+        elements.add(EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.DISPLAY_LEFT_ROTATION_X, Material.RED_GLAZED_TERRACOTTA, 1.0f, 0.1f));
+        elements.add(EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.DISPLAY_LEFT_ROTATION_Y, Material.GREEN_GLAZED_TERRACOTTA, 1.0f, 0.1f));
+        elements.add(EntityEditor.Element.numberEditor(this, EntityEditorRegistry.ToolAction.DISPLAY_LEFT_ROTATION_Z, Material.BLUE_GLAZED_TERRACOTTA, 1.0f, 0.1f));
         elements.add(EntityEditor.Element.empty());
 
         elements.add(EntityEditor.Element.of(

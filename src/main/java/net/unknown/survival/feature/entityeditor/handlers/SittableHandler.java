@@ -55,8 +55,6 @@ public class SittableHandler implements EntityEditorHandler<Sittable> {
                         .build(),
                 (editor, targetEntity, event) -> targetEntity.setSitting(!targetEntity.isSitting())
         ));
-
-        elements.add(EntityEditor.Element.lineBreak());
         return elements;
     }
 }

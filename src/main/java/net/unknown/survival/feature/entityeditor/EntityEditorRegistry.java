@@ -53,6 +53,10 @@ public class EntityEditorRegistry {
     private static final Map<Class<?>, EntityEditorHandler<?>> HANDLERS = new LinkedHashMap<>();
     private static final Map<String, ToolAction<?, ?>> TOOL_ACTIONS = new HashMap<>();
 
+    private static final Function<String, Integer> INTEGER_DECODER = Integer::parseInt;
+    private static final Function<Integer, String> INTEGER_ENCODER = String::valueOf;
+    private static final Function<Integer, String> INTEGER_FORMATTER = String::valueOf;
+
     private static final Function<String, Float> FLOAT_DECODER = Float::parseFloat;
     private static final Function<Float, String> FLOAT_ENCODER = String::valueOf;
     private static final Function<Float, String> FLOAT_FORMATTER = value -> String.format("%.2f", value);
@@ -726,6 +730,28 @@ public class EntityEditorRegistry {
                 (entity, decrementValue) -> entity.setRotation(entity.getYaw() - decrementValue, entity.getPitch()),
                 entity -> entity.setRotation(0f, entity.getPitch()),
                 entity -> entity.getYaw()
+        );
+
+        public static final ToolAction<Slime, Integer> SLIME_SIZE = registerToolAction(Slime.class, "slime_size", "大きさ",
+                INTEGER_DECODER,
+                INTEGER_ENCODER,
+                INTEGER_FORMATTER,
+                (entity, value) -> entity.setSize(value),
+                (entity, incrementValue) -> entity.setSize(Math.min(127, entity.getSize() + incrementValue)),
+                (entity, decrementValue) -> entity.setSize(Math.max(1, entity.getSize() - decrementValue)),
+                entity -> entity.setSize(1),
+                Slime::getSize
+        );
+
+        public static final ToolAction<Shulker, Float> SHULKER_PEEK = registerToolAction(Shulker.class, "shulker_peek", "Peek",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                FLOAT_FORMATTER,
+                (entity, value) -> entity.setPeek(value),
+                (entity, incrementValue) -> entity.setPeek(Math.min(1.0f, entity.getPeek() + incrementValue)),
+                (entity, decrementValue) -> entity.setPeek(Math.max(0.0f, entity.getPeek() - decrementValue)),
+                entity -> entity.setPeek(0.0f),
+                Shulker::getPeek
         );
 
         public static void nothing() {}
