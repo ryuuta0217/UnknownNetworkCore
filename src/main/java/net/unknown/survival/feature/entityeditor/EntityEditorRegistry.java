@@ -60,6 +60,7 @@ public class EntityEditorRegistry {
     private static final Function<String, Float> FLOAT_DECODER = Float::parseFloat;
     private static final Function<Float, String> FLOAT_ENCODER = String::valueOf;
     private static final Function<Float, String> FLOAT_FORMATTER = value -> String.format("%.2f", value);
+    private static final Function<Float, String> DEGREE_FORMATTER = value -> String.format("%.1f°", value);
 
     private static final Function<String, Double> DOUBLE_DECODER = Double::parseDouble;
     private static final Function<Double, String> DOUBLE_ENCODER = String::valueOf;
@@ -419,15 +420,18 @@ public class EntityEditorRegistry {
                 entity -> entity.getTransformation().getTranslation().z
         );
 
-        public static final ToolAction<Display, Float> DISPLAY_LEFT_ROTATION_X = registerToolAction(Display.class, "display_left_rotation_x", "左回転 (Pitch)",
+        public static final ToolAction<Display, Float> DISPLAY_LEFT_ROTATION_X = registerToolAction(Display.class, "display_left_rotation_x", "左回転 (上下 / Pitch)",
                 FLOAT_DECODER,
                 FLOAT_ENCODER,
-                FLOAT_FORMATTER,
+                DEGREE_FORMATTER,
                 (entity, value) -> {
                     Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getLeftRotation().getEulerAnglesXYZ(euler);
+                    euler.x = (float) Math.toRadians(value);
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            new Quaternionf(value, current.getLeftRotation().y, current.getLeftRotation().z, current.getLeftRotation().w),
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z),
                             current.getScale(),
                             current.getRightRotation())
                     );
@@ -436,7 +440,7 @@ public class EntityEditorRegistry {
                     Transformation current = entity.getTransformation();
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            current.getLeftRotation().rotateX(incrementValue),
+                            new Quaternionf(current.getLeftRotation()).rotateX((float) Math.toRadians(incrementValue)),
                             current.getScale(),
                             current.getRightRotation())
                     );
@@ -445,32 +449,42 @@ public class EntityEditorRegistry {
                     Transformation current = entity.getTransformation();
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            current.getLeftRotation().rotateX(-decrementValue),
+                            new Quaternionf(current.getLeftRotation()).rotateX((float) Math.toRadians(-decrementValue)),
                             current.getScale(),
                             current.getRightRotation())
                     );
                 },
                 entity -> {
                     Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getLeftRotation().getEulerAnglesXYZ(euler);
+                    euler.x = 0;
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            new Quaternionf(0.0f, current.getLeftRotation().y, current.getLeftRotation().z, current.getLeftRotation().w),
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z),
                             current.getScale(),
                             current.getRightRotation())
                     );
                 },
-                entity -> entity.getTransformation().getLeftRotation().x
+                entity -> {
+                    Vector3f euler = new Vector3f();
+                    entity.getTransformation().getLeftRotation().getEulerAnglesXYZ(euler);
+                    return (float) Math.toDegrees(euler.x);
+                }
         );
 
-        public static final ToolAction<Display, Float> DISPLAY_LEFT_ROTATION_Y = registerToolAction(Display.class, "display_left_rotation_y", "左回転 (Yaw)",
+        public static final ToolAction<Display, Float> DISPLAY_LEFT_ROTATION_Y = registerToolAction(Display.class, "display_left_rotation_y", "左回転 (左右 / Yaw)",
                 FLOAT_DECODER,
                 FLOAT_ENCODER,
-                FLOAT_FORMATTER,
+                DEGREE_FORMATTER,
                 (entity, value) -> {
                     Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getLeftRotation().getEulerAnglesXYZ(euler);
+                    euler.y = (float) Math.toRadians(value);
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            new Quaternionf(current.getLeftRotation().x, value, current.getLeftRotation().z, current.getLeftRotation().w),
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z),
                             current.getScale(),
                             current.getRightRotation())
                     );
@@ -479,7 +493,7 @@ public class EntityEditorRegistry {
                     Transformation current = entity.getTransformation();
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            current.getLeftRotation().rotateY(incrementValue),
+                            new Quaternionf(current.getLeftRotation()).rotateY((float) Math.toRadians(incrementValue)),
                             current.getScale(),
                             current.getRightRotation())
                     );
@@ -488,41 +502,51 @@ public class EntityEditorRegistry {
                     Transformation current = entity.getTransformation();
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            current.getLeftRotation().rotateY(-decrementValue),
+                            new Quaternionf(current.getLeftRotation()).rotateY((float) Math.toRadians(-decrementValue)),
                             current.getScale(),
                             current.getRightRotation())
                     );
                 },
                 entity -> {
                     Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getLeftRotation().getEulerAnglesXYZ(euler);
+                    euler.y = 0;
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            new Quaternionf(current.getLeftRotation().x, 0.0f, current.getLeftRotation().z, current.getLeftRotation().w),
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z),
                             current.getScale(),
                             current.getRightRotation())
                     );
                 },
-                entity -> entity.getTransformation().getLeftRotation().y
+                entity -> {
+                    Vector3f euler = new Vector3f();
+                    entity.getTransformation().getLeftRotation().getEulerAnglesXYZ(euler);
+                    return (float) Math.toDegrees(euler.y);
+                }
         );
 
-        public static final ToolAction<Display, Float> DISPLAY_LEFT_ROTATION_Z = registerToolAction(Display.class, "display_left_rotation_z", "左回転 (Roll)",
+        public static final ToolAction<Display, Float> DISPLAY_LEFT_ROTATION_Z = registerToolAction(Display.class, "display_left_rotation_z", "左回転 (傾き / Roll)",
                 FLOAT_DECODER,
                 FLOAT_ENCODER,
-                FLOAT_FORMATTER,
+                DEGREE_FORMATTER,
                 (entity, value) -> {
                     Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getLeftRotation().getEulerAnglesXYZ(euler);
+                    euler.z = (float) Math.toRadians(value);
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            new Quaternionf(current.getLeftRotation().x, current.getLeftRotation().y, value, current.getLeftRotation().w),
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z),
                             current.getScale(),
-                            current.getRightRotation()
-                    ));
+                            current.getRightRotation())
+                    );
                 },
                 (entity, incrementValue) -> {
                     Transformation current = entity.getTransformation();
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            current.getLeftRotation().rotateZ(incrementValue),
+                            new Quaternionf(current.getLeftRotation()).rotateZ((float) Math.toRadians(incrementValue)),
                             current.getScale(),
                             current.getRightRotation())
                     );
@@ -531,78 +555,45 @@ public class EntityEditorRegistry {
                     Transformation current = entity.getTransformation();
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            current.getLeftRotation().rotateZ(-decrementValue),
+                            new Quaternionf(current.getLeftRotation()).rotateZ((float) Math.toRadians(-decrementValue)),
                             current.getScale(),
                             current.getRightRotation())
                     );
                 },
                 entity -> {
                     Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getLeftRotation().getEulerAnglesXYZ(euler);
+                    euler.z = 0;
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
-                            new Quaternionf(current.getLeftRotation().x, current.getLeftRotation().y, 0.0f, current.getLeftRotation().w),
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z),
                             current.getScale(),
                             current.getRightRotation())
                     );
                 },
-                entity -> entity.getTransformation().getLeftRotation().z
-        );
-
-        public static final ToolAction<Display, Float> DISPLAY_RIGHT_ROTATION_X = registerToolAction(Display.class, "display_right_rotation_x", "右回転 (Pitch)",
-                FLOAT_DECODER,
-                FLOAT_ENCODER,
-                FLOAT_FORMATTER,
-                (entity, value) -> {
-                    Transformation current = entity.getTransformation();
-                    entity.setTransformation(new Transformation(
-                            current.getTranslation(),
-                            current.getLeftRotation(),
-                            current.getScale(),
-                            new Quaternionf(value, current.getRightRotation().y, current.getRightRotation().z, current.getRightRotation().w)
-                    ));
-                },
-                (entity, incrementValue) -> {
-                    Transformation current = entity.getTransformation();
-                    entity.setTransformation(new Transformation(
-                            current.getTranslation(),
-                            current.getLeftRotation(),
-                            current.getScale(),
-                            current.getRightRotation().rotateX(incrementValue)
-                    ));
-                },
-                (entity, decrementValue) -> {
-                    Transformation current = entity.getTransformation();
-                    entity.setTransformation(new Transformation(
-                            current.getTranslation(),
-                            current.getLeftRotation(),
-                            current.getScale(),
-                            current.getRightRotation().rotateX(-decrementValue)
-                    ));
-                },
                 entity -> {
-                    Transformation current = entity.getTransformation();
-                    entity.setTransformation(new Transformation(
-                            current.getTranslation(),
-                            current.getLeftRotation(),
-                            current.getScale(),
-                            new Quaternionf(0, current.getRightRotation().y, current.getRightRotation().z, current.getRightRotation().w)
-                    ));
-                },
-                entity -> entity.getTransformation().getRightRotation().x
+                    Vector3f euler = new Vector3f();
+                    entity.getTransformation().getLeftRotation().getEulerAnglesXYZ(euler);
+                    return (float) Math.toDegrees(euler.z);
+                }
         );
 
-        public static final ToolAction<Display, Float> DISPLAY_RIGHT_ROTATION_Y = registerToolAction(Display.class, "display_right_rotation_y", "右回転 (Yaw)",
+        public static final ToolAction<Display, Float> DISPLAY_RIGHT_ROTATION_X = registerToolAction(Display.class, "display_right_rotation_x", "右回転 (上下 / Pitch)",
                 FLOAT_DECODER,
                 FLOAT_ENCODER,
-                FLOAT_FORMATTER,
+                DEGREE_FORMATTER,
                 (entity, value) -> {
                     Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getRightRotation().getEulerAnglesXYZ(euler);
+                    euler.x = (float) Math.toRadians(value);
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
                             current.getLeftRotation(),
                             current.getScale(),
-                            new Quaternionf(current.getRightRotation().x, value, current.getRightRotation().z, current.getRightRotation().w)
-                    ));
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z))
+                    );
                 },
                 (entity, incrementValue) -> {
                     Transformation current = entity.getTransformation();
@@ -610,7 +601,7 @@ public class EntityEditorRegistry {
                             current.getTranslation(),
                             current.getLeftRotation(),
                             current.getScale(),
-                            current.getRightRotation().rotateY(incrementValue))
+                            new Quaternionf(current.getRightRotation()).rotateX((float) Math.toRadians(incrementValue)))
                     );
                 },
                 (entity, decrementValue) -> {
@@ -619,33 +610,43 @@ public class EntityEditorRegistry {
                             current.getTranslation(),
                             current.getLeftRotation(),
                             current.getScale(),
-                            current.getRightRotation().rotateY(-decrementValue))
+                            new Quaternionf(current.getRightRotation()).rotateX((float) Math.toRadians(-decrementValue)))
                     );
                 },
                 entity -> {
                     Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getRightRotation().getEulerAnglesXYZ(euler);
+                    euler.x = 0;
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
                             current.getLeftRotation(),
                             current.getScale(),
-                            new Quaternionf(current.getRightRotation().x, 0, current.getRightRotation().z, current.getRightRotation().w)
-                    ));
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z))
+                    );
                 },
-                entity -> entity.getTransformation().getRightRotation().y
+                entity -> {
+                    Vector3f euler = new Vector3f();
+                    entity.getTransformation().getRightRotation().getEulerAnglesXYZ(euler);
+                    return (float) Math.toDegrees(euler.x);
+                }
         );
 
-        public static final ToolAction<Display, Float> DISPLAY_RIGHT_ROTATION_Z = registerToolAction(Display.class, "display_right_rotation_z", "右回転 (Roll)",
+        public static final ToolAction<Display, Float> DISPLAY_RIGHT_ROTATION_Y = registerToolAction(Display.class, "display_right_rotation_y", "右回転 (左右 / Yaw)",
                 FLOAT_DECODER,
                 FLOAT_ENCODER,
-                FLOAT_FORMATTER,
+                DEGREE_FORMATTER,
                 (entity, value) -> {
                     Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getRightRotation().getEulerAnglesXYZ(euler);
+                    euler.y = (float) Math.toRadians(value);
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
                             current.getLeftRotation(),
                             current.getScale(),
-                            new Quaternionf(current.getRightRotation().x, current.getRightRotation().y, value, current.getRightRotation().w)
-                    ));
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z))
+                    );
                 },
                 (entity, incrementValue) -> {
                     Transformation current = entity.getTransformation();
@@ -653,7 +654,7 @@ public class EntityEditorRegistry {
                             current.getTranslation(),
                             current.getLeftRotation(),
                             current.getScale(),
-                            current.getRightRotation().rotateZ(incrementValue))
+                            new Quaternionf(current.getRightRotation()).rotateY((float) Math.toRadians(incrementValue)))
                     );
                 },
                 (entity, decrementValue) -> {
@@ -662,19 +663,79 @@ public class EntityEditorRegistry {
                             current.getTranslation(),
                             current.getLeftRotation(),
                             current.getScale(),
-                            current.getRightRotation().rotateZ(-decrementValue))
+                            new Quaternionf(current.getRightRotation()).rotateY((float) Math.toRadians(-decrementValue)))
                     );
                 },
                 entity -> {
+                    Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getRightRotation().getEulerAnglesXYZ(euler);
+                    euler.y = 0;
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z))
+                    );
+                },
+                entity -> {
+                    Vector3f euler = new Vector3f();
+                    entity.getTransformation().getRightRotation().getEulerAnglesXYZ(euler);
+                    return (float) Math.toDegrees(euler.y);
+                }
+        );
+
+        public static final ToolAction<Display, Float> DISPLAY_RIGHT_ROTATION_Z = registerToolAction(Display.class, "display_right_rotation_z", "右回転 (傾き / Roll)",
+                FLOAT_DECODER,
+                FLOAT_ENCODER,
+                DEGREE_FORMATTER,
+                (entity, value) -> {
+                    Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getRightRotation().getEulerAnglesXYZ(euler);
+                    euler.z = (float) Math.toRadians(value);
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z))
+                    );
+                },
+                (entity, incrementValue) -> {
                     Transformation current = entity.getTransformation();
                     entity.setTransformation(new Transformation(
                             current.getTranslation(),
                             current.getLeftRotation(),
                             current.getScale(),
-                            new Quaternionf(current.getRightRotation().x, current.getRightRotation().y, 0, current.getRightRotation().w)
-                    ));
+                            new Quaternionf(current.getRightRotation()).rotateZ((float) Math.toRadians(incrementValue)))
+                    );
                 },
-                entity -> entity.getTransformation().getRightRotation().z
+                (entity, decrementValue) -> {
+                    Transformation current = entity.getTransformation();
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            new Quaternionf(current.getRightRotation()).rotateZ((float) Math.toRadians(-decrementValue)))
+                    );
+                },
+                entity -> {
+                    Transformation current = entity.getTransformation();
+                    Vector3f euler = new Vector3f();
+                    current.getRightRotation().getEulerAnglesXYZ(euler);
+                    euler.z = 0;
+                    entity.setTransformation(new Transformation(
+                            current.getTranslation(),
+                            current.getLeftRotation(),
+                            current.getScale(),
+                            new Quaternionf().rotationXYZ(euler.x, euler.y, euler.z))
+                    );
+                },
+                entity -> {
+                    Vector3f euler = new Vector3f();
+                    entity.getTransformation().getRightRotation().getEulerAnglesXYZ(euler);
+                    return (float) Math.toDegrees(euler.z);
+                }
         );
 
         public static final ToolAction<Entity, Double> ENTITY_POSITION_X = registerToolAction(Entity.class, "entity_position_x", "位置 (X)",
