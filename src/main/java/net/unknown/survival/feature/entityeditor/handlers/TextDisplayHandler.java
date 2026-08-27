@@ -195,7 +195,6 @@ public class TextDisplayHandler implements EntityEditorHandler<TextDisplay> {
                 (editor, targetEntity, event) -> targetEntity.setShadowed(!targetEntity.isShadowed())
         ));
 
-        elements.add(EntityEditor.Element.lineBreak());
         elements.add(EntityEditor.Element.of(
                 targetEntity -> new ItemStackBuilder(Material.PAPER)
                         .displayName(Component.text("Alignment: " + targetEntity.getAlignment().name(), DefinedTextColor.GREEN))
@@ -262,8 +261,6 @@ public class TextDisplayHandler implements EntityEditorHandler<TextDisplay> {
                     player.showDialog(dialog);
                 }
         ));
-
-        elements.add(EntityEditor.Element.lineBreak());
 
         return elements;
     }

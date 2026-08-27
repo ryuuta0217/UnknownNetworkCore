@@ -112,10 +112,10 @@ public class EntityEditorRegistry {
         registerHandler(ItemFrame.class, new ItemFrameHandler());
         registerHandler(Minecart.class, new MinecartHandler());
         registerHandler(EnderCrystal.class, new EnderCrystalHandler());
-        registerHandler(Display.class, new DisplayHandler());
         registerHandler(TextDisplay.class, new TextDisplayHandler());
         registerHandler(ItemDisplay.class, new ItemDisplayHandler());
         registerHandler(BlockDisplay.class, new BlockDisplayHandler());
+        registerHandler(Display.class, new DisplayHandler());
         
         registerHandler(Axolotl.class, new AxolotlHandler());
         registerHandler(Rabbit.class, new RabbitHandler());
