@@ -257,47 +257,47 @@ public class OpenInvCommand {
         }
 
         @Override
-        public org.bukkit.inventory.@Nullable ItemStack getItem(int index) {
+        public @Nullable org.bukkit.inventory.ItemStack getItem(int index) {
             return this.originalInventory.getItem(index);
         }
 
         @Override
-        public void setItem(int index, org.bukkit.inventory.@Nullable ItemStack item) {
+        public void setItem(int index, @Nullable org.bukkit.inventory.ItemStack item) {
             this.originalInventory.setItem(index, item);
         }
 
         @Override
-        public @NotNull HashMap<Integer, org.bukkit.inventory.ItemStack> addItem(org.bukkit.inventory.@NotNull ItemStack... items) throws IllegalArgumentException {
+        public @NotNull HashMap<Integer, org.bukkit.inventory.ItemStack> addItem(@NotNull org.bukkit.inventory.ItemStack... items) throws IllegalArgumentException {
             return this.originalInventory.addItem(items);
         }
 
         @Override
-        public @NotNull HashMap<Integer, org.bukkit.inventory.ItemStack> removeItem(org.bukkit.inventory.@NotNull ItemStack... items) throws IllegalArgumentException {
+        public @NotNull HashMap<Integer, org.bukkit.inventory.ItemStack> removeItem(@NotNull org.bukkit.inventory.ItemStack... items) throws IllegalArgumentException {
             return this.originalInventory.removeItem(items);
         }
 
         @Override
-        public @NotNull HashMap<Integer, org.bukkit.inventory.ItemStack> removeItemAnySlot(org.bukkit.inventory.@NotNull ItemStack... items) throws IllegalArgumentException {
+        public @NotNull HashMap<Integer, org.bukkit.inventory.ItemStack> removeItemAnySlot(@NotNull org.bukkit.inventory.ItemStack... items) throws IllegalArgumentException {
             return this.originalInventory.removeItemAnySlot(items);
         }
 
         @Override
-        public org.bukkit.inventory.@Nullable ItemStack @NotNull [] getContents() {
+        public @NotNull org.bukkit.inventory.ItemStack[] getContents() {
             return this.originalInventory.getContents();
         }
 
         @Override
-        public void setContents(org.bukkit.inventory.@Nullable ItemStack @NotNull [] items) throws IllegalArgumentException {
+        public void setContents(@NotNull org.bukkit.inventory.ItemStack[] items) throws IllegalArgumentException {
             this.originalInventory.setContents(items);
         }
 
         @Override
-        public org.bukkit.inventory.@Nullable ItemStack @NotNull [] getStorageContents() {
+        public @NotNull org.bukkit.inventory.ItemStack[] getStorageContents() {
             return this.originalInventory.getStorageContents();
         }
 
         @Override
-        public void setStorageContents(org.bukkit.inventory.@Nullable ItemStack @NotNull [] items) throws IllegalArgumentException {
+        public void setStorageContents(@NotNull org.bukkit.inventory.ItemStack[] items) throws IllegalArgumentException {
             this.originalInventory.setStorageContents(items);
         }
 
@@ -307,7 +307,7 @@ public class OpenInvCommand {
         }
 
         @Override
-        public boolean contains(org.bukkit.inventory.@Nullable ItemStack item) {
+        public boolean contains(@Nullable org.bukkit.inventory.ItemStack item) {
             return this.originalInventory.contains(item);
         }
 
@@ -317,12 +317,12 @@ public class OpenInvCommand {
         }
 
         @Override
-        public boolean contains(org.bukkit.inventory.@Nullable ItemStack item, int amount) {
+        public boolean contains(@Nullable org.bukkit.inventory.ItemStack item, int amount) {
             return this.originalInventory.contains(item, amount);
         }
 
         @Override
-        public boolean containsAtLeast(org.bukkit.inventory.@Nullable ItemStack item, int amount) {
+        public boolean containsAtLeast(@Nullable org.bukkit.inventory.ItemStack item, int amount) {
             return this.originalInventory.containsAtLeast(item, amount);
         }
 
@@ -332,7 +332,7 @@ public class OpenInvCommand {
         }
 
         @Override
-        public @NotNull HashMap<Integer, ? extends org.bukkit.inventory.ItemStack> all(org.bukkit.inventory.@Nullable ItemStack item) {
+        public @NotNull HashMap<Integer, ? extends org.bukkit.inventory.ItemStack> all(@Nullable org.bukkit.inventory.ItemStack item) {
             return this.originalInventory.all(item);
         }
 
@@ -342,7 +342,7 @@ public class OpenInvCommand {
         }
 
         @Override
-        public int first(org.bukkit.inventory.@NotNull ItemStack item) {
+        public int first(@NotNull org.bukkit.inventory.ItemStack item) {
             return this.originalInventory.first(item);
         }
 
@@ -362,7 +362,7 @@ public class OpenInvCommand {
         }
 
         @Override
-        public void remove(org.bukkit.inventory.@NotNull ItemStack item) {
+        public void remove(@NotNull org.bukkit.inventory.ItemStack item) {
             this.originalInventory.remove(item);
         }
 

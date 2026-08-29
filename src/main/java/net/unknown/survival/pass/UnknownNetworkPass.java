@@ -36,7 +36,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.resources.Identifier;
 import net.unknown.core.advancements.AdvancementManager;
 import net.unknown.core.builder.advancement.DisplayInfoBuilder;

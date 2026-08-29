@@ -63,7 +63,6 @@ public class CrashCommand {
                                         .append(Component.text(" が ", TextColor.color(16777045), TextDecoration.BOLD))
                                         .append(target.adventure$displayName)
                                         .append(Component.text(" をクラッシュさせた", TextColor.color(16777045), TextDecoration.BOLD)),
-                                ctx.getSource().getEntity() == null ? null : ctx.getSource().getEntity().getUUID(),
                                 false);
                     });
                     return targets.size();

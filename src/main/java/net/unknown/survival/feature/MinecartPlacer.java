@@ -33,6 +33,7 @@ package net.unknown.survival.feature;
 
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.vehicle.minecart.AbstractMinecart;
 import net.minecraft.world.entity.vehicle.minecart.Minecart;
 import net.minecraft.world.level.gameevent.GameEvent;
@@ -86,7 +87,7 @@ public class MinecartPlacer implements Listener {
         if (playerInventory.contains(Material.MINECART) || event.getPlayer().getGameMode() == GameMode.CREATIVE) {
             ItemStack minecartItem = event.getPlayer().getGameMode() == GameMode.CREATIVE ? new ItemStack(Material.MINECART) : playerInventory.getItem(event.getPlayer().getInventory().first(Material.MINECART));
             if (minecartItem != null) {
-                Minecart minecartEntity = AbstractMinecart.createMinecart(MinecraftAdapter.level(blockLocation.getWorld()), blockLocation.getX(), blockLocation.getY() + 0.0625, blockLocation.getZ(), EntityType.MINECART, EntitySpawnReason.DISPENSER, MinecraftAdapter.ItemStack.itemStack(minecartItem), MinecraftAdapter.player(event.getPlayer()));
+                Minecart minecartEntity = AbstractMinecart.createMinecart(MinecraftAdapter.level(blockLocation.getWorld()), blockLocation.getX(), blockLocation.getY() + 0.0625, blockLocation.getZ(), EntityTypes.MINECART, EntitySpawnReason.DISPENSER, MinecraftAdapter.ItemStack.itemStack(minecartItem), MinecraftAdapter.player(event.getPlayer()));
                 if (MinecraftAdapter.level(blockLocation.getWorld()).addFreshEntity(minecartEntity)) {
                     MinecraftAdapter.level(blockLocation.getWorld()).gameEvent(GameEvent.ENTITY_PLACE, MinecraftAdapter.vec3(blockLocation), GameEvent.Context.of(MinecraftAdapter.player(event.getPlayer()), MinecraftAdapter.blockState(event.getClickedBlock())));
                     minecartItem.setAmount(minecartItem.getAmount() - 1);

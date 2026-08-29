@@ -78,13 +78,16 @@ public enum Permissions {
     COMMAND_SB("unknown.survival.command.shulkerbox", "minecraft.command.sb", 0, ShulkerBoxCommand.class),
     COMMAND_AUTOMATEDREGENWORLD("unknown.survival.command.automatedregenworld", "minecraft.command.automatedregenworld", 2, AutomatedRegenWorldCommand.class),
     COMMAND_ARW("unknown.survival.command.automatedregenworld", "minecraft.command.arw", 2, AutomatedRegenWorldCommand.class),
+    COMMAND_ADMINSTORAGE("unknown.survival.command.adminstorage", "minecraft.command.adminstorage", 2, AdminStorageCommand.class),
 
     NOTIFY_MODDED_PLAYER("unknown.survival.notify.mod", 2, null),
     ENTITY_EDITOR("unknown.survival.entity_editor", 2, null),
     OPEN_GUI("unknown.survival.open_gui", 0, null),
     FEATURE_EDIT_ANY_FLAGS("unknown.survival.feature.edit_any_flags", 4, null),
     FEATURE_LONG_PREFIX("unknown.survival.feature.long_prefix", 2, null),
-    FEATURE_EDIT_FLAGS("unknown.survival.feature.edit_flags", 0, null);
+    FEATURE_EDIT_FLAGS("unknown.survival.feature.edit_flags", 0, null),
+    FEATURE_SHULKER_BOX_REDIRECTOR("unknown.survival.feature.shulker_box_redirector", 0, null),
+    FEATURE_SHULKER_BOX_REDIRECTOR_CRAFTING("unknown.survival.feature.shulker_box_redirector.add_marker_via_crafting", 0, null);
 
     private final int opLevel;
     private final String[] permissionNodes;

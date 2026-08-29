@@ -33,6 +33,8 @@ package net.unknown.core.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -52,6 +54,9 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
+import net.unknown.survival.feature.redirector.trash.TrashOverflowBehavior;
+import net.unknown.survival.feature.redirector.trash.TrashRedirector;
+import net.unknown.survival.feature.redirector.trash.TrashRedirectorMode;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -105,6 +110,71 @@ public class TrashCommand {
                     return 0;
                 }));
 
+        LiteralArgumentBuilder<CommandSourceStack> redirectorNode = Commands.literal("redirector")
+                .executes(TrashCommand::showRedirectorInfo);
+
+        LiteralArgumentBuilder<CommandSourceStack> modeNode = Commands.literal("mode")
+                .executes(TrashCommand::showRedirectorMode);
+        for (TrashRedirectorMode mode : TrashRedirectorMode.values()) {
+            modeNode.then(Commands.literal(mode.name())
+                    .executes(ctx -> setRedirectorMode(ctx, mode)));
+        }
+        redirectorNode.then(modeNode);
+
+        LiteralArgumentBuilder<CommandSourceStack> overflowNode = Commands.literal("overflow")
+                .executes(TrashCommand::showOverflowBehavior);
+        for (TrashOverflowBehavior behavior : TrashOverflowBehavior.values()) {
+            overflowNode.then(Commands.literal(behavior.name())
+                    .executes(ctx -> setOverflowBehavior(ctx, behavior)));
+        }
+        redirectorNode.then(overflowNode);
+
+        builder.then(redirectorNode)
+               .then(modeNode)
+               .then(overflowNode);
+
         dispatcher.register(builder);
+    }
+
+    private static int showRedirectorInfo(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Player player = ctx.getSource().getPlayerOrException().getBukkitEntity();
+        TrashRedirectorMode mode = TrashRedirector.getMode(player);
+        TrashOverflowBehavior overflow = TrashRedirector.getOverflowBehavior(player);
+
+        Component msg = Component.text("--- [ゴミ箱自動転送設定] ---", DefinedTextColor.RED)
+                .append(Component.newline())
+                .append(Component.text("現在の転送モード: ", DefinedTextColor.WHITE)).append(mode.getDescription())
+                .append(Component.newline())
+                .append(Component.text("満杯時の動作: ", DefinedTextColor.WHITE)).append(overflow.getDescription());
+        NewMessageUtil.sendMessage(ctx.getSource(), msg);
+        return 0;
+    }
+
+    private static int showRedirectorMode(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Player player = ctx.getSource().getPlayerOrException().getBukkitEntity();
+        TrashRedirectorMode mode = TrashRedirector.getMode(player);
+        NewMessageUtil.sendMessage(ctx.getSource(),mode.getDescription());
+        return 0;
+    }
+
+    private static int setRedirectorMode(CommandContext<CommandSourceStack> ctx, TrashRedirectorMode mode) throws CommandSyntaxException {
+        Player player = ctx.getSource().getPlayerOrException().getBukkitEntity();
+        TrashRedirector.setMode(player, mode);
+        NewMessageUtil.sendMessage(ctx.getSource(), mode.getModeChangedMessage());
+        return 0;
+    }
+
+    private static int showOverflowBehavior(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Player player = ctx.getSource().getPlayerOrException().getBukkitEntity();
+        TrashOverflowBehavior behavior = TrashRedirector.getOverflowBehavior(player);
+        NewMessageUtil.sendMessage(ctx.getSource(), behavior.getDescription());
+        return 0;
+    }
+
+    private static int setOverflowBehavior(CommandContext<CommandSourceStack> ctx, TrashOverflowBehavior behavior) throws CommandSyntaxException {
+        Player player = ctx.getSource().getPlayerOrException().getBukkitEntity();
+        TrashRedirector.setOverflowBehavior(player, behavior);
+        NewMessageUtil.sendMessage(ctx.getSource(), behavior.getModeChangedMessage());
+        return 0;
     }
 }

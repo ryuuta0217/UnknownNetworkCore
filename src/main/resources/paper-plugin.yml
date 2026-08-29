@@ -39,6 +39,10 @@ dependencies:
       load: BEFORE
       required: false
       join-classpath: true
+    QuickShop-Hikari:
+      load: BEFORE
+      required: false
+      join-classpath: true
 softdepend: ["Jecon"]
 permissions:
   unknown.core.default:
@@ -124,6 +128,8 @@ permissions:
       unknown.survival.command.arw: true
       unknown.survival.open_gui: true
       unknown.survival.feature.edit_flags: true
+      unknown.survival.feature.shulker_box_redirector: true
+      unknown.survival.feature.shulker_box_redirector.add_marker_via_crafting: true
   unknown.survival.admin:
     default: op
     children:
@@ -133,6 +139,8 @@ permissions:
       minecraft.command.ahomes: true
       minecraft.command.findhome: true
       minecraft.command.sethomecount: true
+      minecraft.command.adminstorage: true
+      minecraft.command.as: true
       unknown.survival.command.addhome: true
       unknown.survival.command.adelhome: true
       unknown.survival.command.ahome: true
@@ -142,6 +150,7 @@ permissions:
       unknown.survival.command.vote.manage: true
       unknown.survival.command.villages.manage: true
       unknown.survival.command.prefix.manage: true
+      unknown.survival.command.adminstorage: true
       unknown.survival.notify.mod: true
       unknown.survival.notify.whois: true
       unknown.survival.feature.long_prefix: true

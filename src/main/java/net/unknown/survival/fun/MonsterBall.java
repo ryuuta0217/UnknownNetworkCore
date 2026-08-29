@@ -40,6 +40,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrownEgg;
@@ -63,8 +64,8 @@ import java.util.Set;
 
 public class MonsterBall implements Listener {
     private static final Set<EntityType<?>> RESTRICTED_ENTITY_TYPES = new HashSet<>() {{
-        add(EntityType.ENDER_DRAGON);
-        add(EntityType.WITHER);
+        add(EntityTypes.ENDER_DRAGON);
+        add(EntityTypes.WITHER);
     }};
 
     @EventHandler

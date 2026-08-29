@@ -50,7 +50,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,6 +157,17 @@ public class PacketManager implements Listener {
 
                         super.channelRead(ctx, msg);
                     }
+
+                    @Override
+                    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                        // LOGGER.error("Exception in packet handler for player {}", player.getName(), cause);
+                        super.exceptionCaught(ctx, cause);
+                    }
+
+                    @Override
+                    public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+                        super.channelInactive(ctx);
+                    }
                 };
                 ChannelPipeline pipeline = player.connection.connection.channel.pipeline();
                 pipeline.addBefore("packet_handler", PacketManager.getPacketHandlerName(event.getPlayer().getName()), packetHandler);
@@ -170,12 +180,6 @@ public class PacketManager implements Listener {
         } catch (NoSuchFieldException e) {
             LOGGER.warn("Failed to inject TextFilter into player {}. PacketListener will not work for this player.", player.getName());
         }
-    }
-
-    @EventHandler
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        Channel c = ((CraftPlayer) event.getPlayer()).getHandle().connection.connection.channel;
-        c.eventLoop().submit(() -> c.pipeline().remove(PacketManager.getPacketHandlerName(event.getPlayer().getName())));
     }
 
     private static String getPacketHandlerName(String playerName) {

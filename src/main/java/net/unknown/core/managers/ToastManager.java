@@ -34,7 +34,7 @@ package net.unknown.core.managers;
 import io.papermc.paper.advancement.AdvancementDisplay;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.*;
-import net.minecraft.advancements.criterion.ImpossibleTrigger;
+import net.minecraft.advancements.triggers.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.*;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;

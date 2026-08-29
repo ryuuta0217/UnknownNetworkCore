@@ -37,6 +37,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.advancements.*;
+import net.minecraft.advancements.triggers.*;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.Identifier;
@@ -53,7 +54,7 @@ import net.unknown.core.packet.event.PacketSendingEvent;
 import net.unknown.core.packet.listener.OutgoingPacketListener;
 import net.unknown.core.util.MinecraftAdapter;
 import net.unknown.core.util.ReflectionUtil;
-import net.unknown.launchwrapper.mixininterfaces.IMixinCriterionTrigger;
+import net.unknown.launchwrapper.mixininterfaces.IMixinPlayerAdvancements;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -503,6 +504,15 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param player ServerPlayer
      */
     public static void registerListeners(ServerPlayer player) {
+        if (((Object) player.getAdvancements()) instanceof IMixinPlayerAdvancements mixin) {
+            mixin.setAwardHandler((playerAdvancements, holder, criterion) -> {
+                if (ADVANCEMENTS.containsKey(holder.id())) {
+                    grantProgress(player, holder, criterion);
+                    return true;
+                }
+                return null;
+            });
+        }
         ADVANCEMENTS.forEach((id, adv) -> registerListener(player, adv));
     }
 
@@ -540,9 +550,19 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
         });
     }
 
+    @SuppressWarnings("unchecked")
+    private static Map<CriterionTrigger<?>, Map<PlayerAdvancements.TriggerInstanceKey, ? extends CriterionTriggerInstance>> getActiveTriggers(PlayerAdvancements advancements) {
+        try {
+            java.lang.reflect.Field field = PlayerAdvancements.class.getDeclaredField("activeTriggers");
+            field.setAccessible(true);
+            return (Map<CriterionTrigger<?>, Map<PlayerAdvancements.TriggerInstanceKey, ? extends CriterionTriggerInstance>>) field.get(advancements);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to access activeTriggers in PlayerAdvancements", e);
+        }
+    }
+
     /**
      * Register a listener for a player's criterion.
-     * This method uses mixins to inject a custom listener into the vanilla listener.
      *
      * @param player ServerPlayer
      * @param advancement AdvancementHolder
@@ -550,17 +570,22 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param criterion Criterion
      * @param <T> CriterionTriggerInstance type
      */
+    @SuppressWarnings("unchecked")
     private static <T extends CriterionTriggerInstance> void registerListener(ServerPlayer player, AdvancementHolder advancement, String criterionKey, Criterion<T> criterion) {
-        unregisterListener(player, advancement, criterion, criterionKey);
-        CriterionTrigger.Listener<T> vanillaListener = new CriterionTrigger.Listener<>(criterion.triggerInstance(), advancement, criterionKey);
-        if (((Object) vanillaListener) instanceof IMixinCriterionTrigger.Listener bootstrappedListener) {
-            bootstrappedListener.setCustomListener((playerAdvancements) -> {
-                AdvancementManager.grantProgress(player, vanillaListener.advancement(), vanillaListener.criterion());
+        if (((Object) player.getAdvancements()) instanceof IMixinPlayerAdvancements mixin && mixin.getAwardHandler() == null) {
+            mixin.setAwardHandler((playerAdvancements, holder, crit) -> {
+                if (ADVANCEMENTS.containsKey(holder.id())) {
+                    grantProgress(player, holder, crit);
+                    return true;
+                }
+                return null;
             });
-            criterion.trigger().addPlayerListener(player.getAdvancements(), vanillaListener);
-        } else {
-            throw new IllegalStateException("Unsupported environment: CriterionTrigger.Listener is not bootstrapped. Try updating or use UnknownNetworkBootstrap.");
         }
+        unregisterListener(player, advancement, criterion, criterionKey);
+        PlayerAdvancements.TriggerInstanceKey key = new PlayerAdvancements.TriggerInstanceKey(advancement, criterionKey);
+        java.util.Map<CriterionTrigger<?>, java.util.Map<PlayerAdvancements.TriggerInstanceKey, ?>> activeTriggers = (java.util.Map) getActiveTriggers(player.getAdvancements());
+        java.util.Map<PlayerAdvancements.TriggerInstanceKey, T> triggerMap = (java.util.Map<PlayerAdvancements.TriggerInstanceKey, T>) activeTriggers.computeIfAbsent(criterion.trigger(), k -> new java.util.HashMap<>());
+        triggerMap.put(key, criterion.triggerInstance());
     }
 
 
@@ -570,10 +595,11 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      *
      * @param player ServerPlayer
      */
+    @SuppressWarnings("unchecked")
     public static <C extends CriterionTriggerInstance, T extends CriterionTrigger<C>> void unregisterListeners(ServerPlayer player) {
-        new HashMap<>(player.getAdvancements().criterionData).forEach((criterion, listeners) -> {
-            new HashSet<>(listeners).stream().filter(listener -> ADVANCEMENTS.containsKey(listener.advancement().id())).forEach(listener -> {
-                unregisterListener(player, (T) criterion, (CriterionTrigger.Listener<C>) listener);
+        new HashMap<>(getActiveTriggers(player.getAdvancements())).forEach((criterion, triggerMap) -> {
+            new HashSet<>(triggerMap.keySet()).stream().filter(key -> ADVANCEMENTS.containsKey(key.advancement().id())).forEach(key -> {
+                unregisterListener(player, (T) criterion, key);
             });
         });
     }
@@ -588,10 +614,11 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param <C> CriterionTriggerInstance type
      * @param <T> CriterionTrigger type
      */
+    @SuppressWarnings("unchecked")
     public static <C extends CriterionTriggerInstance, T extends CriterionTrigger<C>>  void unregisterListener(ServerPlayer player, String criterionKey) {
-        new HashMap<>(player.getAdvancements().criterionData).forEach((criterion, listeners) -> {
-            new HashSet<>(listeners).stream().filter(listener -> ADVANCEMENTS.containsKey(listener.advancement().id()) && listener.criterion().equals(criterionKey)).forEach(listener -> {
-                unregisterListener(player, (T) criterion, (CriterionTrigger.Listener<C>) listener);
+        new HashMap<>(getActiveTriggers(player.getAdvancements())).forEach((criterion, triggerMap) -> {
+            new HashSet<>(triggerMap.keySet()).stream().filter(key -> ADVANCEMENTS.containsKey(key.advancement().id()) && key.criterion().equals(criterionKey)).forEach(key -> {
+                unregisterListener(player, (T) criterion, key);
             });
         });
     }
@@ -607,10 +634,11 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param <C> CriterionTriggerInstance type
      * @param <T> CriterionTrigger type
      */
+    @SuppressWarnings("unchecked")
     public static <C extends CriterionTriggerInstance, T extends CriterionTrigger<C>>  void unregisterListener(ServerPlayer player, AdvancementHolder holder, String criterionKey) {
-        new HashMap<>(player.getAdvancements().criterionData).forEach((criterion, listeners) -> {
-            new HashSet<>(listeners).stream().filter(listener -> listener.advancement().id().equals(holder.id()) && listener.criterion().equals(criterionKey)).forEach(listener -> {
-                unregisterListener(player, (T) criterion, (CriterionTrigger.Listener<C>) listener);
+        new HashMap<>(getActiveTriggers(player.getAdvancements())).forEach((criterion, triggerMap) -> {
+            new HashSet<>(triggerMap.keySet()).stream().filter(key -> key.advancement().id().equals(holder.id()) && key.criterion().equals(criterionKey)).forEach(key -> {
+                unregisterListener(player, (T) criterion, key);
             });
         });
     }
@@ -627,21 +655,24 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param <C> CriterionTriggerInstance type
      * @param <T> CriterionTrigger type
      */
+    @SuppressWarnings("unchecked")
     public static <C extends CriterionTriggerInstance, T extends CriterionTrigger<C>> void unregisterListener(ServerPlayer player, AdvancementHolder holder, Criterion<C> criterion, String criterionKey) {
-        new HashMap<>(player.getAdvancements().criterionData).forEach((c, listeners) -> {
-            if (!c.equals(criterion)) return;
-            new HashSet<>(listeners).stream().filter(listener -> listener.advancement().id().equals(holder.id()) && listener.criterion().equals(criterionKey)).forEach(listener -> {
-                unregisterListener(player, (T) criterion.trigger(), (CriterionTrigger.Listener<C>) listener);
+        new HashMap<>(getActiveTriggers(player.getAdvancements())).forEach((c, triggerMap) -> {
+            if (!c.equals(criterion.trigger())) return;
+            new HashSet<>(triggerMap.keySet()).stream().filter(key -> key.advancement().id().equals(holder.id()) && key.criterion().equals(criterionKey)).forEach(key -> {
+                unregisterListener(player, (T) c, key);
             });
         });
     }
-
-    private static <T extends CriterionTriggerInstance> void unregisterListener(ServerPlayer player, Criterion<T> criterion, CriterionTrigger.Listener<T> listener) {
-        unregisterListener(player, criterion.trigger(), listener);
+    private static <T extends CriterionTriggerInstance> void unregisterListener(ServerPlayer player, Criterion<T> criterion, PlayerAdvancements.TriggerInstanceKey key) {
+        unregisterListener(player, criterion.trigger(), key);
     }
 
-    private static <C extends CriterionTriggerInstance, T extends CriterionTrigger<C>> void unregisterListener(ServerPlayer player, T trigger, CriterionTrigger.Listener<C> listener) {
-        trigger.removePlayerListener(player.getAdvancements(), listener);
+    private static <C extends CriterionTriggerInstance, T extends CriterionTrigger<C>> void unregisterListener(ServerPlayer player, T trigger, PlayerAdvancements.TriggerInstanceKey key) {
+        java.util.Map<PlayerAdvancements.TriggerInstanceKey, C> triggerMap = player.getAdvancements().getTriggerMapForType(trigger);
+        if (triggerMap != null) {
+            triggerMap.remove(key);
+        }
     }
 
     /**

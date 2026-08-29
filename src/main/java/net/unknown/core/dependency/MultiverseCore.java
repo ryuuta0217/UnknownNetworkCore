@@ -78,7 +78,7 @@ public class MultiverseCore {
     }
 
     public static Location getSpawnLocation(Level level) {
-        Vec3 positionVector3 = level.getRespawnData().pos().getCenter();
+        Vec3 positionVector3 = Vec3.atCenterOf(level.getRespawnData().pos());
         Vec2 rotationVector2 = new Vec2(level.getRespawnData().yaw(), level.getRespawnData().pitch());
         if (isMultiverseCoreEnabled()) {
             Location multiverseSpawnLocation = getSpawnLocation(MinecraftAdapter.world(level));

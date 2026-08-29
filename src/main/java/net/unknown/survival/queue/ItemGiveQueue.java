@@ -66,7 +66,8 @@ public class ItemGiveQueue extends ConfigurationBase implements Listener {
             queuesSection.getKeys(false).forEach(uuidStr -> {
                 UUID uuid = UUID.fromString(uuidStr);
                 this.queue.put(uuid, new HashMap<>());
-                queuesSection.getValues(false).forEach((k, v) -> {
+                ConfigurationSection playerSection = queuesSection.getConfigurationSection(uuidStr);
+                playerSection.getValues(false).forEach((k, v) -> {
                     if (v instanceof String json) {
                         long timestamp = Long.parseLong(k);
                         this.queue.get(uuid).put(timestamp, MinecraftAdapter.ItemStack.itemStack(MinecraftAdapter.ItemStack.json(json)));

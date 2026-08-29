@@ -35,6 +35,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.advancements.*;
+import net.minecraft.advancements.triggers.*;
 import net.minecraft.core.ClientAsset;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.Identifier;

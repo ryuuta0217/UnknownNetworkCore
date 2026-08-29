@@ -62,7 +62,6 @@ collisions:
 commands:
   ride-command-allow-player-as-vehicle: false
   suggest-player-names-when-null-tab-completions: true
-  time-command-affects-all-worlds: false
 console:
   enable-brigadier-completions: true
   enable-brigadier-highlighting: true
@@ -78,8 +77,6 @@ item-validation:
   display-name: 8192
   lore-line: 8192
   resolve-selectors-in-books: false
-logging:
-  deobfuscate-stacktraces: true
 messages:
   kick:
     authentication-servers-down: <lang:multiplayer.disconnect.authservers_down>
@@ -90,6 +87,7 @@ messages:
     Please contact the server administrators if you believe that this is in error.
   use-display-name-in-quit-message: false
 misc:
+  catchup-ticks: default
   chat-threads:
     chat-executor-core-size: -1
     chat-executor-max-size: -1
@@ -100,6 +98,7 @@ misc:
   lag-compensate-block-breaking: true
   load-permissions-yml-before-plugins: true
   max-joins-per-tick: 3
+  max-tracking-combat-entries: 10240
   prevent-negative-villager-demand: false
   region-file-cache-size: 256
   send-full-pos-for-item-entities: false
@@ -144,6 +143,8 @@ spark:
 threaded-regions:
   grid-exponent: 4
   threads: -1
+time:
+  affects-all-worlds: false
 timings:
   enabled: true
   hidden-config-entries:
@@ -162,12 +163,15 @@ unsupported-settings:
   allow-permanent-block-break-exploits: false
   allow-piston-duplication: false
   allow-unsafe-end-portal-teleportation: false
-  compression-format: ZLIB
+  oversized-item-component-sanitizer:
+    dont-sanitize: []
   perform-username-validation: true
   simplify-remote-item-matching: false
   skip-tripwire-hook-placement-validation: false
   skip-vanilla-damage-tick-when-shield-blocked: false
   update-equipment-on-player-actions: true
+update-checker:
+  enabled: true
 watchdog:
   early-warning-delay: 10000
   early-warning-every: 5000

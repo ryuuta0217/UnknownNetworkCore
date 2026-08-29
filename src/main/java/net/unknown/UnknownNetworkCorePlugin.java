@@ -65,6 +65,7 @@ import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
+import net.unknown.provider.DataProviderServer;
 
 import java.util.Locale;
 
@@ -206,6 +207,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         getLogger().info("");
         getLogger().info("");
         UnknownNetworkCore.getEnvironment().onEnable();
+        DataProviderServer.start(25580); // TODO: configurable port on dataprovider_server.yml
         Spy.freeze();
         long end = System.nanoTime();
         getLogger().info("Plugin was enabled in " + (end - start) / 1000000 + "ms");
@@ -214,6 +216,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
     @Override
     public void onDisable() {
         HandlerList.unregisterAll(this);
+        DataProviderServer.stop();
         UnknownNetworkCore.getEnvironment().onDisable();
     }
 

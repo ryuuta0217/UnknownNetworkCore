@@ -31,16 +31,13 @@
 
 package net.unknown.core.entity;
 
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.HumanoidArm;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 
 public class CustomPlayer extends LivingEntity {
     public CustomPlayer(Level world) {
-        super(EntityType.PLAYER, world);
+        super(EntityTypes.PLAYER, world);
     }
 
     @Override

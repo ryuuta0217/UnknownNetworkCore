@@ -45,6 +45,11 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.survival.bossbar.BlueMapBar;
 import net.unknown.survival.chat.ChatManager;
 import net.unknown.survival.chat.CustomChannels;
+import net.unknown.survival.feature.entityeditor.EntityEditorListener;
+import net.unknown.survival.feature.entityeditor.EntityEditorRegistry;
+import net.unknown.survival.feature.qsaddon_shulker.QSAddon_Shulker;
+import net.unknown.survival.feature.redirector.ShulkerBoxRedirector;
+import net.unknown.survival.feature.redirector.trash.TrashRedirector;
 import net.unknown.survival.feature.sidebar.Sidebar;
 import net.unknown.survival.feature.sidebar.modules.*;
 import net.unknown.survival.observers.AFKObserver;
@@ -111,15 +116,19 @@ public class UnknownNetworkSurvival {
         //AutomaticWorldRegeneration.getInstance();
         AutomatedRegenWorldManager.getInstance();
         Villages.getInstance();
+        AdminStorage.getInstance().load();
 
         CustomEnchantments.initialize();
         GNArms.initialize();
         BlueMapBar.initialize();
         UNCUpdateCheckTask.start();
-        DebugStickEntityEditor.Listener.register();
+        EntityEditorListener.register();
+        EntityEditorRegistry.init();
 
         AFKObserver.initialize();
         PerformanceObserver.initialize();
+
+        QSAddon_Shulker.inject();
 
         BossBarManager.getInstance().setVisibilityHandler(new SurvivalVisibilityHandler());
 
@@ -147,7 +156,10 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new FastLeafDecay());
         ListenerManager.registerListener(new GSitListener());
         ListenerManager.registerListener(new BabyCreature());
+        ListenerManager.registerListener(new ShulkerBoxRedirector());
+        ListenerManager.registerListener(new TrashRedirector()); // シュルカーボックス収納より後にゴミ箱処分処理
         ListenerManager.registerListener(new AFKListener());
+        ListenerManager.registerListener(new FishingAutomation());
         SuppressRaids.registerListener();
         //ListenerManager.registerListener(new WorldSeparator());
         if (UnknownNetworkCorePlugin.isBootstrapped()) {
@@ -209,6 +221,7 @@ public class UnknownNetworkSurvival {
 
     public static void onDisable() {
         Villages.save(true, false);
+        AdminStorage.getInstance().save();
     }
 
     public static Logger getLogger() {

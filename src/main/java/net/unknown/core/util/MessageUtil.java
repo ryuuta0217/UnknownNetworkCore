@@ -43,6 +43,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.world.level.BaseCommandBlock;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.unknown.core.define.DefinedTextColor;
+import net.unknown.core.dependency.MultiverseCore;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameRule;
@@ -51,6 +52,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
+import org.mvplugins.multiverse.core.world.MultiverseWorld;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -147,13 +149,13 @@ public class MessageUtil {
         }
     }
 
-    public static void broadcast(Component message, UUID broadcaster) {
-        broadcast(message, broadcaster, true);
+    public static void broadcast(Component message) {
+        broadcast(message, true);
     }
 
-    public static void broadcast(Component message, UUID broadcaster, boolean prefix) {
+    public static void broadcast(Component message, boolean prefix) {
         Bukkit.getOnlinePlayers().forEach(p -> {
-            p.sendMessage(broadcaster == null ? Identity.nil() : Identity.identity(broadcaster), prefix ? Component.text(PREFIX).append(message) : message);
+            p.sendMessage(prefix ? Component.text(PREFIX).append(message) : message);
         });
     }
 
@@ -192,7 +194,7 @@ public class MessageUtil {
     }
 
     public static String getWorldNameDisplay(World world) {
-        return (WORLD_NAME_DISPLAY.containsKey(world.getName()) ? WORLD_NAME_DISPLAY.get(world.getName()) : world.getName()) + "ワールド";
+        return getWorldName(world.getName()) + "ワールド";
     }
 
     public static String getWorldName(World world) {
@@ -200,7 +202,7 @@ public class MessageUtil {
     }
 
     public static String getWorldName(String worldName) {
-        return WORLD_NAME_DISPLAY.getOrDefault(worldName, worldName);
+        return MultiverseCore.isMultiverseCoreEnabled() ? MultiverseCore.getWorldManager().getWorld(worldName).map(MultiverseWorld::getAliasOrName).getOrElse(WORLD_NAME_DISPLAY.getOrDefault(worldName, worldName)) : WORLD_NAME_DISPLAY.getOrDefault(worldName, worldName);
     }
 
     public static String getMessagePrefix() {

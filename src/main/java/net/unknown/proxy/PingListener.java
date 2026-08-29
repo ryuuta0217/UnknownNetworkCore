@@ -51,13 +51,13 @@ public class PingListener {
         CommentedConfigurationNode config = UnknownNetworkProxyCore.getConfig();
         if (!config.hasChild("protocol-name")) {
             try {
-                config.node("protocol-name").set("Minecraft 1.20.2-1.21.11");
+                config.node("protocol-name").set("Minecraft 26.2");
             } catch (SerializationException ignored) {}
         }
 
         if (!config.hasChild("supported-protocol-numbers")) {
             try {
-                config.node("supported-protocol-numbers").setList(Integer.class, List.of(763, 764, 765, 766, 767, 768, 769, 770, 771, 772, 773, 774)); // 1.20.2, 1.20.3, 1.20.4, 1.20.5, 1.20.6, 1.21-1.21.1, 1.21.2-1.21.3, 1.21.4, 1.21.5, 1.21.6, 1.21.7-1.21.8, 1.21.9-1.21.10, 1.21.11
+                config.node("supported-protocol-numbers").setList(Integer.class, List.of(776)); // 26.2
             } catch (SerializationException ignored) {}
         }
 

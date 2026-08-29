@@ -119,8 +119,8 @@ public class SuppressRaids extends ConfigurationBase implements Listener {
         if (this.suppressRaids.containsKey(raidLevel.dimension())) {
             boolean suppress = this.suppressRaids.get(raidLevel.dimension()).stream()
                     .anyMatch(suppressRaid -> {
-                        double distance = suppressRaid.getLeft().getCenter().distanceTo(raidLocation);
-                        System.out.println(distance + " <= " + suppressRaid.getRight());
+                        double distance = Vec3.atCenterOf(suppressRaid.getLeft()).distanceTo(raidLocation);
+//                        System.out.println(distance + " <= " + suppressRaid.getRight());
                         return distance <= suppressRaid.getRight();
                     });
             event.setCancelled(suppress);

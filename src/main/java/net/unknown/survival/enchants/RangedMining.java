@@ -110,7 +110,7 @@ public class RangedMining implements Listener {
 
     public static final Map<UUID, Set<BlockPos>> IGNORE_EVENT = new HashMap<>();
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onBlockBreak(BlockBreakEvent event) {
         Player player = event.getPlayer();
         if (IGNORE_EVENT.containsKey(player.getUniqueId())) {

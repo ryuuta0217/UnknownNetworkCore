@@ -106,7 +106,7 @@ public class FakePlayer extends ServerPlayer {
         super(level.getServer(), level, createFakeProfile(name, uniqueId == null ? UUID.randomUUID() : uniqueId, false), clientOptions);
         this.isRealPlayer = false;
         new ServerGamePacketListenerImpl(this);
-        this.getAdvancements().stopListening();
+        this.getAdvancements().clearTriggers();
     }
 
     @Override

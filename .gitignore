@@ -4,6 +4,7 @@ libs/*
 !libs/BlueMap*.jar
 !libs/NuVotifier*.jar
 !libs/GSit*.jar
+!libs/QuickShop-Hikari*.jar
 !libs/gradle/
 .idea/
 .gradle/

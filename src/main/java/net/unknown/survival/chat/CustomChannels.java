@@ -88,7 +88,8 @@ public class CustomChannels {
                         UUID owner = UUID.fromString(CONFIG.getString("channels." + channelName + ".owner"));
                         Component displayName = GsonComponentSerializer.gson().deserialize(CONFIG.getString("channels." + channelName + ".display_name"));
                         List<UUID> players = CONFIG.getStringList("channels." + channelName + ".players").stream().map(rawUniqueId -> UUID.fromString(rawUniqueId)).toList();
-                        CHANNELS.put(channelName, new CustomChannel(channelName, displayName, owner, players));
+                        String discordChannelId = CONFIG.contains("channels." + channelName + ".discord_channel_id") ? CONFIG.getString("channels." + channelName + ".discord_channel_id") : null;
+                        CHANNELS.put(channelName, new CustomChannel(channelName, displayName, owner, players, discordChannelId));
                     });
                 }
             }

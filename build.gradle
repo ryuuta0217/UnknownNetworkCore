@@ -9,7 +9,7 @@ plugins {
     id 'application'
     id 'maven-publish'
     id 'io.papermc.paperweight.userdev' version '2.0.0-beta.21' // Enable Development of using Mojang Mapping.
-    id 'xyz.jpenilla.run-paper' version '2.3.0' // Run Mojang Mapped or Spigot Mapped Server
+    id 'xyz.jpenilla.run-paper' version '3.0.2' // Run Mojang Mapped or Spigot Mapped Server
     id 'com.gradleup.shadow' version '9.4.1' // fatJar
     id "com.diffplug.spotless" version "8.4.0" // Add License Header to source code headers.
     id "de.undercouch.download" version "+" // File Downloader
@@ -58,7 +58,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("26.1.1.build.+")
+    paperweight.paperDevBundle("26.2.build.+")
     compileOnly fileTree(dir: "libs", include: "*.jar")
     compileOnly group: 'com.sk89q.worldguard', name: 'worldguard-bukkit', version: '7.0.16', {
         exclude group: 'com.google.code.gson', module: 'gson'
@@ -67,8 +67,8 @@ dependencies {
     }
     compileOnly group: 'net.milkbowl.vault', name: 'VaultAPI', version: '1.7'
     compileOnly group: 'net.luckperms', name: 'api', version: '+'
-    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'cb82965c'
-    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'cb82965c'
+    compileOnly group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'd81767d8'
+    launchwrapper group: 'net.unknown', name: 'UnknownNetworkBootstrap', version: 'd81767d8'
     implementation group: 'org.mozilla', name: 'rhino', version: '1.7.15'
     implementation group: 'net.dv8tion', name: 'JDA', version: '+'
     implementation group: 'org.json', name: 'json', version: '+'
@@ -80,7 +80,7 @@ dependencies {
     implementation group: 'com.github.luben', name: 'zstd-jni', version: '+'
     //implementation group: 'io.netty', name: 'netty-buffer', version: '4.1.52.Final'
     //implementation group: 'io.netty', name: 'netty-handler', version: '4.1.52.Final'
-    compileOnly group: 'com.velocitypowered', name: 'velocity-api', version: '3.+'
+    compileOnly group: 'com.velocitypowered', name: 'velocity-api', version: '4.+'
     annotationProcessor group: 'com.velocitypowered', name: 'velocity-api', version: '+'
     implementation group: 'io.ipinfo', name: 'ipinfo-api', version: '+'
     compileOnly group: "com.viaversion", name: "viaversion-api", version: "+"
@@ -129,17 +129,6 @@ jar {
 
 shadowJar {
     archiveFileName = archiveBaseName.get() + "." + archiveExtension.get()
-}
-
-runMojangMappedServer {
-    runDirectory(project.file("testServer"))
-    systemProperty "net.kyori.adventure.text.warnWhenLegacyFormattingDetected", "false"
-    systemProperty "Paper.ignoreWorldDataVersion", "true"
-    systemProperty "un.env", System.getProperty("un.env", "SURVIVAL")
-    systemProperty "file.encoding", System.getProperty("file.encoding", "UTF-8")
-    systemProperty "sun.stdout.encoding", System.getProperty("sun.stdout.encoding", "UTF-8")
-    systemProperty "sun.stderr.encoding", System.getProperty("sun.stderr.encoding", "UTF-8")
-    args("-P pluginsMapped")
 }
 
 runServer {
