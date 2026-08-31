@@ -203,7 +203,8 @@ public class Whois {
                     JSONObject users = json.getJSONObject(ip);
 
                     try {
-                        usersByIp.put(InetAddress.getByName(ip.substring(1)), users.toMap().entrySet().stream().map(e -> Map.entry(UUID.fromString(e.getKey()), Long.parseLong(String.valueOf(e.getValue())))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+                        String ipStr = ip.startsWith("/") ? ip.substring(1) : ip;
+                        usersByIp.put(InetAddress.getByName(ipStr), users.toMap().entrySet().stream().map(e -> Map.entry(UUID.fromString(e.getKey()), Long.parseLong(String.valueOf(e.getValue())))).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
                     } catch (UnknownHostException e) {
                         LOGGER.error("Failed to read IP address from database: " + "{\"" + ip + "\": " + users.toString() + "}", e);
                     }
@@ -228,7 +229,8 @@ public class Whois {
     private static void saveUsersByIp() {
         try {
             if ((USERS_BY_IP_FILE.getParentFile().exists() || USERS_BY_IP_FILE.getParentFile().mkdirs()) && (USERS_BY_IP_FILE.exists() || USERS_BY_IP_FILE.createNewFile())) {
-                JSONObject json = new JSONObject(USERS_BY_IP);
+                JSONObject json = new JSONObject();
+                USERS_BY_IP.forEach((ip, users) -> json.put(ip.getHostAddress(), new JSONObject(users)));
                 Files.write(USERS_BY_IP_FILE.toPath(), Collections.singleton(json.toString()));
             }
         } catch(IOException e) {
