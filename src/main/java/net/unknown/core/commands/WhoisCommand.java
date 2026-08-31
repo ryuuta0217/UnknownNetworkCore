@@ -302,7 +302,7 @@ public class WhoisCommand {
                 }
             }
         }
-        return true;
+        return textCursor == text.length();
     }
 
     private static boolean processWildcardReader(String pattern, String text) {
