@@ -91,7 +91,22 @@ public class WhoisCommand {
                                                         .executes(WhoisCommand::showPlayersByIp)))))
                         .then(Commands.literal("lookup")
                                 .then(Commands.argument("ip", StringArgumentType.string())
-                                        .executes(ctx -> 1))));
+                                        .executes(ctx -> {
+                                            String ipStr = StringArgumentType.getString(ctx, "ip");
+                                            try {
+                                                IPResponse information = Whois.getIpInformation(InetAddress.getByName(ipStr));
+                                                if (information != null) {
+                                                    NewMessageUtil.sendMessage(ctx.getSource(), information.toString());
+                                                    return information.hashCode();
+                                                } else {
+                                                    NewMessageUtil.sendErrorMessage(ctx.getSource(), "IP Lookup に失敗: " + ipStr);
+                                                    return -1;
+                                                }
+                                            } catch (UnknownHostException e) {
+                                                NewMessageUtil.sendErrorMessage(ctx.getSource(), "不明なIPアドレスです: " + ipStr);
+                                                return -2;
+                                            }
+                                        }))));
 
         dispatcher.register(builder);
     }
