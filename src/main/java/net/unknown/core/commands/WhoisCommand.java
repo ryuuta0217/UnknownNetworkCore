@@ -104,7 +104,7 @@ public class WhoisCommand {
             Component l = Component.empty();
 
             Component ipBlock;
-            IPResponse ipInfo = (IPResponse) Whois.getIpInfoCache().get(IPinfo.cacheKey(db.getKey().getHostAddress()));
+            IPResponse ipInfo = Whois.getIpInfoCache() != null ? (IPResponse) Whois.getIpInfoCache().get(IPinfo.cacheKey(db.getKey().getHostAddress())) : null;
             if (ipInfo != null) {
                 ipBlock = Component.text(mask ? Whois.maskIpAddress(db.getKey()) : ipInfo.getIp()).hoverEvent(HoverEvent.showText(
                         Component.text("Country/Region: " + ipInfo.getRegion() + ", " + ipInfo.getCity() + ", " + ipInfo.getCountryName()).appendNewline()
@@ -154,7 +154,7 @@ public class WhoisCommand {
 
             int ipIndex = 0;
             for (Map.Entry<InetAddress, Long> ipEntry : db.getValue().entrySet()) {
-                IPResponse ipInfo = (IPResponse) Whois.getIpInfoCache().get(IPinfo.cacheKey(ipEntry.getKey().getHostAddress()));
+                IPResponse ipInfo = Whois.getIpInfoCache() != null ? (IPResponse) Whois.getIpInfoCache().get(IPinfo.cacheKey(ipEntry.getKey().getHostAddress())) : null;
                 Component ipBlock = ipInfo != null
                         ? Component.text(mask ? Whois.maskIpAddress(ipEntry.getKey()) : ipInfo.getIp())
                                 .hoverEvent(HoverEvent.showText(Component.text("Country/Region: " + ipInfo.getRegion() + ", " + ipInfo.getCity() + ", " + ipInfo.getCountryName())
