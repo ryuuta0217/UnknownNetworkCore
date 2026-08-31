@@ -98,7 +98,7 @@ public class WhoisCommand {
 
     public static int showIpDatabase(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         int showPage = BrigadierUtil.getArgumentOrDefault(ctx, Integer.class, "page", 1);
-        boolean mask = ctx.getSource().isPlayer() && ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
+        boolean mask = ctx.getSource().isPlayer() && !ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
 
         TextBasePagination<Map.Entry<InetAddress, Map<UUID, Long>>> page = new TextBasePagination<>(Whois.getIpDatabase().entrySet(), (db, i) -> {
             Component l = Component.empty();
@@ -141,9 +141,9 @@ public class WhoisCommand {
         }
 
         int showPage = BrigadierUtil.getArgumentOrDefault(ctx, Integer.class, "page", 1);
-        boolean mask = ctx.getSource().isPlayer() && ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
 
         Map<UUID, Map<InetAddress, Long>> entries = Whois.getIpDatabase().entrySet().stream().flatMap(entry -> entry.getValue().entrySet().stream().map(playerEntry -> Map.entry(playerEntry.getKey(), Map.entry(entry.getKey(), playerEntry.getValue())))).collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.toMap(e -> e.getValue().getKey(), e -> e.getValue().getValue())));
+        boolean mask = ctx.getSource().isPlayer() && !ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
 
         TextBasePagination<Map.Entry<UUID, Map<InetAddress, Long>>> page = new TextBasePagination<>(entries.entrySet(), (db, i) -> {
             Component l = Component.empty();
@@ -182,7 +182,7 @@ public class WhoisCommand {
             }
         }
         int showPage = BrigadierUtil.getArgumentOrDefault(ctx, Integer.class, "page", 1);
-        boolean mask = ctx.getSource().isPlayer() && ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
+        boolean mask = ctx.getSource().isPlayer() && !ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
 
         Map<InetAddress, Map<UUID, Long>> entries = Whois.getIpDatabase().entrySet().stream().filter(e -> hasWildcard ? processWildcard(ip, e.getKey().getHostAddress()) : e.getKey().getHostAddress().equals(ip)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -238,7 +238,7 @@ public class WhoisCommand {
         }
 
         ServerPlayer finalTarget = target;
-        if (Whois.getIpInfoCache() != null) ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(WhoisListener.buildWhoisInformationMessage(finalTarget.getBukkitEntity(), finalTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode()))), false);
+        if (Whois.getIpInfoCache() != null) ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(WhoisListener.buildWhoisInformationMessage(finalTarget.getBukkitEntity(), !finalTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode()))), false);
         else ctx.getSource().sendFailure(net.minecraft.network.chat.Component.literal("Whois is disabled"));
         return 0;
     }
