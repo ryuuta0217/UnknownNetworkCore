@@ -31,6 +31,7 @@
 
 package net.unknown.core.managers;
 
+import com.destroystokyo.paper.event.server.PaperServerListPingEvent;
 import net.kyori.adventure.text.Component;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoRemovePacket;
@@ -48,6 +49,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.event.server.ServerListPingEvent;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValueAdapter;
 
@@ -260,5 +262,11 @@ public class VanishManager implements Listener {
         if (isVanished(event.getPlayer())) {
             event.quitMessage(null);
         }
+    }
+
+    @EventHandler
+    public void onPing(PaperServerListPingEvent event) {
+        event.setNumPlayers(Math.toIntExact(Bukkit.getOnlinePlayers().parallelStream().filter(player -> !isVanished(player.getUniqueId())).count()));
+        event.getListedPlayers().removeIf(player -> isVanished(player.id()));
     }
 }
