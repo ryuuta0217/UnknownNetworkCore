@@ -120,7 +120,7 @@ public class Whois {
      * @return ユーザーのUUIDと最終ログイン日時のMap
      */
     public static Map<UUID, Long> getUsersByIp(InetAddress ip) {
-        return Collections.unmodifiableMap(USERS_BY_IP.getOrDefault(ip.getHostAddress(), Collections.emptyMap()));
+        return Collections.unmodifiableMap(USERS_BY_IP.getOrDefault(ip, Collections.emptyMap()));
     }
 
     /**
