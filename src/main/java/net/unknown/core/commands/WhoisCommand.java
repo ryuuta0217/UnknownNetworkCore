@@ -273,6 +273,7 @@ public class WhoisCommand {
             char patternChar = pattern.charAt(patternCursor);
 
             if (patternChar != '*') { // literal processor
+                if (textCursor >= text.length()) return false;
                 char textChar = text.charAt(textCursor);
                 if (textChar == patternChar) {
                     textCursor++;
