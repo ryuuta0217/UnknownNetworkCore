@@ -41,10 +41,13 @@ import org.bukkit.*;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.attribute.AttributeInstance;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
@@ -98,9 +101,17 @@ public class EntityEditorListener implements Listener {
         if (event.getPlayer().getInventory().getItemInMainHand().getType() != Material.DEBUG_STICK) return;
         if (!event.getPlayer().hasPermission(Permissions.ENTITY_EDITOR.getPermissionNode())) return;
 
-        // ツールアイテムの場合はGUIを開かない (onInteractで処理する)
-        ItemStack item = event.getPlayer().getInventory().getItemInMainHand();
-        if (item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().has(EntityEditor.TOOL_KEY, PersistentDataType.STRING)) {
+        // ツールアイテムの場合
+        ItemStack heldItem = event.getPlayer().getInventory().getItemInMainHand();
+        if (heldItem.hasItemMeta() && heldItem.getItemMeta().getPersistentDataContainer().has(EntityEditor.TOOL_KEY, PersistentDataType.STRING)) {
+            ItemMeta meta = heldItem.getItemMeta();
+            String toolActionKey = meta.getPersistentDataContainer().get(EntityEditor.TOOL_KEY, PersistentDataType.STRING);;
+
+            if (toolActionKey != null) {
+                @Nullable String encodedStep = meta.getPersistentDataContainer().get(EntityEditor.TOOL_STEP_KEY, PersistentDataType.STRING);
+                handleToolAction(event.getPlayer(), true, false, toolActionKey, encodedStep);
+                return;
+            }
             event.setCancelled(true);
             return;
         }
@@ -126,7 +137,9 @@ public class EntityEditorListener implements Listener {
 
             if (toolActionKey != null) {
                 @Nullable String encodedStep = meta.getPersistentDataContainer().get(EntityEditor.TOOL_STEP_KEY, PersistentDataType.STRING);
-                handleToolAction(player, event, toolActionKey, encodedStep);
+                boolean isIncrease = (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK);
+                boolean isDecrease = (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK);
+                handleToolAction(player, isIncrease, isDecrease, toolActionKey, encodedStep);
                 return;
             }
         }
@@ -145,8 +158,31 @@ public class EntityEditorListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.LOW)
+    public void onEntityDamaged(EntityDamageByEntityEvent event) {
+        if (event.getDamager().getType() != EntityType.PLAYER) return;
+
+        Player player = (Player) event.getDamager();
+        if (player.getInventory().getItemInMainHand().getType() != Material.DEBUG_STICK) return;
+        if (!player.hasPermission(Permissions.ENTITY_EDITOR.getPermissionNode())) return;
+
+        // ツールアイテムかどうか判定
+        ItemStack heldItem = player.getInventory().getItemInMainHand();
+        if (heldItem.hasItemMeta()) {
+            ItemMeta meta = heldItem.getItemMeta();
+            String toolActionKey = meta.getPersistentDataContainer().get(EntityEditor.TOOL_KEY, PersistentDataType.STRING);;
+
+            if (toolActionKey != null) {
+                @Nullable String encodedStep = meta.getPersistentDataContainer().get(EntityEditor.TOOL_STEP_KEY, PersistentDataType.STRING);
+                handleToolAction(player, false, true, toolActionKey, encodedStep);
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
-    private <V> void handleToolAction(Player player, PlayerInteractEvent event, String actionKey, @Nullable String encodedStep) {
+    private <V> void handleToolAction(Player player, boolean isIncrease, boolean isDecrease, String actionKey, @Nullable String encodedStep) {
         if (encodedStep == null) return; // step が設定されていない
 
         EntityEditorRegistry.ToolAction<Entity, V> toolAction = EntityEditorRegistry.getToolAction(actionKey);
@@ -171,9 +207,6 @@ public class EntityEditorListener implements Listener {
         if (!toolAction.entityType().isAssignableFrom(target.getClass())) return;
 
         // 左クリック: 減少, 右クリック: 増加
-        Action action = event.getAction();
-        boolean isIncrease = (action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK);
-        boolean isDecrease = (action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK);
         if (!isIncrease && !isDecrease) return;
 
         V oldValue = toolAction.currentValueGetter().apply(target);
@@ -186,7 +219,6 @@ public class EntityEditorListener implements Listener {
 
         // ActionBar フィードバック
         player.sendActionBar(Component.text(toolAction.displayName() + ": " + toolAction.formatter().apply(oldValue) + " → " + toolAction.formatter().apply(newValue), DefinedTextColor.GREEN));
-        event.setCancelled(true);
     }
 
     /**

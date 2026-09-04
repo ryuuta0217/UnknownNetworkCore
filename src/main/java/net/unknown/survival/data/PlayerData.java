@@ -32,11 +32,13 @@
 package net.unknown.survival.data;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.resources.Identifier;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.configurations.ConfigurationBase;
 import net.unknown.core.configurations.ConfigurationSerializer;
 import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
+import net.unknown.core.dependency.MultiverseCore;
 import net.unknown.survival.data.model.Home;
 import net.unknown.survival.data.model.HomeGroup;
 import net.unknown.survival.events.PlayerAFKStatusChangedEvent;
@@ -70,6 +72,7 @@ public class PlayerData extends ConfigurationBase {
     private final SessionData sessionData = new SessionData(this);
     private ChatData chatData;
     private PlayerRegistry registries;
+    private SpawnConfigData spawnConfigData;
 
     public PlayerData(UUID uniqueId) {
         super("players/" + uniqueId + ".yml", false, "UNC/PlayerData/" + Bukkit.getOfflinePlayer(uniqueId).getName());
@@ -171,6 +174,7 @@ public class PlayerData extends ConfigurationBase {
         this.homeData = HomeData.load(this);
         this.chatData = ChatData.load(this);
         this.registries = PlayerRegistry.load(this);
+        this.spawnConfigData = SpawnConfigData.load(this);
     }
 
     @Override
@@ -189,6 +193,12 @@ public class PlayerData extends ConfigurationBase {
 
         try {
             this.registries.save(this.getConfig());
+        } catch(Throwable t) {
+            t.printStackTrace();
+        }
+
+        try {
+            this.spawnConfigData.save(this.getConfig());
         } catch(Throwable t) {
             t.printStackTrace();
         }
@@ -218,6 +228,10 @@ public class PlayerData extends ConfigurationBase {
 
     public PlayerRegistry getRegistries() {
         return this.registries;
+    }
+
+    public SpawnConfigData getSpawnConfigData() {
+        return this.spawnConfigData;
     }
 
     public static class PlayerRegistry {
@@ -639,6 +653,113 @@ public class PlayerData extends ConfigurationBase {
             config.set("use-jis-kana-convert", this.useJisKanaConvert);
             config.set("use-minimessage", this.useMiniMessage);
             config.set("show-head-prefix", this.showHeadPrefix);
+        }
+    }
+
+    public static class SpawnConfigData {
+        private static final String CONFIG_KEY = "spawn-config";
+        private static final Identifier DEFAULT_IDENTIFIER = Identifier.parse("unknown-network:default");
+
+        private final PlayerData parent;
+        private Identifier spawnIdentifier;
+        private boolean overrideRespawn;
+
+        public SpawnConfigData(PlayerData parent, Identifier spawnIdentifier, boolean overrideRespawn) {
+            this.parent = parent;
+            this.spawnIdentifier = spawnIdentifier;
+            this.overrideRespawn = overrideRespawn;
+        }
+
+        public PlayerData getPlayerData() {
+            return this.parent;
+        }
+
+        public Identifier getSpawnIdentifier() {
+            return this.spawnIdentifier;
+        }
+
+        public void setSpawnIdentifier(Identifier spawnIdentifier) {
+            this.spawnIdentifier = spawnIdentifier;
+            RunnableManager.runAsync(this.parent::save);
+        }
+
+        public boolean isOverrideRespawn() {
+            return this.overrideRespawn;
+        }
+
+        public void setOverrideRespawn(boolean overrideRespawn) {
+            this.overrideRespawn = overrideRespawn;
+            RunnableManager.runAsync(this.parent::save);
+        }
+
+        public boolean isDefault() {
+            return DEFAULT_IDENTIFIER.equals(this.spawnIdentifier);
+        }
+
+        /**
+         * identifier からスポーン先 Location を解決する。
+         * 解決順序:
+         *   1. default → MultiverseCore.getSpawnLocation(world)
+         *   2. Spawns レジストリで検索
+         *   3. villages/* パターン → Villages で検索
+         *   4. null（フォールバック）
+         */
+        @Nullable
+        public Location resolveLocation() {
+            if (isDefault()) {
+                World world = Bukkit.getWorld("world");
+                if (world != null) {
+                    return MultiverseCore.getSpawnLocation(world);
+                }
+                return null;
+            }
+
+            // Spawns レジストリを検索
+            net.unknown.survival.data.model.Spawn spawn = Spawns.getSpawn(this.spawnIdentifier);
+            if (spawn != null) {
+                return spawn.getLocation().asLocation();
+            }
+
+            // Villages を検索 (unknown-network:villages/<name>)
+            String path = this.spawnIdentifier.getPath();
+            if (path.startsWith("villages/")) {
+                String villageName = path.substring("villages/".length());
+                net.unknown.survival.data.model.Village village = Villages.getVillageByName(villageName);
+                if (village != null) {
+                    return village.getLocation().asLocation();
+                }
+            }
+
+            // 解決不可 → null
+            return null;
+        }
+
+        public static SpawnConfigData load(PlayerData parent) {
+            ConfigurationSection section = parent.getConfig().getConfigurationSection(CONFIG_KEY);
+            if (section == null) {
+                return new SpawnConfigData(parent, DEFAULT_IDENTIFIER, false);
+            }
+
+            String identifierStr = section.getString("spawn-identifier", DEFAULT_IDENTIFIER.toString());
+            Identifier spawnIdentifier;
+            try {
+                spawnIdentifier = Identifier.parse(identifierStr);
+            } catch (Throwable t) {
+                parent.getLogger().warning("Invalid spawn identifier: " + identifierStr + ", falling back to default.");
+                spawnIdentifier = DEFAULT_IDENTIFIER;
+            }
+
+            boolean overrideRespawn = section.getBoolean("override-respawn", false);
+            return new SpawnConfigData(parent, spawnIdentifier, overrideRespawn);
+        }
+
+        public void save(FileConfiguration config) {
+            config.set(CONFIG_KEY + ".spawn-identifier", this.spawnIdentifier.toString());
+            config.set(CONFIG_KEY + ".override-respawn", this.overrideRespawn);
+        }
+
+        public static Identifier getDefaultIdentifier() {
+            return DEFAULT_IDENTIFIER;
         }
     }
 

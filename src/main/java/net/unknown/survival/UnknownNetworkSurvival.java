@@ -39,6 +39,7 @@ import net.unknown.core.feature.admin.spy.modules.CustomChannelSpy;
 import net.unknown.core.managers.BossBarManager;
 import net.unknown.survival.bossbar.SurvivalVisibilityHandler;
 import net.unknown.survival.data.Villages;
+import net.unknown.survival.data.Spawns;
 import net.unknown.survival.economy.UnknownNetworkEconomy;
 import net.unknown.survival.economy.VaultEconomy;
 import net.unknown.core.managers.ListenerManager;
@@ -116,6 +117,7 @@ public class UnknownNetworkSurvival {
         //AutomaticWorldRegeneration.getInstance();
         AutomatedRegenWorldManager.getInstance();
         Villages.getInstance();
+        Spawns.getInstance();
         AdminStorage.getInstance().load();
 
         CustomEnchantments.initialize();
@@ -147,6 +149,7 @@ public class UnknownNetworkSurvival {
         ListenerManager.registerListener(new ServerRestartListener());
         ListenerManager.registerListener(new ProtectedAreaTestStick());
         ListenerManager.registerListener(new PlayerJoinListener());
+        ListenerManager.registerListener(new SpawnConfigListener());
         ListenerManager.registerListener(new MinecraftToDiscordMessageListener());
         ListenerManager.registerListener(new LocalLoginListener());
         ListenerManager.registerListener(new OpenShulkerBoxInHand());
@@ -221,6 +224,7 @@ public class UnknownNetworkSurvival {
 
     public static void onDisable() {
         Villages.save(true, false);
+        Spawns.save(true, false);
         AdminStorage.getInstance().save();
     }
 

@@ -91,20 +91,35 @@ public class WhoisCommand {
                                                         .executes(WhoisCommand::showPlayersByIp)))))
                         .then(Commands.literal("lookup")
                                 .then(Commands.argument("ip", StringArgumentType.string())
-                                        .executes(ctx -> 1))));
+                                        .executes(ctx -> {
+                                            String ipStr = StringArgumentType.getString(ctx, "ip");
+                                            try {
+                                                IPResponse information = Whois.getIpInformation(InetAddress.getByName(ipStr));
+                                                if (information != null) {
+                                                    NewMessageUtil.sendMessage(ctx.getSource(), information.toString());
+                                                    return information.hashCode();
+                                                } else {
+                                                    NewMessageUtil.sendErrorMessage(ctx.getSource(), "IP Lookup に失敗: " + ipStr);
+                                                    return -1;
+                                                }
+                                            } catch (UnknownHostException e) {
+                                                NewMessageUtil.sendErrorMessage(ctx.getSource(), "不明なIPアドレスです: " + ipStr);
+                                                return -2;
+                                            }
+                                        }))));
 
         dispatcher.register(builder);
     }
 
     public static int showIpDatabase(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         int showPage = BrigadierUtil.getArgumentOrDefault(ctx, Integer.class, "page", 1);
-        boolean mask = ctx.getSource().isPlayer() && ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
+        boolean mask = ctx.getSource().isPlayer() && !ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
 
         TextBasePagination<Map.Entry<InetAddress, Map<UUID, Long>>> page = new TextBasePagination<>(Whois.getIpDatabase().entrySet(), (db, i) -> {
             Component l = Component.empty();
 
             Component ipBlock;
-            IPResponse ipInfo = (IPResponse) Whois.getIpInfoCache().get(IPinfo.cacheKey(db.getKey().getHostAddress()));
+            IPResponse ipInfo = Whois.getIpInfoCache() != null ? (IPResponse) Whois.getIpInfoCache().get(IPinfo.cacheKey(db.getKey().getHostAddress())) : null;
             if (ipInfo != null) {
                 ipBlock = Component.text(mask ? Whois.maskIpAddress(db.getKey()) : ipInfo.getIp()).hoverEvent(HoverEvent.showText(
                         Component.text("Country/Region: " + ipInfo.getRegion() + ", " + ipInfo.getCity() + ", " + ipInfo.getCountryName()).appendNewline()
@@ -141,9 +156,23 @@ public class WhoisCommand {
         }
 
         int showPage = BrigadierUtil.getArgumentOrDefault(ctx, Integer.class, "page", 1);
-        boolean mask = ctx.getSource().isPlayer() && ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
+        boolean mask = ctx.getSource().isPlayer() && !ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
 
-        Map<UUID, Map<InetAddress, Long>> entries = Whois.getIpDatabase().entrySet().stream().flatMap(entry -> entry.getValue().entrySet().stream().map(playerEntry -> Map.entry(playerEntry.getKey(), Map.entry(entry.getKey(), playerEntry.getValue())))).collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.toMap(e -> e.getValue().getKey(), e -> e.getValue().getValue())));
+        Map<UUID, Map<InetAddress, Long>> entries = Whois.getIpDatabase()
+                .entrySet()
+                .stream()
+                .flatMap(entry -> entry.getValue().entrySet().stream().map(playerEntry -> Map.entry(playerEntry.getKey(), Map.entry(entry.getKey(), playerEntry.getValue()))))
+                .filter(e -> {
+                    String cachedPlayerName = Bukkit.getOfflinePlayer(e.getKey()).getName();
+                    if (cachedPlayerName == null) return false;
+
+                    if (hasWildcard) {
+                        return processWildcard(player, cachedPlayerName);
+                    } else {
+                        return cachedPlayerName.equalsIgnoreCase(player);
+                    }
+                })
+                .collect(Collectors.groupingBy(Map.Entry::getKey, Collectors.toMap(e -> e.getValue().getKey(), e -> e.getValue().getValue())));
 
         TextBasePagination<Map.Entry<UUID, Map<InetAddress, Long>>> page = new TextBasePagination<>(entries.entrySet(), (db, i) -> {
             Component l = Component.empty();
@@ -154,7 +183,7 @@ public class WhoisCommand {
 
             int ipIndex = 0;
             for (Map.Entry<InetAddress, Long> ipEntry : db.getValue().entrySet()) {
-                IPResponse ipInfo = (IPResponse) Whois.getIpInfoCache().get(IPinfo.cacheKey(ipEntry.getKey().getHostAddress()));
+                IPResponse ipInfo = Whois.getIpInfoCache() != null ? (IPResponse) Whois.getIpInfoCache().get(IPinfo.cacheKey(ipEntry.getKey().getHostAddress())) : null;
                 Component ipBlock = ipInfo != null
                         ? Component.text(mask ? Whois.maskIpAddress(ipEntry.getKey()) : ipInfo.getIp())
                                 .hoverEvent(HoverEvent.showText(Component.text("Country/Region: " + ipInfo.getRegion() + ", " + ipInfo.getCity() + ", " + ipInfo.getCountryName())
@@ -182,7 +211,7 @@ public class WhoisCommand {
             }
         }
         int showPage = BrigadierUtil.getArgumentOrDefault(ctx, Integer.class, "page", 1);
-        boolean mask = ctx.getSource().isPlayer() && ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
+        boolean mask = ctx.getSource().isPlayer() && !ctx.getSource().getPlayerOrException().getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
 
         Map<InetAddress, Map<UUID, Long>> entries = Whois.getIpDatabase().entrySet().stream().filter(e -> hasWildcard ? processWildcard(ip, e.getKey().getHostAddress()) : e.getKey().getHostAddress().equals(ip)).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
@@ -238,7 +267,7 @@ public class WhoisCommand {
         }
 
         ServerPlayer finalTarget = target;
-        if (Whois.getIpInfoCache() != null) ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(WhoisListener.buildWhoisInformationMessage(finalTarget.getBukkitEntity(), finalTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode()))), false);
+        if (Whois.getIpInfoCache() != null) ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(WhoisListener.buildWhoisInformationMessage(finalTarget.getBukkitEntity(), !finalTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode()))), false);
         else ctx.getSource().sendFailure(net.minecraft.network.chat.Component.literal("Whois is disabled"));
         return 0;
     }
@@ -258,6 +287,7 @@ public class WhoisCommand {
             char patternChar = pattern.charAt(patternCursor);
 
             if (patternChar != '*') { // literal processor
+                if (textCursor >= text.length()) return false;
                 char textChar = text.charAt(textCursor);
                 if (textChar == patternChar) {
                     textCursor++;
@@ -286,7 +316,7 @@ public class WhoisCommand {
                 }
             }
         }
-        return true;
+        return textCursor == text.length();
     }
 
     private static boolean processWildcardReader(String pattern, String text) {

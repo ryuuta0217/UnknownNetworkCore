@@ -66,7 +66,7 @@ public class Commands {
 
         ChannelCommand.register(dispatcher, buildContext);
 
-        SpawnCommand.register(dispatcher);
+        SpawnCommand.register(dispatcher, buildContext);
         LastTpCommand.register(dispatcher);
         FlyCommand.register(dispatcher);
 
