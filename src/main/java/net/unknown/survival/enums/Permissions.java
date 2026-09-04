@@ -63,6 +63,7 @@ public enum Permissions {
     COMMAND_TELEPORT_PET("unknown.survival.command.tppet", "minecraft.command.tppet", 0, TeleportPetCommand.class),
     COMMAND_LASTTP("unknown.survival.command.lasttp", "minecraft.command.lasttp", 2, LastTpCommand.class),
     COMMAND_SPAWN("unknown.survival.command.spawn", "minecraft.command.spawn", 0, SpawnCommand.class),
+    COMMAND_SPAWN_MANAGE("unknown.survival.command.spawn.manage", 2, SpawnCommand.class),
     COMMAND_FLY("unknown.survival.command.fly", "minecraft.command.fly", 0, FlyCommand.class),
     COMMAND_SUPPRESSRAID("unknown.survival.command.suppressraid", "minecraft.command.suppressraid", 4, SuppressRaidCommand.class),
     COMMAND_VOTE("unknown.survival.command.vote", "minecraft.command.vote", 0, VoteCommand.class),
