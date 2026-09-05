@@ -37,9 +37,11 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -50,6 +52,7 @@ import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.unknown.core.define.DefinedTextColor;
@@ -66,7 +69,6 @@ import net.unknown.survival.data.model.Village;
 import net.unknown.survival.enums.Permissions;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
 
@@ -84,18 +86,29 @@ public class SpawnCommand {
         // /spawn
         builder.executes(SpawnCommand::execTeleport);
 
+        SuggestionProvider<CommandSourceStack> spawnIdentifierSuggestions = (ctx, suggestionsBuilder) -> {
+            List<Identifier> suggestions = new ArrayList<>();
+            suggestions.add(Spawns.DEFAULT_IDENTIFIER);
+            suggestions.addAll(Spawns.getSpawns().keySet());
+            suggestions.addAll(Villages.getVillages()
+                    .values()
+                    .parallelStream()
+                    .map(Village::getIdentifier)
+                    .map(identifier -> Identifier.tryBuild("unknown-network", "villages/" + identifier.toShortString().replace(':', '/')))
+                    .toList());
+            return SharedSuggestionProvider.suggestResource(suggestions, suggestionsBuilder);
+        };
+
+        // /spawn <identifier>
+        builder.then(Commands.argument("identifier", IdentifierArgument.id())
+                .suggests(spawnIdentifierSuggestions)
+                .executes(SpawnCommand::execTeleport));
+
         // /spawn set <identifier>
         builder.then(Commands.literal("set")
                 .requires(Permissions.COMMAND_SPAWN::checkAndIsPlayer)
                 .then(Commands.argument("identifier", IdentifierArgument.id())
-                        .suggests((ctx, suggestionsBuilder) -> {
-                            List<Identifier> suggestions = new ArrayList<>();
-                            suggestions.add(PlayerData.SpawnConfigData.getDefaultIdentifier());
-                            suggestions.addAll(Spawns.getSpawns().keySet());
-                            Villages.getVillages().values().forEach(village ->
-                                    suggestions.add(Identifier.parse("unknown-network:villages/" + village.getName())));
-                            return SharedSuggestionProvider.suggestResource(suggestions, suggestionsBuilder);
-                        })
+                        .suggests(spawnIdentifierSuggestions)
                         .executes(SpawnCommand::execSet)));
 
         // /spawn override <true|false>
@@ -140,7 +153,10 @@ public class SpawnCommand {
         net.minecraft.world.entity.Entity executor = ctx.getSource().getEntityOrException();
 
         Location destination;
-        if (executor instanceof net.minecraft.world.entity.player.Player player) {
+        if (BrigadierUtil.isArgumentKeyExists(ctx, "identifier")) {
+            Identifier identifier = IdentifierArgument.getId(ctx, "identifier");
+            destination = Spawns.resolveLocation(identifier);
+        } else if (executor instanceof Player player) {
             PlayerData.SpawnConfigData config = PlayerData.of(player.getUUID()).getSpawnConfigData();
             destination = config.resolveLocation();
         } else {
@@ -152,6 +168,7 @@ public class SpawnCommand {
             org.bukkit.World world = Bukkit.getWorld("world");
             if (world != null) {
                 destination = MultiverseCore.getSpawnLocation(world);
+                NewMessageUtil.sendMessage(ctx.getSource(), Component.text("設定されているスポーン地点を解決できなかったため、メインワールドスポーンにテレポートします。", DefinedTextColor.GRAY, TextDecoration.ITALIC));
             }
         }
 
@@ -173,7 +190,7 @@ public class SpawnCommand {
 
     private static int execSet(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         Identifier identifier = IdentifierArgument.getId(ctx, "identifier");
-        net.minecraft.world.entity.player.Player player = ctx.getSource().getPlayerOrException();
+        Player player = ctx.getSource().getPlayerOrException();
         PlayerData.SpawnConfigData config = PlayerData.of(player.getUUID()).getSpawnConfigData();
 
         config.setSpawnIdentifier(identifier);
@@ -187,7 +204,7 @@ public class SpawnCommand {
 
     private static int execOverride(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
         boolean enabled = BoolArgumentType.getBool(ctx, "enabled");
-        net.minecraft.world.entity.player.Player player = ctx.getSource().getPlayerOrException();
+        Player player = ctx.getSource().getPlayerOrException();
         PlayerData.SpawnConfigData config = PlayerData.of(player.getUUID()).getSpawnConfigData();
 
         config.setOverrideRespawn(enabled);
@@ -207,7 +224,7 @@ public class SpawnCommand {
     }
 
     private static int execInfo(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
-        net.minecraft.world.entity.player.Player player = ctx.getSource().getPlayerOrException();
+        Player player = ctx.getSource().getPlayerOrException();
         PlayerData.SpawnConfigData config = PlayerData.of(player.getUUID()).getSpawnConfigData();
 
         Component message = Component.empty()
@@ -280,7 +297,7 @@ public class SpawnCommand {
                     .append(Component.text("--- 公認村 (" + villages.size() + ") ---", DefinedTextColor.GOLD));
             for (Village village : villages) {
                 message = message.appendNewline()
-                        .append(Component.text("  unknown-network:villages/" + village.getName(), DefinedTextColor.AQUA))
+                        .append(Component.text("  unknown-network:villages/" + village.getIdentifier(), DefinedTextColor.AQUA))
                         .append(Component.text(" - ", DefinedTextColor.GRAY))
                         .append(village.getDisplayName().hoverEvent(HoverEvent.showText(village.getDescription())))
                         .append(Component.text(" - ", DefinedTextColor.GRAY))
