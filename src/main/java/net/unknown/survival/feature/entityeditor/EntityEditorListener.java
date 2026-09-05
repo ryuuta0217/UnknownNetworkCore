@@ -107,12 +107,12 @@ public class EntityEditorListener implements Listener {
             ItemMeta meta = heldItem.getItemMeta();
             String toolActionKey = meta.getPersistentDataContainer().get(EntityEditor.TOOL_KEY, PersistentDataType.STRING);;
 
+            event.setCancelled(true);
             if (toolActionKey != null) {
                 @Nullable String encodedStep = meta.getPersistentDataContainer().get(EntityEditor.TOOL_STEP_KEY, PersistentDataType.STRING);
                 handleToolAction(event.getPlayer(), true, false, toolActionKey, encodedStep);
                 return;
             }
-            event.setCancelled(true);
             return;
         }
 
@@ -140,6 +140,7 @@ public class EntityEditorListener implements Listener {
                 boolean isIncrease = (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK);
                 boolean isDecrease = (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK);
                 handleToolAction(player, isIncrease, isDecrease, toolActionKey, encodedStep);
+                event.setCancelled(true);
                 return;
             }
         }
@@ -176,7 +177,6 @@ public class EntityEditorListener implements Listener {
                 @Nullable String encodedStep = meta.getPersistentDataContainer().get(EntityEditor.TOOL_STEP_KEY, PersistentDataType.STRING);
                 handleToolAction(player, false, true, toolActionKey, encodedStep);
                 event.setCancelled(true);
-                return;
             }
         }
     }
