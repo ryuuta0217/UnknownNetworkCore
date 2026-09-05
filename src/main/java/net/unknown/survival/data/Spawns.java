@@ -38,9 +38,13 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.resources.Identifier;
 import net.unknown.core.configurations.ConfigurationBase;
 import net.unknown.core.configurations.ConfigurationSerializer;
+import net.unknown.core.dependency.MultiverseCore;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.survival.data.model.Spawn;
+import net.unknown.survival.data.model.Village;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.craftbukkit.util.CraftMagicNumbers;
 import org.bukkit.inventory.ItemStack;
@@ -51,6 +55,7 @@ import java.util.*;
 
 public class Spawns extends ConfigurationBase {
     private static final Spawns INSTANCE = new Spawns();
+    public static final Identifier DEFAULT_IDENTIFIER = Identifier.parse("unknown-network:default");
 
     private Map<Identifier, Spawn> spawns;
     private Set<Identifier> dirtySpawns;
@@ -115,6 +120,10 @@ public class Spawns extends ConfigurationBase {
         return getSpawns().values().parallelStream().filter(spawn -> spawn.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 
+    public static boolean isDefault(Identifier identifier) {
+        return DEFAULT_IDENTIFIER.equals(identifier);
+    }
+
     public static void setSpawn(Identifier identifier, Spawn spawn) {
         Spawns.getInstance().spawns.put(identifier, spawn);
         Spawns.getInstance().dirtySpawns.add(identifier);
@@ -168,6 +177,62 @@ public class Spawns extends ConfigurationBase {
     public static void removeSpawn(String namespace, String path) {
         removeSpawn(Identifier.parse(namespace + ":" + path));
     }
+
+    public static Location resolveLocation(Identifier identifier) {
+        if (Spawns.isDefault(identifier)) {
+            World world = Bukkit.getWorld("world");
+            if (world != null) {
+                return MultiverseCore.getSpawnLocation(world);
+            }
+            return null;
+        }
+
+        // Spawns レジストリを検索
+        Spawn spawn = Spawns.getSpawn(identifier);
+        if (spawn != null) {
+            return spawn.getLocation().asLocation();
+        }
+
+        // Villages を検索 (unknown-network:villages/<name>)
+        String path = identifier.getPath();
+        if (path.startsWith("villages/")) {
+            Village village = resolveVillage(path);
+            if (village != null) {
+                return village.getLocation().asLocation();
+            }
+        }
+
+        // 解決不可 → null
+        return null;
+    }
+
+    // villageのidentifierの例: minecraft:harrison, unknown-network:dept_village, minecraft:broken/lost_city, unknown-network:pyramid/ancient_temple
+    // 入力例: villages/<namespace>/<path>, villages/<path>
+    public static Village resolveVillage(String path) {
+        if (path.startsWith("villages/")) {
+            path = path.substring(path.indexOf("/") + 1);
+        }
+
+        String[] paths = path.split("/");
+
+        Identifier villageIdentifier;
+        if (paths.length == 1) { // default namespace (minecraft)
+            villageIdentifier = Identifier.parse(path);
+        } else { // namespace? + path
+            // デフォルトの名前空間 "minecraft" 名前空間を優先して確認する
+            if (Villages.getVillage(Identifier.parse(path)) != null) {
+                villageIdentifier = Identifier.parse(path);
+            } else {
+                // 名前空間 + パスに分割して確認する
+                String namespace = paths[0];
+                String pathPart = String.join("/", Arrays.copyOfRange(paths, 1, paths.length));
+                villageIdentifier = Identifier.parse(namespace + ":" + pathPart);
+            }
+        }
+
+        return Villages.getVillage(villageIdentifier);
+    }
+
 
     public static void save(boolean completely, boolean async) {
         if (completely) {
