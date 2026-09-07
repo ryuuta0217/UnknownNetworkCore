@@ -49,6 +49,7 @@ import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -60,6 +61,7 @@ public class Whois {
     private static final Cache IPINFO_CACHE;
     private static final File USERS_BY_IP_FILE = new File(SharedConstants.DATA_FOLDER, "users_by_ip.json");
     private static final Map<InetAddress, Map<UUID, Long>> USERS_BY_IP = new HashMap<>();
+    private static final Map<UUID, Map<InetAddress, Long>> IPS_BY_USER = new HashMap<>();
 
     static {
         LOGGER.info("Reading ipinfo.io API access token from tokens.txt...");
@@ -93,6 +95,10 @@ public class Whois {
         LOGGER.info("Loading IP to players database...");
         USERS_BY_IP.clear();
         USERS_BY_IP.putAll(loadUsersByIp());
+
+        LOGGER.info("Building reverse index (Player -> IPs)...");
+        IPS_BY_USER.clear();
+        IPS_BY_USER.putAll(buildReverseIndex(USERS_BY_IP));
     }
 
     public static Cache getIpInfoCache() {
@@ -130,6 +136,56 @@ public class Whois {
      */
     public static Map<InetAddress, Map<UUID, Long>> getIpDatabase() {
         return Collections.unmodifiableMap(USERS_BY_IP);
+    }
+
+    /**
+     * 指定されたプレイヤーが過去に接続した全IPアドレスと最終接続日時を返す。
+     *
+     * @param uuid プレイヤーのUUID
+     * @return IPアドレスと最終接続日時のMap
+     */
+    public static Map<InetAddress, Long> getIpsByPlayer(UUID uuid) {
+        return Collections.unmodifiableMap(IPS_BY_USER.getOrDefault(uuid, Collections.emptyMap()));
+    }
+
+    public record RelatedPlayer(UUID uuid, int depth, InetAddress viaIp, UUID viaPlayer) {}
+
+    public static Map<Integer, List<RelatedPlayer>> findRelatedPlayers(UUID startPlayer, int maxDepth) {
+        record IpSource(InetAddress ip, UUID sourcePlayer) {}
+
+        Map<Integer, List<RelatedPlayer>> result = new LinkedHashMap<>();
+        Set<UUID> visitedPlayers = ConcurrentHashMap.newKeySet();
+        Set<InetAddress> visitedIps = ConcurrentHashMap.newKeySet();
+
+        visitedPlayers.add(startPlayer);
+
+        List<IpSource> currentBatch = getIpsByPlayer(startPlayer).keySet().stream()
+                .map(ip -> new IpSource(ip, startPlayer))
+                .toList();
+
+        for (int depth = 1; depth <= maxDepth && !currentBatch.isEmpty(); depth++) {
+            final int currentDepth = depth;
+
+            List<RelatedPlayer> foundAtThisDepth = currentBatch.parallelStream()
+                    .filter(src -> visitedIps.add(src.ip()))
+                    .flatMap(src -> getUsersByIp(src.ip()).keySet().stream()
+                            .filter(visitedPlayers::add)
+                            .map(uuid -> new RelatedPlayer(uuid, currentDepth, src.ip(), src.sourcePlayer())))
+                    .toList();
+
+            if (!foundAtThisDepth.isEmpty()) {
+                result.put(depth, foundAtThisDepth);
+            }
+
+            // 次の深度のシードを構築
+            currentBatch = foundAtThisDepth.parallelStream()
+                    .flatMap(rp -> getIpsByPlayer(rp.uuid()).keySet().stream()
+                            .filter(ip -> !visitedIps.contains(ip))
+                            .map(ip -> new IpSource(ip, rp.uuid())))
+                    .toList();
+        }
+
+        return Collections.unmodifiableMap(result);
     }
 
     public static String maskIpAddress(InetAddress address) {
@@ -217,12 +273,27 @@ public class Whois {
         return Collections.emptyMap();
     }
 
+    /**
+     * USERS_BY_IP から逆引きインデックス (Player -> IPs) を構築する。
+     */
+    private static Map<UUID, Map<InetAddress, Long>> buildReverseIndex(Map<InetAddress, Map<UUID, Long>> usersByIp) {
+        Map<UUID, Map<InetAddress, Long>> result = new HashMap<>();
+        usersByIp.forEach((ip, users) -> {
+            users.forEach((uuid, lastLogin) -> {
+                result.computeIfAbsent(uuid, k -> new HashMap<>()).put(ip, lastLogin);
+            });
+        });
+        return result;
+    }
+
     public static void addUserByIp(InetAddress ip, UUID uuid, long lastLogin) {
         USERS_BY_IP.compute(ip, (k, v) -> {
             if (v == null) v = new HashMap<>();
             v.put(uuid, lastLogin);
             return v;
         });
+        // 逆引きインデックスも更新
+        IPS_BY_USER.computeIfAbsent(uuid, k -> new HashMap<>()).put(ip, lastLogin);
         saveUsersByIp();
     }
 

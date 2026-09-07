@@ -42,6 +42,7 @@ import io.ipinfo.api.IPinfo;
 import io.ipinfo.api.model.IPResponse;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -106,7 +107,13 @@ public class WhoisCommand {
                                                 NewMessageUtil.sendErrorMessage(ctx.getSource(), "不明なIPアドレスです: " + ipStr);
                                                 return -2;
                                             }
-                                        }))));
+                                        }))))
+                .then(Commands.literal("related")
+                        .requires(Permissions.FEATURE_WHOIS_UNMASKED::check)
+                        .then(Commands.argument("target", EntityArgument.player())
+                                .executes(WhoisCommand::showRelatedPlayers)
+                                .then(Commands.argument("depth", IntegerArgumentType.integer(1, 10))
+                                        .executes(WhoisCommand::showRelatedPlayers))));
 
         dispatcher.register(builder);
     }
@@ -270,6 +277,64 @@ public class WhoisCommand {
         if (Whois.getIpInfoCache() != null) ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(WhoisListener.buildWhoisInformationMessage(finalTarget.getBukkitEntity(), !finalTarget.getBukkitEntity().hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode()))), false);
         else ctx.getSource().sendFailure(net.minecraft.network.chat.Component.literal("Whois is disabled"));
         return 0;
+    }
+
+    private static int showRelatedPlayers(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        ServerPlayer target = EntityArgument.getPlayer(ctx, "target");
+        int maxDepth = BrigadierUtil.getArgumentOrDefault(ctx, Integer.class, "depth", 3);
+        boolean mask = ctx.getSource().isPlayer()
+                && !ctx.getSource().getPlayerOrException().getBukkitEntity()
+                        .hasPermission(Permissions.FEATURE_WHOIS_UNMASKED.getPermissionNode());
+
+        Map<Integer, List<Whois.RelatedPlayer>> related = Whois.findRelatedPlayers(target.getUUID(), maxDepth);
+
+        Component message = Component.text("===== Related Players: " + target.getGameProfile().name()
+                + " (深度 " + maxDepth + ") =====", DefinedTextColor.AQUA);
+
+        if (related.isEmpty()) {
+            message = message.appendNewline()
+                    .append(Component.text("関連プレイヤーなし", DefinedTextColor.GRAY));
+        } else {
+            int totalCount = related.values().stream().mapToInt(List::size).sum();
+            message = message.appendNewline()
+                    .append(Component.text("合計: " + totalCount + " 人", DefinedTextColor.WHITE));
+
+            for (Map.Entry<Integer, List<Whois.RelatedPlayer>> entry : related.entrySet()) {
+                int depth = entry.getKey();
+
+                String depthHoverText = switch (depth) {
+                    case 1 -> "このプレイヤーと同じIPアドレスで接続したことがあるプレイヤー";
+                    default -> "関連度 " + (depth - 1) + " のプレイヤーと同じIPアドレスで接続したことがあるプレイヤー";
+                };
+
+                List<Component> playerComponents = entry.getValue().stream()
+                        .map(rp -> {
+                            OfflinePlayer op = Bukkit.getOfflinePlayer(rp.uuid());
+                            String name = op.getName() != null ? op.getName() : "Unknown";
+
+                            OfflinePlayer viaOp = Bukkit.getOfflinePlayer(rp.viaPlayer());
+                            String viaName = viaOp.getName() != null ? viaOp.getName() : "Unknown";
+                            String ipDisplay = mask ? Whois.maskIpAddress(rp.viaIp()) : rp.viaIp().getHostAddress();
+
+                            Component hover = Component.text("UUID: " + rp.uuid(), DefinedTextColor.GRAY)
+                                    .appendNewline()
+                                    .append(Component.text("発見経路: " + viaName + " → " + ipDisplay + " → " + name, DefinedTextColor.GRAY));
+
+                            return (Component) Component.text(name, op.getName() != null ? DefinedTextColor.YELLOW : DefinedTextColor.RED)
+                                    .hoverEvent(HoverEvent.showText(hover));
+                        })
+                        .toList();
+
+                message = message.appendNewline()
+                        .append(Component.text("  [関連度 " + depth + "] ", DefinedTextColor.GOLD)
+                                .hoverEvent(HoverEvent.showText(Component.text(depthHoverText, DefinedTextColor.GRAY))))
+                        .append(Component.join(JoinConfiguration.commas(true), playerComponents));
+            }
+        }
+
+        Component finalMessage = message;
+        ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(finalMessage), false);
+        return 1;
     }
 
     /**

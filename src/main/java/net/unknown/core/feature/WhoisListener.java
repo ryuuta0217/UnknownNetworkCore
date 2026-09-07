@@ -34,6 +34,7 @@ package net.unknown.core.feature;
 import com.ryuuta0217.util.ComponentCollector;
 import io.ipinfo.api.model.IPResponse;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.JoinConfiguration;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -73,7 +74,6 @@ public class WhoisListener implements Listener {
 
     public static Component buildWhoisInformationMessage(Player target, boolean mask) {
         IPResponse ipInfo = Whois.getIpInformation(target.getAddress().getAddress());
-        Set<UUID> sameIpPlayers = Whois.getUsersByIp(target.getAddress().getAddress()).keySet();
 
         Date firstPlayed = new Date(target.getFirstPlayed());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
@@ -97,7 +97,50 @@ public class WhoisListener implements Listener {
         Component hostNameComponent = Component.text("ホスト名: " + (ipInfo != null ? (mask ? Whois.maskHostName(ipInfo.getHostname()) : ipInfo.getHostname()) : "不明"), DefinedTextColor.YELLOW);
         Component countryComponent = Component.text("国/地域: " + (ipInfo != null ? ipInfo.getCountryName() + ", " + ipInfo.getRegion() : "不明"), DefinedTextColor.YELLOW);
         Component firstLoginComponent = Component.text("初回ログイン: " + firstPlayedFormatted + " (" + relativeTime.toDays() + "日前)", DefinedTextColor.YELLOW);
-        Component sameIpOtherPlayerComponent = Component.text("同じIPの他のプレイヤー: " + (!sameIpPlayers.isEmpty() ? sameIpPlayers.stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull).collect(Collectors.joining(", ")) : "なし"), DefinedTextColor.YELLOW);
+
+        Map<Integer, List<Whois.RelatedPlayer>> relatedPlayers = Whois.findRelatedPlayers(target.getUniqueId(), 3);
+
+        Component relatedPlayersComponent;
+        if (relatedPlayers.isEmpty()) {
+            relatedPlayersComponent = Component.text("関連プレイヤー: なし", DefinedTextColor.YELLOW);
+        } else {
+            relatedPlayersComponent = Component.text("関連プレイヤー:", DefinedTextColor.YELLOW);
+
+            for (Map.Entry<Integer, List<Whois.RelatedPlayer>> entry : relatedPlayers.entrySet()) {
+                int depth = entry.getKey();
+                List<Whois.RelatedPlayer> players = entry.getValue();
+
+                String depthLabel = "[関連度 " + depth + "]";
+                String depthHoverText = switch (depth) {
+                    case 1 -> "このプレイヤーと同じIPアドレスで接続したことがあるプレイヤー";
+                    default -> "関連度 " + (depth - 1) + " のプレイヤーと同じIPアドレスで接続したことがあるプレイヤー";
+                };
+
+                List<Component> playerComponents = players.stream()
+                        .map(rp -> {
+                            OfflinePlayer op = Bukkit.getOfflinePlayer(rp.uuid());
+                            String name = op.getName() != null ? op.getName() : "Unknown";
+
+                            OfflinePlayer viaOp = Bukkit.getOfflinePlayer(rp.viaPlayer());
+                            String viaPlayerName = viaOp.getName() != null ? viaOp.getName() : "Unknown";
+                            String maskedIp = Whois.maskIpAddress(rp.viaIp());
+
+                            Component hoverText = Component.text("UUID: " + rp.uuid(), DefinedTextColor.GRAY)
+                                    .appendNewline()
+                                    .append(Component.text("発見経路: " + viaPlayerName + " → " + maskedIp + " → " + name, DefinedTextColor.GRAY));
+
+                            return (Component) Component.text(name, op.getName() != null ? DefinedTextColor.YELLOW : DefinedTextColor.RED)
+                                    .hoverEvent(HoverEvent.showText(hoverText));
+                        })
+                        .toList();
+
+                Component depthLine = Component.text("  " + depthLabel + " ", DefinedTextColor.GOLD)
+                        .hoverEvent(HoverEvent.showText(Component.text(depthHoverText, DefinedTextColor.GRAY)))
+                        .append(Component.join(JoinConfiguration.commas(true), playerComponents));
+
+                relatedPlayersComponent = relatedPlayersComponent.appendNewline().append(depthLine);
+            }
+        }
 
         return Component.empty()
                 .append(headerComponent).appendNewline()
@@ -107,6 +150,6 @@ public class WhoisListener implements Listener {
                 .append(hostNameComponent).appendNewline()
                 .append(countryComponent).appendNewline()
                 .append(firstLoginComponent).appendNewline()
-                .append(sameIpOtherPlayerComponent);
+                .append(relatedPlayersComponent);
     }
 }
