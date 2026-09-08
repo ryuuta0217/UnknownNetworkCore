@@ -31,6 +31,7 @@
 
 package net.unknown.survival.feature.entityeditor;
 
+import io.papermc.paper.event.player.PlayerArmSwingEvent;
 import net.kyori.adventure.text.Component;
 import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.core.define.DefinedTextColor;
@@ -110,7 +111,7 @@ public class EntityEditorListener implements Listener {
             event.setCancelled(true);
             if (toolActionKey != null) {
                 @Nullable String encodedStep = meta.getPersistentDataContainer().get(EntityEditor.TOOL_STEP_KEY, PersistentDataType.STRING);
-                handleToolAction(event.getPlayer(), true, false, toolActionKey, encodedStep);
+                handleToolAction(event.getPlayer(), true, false, toolActionKey, event.getRightClicked(), encodedStep);
                 return;
             }
             return;
@@ -139,7 +140,7 @@ public class EntityEditorListener implements Listener {
                 @Nullable String encodedStep = meta.getPersistentDataContainer().get(EntityEditor.TOOL_STEP_KEY, PersistentDataType.STRING);
                 boolean isIncrease = (event.getAction() == Action.RIGHT_CLICK_AIR || event.getAction() == Action.RIGHT_CLICK_BLOCK);
                 boolean isDecrease = (event.getAction() == Action.LEFT_CLICK_AIR || event.getAction() == Action.LEFT_CLICK_BLOCK);
-                handleToolAction(player, isIncrease, isDecrease, toolActionKey, encodedStep);
+                handleToolAction(player, isIncrease, isDecrease, toolActionKey, null, encodedStep);
                 event.setCancelled(true);
                 return;
             }
@@ -160,7 +161,29 @@ public class EntityEditorListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.LOW)
-    public void onEntityDamaged(EntityDamageByEntityEvent event) {
+    public void onPlayerArmSwing(PlayerArmSwingEvent event) { // 左クリックを判定している (DamageEvent よりも先に呼ばれる)
+        if (event.getHand() != EquipmentSlot.HAND) return;
+
+        Player player = event.getPlayer();
+        if (player.getInventory().getItemInMainHand().getType() != Material.DEBUG_STICK) return;
+        if (!player.hasPermission(Permissions.ENTITY_EDITOR.getPermissionNode())) return;
+
+        // ツールアイテムかどうか判定
+        ItemStack heldItem = player.getInventory().getItemInMainHand();
+        if (heldItem.hasItemMeta()) {
+            ItemMeta meta = heldItem.getItemMeta();
+            String toolActionKey = meta.getPersistentDataContainer().get(EntityEditor.TOOL_KEY, PersistentDataType.STRING);;
+
+            if (toolActionKey != null) {
+                @Nullable String encodedStep = meta.getPersistentDataContainer().get(EntityEditor.TOOL_STEP_KEY, PersistentDataType.STRING);
+                handleToolAction(player, false, true, toolActionKey, null, encodedStep);
+                event.setCancelled(true);
+            }
+        }
+    }
+
+    @EventHandler(priority = EventPriority.LOW)
+    public void onEntityDamaged(EntityDamageByEntityEvent event) { // 左クリックを判定している
         if (event.getDamager().getType() != EntityType.PLAYER) return;
 
         Player player = (Player) event.getDamager();
@@ -174,15 +197,14 @@ public class EntityEditorListener implements Listener {
             String toolActionKey = meta.getPersistentDataContainer().get(EntityEditor.TOOL_KEY, PersistentDataType.STRING);;
 
             if (toolActionKey != null) {
-                @Nullable String encodedStep = meta.getPersistentDataContainer().get(EntityEditor.TOOL_STEP_KEY, PersistentDataType.STRING);
-                handleToolAction(player, false, true, toolActionKey, encodedStep);
+                // ここでは実際に何も処理しない。エンティティがダメージを受ける前に PlayerArmSwingEvent で処理されるため、ここではキャンセルするだけ。
                 event.setCancelled(true);
             }
         }
     }
 
     @SuppressWarnings("unchecked")
-    private <V> void handleToolAction(Player player, boolean isIncrease, boolean isDecrease, String actionKey, @Nullable String encodedStep) {
+    private <V> void handleToolAction(Player player, boolean isIncrease, boolean isDecrease, String actionKey, @Nullable Entity target, @Nullable String encodedStep) {
         if (encodedStep == null) return; // step が設定されていない
 
         EntityEditorRegistry.ToolAction<Entity, V> toolAction = EntityEditorRegistry.getToolAction(actionKey);
@@ -197,11 +219,14 @@ public class EntityEditorListener implements Listener {
             return;
         }
 
-        // RayTrace でエンティティを特定
-        AttributeInstance rangeAttr = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE);
-        double range = rangeAttr != null ? rangeAttr.getValue() : 3.0;
-        Entity target = rayTraceTarget(player, range);
-        if (target == null) return;
+        // Entity 指定がない場合、RayTrace でエンティティを特定
+        if (target == null) {
+            AttributeInstance rangeAttr = player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE);
+            double range = rangeAttr != null ? rangeAttr.getValue() : 3.0;
+            target = rayTraceTarget(player, range);
+        }
+
+        if (target == null) return; // 対象エンティティが見つからない
 
         // 型チェック: 対象エンティティがアクションの登録型を継承しているか
         if (!toolAction.entityType().isAssignableFrom(target.getClass())) return;
