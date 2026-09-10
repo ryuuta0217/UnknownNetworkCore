@@ -297,6 +297,78 @@ public class Whois {
         saveUsersByIp();
     }
 
+    /**
+     * 指定されたIPアドレスのエントリをデータベースから削除する。
+     *
+     * @param ip 削除するIPアドレス
+     * @return 削除されたプレイヤー数（エントリが存在しなかった場合は 0）
+     */
+    public static int removeIp(InetAddress ip) {
+        Map<UUID, Long> removed = USERS_BY_IP.remove(ip);
+        if (removed == null) return 0;
+
+        // 逆引きインデックスからも削除
+        for (UUID uuid : removed.keySet()) {
+            Map<InetAddress, Long> playerIps = IPS_BY_USER.get(uuid);
+            if (playerIps != null) {
+                playerIps.remove(ip);
+                if (playerIps.isEmpty()) IPS_BY_USER.remove(uuid);
+            }
+        }
+
+        saveUsersByIp();
+        return removed.size();
+    }
+
+    /**
+     * 指定されたプレイヤーの全IP紐付けをデータベースから削除する。
+     *
+     * @param uuid 削除するプレイヤーのUUID
+     * @return 削除されたIP数（紐付けが存在しなかった場合は 0）
+     */
+    public static int removePlayer(UUID uuid) {
+        Map<InetAddress, Long> removed = IPS_BY_USER.remove(uuid);
+        if (removed == null) return 0;
+
+        // 正引きからも削除
+        for (InetAddress ip : removed.keySet()) {
+            Map<UUID, Long> ipUsers = USERS_BY_IP.get(ip);
+            if (ipUsers != null) {
+                ipUsers.remove(uuid);
+                if (ipUsers.isEmpty()) USERS_BY_IP.remove(ip);
+            }
+        }
+
+        saveUsersByIp();
+        return removed.size();
+    }
+
+    /**
+     * 指定されたIPとプレイヤーの紐付けを削除する。
+     *
+     * @param ip   対象IPアドレス
+     * @param uuid 対象プレイヤーのUUID
+     * @return 紐付けが存在し削除できた場合は true
+     */
+    public static boolean removeEntry(InetAddress ip, UUID uuid) {
+        boolean removed = false;
+
+        Map<UUID, Long> ipUsers = USERS_BY_IP.get(ip);
+        if (ipUsers != null && ipUsers.remove(uuid) != null) {
+            if (ipUsers.isEmpty()) USERS_BY_IP.remove(ip);
+            removed = true;
+        }
+
+        Map<InetAddress, Long> playerIps = IPS_BY_USER.get(uuid);
+        if (playerIps != null) {
+            playerIps.remove(ip);
+            if (playerIps.isEmpty()) IPS_BY_USER.remove(uuid);
+        }
+
+        if (removed) saveUsersByIp();
+        return removed;
+    }
+
     private static void saveUsersByIp() {
         try {
             if ((USERS_BY_IP_FILE.getParentFile().exists() || USERS_BY_IP_FILE.getParentFile().mkdirs()) && (USERS_BY_IP_FILE.exists() || USERS_BY_IP_FILE.createNewFile())) {
