@@ -35,14 +35,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.unknown.provider.DataProvider;
 import net.unknown.provider.requests.EmptyRequest;
+import net.unknown.provider.util.NamespacedKey;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 
 import java.util.Map;
 
 public class ServerInfoProvider implements DataProvider<EmptyRequest, Map<String, Object>> {
-
-    @SuppressWarnings("deprecation")
     @Override
     public NamespacedKey id() {
         return new NamespacedKey("survival", "server/info");

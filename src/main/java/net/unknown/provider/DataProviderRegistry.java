@@ -31,7 +31,7 @@
 
 package net.unknown.provider;
 
-import org.bukkit.NamespacedKey;
+import net.unknown.provider.util.NamespacedKey;
 
 import java.util.Collection;
 import java.util.Collections;

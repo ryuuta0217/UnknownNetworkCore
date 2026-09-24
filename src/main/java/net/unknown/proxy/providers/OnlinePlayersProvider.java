@@ -36,8 +36,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.unknown.provider.DataProvider;
 import net.unknown.provider.requests.EmptyRequest;
+import net.unknown.provider.util.NamespacedKey;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -45,8 +45,6 @@ import java.util.List;
 import java.util.Map;
 
 public class OnlinePlayersProvider implements DataProvider<EmptyRequest, List<Map<String, String>>> {
-
-    @SuppressWarnings("deprecation")
     @Override
     public NamespacedKey id() {
         return new NamespacedKey("proxy", "online_players");
