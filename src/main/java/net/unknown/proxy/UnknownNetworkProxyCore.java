@@ -42,6 +42,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import io.netty.channel.*;
+import net.unknown.provider.DataProviderServer;
 import net.unknown.proxy.fml.ForgeListener;
 import net.unknown.proxy.fml.ForgePlayer;
 import net.unknown.proxy.util.VelocityConnectionReflectUtil;
@@ -167,6 +168,9 @@ public class UnknownNetworkProxyCore {
         this.proxy.getChannelRegistrar().register(MinecraftChannelIdentifier.forDefaultNamespace("brand"), MinecraftChannelIdentifier.forDefaultNamespace("register"), ForgePlayer.FORGE_HANDSHAKE_IDENTIFIER, ForgePlayer.FORGE_LOGIN_IDENTIFIER);
         LOBBY = this.proxy.getServer("lobby").orElse(null);
         SURVIVAL = this.proxy.getServer("survival").orElse(null);
+
+        DataProviderServer.start(CONFIG.node("data-provider", "port").getInt(25581));
+
     }
 
     public ProxyServer getProxy() {

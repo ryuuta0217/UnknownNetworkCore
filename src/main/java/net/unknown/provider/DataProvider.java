@@ -32,7 +32,7 @@
 package net.unknown.provider;
 
 import com.google.gson.JsonElement;
-import org.bukkit.NamespacedKey;
+import net.unknown.provider.util.NamespacedKey;
 
 import java.util.Map;
 

@@ -37,8 +37,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.stats.ServerStatsCounter;
 import net.unknown.provider.DataProvider;
 import net.unknown.provider.requests.PlayerTargetedRequest;
+import net.unknown.provider.util.NamespacedKey;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -47,7 +47,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class StatsProvider implements DataProvider<PlayerTargetedRequest, ServerStatsCounter> {
-    @SuppressWarnings("deprecation")
     @Override
     public NamespacedKey id() {
         return new NamespacedKey("survival", "player/stats");

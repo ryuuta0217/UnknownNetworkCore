@@ -107,7 +107,31 @@ public class WhoisCommand {
                                                 NewMessageUtil.sendErrorMessage(ctx.getSource(), "不明なIPアドレスです: " + ipStr);
                                                 return -2;
                                             }
-                                        }))))
+                                        })))
+                        .then(Commands.literal("remove")
+                                .requires(Permissions.FEATURE_WHOIS_UNMASKED::check)
+                                .then(Commands.literal("ip")
+                                        .then(Commands.argument("ip", StringArgumentType.string())
+                                                .suggests((ctx, sb) -> SharedSuggestionProvider.suggest(Whois.getIpDatabase().keySet().stream().map(InetAddress::getHostAddress), sb))
+                                                .executes(WhoisCommand::removeByIp)))
+                                .then(Commands.literal("player")
+                                        .then(Commands.argument("name", StringArgumentType.string())
+                                                .suggests((ctx, sb) -> SharedSuggestionProvider.suggest(Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getName), sb))
+                                                .executes(WhoisCommand::removeByPlayer)))
+                                .then(Commands.literal("entry")
+                                        .then(Commands.argument("ip", StringArgumentType.string())
+                                                .suggests((ctx, sb) -> SharedSuggestionProvider.suggest(Whois.getIpDatabase().keySet().stream().map(InetAddress::getHostAddress), sb))
+                                                .then(Commands.argument("name", StringArgumentType.string())
+                                                        .suggests((ctx, sb) -> {
+                                                            String ipStr = StringArgumentType.getString(ctx, "ip");
+                                                            try {
+                                                                InetAddress ip = InetAddress.getByName(ipStr);
+                                                                return SharedSuggestionProvider.suggest(Whois.getUsersByIp(ip).keySet().stream().map(Bukkit::getOfflinePlayer).map(OfflinePlayer::getName).filter(Objects::nonNull), sb);
+                                                            } catch (UnknownHostException e) {
+                                                                return sb.buildFuture();
+                                                            }
+                                                        })
+                                                        .executes(WhoisCommand::removeEntry))))))
                 .then(Commands.literal("related")
                         .requires(Permissions.FEATURE_WHOIS_UNMASKED::check)
                         .then(Commands.argument("target", EntityArgument.player())
@@ -335,6 +359,64 @@ public class WhoisCommand {
         Component finalMessage = message;
         ctx.getSource().sendSuccess(() -> NewMessageUtil.convertAdventure2Minecraft(finalMessage), false);
         return 1;
+    }
+
+    private static int removeByIp(CommandContext<CommandSourceStack> ctx) {
+        String ipStr = StringArgumentType.getString(ctx, "ip");
+        try {
+            InetAddress ip = InetAddress.getByName(ipStr);
+            int count = Whois.removeIp(ip);
+            if (count > 0) {
+                NewMessageUtil.sendMessage(ctx.getSource(), ipStr + " のエントリを削除しました (" + count + " プレイヤーの紐付け)");
+            } else {
+                NewMessageUtil.sendErrorMessage(ctx.getSource(), ipStr + " はデータベースに存在しません");
+            }
+            return count;
+        } catch (UnknownHostException e) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "不明なIPアドレスです: " + ipStr);
+            return -1;
+        }
+    }
+
+    private static int removeByPlayer(CommandContext<CommandSourceStack> ctx) {
+        String playerName = StringArgumentType.getString(ctx, "name");
+        OfflinePlayer target = Bukkit.getOfflinePlayer(playerName);
+        if (target.getName() == null) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "不明なプレイヤーです: " + playerName);
+            return -1;
+        }
+
+        int count = Whois.removePlayer(target.getUniqueId());
+        if (count > 0) {
+            NewMessageUtil.sendMessage(ctx.getSource(), playerName + " の全IP紐付けを削除しました (" + count + " IP)");
+        } else {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), playerName + " はデータベースに存在しません");
+        }
+        return count;
+    }
+
+    private static int removeEntry(CommandContext<CommandSourceStack> ctx) {
+        String ipStr = StringArgumentType.getString(ctx, "ip");
+        String playerName = StringArgumentType.getString(ctx, "name");
+        try {
+            InetAddress ip = InetAddress.getByName(ipStr);
+            OfflinePlayer target = Bukkit.getOfflinePlayer(playerName);
+            if (target.getName() == null) {
+                NewMessageUtil.sendErrorMessage(ctx.getSource(), "不明なプレイヤーです: " + playerName);
+                return -1;
+            }
+
+            boolean removed = Whois.removeEntry(ip, target.getUniqueId());
+            if (removed) {
+                NewMessageUtil.sendMessage(ctx.getSource(), ipStr + " ⇔ " + playerName + " の紐付けを削除しました");
+            } else {
+                NewMessageUtil.sendErrorMessage(ctx.getSource(), ipStr + " ⇔ " + playerName + " の紐付けはデータベースに存在しません");
+            }
+            return removed ? 1 : 0;
+        } catch (UnknownHostException e) {
+            NewMessageUtil.sendErrorMessage(ctx.getSource(), "不明なIPアドレスです: " + ipStr);
+            return -1;
+        }
     }
 
     /**

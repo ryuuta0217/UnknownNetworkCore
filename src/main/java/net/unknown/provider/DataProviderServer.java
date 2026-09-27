@@ -35,7 +35,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import org.bukkit.NamespacedKey;
+import net.unknown.provider.util.NamespacedKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
