@@ -324,7 +324,7 @@ public class Firework {
         }
 
         public static Explosion buildObject(CompoundTag tag, String programId) {
-            FireworkExplosion.Shape shape = FireworkExplosion.Shape.valueOf(tag.getStringOr("shape", "small_ball"));
+            FireworkExplosion.Shape shape = FireworkExplosion.Shape.valueOf(tag.getStringOr("shape", "small_ball").toUpperCase());
             boolean flicker = tag.getBoolean("has_twinkle").get();
             boolean trail = tag.getBoolean("has_trail").get();
             int[] colors = tag.getIntArray("colors").get();
