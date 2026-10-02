@@ -252,7 +252,7 @@ public class Firework {
         boolean entityTag = tag.contains("FireworksItem");
 
         // if item tag input, calculate lifetime from Flight tag, 10*1+flight = lifetime
-        int lifeTime = entityTag ? tag.getInt("LifeTime").get() : 10 * (1 + tag.getCompoundOrEmpty("components").getCompoundOrEmpty("minecraft:fireworks").getInt("flight_duration").get());
+        int lifeTime = entityTag ? tag.getInt("LifeTime").orElse(0) : 10 * (1 + tag.getCompoundOrEmpty("components").getCompoundOrEmpty("minecraft:fireworks").getInt("flight_duration").orElse(0));
         boolean shotAtAngle = entityTag && tag.getBoolean("ShotAtAngle").orElse(false);
 
         CompoundTag fireworks = entityTag ? tag.getCompoundOrEmpty("FireworksItem").getCompoundOrEmpty("components").getCompoundOrEmpty("minecraft:fireworks") : tag.getCompoundOrEmpty("components").getCompoundOrEmpty("minecraft:fireworks");
@@ -352,7 +352,7 @@ public class Firework {
                 return null;
             }).toList();
 
-            int[] fadeColors = tag.getIntArray("fade_colors").get();
+            int[] fadeColors = tag.getIntArray("fade_colors").orElse(new int[0]);
             List<ColorReference> fadeColorRefs = Arrays.stream(fadeColors).mapToObj(rgb -> {
                 Map<String, Color> defColors = null;
 
