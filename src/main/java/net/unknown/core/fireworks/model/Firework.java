@@ -233,28 +233,30 @@ public class Firework {
         //  LifeTime:30,
         //  FireworksItem: {
         //      id:firework_rocket,
-        //      Count:1,
-        //      tag: {
-        //          Fireworks:{Explosions:[{Type:1,Trail:1,Colors:[I;15204362,15204362]}],Flight:3,}
+        //      count:1,
+        //      components: {
+        //          "minecraft:fireworks": {Explosions:[{shape: "small_ball", has_twinkle: true, Colors: [I;15204362, 15204362]}], flight_duration: 3}
         //      }
         //  }
         // }
 
         // item tag input:
         // {
-        // Fireworks: {
-        //      Explosions:[{Type:1,Trail:1,Colors:[I;15204362,15204362]}],
-        //      Flight:3,
+        // components: {
+        //    "minecraft:fireworks": {
+        //      Explosions: [{shape: "small_ball", has_twinkle: true, Colors: [I;15204362, 15204362]}],
+        //      flight_duration: 3
+        //    }
         //  }
         // }
         boolean entityTag = tag.contains("FireworksItem");
 
         // if item tag input, calculate lifetime from Flight tag, 10*1+flight = lifetime
-        int lifeTime = entityTag ? tag.getInt("LifeTime").get() : 10 * (1 + tag.getCompoundOrEmpty("Fireworks").getInt("Flight").get());
-        boolean shotAtAngle = entityTag ? (tag.contains("ShotAtAngle") ? tag.getBoolean("ShotAtAngle").get() : false) : false;
+        int lifeTime = entityTag ? tag.getInt("LifeTime").orElse(0) : 10 * (1 + tag.getCompoundOrEmpty("components").getCompoundOrEmpty("minecraft:fireworks").getInt("flight_duration").orElse(0));
+        boolean shotAtAngle = entityTag && tag.getBoolean("ShotAtAngle").orElse(false);
 
-        CompoundTag fireworks = entityTag ? tag.getCompoundOrEmpty("FireworksItem").getCompoundOrEmpty("tag").getCompoundOrEmpty("Fireworks") : tag.getCompoundOrEmpty("Fireworks");
-        ListTag explosions = fireworks.getListOrEmpty("Explosions");
+        CompoundTag fireworks = entityTag ? tag.getCompoundOrEmpty("FireworksItem").getCompoundOrEmpty("components").getCompoundOrEmpty("minecraft:fireworks") : tag.getCompoundOrEmpty("components").getCompoundOrEmpty("minecraft:fireworks");
+        ListTag explosions = fireworks.getListOrEmpty("explosions");
         Map<String, Explosion> explosionsMap = new HashMap<>();
         for (int i = 0; i < explosions.size(); i++) {
             CompoundTag explosion = explosions.getCompoundOrEmpty(i);
@@ -310,22 +312,22 @@ public class Firework {
             return this.fadeColors.stream().map(ColorReference::get).toList();
         }
 
-        // Format: {Type: 0, Flicker: 0b, Trail: 0b, Colors: [I;0, 0, 0], FadeColors: [I;0, 0, 0]}
+        // Format: {shape: "small_ball", has_twinkle: true, has_trail: true, Colors: [I;0, 0, 0], FadeColors: [I;0, 0, 0]}
         public CompoundTag buildCompoundTag() {
             CompoundTag explosion = new CompoundTag();
-            explosion.putInt("Type", this.type.ordinal());
-            explosion.putBoolean("Flicker", this.flicker);
-            explosion.putBoolean("Trail", this.trail);
-            explosion.putIntArray("Colors", this.getColors().stream().map(Color::asRGB).mapToInt(i -> i).toArray());
-            explosion.putIntArray("FadeColors", this.getFadeColors().stream().map(Color::asRGB).mapToInt(i -> i).toArray());
+            explosion.putString("shape", this.type.getSerializedName());
+            explosion.putBoolean("has_twinkle", this.flicker);
+            explosion.putBoolean("has_trail", this.trail);
+            explosion.putIntArray("colors", this.getColors().stream().map(Color::asRGB).mapToInt(i -> i).toArray());
+            explosion.putIntArray("fade_colors", this.getFadeColors().stream().map(Color::asRGB).mapToInt(i -> i).toArray());
             return explosion;
         }
 
         public static Explosion buildObject(CompoundTag tag, String programId) {
-            FireworkExplosion.Shape shape = FireworkExplosion.Shape.values()[tag.getInt("Type").get()];
-            boolean flicker = tag.getBoolean("Flicker").get();
-            boolean trail = tag.getBoolean("Trail").get();
-            int[] colors = tag.getIntArray("Colors").get();
+            FireworkExplosion.Shape shape = FireworkExplosion.Shape.valueOf(tag.getStringOr("shape", "small_ball").toUpperCase());
+            boolean flicker = tag.getBoolean("has_twinkle").orElse(false);
+            boolean trail = tag.getBoolean("has_trail").orElse(false);
+            int[] colors = tag.getIntArray("colors").orElse(new int[0]);
             List<ColorReference> colorRefs = Arrays.stream(colors).mapToObj(rgb -> {
                 Map<String, Color> defColors = null;
 
@@ -350,7 +352,7 @@ public class Firework {
                 return null;
             }).toList();
 
-            int[] fadeColors = tag.getIntArray("FadeColors").get();
+            int[] fadeColors = tag.getIntArray("fade_colors").orElse(new int[0]);
             List<ColorReference> fadeColorRefs = Arrays.stream(fadeColors).mapToObj(rgb -> {
                 Map<String, Color> defColors = null;
 
