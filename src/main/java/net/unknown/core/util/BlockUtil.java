@@ -55,7 +55,7 @@ public class BlockUtil {
     public static void searchBlock(BlockPos center, int maxBlockCount, Level level, Block searchTarget, Set<BlockPos> data) {
         if (searchTarget == Blocks.AIR) return;
         Set<BlockPos> foundPositions = new HashSet<>();
-        BlockPos.withinManhattan(center, 1, 1, 1).forEach(pos -> {
+        BlockPos.withinClippedManhattan(center, 1, 1, 1).forEach(pos -> {
             BlockPos immPos = pos.immutable();
             BlockState state = level.getBlockState(immPos);
             if (state.is(searchTarget) && !data.contains(immPos) && data.size() <= maxBlockCount && !center.equals(immPos)) {

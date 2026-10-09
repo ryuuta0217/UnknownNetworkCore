@@ -35,6 +35,9 @@ import io.papermc.paper.advancement.AdvancementDisplay;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.*;
 import net.minecraft.advancements.triggers.*;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.*;
 import net.minecraft.network.protocol.game.ClientboundUpdateAdvancementsPacket;
@@ -52,6 +55,7 @@ import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Stream;
 
 public class ToastManager {
     public static void showAdvancementToast(Player player, AdvancementDisplay.Frame type, ItemStack icon, Component title) {
@@ -86,7 +90,7 @@ public class ToastManager {
                 .build(id);
 
         // Send new advancement to player
-        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, List.of(advancement), Collections.emptySet(), Collections.emptyMap(), true));
+        player.connection.send(new ClientboundUpdateAdvancementsPacket(false, List.of(new ClientboundUpdateAdvancementsPacket.PositionedAdvancement(advancement, 0f, 0f)), Collections.emptySet(), Collections.emptyMap(), true));
 
         // Grant the advancement to the player (show toast)
         AdvancementProgress progress = new AdvancementProgress();
@@ -105,6 +109,16 @@ public class ToastManager {
 
         RecipeOutput recipeOutput = new RecipeOutput() {
             @Override
+            public <S> HolderGetter<S> lookup(ResourceKey<? extends Registry<? extends S>> resourceKey) {
+                return null;
+            }
+
+            @Override
+            public <S> Stream<Holder.Reference<S>> listContextElements(ResourceKey<? extends Registry<? extends S>> resourceKey) {
+                return Stream.empty();
+            }
+
+            @Override
             public void accept(ResourceKey<Recipe<?>> key, Recipe<?> recipe, @org.jetbrains.annotations.Nullable AdvancementHolder advancement) {
                 recipes.put(key, recipe);
             }
@@ -112,11 +126,6 @@ public class ToastManager {
             @Override
             public Advancement.Builder advancement() {
                 return net.minecraft.advancements.Advancement.Builder.recipeAdvancement().parent(RecipeBuilder.ROOT_RECIPE_ADVANCEMENT);
-            }
-
-            @Override
-            public void includeRootAdvancement() {
-
             }
         };
 

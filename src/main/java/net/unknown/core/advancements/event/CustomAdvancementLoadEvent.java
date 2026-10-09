@@ -81,14 +81,14 @@ public class CustomAdvancementLoadEvent extends Event implements Cancellable {
         if (this.advancement.display().isEmpty()) return new DisplayInfoBuilder();
         DisplayInfo displayInfo = this.advancement.display().get();
         DisplayInfoBuilder builder = new DisplayInfoBuilder();
-        builder.title(displayInfo.getTitle());
-        builder.description(displayInfo.getDescription());
-        builder.icon(displayInfo.getIcon().create());
-        builder.background(displayInfo.getBackground().isEmpty() ? null : displayInfo.getBackground().get().id());
-        builder.type(displayInfo.getType());
-        builder.showToast(displayInfo.shouldShowToast());
-        builder.announceChat(displayInfo.shouldAnnounceChat());
-        builder.hidden(displayInfo.isHidden());
+        builder.title(displayInfo.title());
+        builder.description(displayInfo.description());
+        builder.icon(displayInfo.icon().create());
+        builder.background(displayInfo.background().isEmpty() ? null : displayInfo.background().get().id());
+        builder.type(displayInfo.type());
+        builder.showToast(displayInfo.showToast());
+        builder.announceChat(displayInfo.announceToChat());
+        builder.hidden(displayInfo.hidden());
         return builder;
     }
 

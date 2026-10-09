@@ -84,7 +84,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
     public static final AdvancementManager INSTANCE = new AdvancementManager();
     private static final Logger LOGGER = Logger.getLogger("UNC/Advancements");
 
-    private static final Map<Identifier, AdvancementHolder> ADVANCEMENTS = new HashMap<>();
+    private static final Map<Identifier, ClientboundUpdateAdvancementsPacket.PositionedAdvancement> ADVANCEMENTS = new HashMap<>();
     private static final Map<Identifier, Pair<Float, Float>> ADVANCEMENT_POSITIONS = new HashMap<>();
     private static AdvancementPlacingBehaviour PLACING_BEHAVIOUR = AdvancementPlacingBehaviour.ROOT_LEFT_TOP_GRID;
     private static final Map<UUID, Map<Identifier, AdvancementProgress>> PROGRESSES = new HashMap<>();
@@ -129,7 +129,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
             }
 
             advancements.forEach((id, advancement) -> {
-                register(new AdvancementHolder(id, advancement));
+                register(new AdvancementHolder(id, advancement), 0f, 0f);
                 LOGGER.info("Loaded advancement " + id);
                 loadCount.incrementAndGet();
             });
@@ -286,20 +286,21 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      *
      * @param advancementHolder AdvancementHolder to register
      */
-    public static void register(AdvancementHolder advancementHolder) {
+    public static void register(AdvancementHolder advancementHolder, float x, float y) {
         CustomAdvancementLoadEvent loadEvent = new CustomAdvancementLoadEvent(advancementHolder.id(), advancementHolder.value());
         if (!loadEvent.callEvent()) return;
 
         if (ADVANCEMENTS.containsKey(loadEvent.getId())) LOGGER.warning("Advancement " + loadEvent.getId() + " is already registered. Overwriting.");
-        ADVANCEMENTS.put(loadEvent.getId(), loadEvent.getHolder());
+        ADVANCEMENTS.put(loadEvent.getId(), new ClientboundUpdateAdvancementsPacket.PositionedAdvancement(loadEvent.getHolder(), x, y));
+        ADVANCEMENT_POSITIONS.put(loadEvent.getId(), Pair.of(x, y));
     }
 
-    public static void register(Identifier id, Advancement advancement) {
-        register(new AdvancementHolder(id, advancement));
+    public static void register(Identifier id, Advancement advancement, float x, float y) {
+        register(new AdvancementHolder(id, advancement), x, y);
     }
 
-    public static void register(Pair<Identifier, Advancement> pair) {
-        register(new AdvancementHolder(pair.getFirst(), pair.getSecond()));
+    public static void register(Pair<Identifier, Advancement> pair, float x, float y) {
+        register(new AdvancementHolder(pair.getFirst(), pair.getSecond()), x, y);
     }
 
     /**
@@ -311,7 +312,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      */
     public static void resetProgress(UUID uniqueId, Identifier id) {
         if (!ADVANCEMENTS.containsKey(id)) throw new IllegalArgumentException("Unknown advancement " + id);
-        Advancement advancement = ADVANCEMENTS.get(id).value();
+        Advancement advancement = ADVANCEMENTS.get(id).advancement().value();
         AdvancementProgress progress = new AdvancementProgress();
         progress.update(advancement.requirements());
         PROGRESSES.computeIfAbsent(uniqueId, k -> new HashMap<>()).put(id, progress);
@@ -337,7 +338,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param advancement Advancement
      */
     public static void resetProgress(UUID uniqueId, Advancement advancement) {
-        resetProgress(uniqueId, ADVANCEMENTS.entrySet().stream().filter(e -> e.getValue().value().equals(advancement)).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown advancement " + advancement)).getKey());
+        resetProgress(uniqueId, ADVANCEMENTS.entrySet().stream().filter(e -> e.getValue().advancement().value().equals(advancement)).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown advancement " + advancement)).getKey());
     }
 
     /**
@@ -347,7 +348,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @return AdvancementHolder or null if not found
      */
     public static AdvancementHolder getAdvancement(Identifier id) {
-        return ADVANCEMENTS.getOrDefault(id, null);
+        return Optional.ofNullable(ADVANCEMENTS.getOrDefault(id, null)).map(ClientboundUpdateAdvancementsPacket.PositionedAdvancement::advancement).orElse(null);
     }
 
     /**
@@ -391,7 +392,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @return AdvancementProgress
      */
     public static AdvancementProgress getProgress(ServerPlayer player, Advancement advancement) {
-        return getProgress(player, ADVANCEMENTS.entrySet().stream().filter(e -> e.getValue().value().equals(advancement)).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown advancement provided")).getKey());
+        return getProgress(player, ADVANCEMENTS.entrySet().stream().filter(e -> e.getValue().advancement().value().equals(advancement)).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown advancement provided")).getKey());
     }
 
     /**
@@ -450,7 +451,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      */
     @Deprecated
     public static boolean grantProgress(ServerPlayer player, Advancement advancement, String name) {
-        return grantProgress(player, ADVANCEMENTS.entrySet().stream().filter(e -> e.getValue().value().equals(advancement)).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown advancement provided")).getKey(), name);
+        return grantProgress(player, ADVANCEMENTS.entrySet().stream().filter(e -> e.getValue().advancement().value().equals(advancement)).findAny().orElseThrow(() -> new IllegalArgumentException("Unknown advancement provided")).getKey(), name);
     }
 
     /**
@@ -513,7 +514,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
                 return null;
             });
         }
-        ADVANCEMENTS.forEach((id, adv) -> registerListener(player, adv));
+        ADVANCEMENTS.forEach((id, adv) -> registerListener(player, adv.advancement()));
     }
 
     /**
@@ -684,7 +685,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
      * @param mergeVanilla Whether to merge vanilla advancements with custom advancements.
      */
     public static void send(boolean clearExists, ServerPlayer player, boolean showAdvancements, boolean mergeVanilla) {
-        List<AdvancementHolder> toEarn = new ArrayList<>();
+        List<ClientboundUpdateAdvancementsPacket.PositionedAdvancement> toEarn = new ArrayList<>();
         Set<Identifier> toRemove = new HashSet<>();
         Map<Identifier, AdvancementProgress> toSetProgress = new HashMap<>();
 
@@ -729,23 +730,6 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
     }
 
     /**
-     * Initialize advancement positions for placing behaviour.
-     *
-     * @deprecated This method is unused. Use data-driven custom positioning instead. {"display": { "x": 1.0, "y": 2.0 }}
-     * @param advancements Map of advancements
-     */
-    @Deprecated
-    private static void initAdvancementPosition(Map<Identifier, Advancement> advancements) {
-        advancements.entrySet()
-                .stream()
-                .filter(e -> e.getValue().isRoot())
-                .forEach(e -> {
-                    ADVANCEMENT_POSITIONS.put(e.getKey(), Pair.of(0f, 0f));
-                    e.getValue().display().ifPresent(display -> display.setLocation(0f, 0f));
-                });
-    }
-
-    /**
      * Place advancement gracefully according to the placing behaviour.
      *
      * @deprecated This method is unused. Use data-driven custom positioning instead. {"display": { "x": 1.0, "y": 2.0 }}
@@ -777,8 +761,6 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
                     x = 0;
                     y += 1;
                 }
-                final float fX = x, fY = y;
-                advancement.display().ifPresent(display -> display.setLocation(fX, fY));
                 ADVANCEMENT_POSITIONS.put(parentId, Pair.of(x, y));
             }
         } else {
@@ -802,10 +784,10 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
     @Override
     public void onSendingPacket(PacketSendingEvent<ClientboundUpdateAdvancementsPacket> event) {
         boolean clearExisting = event.getPacket().shouldReset();
-        List<AdvancementHolder> added = new ArrayList<>(event.getPacket().getAdded() != null ? event.getPacket().getAdded() : Collections.emptyList());
-        Set<Identifier> removed = new HashSet<>(event.getPacket().getRemoved() != null ? event.getPacket().getRemoved() : Collections.emptySet());
-        Map<Identifier, AdvancementProgress> progressMap = new HashMap<>(event.getPacket().getProgress() != null ? event.getPacket().getProgress() : Collections.emptyMap());
-        boolean showAdvancements = event.getPacket().shouldShowAdvancements();
+        List<ClientboundUpdateAdvancementsPacket.PositionedAdvancement> added = new ArrayList<>(event.getPacket().added() != null ? event.getPacket().added() : Collections.emptyList());
+        Set<Identifier> removed = new HashSet<>(event.getPacket().removed() != null ? event.getPacket().removed() : Collections.emptySet());
+        Map<Identifier, AdvancementProgress> progressMap = new HashMap<>(event.getPacket().progress() != null ? event.getPacket().progress() : Collections.emptyMap());
+        boolean showAdvancements = event.getPacket().showAdvancements();
 
         if (clearExisting) {
             added.addAll(ADVANCEMENTS.values());
@@ -829,7 +811,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
         private AdvancementTree tree;
         private final Codec<?> codec;
 
-        private final Set<AdvancementHolder> toAdd = new HashSet<>();
+        private final Set<ClientboundUpdateAdvancementsPacket.PositionedAdvancement> toAdd = new HashSet<>();
         private final Set<Identifier> toRemove = new HashSet<>();
         private final Map<Identifier, AdvancementProgress> toSetProgress = new HashMap<>();
 
@@ -882,7 +864,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
                             return false;
                         }, (node, isVisible) -> {
                             if (isVisible) {
-                                this.toAdd.add(node.holder());
+                                this.toAdd.add(ClientboundUpdateAdvancementsPacket.PositionedAdvancement.fromNode(node));
                             }
                         });
                     });
@@ -901,7 +883,7 @@ public class AdvancementManager extends OutgoingPacketListener<ClientboundUpdate
             }
         }
 
-        public Set<AdvancementHolder> toAdd() {
+        public Set<ClientboundUpdateAdvancementsPacket.PositionedAdvancement> toAdd() {
             return this.toAdd;
         }
 

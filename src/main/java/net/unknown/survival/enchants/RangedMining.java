@@ -38,7 +38,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -95,7 +94,7 @@ public class RangedMining implements Listener {
             x = range;
             z = range;
         }
-        return BlockPos.withinManhattan(center, x, y, z);
+        return BlockPos.withinClippedManhattan(center, x, y, z);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

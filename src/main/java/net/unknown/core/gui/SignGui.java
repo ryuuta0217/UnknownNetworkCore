@@ -41,6 +41,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
+import net.minecraft.world.level.block.entity.SignTextSlot;
 import net.minecraft.world.level.block.state.BlockState;
 import net.unknown.core.packet.event.PacketReceivedEvent;
 import net.unknown.core.packet.event.PacketSendingEvent;
@@ -123,11 +124,11 @@ public class SignGui {
             sign.setAllowedPlayerEditor(this.target.getUniqueId());
 
             /* Set virtual sign lines */
-            SignText signText = sign.getText(true);
+            SignText signText = sign.getText(SignTextSlot.FRONT);
             for (int i = 0; i < this.defaultLines.length; i++) {
-                signText = signText.setMessage(i, this.defaultLines[i]); // set lines
+                signText = signText.asMutable().setLine(i, this.defaultLines[i]).asImmutable(); // set lines
             }
-            sign.setText(signText, true);
+            sign.setText(signText, SignTextSlot.FRONT);
             sign.setLevel(level);
             nmsTarget.connection.send(sign.getUpdatePacket()); // set lines
 
@@ -142,7 +143,7 @@ public class SignGui {
             });
 
             /* Open SignGUI */
-            ClientboundOpenSignEditorPacket signEditorPacket = new ClientboundOpenSignEditorPacket(this.dummySignPos, true);
+            ClientboundOpenSignEditorPacket signEditorPacket = new ClientboundOpenSignEditorPacket(this.dummySignPos, SignTextSlot.FRONT);
             nmsTarget.connection.send(signEditorPacket); // show sign editor
 
             this.isOpened = true;
@@ -170,7 +171,7 @@ public class SignGui {
                     SignGui.SIGN_GUI_OPENED.remove(event.getPlayer().getUniqueId());
                     if (gui.completeHandler != null) {
                         RunnableManager.runDelayed(() -> {
-                            gui.completeHandler.accept(Arrays.stream(event.getPacket().getLines()).map(line -> (Component) Component.text(line)).toList());
+                            gui.completeHandler.accept(event.getPacket().lines().stream().map(line -> (Component) Component.text(line)).toList());
                         }, 1L);
                     }
                 }
