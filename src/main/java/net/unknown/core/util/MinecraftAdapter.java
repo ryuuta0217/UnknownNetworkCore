@@ -230,7 +230,7 @@ public class MinecraftAdapter {
         }
 
         public static org.bukkit.inventory.ItemStack itemStack(net.minecraft.world.item.ItemStack minecraft, boolean mirror) {
-            if (mirror) return CraftItemStack.asCraftMirror(minecraft);
+            if (mirror) return CraftItemStack.asBukkitMirror(minecraft);
             else return CraftItemStack.asBukkitCopy(minecraft);
         }
     }

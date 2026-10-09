@@ -40,6 +40,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -47,7 +48,6 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.golem.SnowGolem;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -191,7 +191,7 @@ public class UpgradeSnowGolemItem extends UnknownNetworkItem implements Listener
                 net.minecraft.world.item.ItemStack mobStack = source.getMainHandItem();
                 net.minecraft.world.item.ItemStack playerStack = player.isUsingItem() ? player.getUseItem() : net.minecraft.world.item.ItemStack.EMPTY;
 
-                if (!mobStack.isEmpty() && !playerStack.isEmpty() && mobStack.getItem() instanceof AxeItem && playerStack.is(net.minecraft.world.item.Items.SHIELD)) {
+                if (!mobStack.isEmpty() && !playerStack.isEmpty() && mobStack.is(ItemTags.AXES) && playerStack.is(net.minecraft.world.item.Items.SHIELD)) {
                     float f = 0.25F + (float) EnchantmentHelper.getEnchantmentLevel(enchRegistryLookup.getOrThrow(Enchantments.EFFICIENCY), source) * 0.05F;
 
                     if (source.getRandom().nextFloat() < f) {

@@ -53,8 +53,6 @@ public class DisplayInfoBuilder {
     private boolean showToast = true;
     private boolean announceChat = true;
     private boolean hidden = false;
-    private float x = 0;
-    private float y = 0;
 
     public DisplayInfoBuilder() {}
 
@@ -98,29 +96,11 @@ public class DisplayInfoBuilder {
         return this;
     }
 
-    public DisplayInfoBuilder location(float x, float y) {
-        this.x = x;
-        this.y = y;
-        return this;
-    }
-
-    public DisplayInfoBuilder x(float x) {
-        this.x = x;
-        return this;
-    }
-
-    public DisplayInfoBuilder y(float y) {
-        this.y = y;
-        return this;
-    }
-
     public DisplayInfo build() {
         Objects.requireNonNull(this.title);
         Objects.requireNonNull(this.description);
         Objects.requireNonNull(this.icon);
         Objects.requireNonNull(this.type);
-        DisplayInfo displayInfo = new DisplayInfo(ItemStackTemplate.fromNonEmptyStack(icon), title, description, Optional.of(new ClientAsset.ResourceTexture(background == null ? Identifier.tryParse("minecraft:air") : background)), type, showToast, announceChat, hidden);
-        displayInfo.setLocation(this.x, this.y);
-        return displayInfo;
+        return new DisplayInfo(ItemStackTemplate.fromNonEmptyStack(icon), title, description, Optional.of(new ClientAsset.ResourceTexture(background == null ? Identifier.tryParse("minecraft:air") : background)), type, showToast, announceChat, hidden);
     }
 }

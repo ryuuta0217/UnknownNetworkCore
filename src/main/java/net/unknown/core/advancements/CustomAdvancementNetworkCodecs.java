@@ -48,21 +48,17 @@ import java.util.Optional;
 public class CustomAdvancementNetworkCodecs {
     public static final Codec<DisplayInfo> DISPLAY_INFO_CODEC = RecordCodecBuilder.create( /* Supports positioning: x, y */
             instance -> instance.group(
-                            ItemStack.CODEC.fieldOf("icon").forGetter(info -> info.getIcon().create()),
-                            ComponentSerialization.CODEC.fieldOf("title").forGetter(DisplayInfo::getTitle),
-                            ComponentSerialization.CODEC.fieldOf("description").forGetter(DisplayInfo::getDescription),
-                            ClientAsset.ResourceTexture.CODEC.optionalFieldOf("background").forGetter(DisplayInfo::getBackground),
-                            AdvancementType.CODEC.optionalFieldOf("frame", AdvancementType.TASK).forGetter(DisplayInfo::getType),
-                            Codec.BOOL.optionalFieldOf("show_toast", true).forGetter(DisplayInfo::shouldShowToast),
-                            Codec.BOOL.optionalFieldOf("announce_to_chat", true).forGetter(DisplayInfo::shouldAnnounceChat),
-                            Codec.BOOL.optionalFieldOf("hidden", false).forGetter(DisplayInfo::isHidden),
-                            Codec.FLOAT.optionalFieldOf("x", 0f).forGetter(DisplayInfo::getX),
-                            Codec.FLOAT.optionalFieldOf("y", 0f).forGetter(DisplayInfo::getY)
+                            ItemStack.CODEC.fieldOf("icon").forGetter(info -> info.icon().create()),
+                            ComponentSerialization.CODEC.fieldOf("title").forGetter(DisplayInfo::title),
+                            ComponentSerialization.CODEC.fieldOf("description").forGetter(DisplayInfo::description),
+                            ClientAsset.ResourceTexture.CODEC.optionalFieldOf("background").forGetter(DisplayInfo::background),
+                            AdvancementType.CODEC.optionalFieldOf("frame", AdvancementType.TASK).forGetter(DisplayInfo::type),
+                            Codec.BOOL.optionalFieldOf("show_toast", true).forGetter(DisplayInfo::showToast),
+                            Codec.BOOL.optionalFieldOf("announce_to_chat", true).forGetter(DisplayInfo::announceToChat),
+                            Codec.BOOL.optionalFieldOf("hidden", false).forGetter(DisplayInfo::hidden)
                     )
-                    .apply(instance, (icon, title, description, background, frame, showToast, announceToChat, hidden, x, y) -> {
-                        DisplayInfo displayInfo = new DisplayInfo(ItemStackTemplate.fromNonEmptyStack(icon), title, description, background, frame, showToast, announceToChat, hidden);
-                        displayInfo.setLocation(x, y);
-                        return displayInfo;
+                    .apply(instance, (icon, title, description, background, frame, showToast, announceToChat, hidden) -> {
+                        return new DisplayInfo(ItemStackTemplate.fromNonEmptyStack(icon), title, description, background, frame, showToast, announceToChat, hidden);
                     })
     );
     private static final Codec<Map<String, Criterion<?>>> CRITERIA_CODEC = Codec.unboundedMap(Codec.STRING, Criterion.CODEC)

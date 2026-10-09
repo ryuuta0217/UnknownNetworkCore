@@ -42,7 +42,6 @@ import net.minecraft.tags.BlockItemTags;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.item.AxeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
@@ -107,7 +106,7 @@ public class ChainDestruction implements Listener {
         BlockState blockState = MinecraftAdapter.blockState(event.getBlock());
         Block chainDestructTarget = blockState.getBlock();
         if (!isValidTarget(chainDestructTarget)) return;
-        if (blockState.is(BlockTags.LOGS) && !(selectedItem.getItem() instanceof AxeItem)) return;
+        if (blockState.is(BlockTags.LOGS) && !selectedItem.is(ItemTags.AXES)) return;
         if (!player.hasCorrectToolForDrops(blockState)) return;
         if (selectedItem.getMaxDamage() - selectedItem.getDamageValue() == 1) return;
 

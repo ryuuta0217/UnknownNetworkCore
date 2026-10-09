@@ -58,7 +58,7 @@ public class UnknownNetworkPass {
                         .showToast(true)
                         .background(Identifier.tryBySeparator("minecraft:block/chiseled_polished_blackstone", ':'))
                         .build())
-                .build(Identifier.tryBySeparator("unknown-network:pass/root", ':')));
+                .build(Identifier.tryBySeparator("unknown-network:pass/root", ':')), 0f, 0f);
 
         AdvancementManager.register(Advancement.Builder.advancement()
                 .display(new DisplayInfoBuilder()
@@ -69,7 +69,7 @@ public class UnknownNetworkPass {
                         .showToast(true)
                         .background(Identifier.tryBySeparator("minecraft:block/crafting_table_top", ':'))
                         .build())
-                .build(Identifier.tryBySeparator("unknown-network:missions/daily/root", ':')));
+                .build(Identifier.tryBySeparator("unknown-network:missions/daily/root", ':')), 0f, 0f);
 
         AdvancementManager.send(true, MinecraftAdapter.player(player), true, true);
     }
