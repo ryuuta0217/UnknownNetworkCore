@@ -94,7 +94,7 @@ public class RangedMining implements Listener {
             x = range;
             z = range;
         }
-        return BlockPos.withinClippedManhattan(center, x, y, z);
+        return BlockPos.withinBoxByManhattanDistance(center, x, y, z);
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
