@@ -54,8 +54,11 @@ public class StatsProvider implements DataProvider<PlayerTargetedRequest, Server
 
     @Override
     public PlayerTargetedRequest parseRequest(Map<String, String> queryParams) {
-        if (!queryParams.containsKey("target")) throw new IllegalArgumentException("Missing required query parameter: target");
-        return new PlayerTargetedRequest(UUID.fromString(queryParams.get("target")));
+        String rawUuid = queryParams.getOrDefault("uuid", queryParams.get("target"));
+        if (rawUuid == null || rawUuid.isEmpty()) {
+            throw new IllegalArgumentException("Missing required query parameter: uuid");
+        }
+        return new PlayerTargetedRequest(UUID.fromString(rawUuid));
     }
 
     @Override
