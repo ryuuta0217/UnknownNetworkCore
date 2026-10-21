@@ -199,7 +199,7 @@ public class UnknownNetworkProxyCore {
         LOBBY = this.proxy.getServer("lobby").orElse(null);
         SURVIVAL = this.proxy.getServer("survival").orElse(null);
 
-        DataProviderServer.start(CONFIG.node("data-provider", "port").getInt(25581));
+        DataProviderServer.start(CONFIG.node("data-provider", "port").getInt(25582));
 
     }
 
