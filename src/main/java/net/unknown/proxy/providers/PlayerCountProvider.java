@@ -36,6 +36,7 @@ import com.google.gson.JsonObject;
 import net.unknown.provider.DataProvider;
 import net.unknown.provider.requests.EmptyRequest;
 import net.unknown.provider.util.NamespacedKey;
+import net.unknown.proxy.UnknownNetworkProxyCore;
 import org.bukkit.Bukkit;
 
 import java.util.Map;
@@ -54,7 +55,7 @@ public class PlayerCountProvider implements DataProvider<EmptyRequest, Map<Strin
     @Override
     public Map<String, Object> provide(EmptyRequest request) {
         return Map.of(
-                "count", Bukkit.getOnlinePlayers().size()
+                "count", UnknownNetworkProxyCore.getInstance().getProxy().getPlayerCount()
         );
     }
 

@@ -34,11 +34,11 @@ package net.unknown.proxy.providers;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.velocitypowered.api.proxy.Player;
 import net.unknown.provider.DataProvider;
 import net.unknown.provider.requests.EmptyRequest;
 import net.unknown.provider.util.NamespacedKey;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import net.unknown.proxy.UnknownNetworkProxyCore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,10 +58,10 @@ public class OnlinePlayersProvider implements DataProvider<EmptyRequest, List<Ma
     @Override
     public List<Map<String, String>> provide(EmptyRequest request) {
         List<Map<String, String>> players = new ArrayList<>();
-        for (Player player : Bukkit.getOnlinePlayers()) {
+        for (Player player : UnknownNetworkProxyCore.getInstance().getProxy().getAllPlayers()) {
             players.add(Map.of(
                     "uuid", player.getUniqueId().toString(),
-                    "name", player.getName()
+                    "name", player.getUsername()
             ));
         }
         return players;
