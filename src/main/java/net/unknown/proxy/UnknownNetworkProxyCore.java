@@ -200,6 +200,8 @@ public class UnknownNetworkProxyCore {
         SURVIVAL = this.proxy.getServer("survival").orElse(null);
 
         DataProviderServer.start(CONFIG.node("data-provider", "port").getInt(25582));
+        DataProviderRegistry.getInstance().register(new OnlinePlayersProvider());
+        DataProviderRegistry.getInstance().register(new PlayerCountProvider());
 
     }
 
