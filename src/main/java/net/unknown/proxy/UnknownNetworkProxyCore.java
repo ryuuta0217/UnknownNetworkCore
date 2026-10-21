@@ -203,6 +203,7 @@ public class UnknownNetworkProxyCore {
         DataProviderRegistry.getInstance().register(new OnlinePlayersProvider());
         DataProviderRegistry.getInstance().register(new PlayerCountProvider());
 
+        this.proxy.getCommandManager().register(this.proxy.getCommandManager().metaBuilder("webpassword").build(), new WebPasswordCommand());
     }
 
     public ProxyServer getProxy() {
