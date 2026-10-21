@@ -93,8 +93,14 @@ public class DataProviderServer {
                     return;
                 }
 
-                @SuppressWarnings("deprecation")
-                NamespacedKey key = new NamespacedKey(parts[0], parts[1]);
+                NamespacedKey key;
+                try {
+                    key = new NamespacedKey(parts[0], parts[1]);
+                } catch (IllegalArgumentException e) {
+                    sendResponse(exchange, 400, "Invalid Provider ID: " + e.getMessage());
+                    return;
+                }
+
                 DataProvider<?, ?> provider = DataProviderRegistry.getInstance().getProvider(key);
 
                 if (provider == null) {
@@ -105,8 +111,10 @@ public class DataProviderServer {
                 try {
                     Map<String, String> queryParams = parseQueryParams(exchange.getRequestURI().getQuery());
                     handleProvider(exchange, provider, queryParams);
-                } catch (Exception e) {
-                    LOGGER.error("Error handling provider {}", key, e);
+                } catch (IllegalArgumentException e) {
+                    sendResponse(exchange, 400, "Bad Request: " + e.getMessage());
+                } catch (Throwable t) {
+                    LOGGER.error("Error handling provider {}", key, t);
                     sendResponse(exchange, 500, "Internal Server Error");
                 }
             });
@@ -114,7 +122,7 @@ public class DataProviderServer {
             executor = Executors.newVirtualThreadPerTaskExecutor();
             server.setExecutor(executor);
             server.start();
-            LOGGER.info("DataProvider HTTP Server started on 127.0.0.1:{}", port);
+            LOGGER.info("DataProvider HTTP Server started on 0.0.0.0:{}", port);
         } catch (IOException e) {
             LOGGER.error("Failed to start DataProvider HTTP Server", e);
         }
