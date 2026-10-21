@@ -84,6 +84,7 @@ dependencies {
     annotationProcessor group: 'com.velocitypowered', name: 'velocity-api', version: '+'
     implementation group: 'io.ipinfo', name: 'ipinfo-api', version: '+'
     compileOnly group: "com.viaversion", name: "viaversion-api", version: "+"
+    implementation 'org.bouncycastle:bcprov-jdk18on:+'
 }
 
 def generateTemplates = tasks.register("generateTemplates", Copy) { task ->
