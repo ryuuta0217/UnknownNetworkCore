@@ -72,6 +72,9 @@ import net.unknown.survival.gui.hopper.ConfigureHopperGui;
 import net.unknown.survival.item.Items;
 import net.unknown.survival.item.PotionEffectItem;
 import net.unknown.survival.listeners.*;
+import net.unknown.provider.DataProviderRegistry;
+import net.unknown.survival.providers.ServerInfoProvider;
+import net.unknown.survival.providers.StatsProvider;
 import net.unknown.survival.update.UNCUpdateCheckTask;
 import net.unknown.survival.queue.ItemGiveQueue;
 import net.unknown.survival.vote.VoteManager;
@@ -219,6 +222,10 @@ public class UnknownNetworkSurvival {
             if (VoteTicketExchangeItems.getInstance() == null) LOGGER.warning("Failed to initialize VoteTicketExchangeItems, but proceed to enable.");
             ListenerManager.registerListener(VoteManager.getInstance());
         }
+
+        DataProviderRegistry.getInstance().register(new ServerInfoProvider());
+        DataProviderRegistry.getInstance().register(new StatsProvider());
+
         LOGGER.info("Plugin enabled - Running as Survival mode.");
     }
 
