@@ -42,9 +42,13 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import io.netty.channel.*;
+import net.unknown.provider.DataProviderRegistry;
 import net.unknown.provider.DataProviderServer;
+import net.unknown.proxy.commands.WebPasswordCommand;
 import net.unknown.proxy.fml.ForgeListener;
 import net.unknown.proxy.fml.ForgePlayer;
+import net.unknown.proxy.providers.OnlinePlayersProvider;
+import net.unknown.proxy.providers.PlayerCountProvider;
 import net.unknown.proxy.util.VelocityConnectionReflectUtil;
 import net.unknown.shared.SharedConstants;
 import org.spongepowered.configurate.CommentedConfigurationNode;
@@ -72,6 +76,9 @@ public class UnknownNetworkProxyCore {
     private static YamlConfigurationLoader CONFIG_LOADER;
     private static CommentedConfigurationNode CONFIG;
 
+    private static YamlConfigurationLoader SHARED_CONFIG_LOADER;
+    private static CommentedConfigurationNode SHARED_CONFIG;
+
     public static UnknownNetworkProxyCore getInstance() {
         return UnknownNetworkProxyCore.INSTANCE;
     }
@@ -86,6 +93,10 @@ public class UnknownNetworkProxyCore {
 
     public static CommentedConfigurationNode getConfig() {
         return CONFIG;
+    }
+
+    public static CommentedConfigurationNode getSharedConfig() {
+        return SHARED_CONFIG;
     }
 
     public static YamlConfigurationLoader createConfigLoader(File configFile) {
@@ -104,6 +115,14 @@ public class UnknownNetworkProxyCore {
         }
     }
 
+    public static void saveSharedConfig() {
+        try {
+            SHARED_CONFIG_LOADER.save(SHARED_CONFIG);
+        } catch (IOException e) {
+            getInstance().getLogger().warning("Failed to save shared configuration file!");
+        }
+    }
+
     private static void loadConfig() throws IOException {
         File configFile = new File(getInstance().getDataFolder(), "config.yml");
         if ((configFile.getParentFile().exists() || configFile.getParentFile().mkdirs()) && (configFile.exists() || configFile.createNewFile())) {
@@ -111,6 +130,16 @@ public class UnknownNetworkProxyCore {
             CONFIG = CONFIG_LOADER.load();
         } else {
             throw new IOException("Failed to create configuration file!");
+        }
+    }
+
+    private static void loadSharedConfig() throws IOException {
+        File sharedConfigFile = new File(SharedConstants.DATA_FOLDER, "config.yml");
+        if ((sharedConfigFile.getParentFile().exists() || sharedConfigFile.getParentFile().mkdirs()) && (sharedConfigFile.exists() || sharedConfigFile.createNewFile())) {
+            SHARED_CONFIG_LOADER = createConfigLoader(sharedConfigFile);
+            SHARED_CONFIG = SHARED_CONFIG_LOADER.load();
+        } else {
+            throw new IOException("Failed to create shared configuration file!");
         }
     }
 
@@ -157,6 +186,7 @@ public class UnknownNetworkProxyCore {
     public void onProxyInit(ProxyInitializeEvent event) {
         try {
             loadConfig();
+            loadSharedConfig();
         } catch (IOException e) {
             this.getLogger().log(Level.SEVERE, "Failed to load configuration file!", e);
         }
