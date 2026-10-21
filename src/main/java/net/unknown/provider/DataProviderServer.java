@@ -45,10 +45,13 @@ import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class DataProviderServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataProviderServer.class);
     private static HttpServer server;
+    private static ExecutorService executor;
 
     public static void start(int port) {
         if (server != null) return;
@@ -108,7 +111,8 @@ public class DataProviderServer {
                 }
             });
 
-            server.setExecutor(null); // default executor
+            executor = Executors.newVirtualThreadPerTaskExecutor();
+            server.setExecutor(executor);
             server.start();
             LOGGER.info("DataProvider HTTP Server started on 127.0.0.1:{}", port);
         } catch (IOException e) {
@@ -120,6 +124,10 @@ public class DataProviderServer {
         if (server != null) {
             server.stop(0);
             server = null;
+            if (executor != null) {
+                executor.close();
+                executor = null;
+            }
             LOGGER.info("DataProvider HTTP Server stopped.");
         }
     }
