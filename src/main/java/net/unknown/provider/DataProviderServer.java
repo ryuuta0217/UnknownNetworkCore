@@ -109,7 +109,7 @@ public class DataProviderServer {
                 }
 
                 try {
-                    Map<String, String> queryParams = parseQueryParams(exchange.getRequestURI().getQuery());
+                    Map<String, String> queryParams = parseQueryParams(exchange.getRequestURI().getRawQuery());
                     handleProvider(exchange, provider, queryParams);
                 } catch (IllegalArgumentException e) {
                     sendResponse(exchange, 400, "Bad Request: " + e.getMessage());
