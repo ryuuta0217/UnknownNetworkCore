@@ -33,6 +33,7 @@ package net.unknown.provider;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 import net.unknown.provider.util.NamespacedKey;
@@ -144,7 +145,7 @@ public class DataProviderServer {
         R req = provider.parseRequest(queryParams);
         T data = provider.provide(req);
         JsonElement json = provider.serialize(data);
-        sendResponse(exchange, 200, json.toString());
+        sendResponse(exchange, 200, (json != null ? json : JsonNull.INSTANCE).toString());
     }
 
     private static boolean checkAuth(HttpExchange exchange) throws IOException {
