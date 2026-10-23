@@ -43,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -164,11 +165,13 @@ public class DataProviderServer {
         if (query == null || query.isEmpty()) return result;
 
         for (String param : query.split("&")) {
+            if (param.isEmpty()) continue;
             String[] pair = param.split("=", 2);
+            String key = URLDecoder.decode(pair[0], StandardCharsets.UTF_8);
             if (pair.length > 1) {
-                result.put(pair[0], pair[1]);
+                result.put(key, URLDecoder.decode(pair[1], StandardCharsets.UTF_8));
             } else {
-                result.put(pair[0], "");
+                result.put(key, "");
             }
         }
         return result;
