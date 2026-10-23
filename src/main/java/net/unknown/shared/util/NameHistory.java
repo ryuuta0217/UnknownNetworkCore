@@ -35,6 +35,7 @@ import net.unknown.core.managers.ListenerManager;
 import net.unknown.core.managers.RunnableManager;
 import net.unknown.shared.SharedConstants;
 import org.bukkit.event.EventPriority;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -51,6 +52,11 @@ public class NameHistory {
     private static final Map<UUID, Map<String, Long>> NAME_HISTORY = new HashMap<>();
 
     public static void init() {
+        ListenerManager.registerEventListener(PlayerJoinEvent.class, null, EventPriority.MONITOR, false, (l, e) -> {
+            if (e instanceof PlayerJoinEvent event) {
+                updateLastSeen(event.getPlayer().getUniqueId(), event.getPlayer().getName(), System.currentTimeMillis());
+            }
+        });
         ListenerManager.registerEventListener(PlayerQuitEvent.class, null, EventPriority.MONITOR, false, (l, e) -> {
             if (e instanceof PlayerQuitEvent event) {
                 updateLastSeen(event.getPlayer().getUniqueId(), event.getPlayer().getName(), System.currentTimeMillis());
@@ -58,7 +64,7 @@ public class NameHistory {
         });
     }
 
-    public static void loadNameHistory() {
+    public static synchronized void loadNameHistory() {
         NAME_HISTORY.clear();
         try {
             if ((NAME_HISTORY_FILE.getParentFile().exists() || NAME_HISTORY_FILE.getParentFile().mkdirs()) && (NAME_HISTORY_FILE.exists() || NAME_HISTORY_FILE.createNewFile())) {
@@ -80,17 +86,21 @@ public class NameHistory {
         }
     }
 
-    public static Map<String, Long> getNameHistory(UUID uniqueId) {
-        return Collections.unmodifiableMap(NAME_HISTORY.getOrDefault(uniqueId, Collections.emptyMap()));
+    public static synchronized Map<String, Long> getNameHistory(UUID uniqueId) {
+        Map<String, Long> existing = NAME_HISTORY.get(uniqueId);
+        if (existing == null || existing.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return Collections.unmodifiableMap(new HashMap<>(existing));
     }
 
-    public static Map<String, Long> getNameHistory(UUID uniqueId, String currentName) {
+    public static synchronized Map<String, Long> getNameHistory(UUID uniqueId, String currentName) {
         HashMap<String, Long> nameHistory = new HashMap<>(NAME_HISTORY.getOrDefault(uniqueId, Collections.emptyMap()));
         nameHistory.entrySet().removeIf(e -> e.getKey().equalsIgnoreCase(currentName));
         return Collections.unmodifiableMap(nameHistory);
     }
 
-    public static void updateLastSeen(UUID uniqueId, String playerName, long lastSeen) {
+    public static synchronized void updateLastSeen(UUID uniqueId, String playerName, long lastSeen) {
         NAME_HISTORY.computeIfAbsent(uniqueId, k -> new HashMap<>()).put(playerName, lastSeen);
         RunnableManager.runAsync(NameHistory::save);
     }

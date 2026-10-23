@@ -73,6 +73,12 @@ import net.unknown.survival.item.Items;
 import net.unknown.survival.item.PotionEffectItem;
 import net.unknown.survival.listeners.*;
 import net.unknown.provider.DataProviderRegistry;
+import net.unknown.survival.providers.AdvancementsProvider;
+import net.unknown.survival.providers.BalanceProvider;
+import net.unknown.survival.providers.HomesProvider;
+import net.unknown.survival.providers.LoginStreakProvider;
+import net.unknown.survival.providers.NameHistoryProvider;
+import net.unknown.survival.providers.PlaytimeProvider;
 import net.unknown.survival.providers.ServerInfoProvider;
 import net.unknown.survival.providers.StatsProvider;
 import net.unknown.survival.update.UNCUpdateCheckTask;
@@ -225,6 +231,12 @@ public class UnknownNetworkSurvival {
 
         DataProviderRegistry.getInstance().register(new ServerInfoProvider());
         DataProviderRegistry.getInstance().register(new StatsProvider());
+        DataProviderRegistry.getInstance().register(new BalanceProvider());
+        DataProviderRegistry.getInstance().register(new PlaytimeProvider());
+        DataProviderRegistry.getInstance().register(new LoginStreakProvider());
+        DataProviderRegistry.getInstance().register(new AdvancementsProvider());
+        DataProviderRegistry.getInstance().register(new HomesProvider());
+        DataProviderRegistry.getInstance().register(new NameHistoryProvider());
 
         LOGGER.info("Plugin enabled - Running as Survival mode.");
     }

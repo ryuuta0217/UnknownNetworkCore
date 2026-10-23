@@ -32,21 +32,42 @@
 package net.unknown.survival.providers;
 
 import com.google.gson.JsonElement;
-import com.mojang.authlib.GameProfile;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.ServerStatsCounter;
+import net.minecraft.world.level.storage.LevelResource;
+import net.unknown.UnknownNetworkCorePlugin;
 import net.unknown.provider.DataProvider;
 import net.unknown.provider.requests.PlayerTargetedRequest;
 import net.unknown.provider.util.NamespacedKey;
 import org.bukkit.Bukkit;
 
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
-public class StatsProvider implements DataProvider<PlayerTargetedRequest, ServerStatsCounter> {
+public class StatsProvider implements DataProvider<PlayerTargetedRequest, JsonObject> {
+    private static final Method TO_JSON_METHOD;
+
+    static {
+        try {
+            TO_JSON_METHOD = ServerStatsCounter.class.getDeclaredMethod("toJson");
+            TO_JSON_METHOD.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+    }
+
     @Override
     public NamespacedKey id() {
         return new NamespacedKey("survival", "player/stats");
@@ -62,22 +83,62 @@ public class StatsProvider implements DataProvider<PlayerTargetedRequest, Server
     }
 
     @Override
-    public ServerStatsCounter provide(PlayerTargetedRequest request) {
-        if (Bukkit.getOfflinePlayer(request.target()).isOnline()) {
-            return MinecraftServer.getServer().getPlayerList().getPlayer(request.target()).getStats();
-        } else {
-            return MinecraftServer.getServer().getPlayerList().getPlayerStats(new GameProfile(request.target(), Optional.ofNullable(Bukkit.getOfflinePlayer(request.target()).getName()).orElse("Unknown")));
-        }
+    public JsonObject provide(PlayerTargetedRequest request) {
+        return getPlayerStatsJson(request.target());
     }
 
     @Override
-    public JsonElement serialize(ServerStatsCounter data) {
+    public JsonElement serialize(JsonObject data) {
+        return data;
+    }
+
+    public static JsonObject getPlayerStatsJson(UUID uuid) {
+        if (MinecraftServer.getServer().getPlayerList().getPlayer(uuid) != null) {
+            if (Bukkit.isPrimaryThread()) {
+                ServerPlayer player = MinecraftServer.getServer().getPlayerList().getPlayer(uuid);
+                if (player != null) {
+                    return invokeToJson(player.getStats());
+                }
+            } else {
+                try {
+                    JsonObject onlineStats = Bukkit.getScheduler().callSyncMethod(UnknownNetworkCorePlugin.getInstance(), () -> {
+                        ServerPlayer player = MinecraftServer.getServer().getPlayerList().getPlayer(uuid);
+                        return player != null ? invokeToJson(player.getStats()) : null;
+                    }).get(5, TimeUnit.SECONDS);
+                    if (onlineStats != null) {
+                        return onlineStats;
+                    }
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                } catch (ExecutionException | TimeoutException e) {
+                    throw new IllegalStateException("Failed to retrieve online player stats on main thread", e);
+                }
+            }
+        }
+
+        Path statsFile = MinecraftServer.getServer().getWorldPath(LevelResource.PLAYER_STATS_DIR).resolve(uuid + ".json");
+        if (Files.isRegularFile(statsFile)) {
+            try {
+                JsonElement parsed = JsonParser.parseString(Files.readString(statsFile, StandardCharsets.UTF_8));
+                if (parsed != null && parsed.isJsonObject()) {
+                    return parsed.getAsJsonObject();
+                }
+            } catch (IOException e) {
+                throw new IllegalStateException("Failed to read offline player stats file: " + statsFile, e);
+            }
+        }
+
+        JsonObject empty = new JsonObject();
+        empty.add("stats", new JsonObject());
+        return empty;
+    }
+
+    private static JsonObject invokeToJson(ServerStatsCounter counter) {
         try {
-            Method toJson = ServerStatsCounter.class.getDeclaredMethod("toJson");
-            toJson.setAccessible(true);
-            return (JsonElement) toJson.invoke(data);
-        } catch(NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalStateException(e);
+            JsonElement elem = (JsonElement) TO_JSON_METHOD.invoke(counter);
+            return elem != null && elem.isJsonObject() ? elem.getAsJsonObject() : new JsonObject();
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalStateException("Failed to serialize ServerStatsCounter to JSON", e);
         }
     }
 }

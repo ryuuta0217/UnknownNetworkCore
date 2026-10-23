@@ -50,7 +50,7 @@ public record NamespacedKey(@Nonnull String namespace, @Nonnull String path) {
     public static NamespacedKey tryParse(String input) throws IllegalArgumentException {
         if (input == null || input.isEmpty()) return null;
         String[] parts = input.split(":", 2);
-        if (parts.length != 2 && isValidPath(input)) {
+        if (parts.length != 2) {
             return new NamespacedKey(DEFAULT_NAMESPACE, input);
         } else {
             String namespace = parts[0];
@@ -68,6 +68,11 @@ public record NamespacedKey(@Nonnull String namespace, @Nonnull String path) {
     public static boolean isValidPath(String path) {
         if (path == null || path.isEmpty()) return false;
         return path.matches("[a-z0-9_\\-./]+");
+    }
+
+    @Override
+    public String toString() {
+        return this.namespace + ":" + this.path;
     }
 
     @Override
