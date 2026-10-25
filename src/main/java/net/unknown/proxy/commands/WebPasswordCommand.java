@@ -65,7 +65,9 @@ public class WebPasswordCommand implements SimpleCommand {
     private static final String PASSWORD_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     private final SecureRandom secureRandom = new SecureRandom();
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(5))
+            .build();
 
     private final Set<UUID> processingPlayers = ConcurrentHashMap.newKeySet();
     private final Set<UUID> passwordResetPendingPlayers = ConcurrentHashMap.newKeySet();
