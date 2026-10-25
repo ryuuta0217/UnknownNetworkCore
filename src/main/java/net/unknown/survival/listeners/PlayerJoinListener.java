@@ -57,11 +57,14 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 public class PlayerJoinListener implements Listener {
+    public static final org.bukkit.NamespacedKey LOGIN_STREAK_REGISTRY_KEY = new org.bukkit.NamespacedKey("survival", "login_streak");
     private final Map<UUID, Long> LAST_SEEN = new HashMap<>();
 
     @EventHandler
@@ -73,6 +76,7 @@ public class PlayerJoinListener implements Listener {
 
     @EventHandler
     public void onPlayerJoined(PlayerJoinEvent event) {
+        updateLoginStreak(PlayerData.of(event.getPlayer()));
         if (!event.getPlayer().hasPlayedBefore()) {
             event.joinMessage(Component.text(event.getPlayer().getName() + " が初めてゲームに参加しました", DefinedTextColor.YELLOW));
             if (Bukkit.getWorld("tutorial") != null) {
@@ -130,6 +134,31 @@ public class PlayerJoinListener implements Listener {
                 });
             });
         }, 20L);
+    }
+
+    private static void updateLoginStreak(PlayerData playerData) {
+        PlayerData.PlayerRegistry registries = playerData.getRegistries();
+        long today = LocalDate.now(ZoneId.systemDefault()).toEpochDay();
+        long lastDay = -1L;
+        int streak = 0;
+        try {
+            String rawDay = registries.get(LOGIN_STREAK_REGISTRY_KEY, "last_login_day");
+            if (rawDay != null) lastDay = Long.parseLong(rawDay);
+            String rawStreak = registries.get(LOGIN_STREAK_REGISTRY_KEY, "streak");
+            if (rawStreak != null) streak = Integer.parseInt(rawStreak);
+        } catch (NumberFormatException ignored) {
+        }
+
+        if (lastDay == today - 1) {
+            streak = Math.max(1, streak) + 1;
+        } else if (lastDay == today) {
+            streak = Math.max(1, streak);
+        } else {
+            streak = 1;
+        }
+
+        registries.put(LOGIN_STREAK_REGISTRY_KEY, "last_login_day", String.valueOf(today));
+        registries.put(LOGIN_STREAK_REGISTRY_KEY, "streak", String.valueOf(streak));
     }
 
     private static String getFormattedTime(long time) {
