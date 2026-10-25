@@ -90,13 +90,13 @@ public class WebPasswordCommand implements SimpleCommand {
 
                 if (!this.passwordResetPendingPlayers.contains(player.getUniqueId())) {
                     // アカウントが既に存在するかどうかをチェックする
-                    HttpRequest accountExsistsRequest = HttpRequest.newBuilder()
+                    HttpRequest accountExistsRequest = HttpRequest.newBuilder()
                             .uri(URI.create(apiUrl + "/internal/webhook/account-exists?uuid=" + player.getUniqueId().toString()))
                             .header("X-Internal-Token", apiToken)
                             .GET()
                             .build();
 
-                    HttpResponse<String> accountExistsResponse = this.httpClient.send(accountExsistsRequest, HttpResponse.BodyHandlers.ofString());
+                    HttpResponse<String> accountExistsResponse = this.httpClient.send(accountExistsRequest, HttpResponse.BodyHandlers.ofString());
 
                     if (accountExistsResponse.statusCode() == 200) {
                         player.sendMessage(Component.text("アカウントが既に作成されています。ログインしてパスワードを再設定するか、1分以内にもう一度コマンドを実行することで初期パスワードを再生成できます。", NamedTextColor.YELLOW));
