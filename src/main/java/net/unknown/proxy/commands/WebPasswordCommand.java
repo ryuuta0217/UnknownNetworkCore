@@ -51,6 +51,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
@@ -101,7 +102,7 @@ public class WebPasswordCommand implements SimpleCommand {
                     HttpResponse<String> accountExistsResponse = this.httpClient.send(accountExistsRequest, HttpResponse.BodyHandlers.ofString());
 
                     if (accountExistsResponse.statusCode() == 200) {
-                        player.sendMessage(Component.text("アカウントが既に作成されています。ログインしてパスワードを再設定するか、1分以内にもう一度コマンドを実行することで初期パスワードを再生成できます。", NamedTextColor.YELLOW));
+                        player.sendMessage(Component.empty().append(Component.text("アカウントが既に作成されています。", NamedTextColor.RED)).appendNewline().append(Component.text("ログインしてパスワードを再設定するか、1分以内にもう一度コマンドを実行することで初期パスワードを再生成できます。", NamedTextColor.YELLOW)));
                         this.passwordResetPendingPlayers.add(player.getUniqueId());
                         UnknownNetworkProxyCore.getInstance().getProxy().getScheduler().buildTask(UnknownNetworkProxyCore.getInstance(), () -> {
                             this.passwordResetPendingPlayers.remove(player.getUniqueId());
@@ -148,10 +149,12 @@ public class WebPasswordCommand implements SimpleCommand {
                     this.passwordResetPendingPlayers.remove(player.getUniqueId());
                     String loginUrl = getLoginUrl();
                     player.sendMessage(Component.empty()
-                            .append(Component.text("初期パスワードを生成しました。", NamedTextColor.GREEN))
+                            .append(Component.text("初期パスワードを生成しました（有効期限15分）。", NamedTextColor.GREEN))
+                            .appendNewline()
                             .append(Component.text("[ここをクリックしてコピー]", NamedTextColor.GOLD, TextDecoration.UNDERLINED)
                                     .clickEvent(ClickEvent.copyToClipboard(rawPassword))
                                     .hoverEvent(HoverEvent.showText(Component.text("クリックするとパスワードをコピーします", DefinedTextColor.GREEN).append(Component.text("\n「コピーしました」などの表示はありません", DefinedTextColor.GRAY)))))
+                            .appendNewline()
                             .append(Component.text(loginUrl, NamedTextColor.BLUE, TextDecoration.UNDERLINED)
                                     .clickEvent(ClickEvent.openUrl(loginUrl))
                                     .hoverEvent(HoverEvent.showText(Component.text("ログインページを開きます", DefinedTextColor.GREEN)))));
