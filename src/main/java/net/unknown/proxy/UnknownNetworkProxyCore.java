@@ -36,6 +36,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -199,11 +200,16 @@ public class UnknownNetworkProxyCore {
         LOBBY = this.proxy.getServer("lobby").orElse(null);
         SURVIVAL = this.proxy.getServer("survival").orElse(null);
 
-        DataProviderServer.start(CONFIG.node("data-provider", "port").getInt(25582));
         DataProviderRegistry.getInstance().register(new OnlinePlayersProvider());
         DataProviderRegistry.getInstance().register(new PlayerCountProvider());
+        DataProviderServer.start(CONFIG.node("data-provider", "port").getInt(25582));
 
         this.proxy.getCommandManager().register(this.proxy.getCommandManager().metaBuilder("webpassword").build(), new WebPasswordCommand());
+    }
+
+    @Subscribe
+    public void onProxyShutdown(ProxyShutdownEvent event) {
+        DataProviderServer.stop();
     }
 
     public ProxyServer getProxy() {
