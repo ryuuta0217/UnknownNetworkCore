@@ -202,7 +202,7 @@ public class UnknownNetworkProxyCore {
 
         DataProviderRegistry.getInstance().register(new OnlinePlayersProvider());
         DataProviderRegistry.getInstance().register(new PlayerCountProvider());
-        DataProviderServer.start(CONFIG.node("data-provider", "port").getInt(25582), CONFIG.node("webapi", "internal-token").getString("change-me-in-production"));
+        onConfigLoad();
 
         this.proxy.getCommandManager().register(this.proxy.getCommandManager().metaBuilder("webpassword").build(), new WebPasswordCommand());
     }
@@ -257,5 +257,36 @@ public class UnknownNetworkProxyCore {
     public void onDisconnect(DisconnectEvent event) {
         Channel channel = VelocityConnectionReflectUtil.getNettyChannel(event.getPlayer());
         channel.eventLoop().submit(() -> channel.pipeline().remove(PACKET_HANDLER_NAME));
+    }
+
+    public static void reloadConfig() {
+        try {
+            onConfigUnload();
+            loadConfig();
+            onConfigLoad();
+        } catch (IOException e) {
+            getInstance().getLogger().log(Level.SEVERE, "Failed to reload configuration file!", e);
+        }
+    }
+
+    public static void reloadSharedConfig() {
+        try {
+            onConfigUnload();
+            loadSharedConfig();
+            onConfigUnload();
+        } catch (IOException e) {
+            getInstance().getLogger().log(Level.SEVERE, "Failed to reload shared configuration file!", e);
+        }
+    }
+
+    public static void onConfigUnload() {
+        DataProviderServer.stop();
+    }
+
+    public static void onConfigLoad() {
+        int dataProviderPort = CONFIG.node("data-provider", "port").getInt(25582);
+        String internalToken = SHARED_CONFIG.node("webapi", "internal-token").getString("change-me-in-production");
+
+        DataProviderServer.start(dataProviderPort, internalToken);
     }
 }
