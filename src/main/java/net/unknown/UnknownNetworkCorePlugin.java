@@ -212,7 +212,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         getLogger().info("");
         getLogger().info("");
         UnknownNetworkCore.getEnvironment().onEnable();
-        DataProviderServer.start(getConfig().getInt("data-provider.port", 25580), getConfig().getString("webapi.internal-token", "change-me-in-production")); // TODO: configurable port on dataprovider_server.yml
+        onConfigLoad();
         Spy.freeze();
         long end = System.nanoTime();
         getLogger().info("Plugin was enabled in " + (end - start) / 1000000 + "ms");
@@ -246,5 +246,24 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
 
     public static VersionInfo getVersion() {
         return VersionInfo.parseFromString(getInstance().getPluginMeta().getVersion());
+    }
+
+    public static void onConfigUnload() {
+        DataProviderServer.stop();
+    }
+
+    public static void onConfigLoad() {
+        int dataProviderPort = getInstance().getConfig().getInt("data-provider.port", 25579);
+        String internalToken = getInstance().getSharedConfig().getString("webapi.internal-token", "change-me-in-production");
+
+        DataProviderServer.start(dataProviderPort, internalToken);
+    }
+
+    public static void onSharedConfigUnload() {
+
+    }
+
+    public static void onSharedConfigLoad() {
+
     }
 }
