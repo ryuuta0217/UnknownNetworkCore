@@ -45,6 +45,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import io.netty.channel.*;
 import net.unknown.provider.DataProviderRegistry;
 import net.unknown.provider.DataProviderServer;
+import net.unknown.proxy.commands.UnknownNetworkProxyCoreCommand;
 import net.unknown.proxy.commands.WebPasswordCommand;
 import net.unknown.proxy.fml.ForgeListener;
 import net.unknown.proxy.fml.ForgePlayer;
@@ -205,6 +206,7 @@ public class UnknownNetworkProxyCore {
         onConfigLoad();
 
         this.proxy.getCommandManager().register(this.proxy.getCommandManager().metaBuilder("webpassword").build(), new WebPasswordCommand());
+        this.proxy.getCommandManager().register(this.proxy.getCommandManager().metaBuilder("unpc").build(), new UnknownNetworkProxyCoreCommand());
     }
 
     @Subscribe
