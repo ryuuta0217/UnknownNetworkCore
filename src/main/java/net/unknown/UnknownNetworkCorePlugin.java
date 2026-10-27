@@ -58,15 +58,19 @@ import net.unknown.core.prefix.PlayerPrefixes;
 import net.unknown.core.skin.SkinManager;
 import net.unknown.core.tab.TabListPingManager;
 import net.unknown.core.util.Languages;
+import net.unknown.shared.SharedConstants;
 import net.unknown.shared.VersionInfo;
 import net.unknown.shared.util.NameHistory;
 import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.simple.parser.JSONParser;
 import net.unknown.provider.DataProviderServer;
 
+import java.io.File;
 import java.util.Locale;
 
 public class UnknownNetworkCorePlugin extends JavaPlugin {
@@ -74,6 +78,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
     private static UnknownNetworkCorePlugin INSTANCE;
     private static boolean BOOTSTRAPPED = false;
     private static int FOLIA_PLATFORM = -1; // -1 = unknow (not checked), 0 = no, 1 = yes
+    private FileConfiguration sharedConfig;
 
     public UnknownNetworkCorePlugin() {
         INSTANCE = this;
@@ -218,6 +223,25 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         HandlerList.unregisterAll(this);
         DataProviderServer.stop();
         UnknownNetworkCore.getEnvironment().onDisable();
+    }
+
+    public FileConfiguration getSharedConfig() {
+        if (this.sharedConfig == null) {
+            this.sharedConfig = YamlConfiguration.loadConfiguration(new File(SharedConstants.DATA_FOLDER, "config.yml"));
+        }
+        return this.sharedConfig;
+    }
+
+    public void reloadSharedConfig() {
+        this.sharedConfig = YamlConfiguration.loadConfiguration(new File(SharedConstants.DATA_FOLDER, "config.yml"));
+    }
+
+    public void saveSharedConfig() {
+        try {
+            this.getSharedConfig().save(new File(SharedConstants.DATA_FOLDER, "config.yml"));
+        } catch (Exception e) {
+            getLogger().severe("Failed to save shared config: " + e.getMessage());
+        }
     }
 
     public static VersionInfo getVersion() {
