@@ -75,6 +75,7 @@ permissions:
       minecraft.command.whois: true
       minecraft.command.toast: true
       minecraft.command.spy: true
+      minecraft.command.unc: true
       unknown.core.command.nick: true
       unknown.core.command.skin: true
       unknown.core.command.packet: true
@@ -89,6 +90,7 @@ permissions:
       unknown.core.command.whois: true
       unknown.core.command.toast: true
       unknown.core.command.spy: true
+      unknown.core.command.unc: true
       unknown.feature.see_vanished_players: true
   unknown.survival.default:
     default: true

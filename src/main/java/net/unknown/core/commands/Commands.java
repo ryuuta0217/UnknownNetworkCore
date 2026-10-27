@@ -62,5 +62,6 @@ public class Commands {
         SpyCommand.register(dispatcher);
         HideArmorsCommand.register(dispatcher);
         BarsCommand.register(dispatcher);
+        UnknownNetworkCoreCommand.register(dispatcher);
     }
 }
