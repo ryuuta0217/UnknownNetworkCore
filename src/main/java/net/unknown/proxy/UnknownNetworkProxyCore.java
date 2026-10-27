@@ -202,7 +202,7 @@ public class UnknownNetworkProxyCore {
 
         DataProviderRegistry.getInstance().register(new OnlinePlayersProvider());
         DataProviderRegistry.getInstance().register(new PlayerCountProvider());
-        DataProviderServer.start(CONFIG.node("data-provider", "port").getInt(25582));
+        DataProviderServer.start(CONFIG.node("data-provider", "port").getInt(25582), CONFIG.node("webapi", "internal-token").getString("change-me-in-production"));
 
         this.proxy.getCommandManager().register(this.proxy.getCommandManager().metaBuilder("webpassword").build(), new WebPasswordCommand());
     }

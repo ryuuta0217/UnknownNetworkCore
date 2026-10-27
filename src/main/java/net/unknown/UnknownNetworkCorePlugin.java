@@ -207,7 +207,7 @@ public class UnknownNetworkCorePlugin extends JavaPlugin {
         getLogger().info("");
         getLogger().info("");
         UnknownNetworkCore.getEnvironment().onEnable();
-        DataProviderServer.start(25580); // TODO: configurable port on dataprovider_server.yml
+        DataProviderServer.start(getConfig().getInt("data-provider.port", 25580), getConfig().getString("webapi.internal-token", "change-me-in-production")); // TODO: configurable port on dataprovider_server.yml
         Spy.freeze();
         long end = System.nanoTime();
         getLogger().info("Plugin was enabled in " + (end - start) / 1000000 + "ms");

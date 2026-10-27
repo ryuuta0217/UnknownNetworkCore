@@ -54,9 +54,12 @@ public class DataProviderServer {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataProviderServer.class);
     private static HttpServer server;
     private static ExecutorService executor;
+    private static String authToken = "change-me-in-production";
 
-    public static void start(int port) {
+    public static void start(int port, String authToken) {
         if (server != null) return;
+        DataProviderServer.authToken = authToken;
+
         try {
             server = HttpServer.create(new InetSocketAddress("0.0.0.0", port), 0);
 
@@ -150,10 +153,9 @@ public class DataProviderServer {
     }
 
     private static boolean checkAuth(HttpExchange exchange) throws IOException {
-        String token = "change-me-in-production";
         String authHeader = exchange.getRequestHeaders().getFirst("X-Internal-Token");
         
-        if (token.isEmpty() || !token.equals(authHeader)) {
+        if (authToken.isEmpty() || !authToken.equals(authHeader)) {
             sendResponse(exchange, 403, "Forbidden");
             return false;
         }
