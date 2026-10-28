@@ -174,18 +174,25 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
 
                 int repairAmountFull = EnchantmentHelper.modifyDurabilityToRepairFromXp(MinecraftAdapter.level(player.getWorld()), mendingTargetItem, amount);
                 int repairAmount = Math.min(repairAmountFull, mendingTargetItem.getDamageValue()); // デフォルトでは経験値ポイントの2倍の値が耐久値の回復量になる。耐久値の回復量がダメージ量を上回る場合は、ダメージを全て回復する。
+                int consumedExperience = repairAmountFull > 0
+                        ? (int) ((long) repairAmount * amount / repairAmountFull)
+                        : 0;
 
                 // CraftBukkit start
-                PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(MinecraftAdapter.player(player), dummyExpOrb, mendingTargetItem, mendingTargetItemEntry.inSlot(), repairAmount, dummyExpOrb.getValue());
+                PlayerItemMendEvent event = CraftEventFactory.callPlayerItemMendEvent(MinecraftAdapter.player(player), dummyExpOrb, mendingTargetItem, mendingTargetItemEntry.inSlot(), repairAmount, consumedExperience);
                 repairAmount = event.getRepairAmount();
                 if (event.isCancelled()) {
                     return amount;
                 }
                 // CraftBukkit end
 
+                repairAmount = Math.clamp(repairAmount, 0, mendingTargetItem.getDamageValue());
                 mendingTargetItem.setDamageValue(mendingTargetItem.getDamageValue() - repairAmount);
 
-                int remainingAmount = amount - repairAmount; // Paper
+                int consumedExperienceAfterEvent = repairAmountFull > 0
+                        ? Math.min(amount, (int) ((long) repairAmount * amount / repairAmountFull))
+                        : 0;
+                int remainingAmount = amount - consumedExperienceAfterEvent; // Paper
 
                 // Paper start
                 if (repairAmount == 0 && amount == remainingAmount) { // if repair amount is 0 and no xp was removed, don't do recursion; treat as cancelled
@@ -196,7 +203,7 @@ public class MendingSupportStickItem extends UnknownNetworkItem implements Liste
                 // dummyExpOrb.value = remainingAmount; // CraftBukkit - update exp value of orb for PlayerItemMendEvent calls // Unknown Network - disabled, because it's not needed. if recursive called, it will be updated in next call.
 
                 // Unknown Network start
-                amount -= repairAmount; // Unknown Network - update amount for recursion
+                amount = remainingAmount; // Unknown Network - update amount for recursion
             }
             // Unknown Network end
 
