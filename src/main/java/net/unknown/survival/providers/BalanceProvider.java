@@ -42,6 +42,8 @@ import net.unknown.survival.wrapper.economy.WrappedEconomy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -98,7 +100,47 @@ public class BalanceProvider implements DataProvider<PlayerTargetedRequest, Doub
     @Override
     public JsonElement serialize(Double data) {
         JsonObject json = new JsonObject();
-        json.addProperty("balance", data != null ? data : 0.0D);
+        double balance = data != null ? data : 0.0D;
+        json.addProperty("balance", balance);
+
+        String major = "円";
+        String minor = "銭";
+        int fractionalDigits = 2;
+
+        if (WrappedEconomy.INSTANCE != null) {
+            String p = WrappedEconomy.INSTANCE.currencyNamePlural();
+            if (p != null && !p.isEmpty() && !p.equals("$")) {
+                major = p;
+            }
+            fractionalDigits = WrappedEconomy.INSTANCE.fractionalDigits();
+        }
+
+        json.addProperty("formatted", formatCurrency(balance, major, minor));
+
+        JsonObject cur = new JsonObject();
+        cur.addProperty("major", major);
+        cur.addProperty("minor", minor);
+        cur.addProperty("plural", major);
+        cur.addProperty("singular", minor);
+        cur.addProperty("fractionalDigits", fractionalDigits);
+        json.add("currency", cur);
+
         return json;
+    }
+
+    public static String formatCurrency(double amount, String major, String minor) {
+        boolean negative = amount < 0;
+        BigDecimal bd = BigDecimal.valueOf(Math.abs(amount)).setScale(2, RoundingMode.HALF_UP);
+        long yen = bd.longValue();
+        long sen = bd.remainder(BigDecimal.ONE).movePointRight(2).longValue();
+
+        StringBuilder sb = new StringBuilder();
+        if (negative) sb.append("-");
+        sb.append(String.format("%,d", yen)).append(major);
+
+        if (sen > 0) {
+            sb.append(" ").append(sen).append(minor);
+        }
+        return sb.toString();
     }
 }
