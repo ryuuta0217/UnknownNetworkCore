@@ -46,15 +46,17 @@ import org.bukkit.Bukkit;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class HomesProvider implements DataProvider<PlayerTargetedRequest, List<HomesProvider.HomeEntry>> {
-    public record HomeEntry(String name, String group, String world, double x, double y, double z, float yaw, float pitch) {}
+    public record HomeEntry(String name, String homeName, String group, String world, double x, double y, double z, float yaw, float pitch) {}
 
     @Override
     public NamespacedKey id() {
@@ -92,10 +94,15 @@ public class HomesProvider implements DataProvider<PlayerTargetedRequest, List<H
     public JsonElement serialize(List<HomeEntry> data) {
         JsonObject root = new JsonObject();
         JsonArray homesArray = new JsonArray();
+        Set<String> groups = new LinkedHashSet<>();
+        Set<String> worlds = new LinkedHashSet<>();
+        groups.add("default");
+
         if (data != null) {
             for (HomeEntry entry : data) {
                 JsonObject obj = new JsonObject();
                 obj.addProperty("name", entry.name());
+                obj.addProperty("homeName", entry.homeName());
                 obj.addProperty("group", entry.group());
                 obj.addProperty("world", entry.world());
                 obj.addProperty("x", entry.x());
@@ -104,9 +111,30 @@ public class HomesProvider implements DataProvider<PlayerTargetedRequest, List<H
                 obj.addProperty("yaw", entry.yaw());
                 obj.addProperty("pitch", entry.pitch());
                 homesArray.add(obj);
+
+                if (entry.group() != null && !entry.group().isEmpty()) {
+                    groups.add(entry.group());
+                }
+                if (entry.world() != null && !entry.world().isEmpty()) {
+                    worlds.add(entry.world());
+                }
             }
         }
         root.add("homes", homesArray);
+
+        JsonArray groupsArray = new JsonArray();
+        for (String g : groups) {
+            groupsArray.add(g);
+        }
+        root.add("groups", groupsArray);
+        root.addProperty("defaultGroup", "default");
+
+        JsonArray worldsArray = new JsonArray();
+        for (String w : worlds) {
+            worldsArray.add(w);
+        }
+        root.add("worlds", worldsArray);
+
         return root;
     }
 
@@ -140,6 +168,7 @@ public class HomesProvider implements DataProvider<PlayerTargetedRequest, List<H
                 String displayName = groupName.equals(defaultGroupName) ? home.name() : groupName + ":" + home.name();
                 entries.add(new HomeEntry(
                         displayName,
+                        home.name(),
                         groupName,
                         home.worldName(),
                         home.x(),
