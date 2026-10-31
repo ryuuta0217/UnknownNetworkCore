@@ -33,6 +33,7 @@ package net.unknown.survival.providers;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.minecraft.SharedConstants;
 import net.unknown.provider.DataProvider;
 import net.unknown.provider.requests.EmptyRequest;
 import net.unknown.provider.util.NamespacedKey;
@@ -54,17 +55,19 @@ public class ServerInfoProvider implements DataProvider<EmptyRequest, Map<String
     @Override
     public Map<String, Object> provide(EmptyRequest request) {
         Runtime runtime = Runtime.getRuntime();
-        return Map.of(
-                "version", Bukkit.getVersion(),
-                "bukkit_version", Bukkit.getBukkitVersion(),
-                "motd", Bukkit.getMotd(),
-                "online_players", Bukkit.getOnlinePlayers().size(),
-                "max_players", Bukkit.getMaxPlayers(),
-                "tps", Bukkit.getTPS()[0], // Paper API: 1m TPS
-                "memory_max", runtime.maxMemory(),
-                "memory_total", runtime.totalMemory(),
-                "memory_free", runtime.freeMemory(),
-                "cpu_cores", runtime.availableProcessors()
+        return Map.ofEntries(
+                Map.entry("version", Bukkit.getVersion()),
+                Map.entry("bukkit_version", Bukkit.getBukkitVersion()),
+                Map.entry("minecraft_version", SharedConstants.getCurrentVersion().id()),
+                Map.entry("minecraft_protocol_version", SharedConstants.getCurrentVersion().protocolVersion()),
+                Map.entry("motd", Bukkit.getMotd()),
+                Map.entry("online_players", Bukkit.getOnlinePlayers().size()),
+                Map.entry("max_players", Bukkit.getMaxPlayers()),
+                Map.entry("tps", Bukkit.getTPS()[0]), // Paper API: 1m TPS
+                Map.entry("memory_max", runtime.maxMemory()),
+                Map.entry("memory_total", runtime.totalMemory()),
+                Map.entry("memory_free", runtime.freeMemory()),
+                Map.entry("cpu_cores", runtime.availableProcessors())
         );
     }
 
